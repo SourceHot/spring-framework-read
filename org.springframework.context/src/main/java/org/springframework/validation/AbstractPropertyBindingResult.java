@@ -22,12 +22,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyEditorRegistry;
-import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.ui.format.Formatter;
-import org.springframework.ui.format.FormatterRegistry;
-import org.springframework.ui.format.support.FormattingConversionServiceAdapter;
-import org.springframework.ui.format.support.FormattingPropertyEditorAdapter;
+import org.springframework.core.convert.support.ConvertingPropertyEditorAdapter;
 import org.springframework.util.Assert;
 
 /**
@@ -44,7 +41,7 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractPropertyBindingResult extends AbstractBindingResult {
 
-	private FormatterRegistry formatterRegistry;
+	private ConversionService conversionService;
 
 
 	/**
@@ -57,10 +54,10 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	}
 
 
-	public void initFormatterLookup(FormatterRegistry formatterRegistry) {
-		Assert.notNull(formatterRegistry, "FormatterRegistry must not be null");
-		this.formatterRegistry = formatterRegistry;
-		getPropertyAccessor().setConversionService(new FormattingConversionServiceAdapter(formatterRegistry));
+	public void initConversion(ConversionService conversionService) {
+		Assert.notNull(conversionService, "ConversionService must not be null");
+		this.conversionService = conversionService;
+		getPropertyAccessor().setConversionService(conversionService);
 	}
 
 	/**
@@ -117,13 +114,14 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 				return textValue;
 			}
 		}
-		// Try custom formatter...
-		TypeDescriptor td = getPropertyAccessor().getPropertyTypeDescriptor(fixedField);
-		Formatter<Object> formatter = (this.formatterRegistry != null ? this.formatterRegistry.getFormatter(td) : null);
-		if (formatter != null) {
-			return formatter.format(value, LocaleContextHolder.getLocale());
+		if (this.conversionService != null) {
+			// Try custom converter...
+			TypeDescriptor fieldDesc = getPropertyAccessor().getPropertyTypeDescriptor(fixedField);
+			TypeDescriptor strDesc = TypeDescriptor.valueOf(String.class);
+			if (fieldDesc != null && this.conversionService.canConvert(fieldDesc, strDesc)) {
+				return this.conversionService.convert(value, fieldDesc, strDesc);
+			}
 		}
-		// Nothing found: return value as-is.
 		return value;
 	}
 
@@ -147,15 +145,16 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 */
 	@Override
 	public PropertyEditor findEditor(String field, Class valueType) {
+		if (valueType == null) {
+			valueType = getFieldType(field);
+		}
 		PropertyEditor editor = super.findEditor(field, valueType);
-		if (editor == null) {
+		if (editor == null && this.conversionService != null) {
 			TypeDescriptor td = (field != null ?
 					getPropertyAccessor().getPropertyTypeDescriptor(fixedField(field)) :
 					TypeDescriptor.valueOf(valueType));
-			Formatter<Object> formatter =
-					(this.formatterRegistry != null ? this.formatterRegistry.getFormatter(td) : null);
-			if (formatter != null) {
-				editor = new FormattingPropertyEditorAdapter(formatter);
+			if (this.conversionService.canConvert(TypeDescriptor.valueOf(String.class), td)) {
+				editor = new ConvertingPropertyEditorAdapter(this.conversionService, td);
 			}
 		}
 		return editor;

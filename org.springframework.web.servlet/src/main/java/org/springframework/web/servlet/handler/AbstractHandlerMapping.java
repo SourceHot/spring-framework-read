@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.handler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeansException;
@@ -46,7 +45,7 @@ import org.springframework.web.servlet.HandlerMapping;
  * @see org.springframework.web.servlet.HandlerInterceptor
  */
 public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
-	implements HandlerMapping, Ordered {
+		implements HandlerMapping, Ordered {
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
@@ -121,7 +120,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * allowing to add further interceptors before as well as after the existing
 	 * interceptors
 	 */
-	protected void extendInterceptors(List interceptors) {
+	protected void extendInterceptors(List<Object> interceptors) {
 	}
 
 	/**

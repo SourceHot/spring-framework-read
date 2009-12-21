@@ -20,13 +20,13 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 
 /**
- * A factory for String to enum converters.
+ * Converts from a String to a java.lang.Enum by calling {@link Enum#valueOf(Class, String)}.
  *
  * @author Keith Donald
  * @since 3.0
  */
 @SuppressWarnings("unchecked")
-class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
+final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 
 	public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
 		return new StringToEnum(targetType);
@@ -35,13 +35,13 @@ class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 	private class StringToEnum<T extends Enum> implements Converter<String, T> {
 
 		private final Class<T> enumType;
-		
+
 		public StringToEnum(Class<T> enumType) {
 			this.enumType = enumType;
 		}
 
 		public T convert(String source) {
-			if ("".equals(source)) {
+			if (source.length() == 0) {
 				// It's an empty enum identifier: reset the enum value to null.
 				return null;
 			}

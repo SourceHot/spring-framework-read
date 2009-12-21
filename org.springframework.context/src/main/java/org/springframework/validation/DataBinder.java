@@ -35,9 +35,7 @@ import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.format.FormatterRegistry;
-import org.springframework.ui.format.support.FormattingConversionServiceAdapter;
-import org.springframework.ui.format.support.GenericFormatterRegistry;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
@@ -127,6 +125,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private boolean ignoreInvalidFields = false;
 
+	private boolean autoGrowNestedPaths = true;
+
 	private String[] allowedFields;
 
 	private String[] disallowedFields;
@@ -137,7 +137,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private Validator validator;
 
-	private FormatterRegistry formatterRegistry;
+	private ConversionService conversionService;
 
 
 	/**
@@ -184,9 +184,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	public void initBeanPropertyAccess() {
 		Assert.isNull(this.bindingResult,
 				"DataBinder is already initialized - call initBeanPropertyAccess before any other configuration methods");
-		this.bindingResult = new BeanPropertyBindingResult(getTarget(), getObjectName());
-		if (this.formatterRegistry != null) {
-			this.bindingResult.initFormatterLookup(this.formatterRegistry);
+		this.bindingResult = new BeanPropertyBindingResult(getTarget(), getObjectName(), isAutoGrowNestedPaths());
+		if (this.conversionService != null) {
+			this.bindingResult.initConversion(this.conversionService);
 		}
 	}
 
@@ -199,8 +199,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		Assert.isNull(this.bindingResult,
 				"DataBinder is already initialized - call initDirectFieldAccess before any other configuration methods");
 		this.bindingResult = new DirectFieldBindingResult(getTarget(), getObjectName());
-		if (this.formatterRegistry != null) {
-			this.bindingResult.initFormatterLookup(this.formatterRegistry);
+		if (this.conversionService != null) {
+			this.bindingResult.initConversion(this.conversionService);
 		}
 	}
 
@@ -228,8 +228,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected SimpleTypeConverter getSimpleTypeConverter() {
 		if (this.typeConverter == null) {
 			this.typeConverter = new SimpleTypeConverter();
-			if (this.formatterRegistry != null) {
-				this.typeConverter.setConversionService(new FormattingConversionServiceAdapter(this.formatterRegistry));
+			if (this.conversionService != null) {
+				this.typeConverter.setConversionService(this.conversionService);
 			}
 		}
 		return this.typeConverter;
@@ -333,6 +333,25 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
+	 * Set whether this binder should attempt to "auto-grow" a nested path that contains a null value.
+	 * <p>If "true", a null path location will be populated with a default object value and traversed
+	 * instead of resulting in an exception. This flag also enables auto-growth of collection elements
+	 * when accessing an out-of-bounds index.
+	 * <p>Default is "true" on a standard DataBinder.
+	 * @see org.springframework.beans.BeanWrapper#setAutoGrowNestedPaths
+	 */
+	public void setAutoGrowNestedPaths(boolean autoGrowNestedPaths) {
+		this.autoGrowNestedPaths = autoGrowNestedPaths;
+	}
+
+	/**
+	 * Return whether "auto-growing" of nested paths has been activated.
+	 */
+	public boolean isAutoGrowNestedPaths() {
+		return this.autoGrowNestedPaths;
+	}
+
+	/**
 	 * Register fields that should be allowed for binding. Default is all
 	 * fields. Restrict this for example to avoid unwanted modifications
 	 * by malicious users when binding HTTP request parameters.
@@ -344,7 +363,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #isAllowed(String)
 	 * @see org.springframework.web.bind.ServletRequestDataBinder
 	 */
-	public void setAllowedFields(String[] allowedFields) {
+	public void setAllowedFields(String... allowedFields) {
 		this.allowedFields = PropertyAccessorUtils.canonicalPropertyNames(allowedFields);
 	}
 
@@ -368,7 +387,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #isAllowed(String)
 	 * @see org.springframework.web.bind.ServletRequestDataBinder
 	 */
-	public void setDisallowedFields(String[] disallowedFields) {
+	public void setDisallowedFields(String... disallowedFields) {
 		this.disallowedFields = PropertyAccessorUtils.canonicalPropertyNames(disallowedFields);
 	}
 
@@ -390,7 +409,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #setBindingErrorProcessor
 	 * @see DefaultBindingErrorProcessor#MISSING_FIELD_ERROR_CODE
 	 */
-	public void setRequiredFields(String[] requiredFields) {
+	public void setRequiredFields(String... requiredFields) {
 		this.requiredFields = PropertyAccessorUtils.canonicalPropertyNames(requiredFields);
 		if (logger.isDebugEnabled()) {
 			logger.debug("DataBinder requires binding of required fields [" +
@@ -462,44 +481,37 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return this.validator;
 	}
 
-	/**
-	 * Set the FormatterRegistry to use for obtaining Formatters in preference
-	 * to JavaBeans PropertyEditors.
-	 */
-	public void setFormatterRegistry(FormatterRegistry formatterRegistry) {
-		this.formatterRegistry = formatterRegistry;
-	}
-
-	/**
-	 * Return the FormatterRegistry to use for obtaining Formatters in preference
-	 * to JavaBeans PropertyEditors.
-	 * @return the FormatterRegistry (never <code>null</code>), which may also be
-	 * used to register further Formatters for this DataBinder
-	 */
-	public FormatterRegistry getFormatterRegistry() {
-		if (this.formatterRegistry == null) {
-			this.formatterRegistry = new GenericFormatterRegistry();
-		}
-		else if (this.formatterRegistry instanceof GenericFormatterRegistry &&
-				((GenericFormatterRegistry) this.formatterRegistry).isShared()) {
-			this.formatterRegistry = ((GenericFormatterRegistry) this.formatterRegistry).clone();
-		}
-		return this.formatterRegistry;
-	}
-
 
 	//---------------------------------------------------------------------
 	// Implementation of PropertyEditorRegistry/TypeConverter interface
 	//---------------------------------------------------------------------
 
+	/**
+	 * Specify a Spring 3.0 ConversionService to use for converting
+	 * property values, as an alternative to JavaBeans PropertyEditors.
+	 */
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
+	}
+
+	/**
+	 * Return the associated ConversionService, if any.
+	 */
+	public ConversionService getConversionService() {
+		return this.conversionService;
+	}
+
+	@SuppressWarnings("unchecked")
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
 		getPropertyEditorRegistry().registerCustomEditor(requiredType, propertyEditor);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void registerCustomEditor(Class requiredType, String field, PropertyEditor propertyEditor) {
 		getPropertyEditorRegistry().registerCustomEditor(requiredType, field, propertyEditor);
 	}
 
+	@SuppressWarnings("unchecked")
 	public PropertyEditor findCustomEditor(Class requiredType, String propertyPath) {
 		return getPropertyEditorRegistry().findCustomEditor(requiredType, propertyPath);
 	}
@@ -611,8 +623,17 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			}
 			for (String field : requiredFields) {
 				PropertyValue pv = propertyValues.get(field);
-				if (pv == null || pv.getValue() == null ||
-						(pv.getValue() instanceof String && !StringUtils.hasText((String) pv.getValue()))) {
+				boolean empty = (pv == null || pv.getValue() == null);
+				if (!empty) {
+					if (pv.getValue() instanceof String) {
+						empty = !StringUtils.hasText((String) pv.getValue());
+					}
+					else if (pv.getValue() instanceof String[]) {
+						String[] values = (String[]) pv.getValue();
+						empty = (values.length == 0 || !StringUtils.hasText(values[0]));
+					}
+				}
+				if (empty) {
 					// Use bind error processor to create FieldError.
 					getBindingErrorProcessor().processMissingFieldError(field, getInternalBindingResult());
 					// Remove property from property values to bind:
@@ -671,6 +692,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @throws BindException if there were any errors in the bind operation
 	 * @see BindingResult#getModel()
 	 */
+	@SuppressWarnings("unchecked")
 	public Map close() throws BindException {
 		if (getBindingResult().hasErrors()) {
 			throw new BindException(getBindingResult());

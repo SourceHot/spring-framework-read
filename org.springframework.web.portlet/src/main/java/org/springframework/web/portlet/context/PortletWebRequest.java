@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 	 * @param response current portlet response
 	 */
 	public PortletWebRequest(PortletRequest request, PortletResponse response) {
-		super(request);
+		this(request);
 		this.response = response;
 	}
 
@@ -83,6 +83,10 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 	public String[] getHeaderValues(String headerName) {
 		String[] headerValues = StringUtils.toStringArray(getRequest().getProperties(headerName));
 		return (!ObjectUtils.isEmpty(headerValues) ? headerValues : null);
+	}
+
+	public Iterator<String> getHeaderNames() {
+		return CollectionUtils.toIterator(getRequest().getPropertyNames());
 	}
 
 	public String getParameter(String paramName) {
@@ -133,7 +137,6 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 		return false;
 	}
 
-
 	public String getDescription(boolean includeClientInfo) {
 		PortletRequest request = getRequest();
 		StringBuilder result = new StringBuilder();
@@ -150,6 +153,7 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 		}
 		return result.toString();
 	}
+
 
 	@Override
 	public String toString() {

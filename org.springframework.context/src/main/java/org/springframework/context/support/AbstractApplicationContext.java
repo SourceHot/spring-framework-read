@@ -18,13 +18,15 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.security.AccessControlException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +39,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -46,7 +49,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.HierarchicalMessageSource;
-import org.springframework.context.Lifecycle;
+import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.MessageSourceResolvable;
@@ -124,6 +127,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public static final String MESSAGE_SOURCE_BEAN_NAME = "messageSource";
 
 	/**
+	 * Name of the LifecycleProcessor bean in the factory.
+	 * If none is supplied, a DefaultLifecycleProcessor is used.
+	 * @see org.springframework.context.LifecycleProcessor
+	 * @see org.springframework.context.support.DefaultLifecycleProcessor
+	 */
+	public static final String LIFECYCLE_PROCESSOR_BEAN_NAME = "lifecycleProcessor";
+
+	/**
 	 * Name of the ApplicationEventMulticaster bean in the factory.
 	 * If none is supplied, a default SimpleApplicationEventMulticaster is used.
 	 * @see org.springframework.context.event.ApplicationEventMulticaster
@@ -176,11 +187,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** MessageSource we delegate our implementation of this interface to */
 	private MessageSource messageSource;
 
+	/** LifecycleProcessor for managing the lifecycle of beans within this context */
+	private LifecycleProcessor lifecycleProcessor;
+
 	/** Helper class used in event publishing */
 	private ApplicationEventMulticaster applicationEventMulticaster;
 
 	/** Statically specified listeners */
-	private List<ApplicationListener> applicationListeners = new ArrayList<ApplicationListener>();
+	private Set<ApplicationListener> applicationListeners = new LinkedHashSet<ApplicationListener>();
 
 
 	/**
@@ -284,8 +298,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Return the internal MessageSource used by the context.
-	 * @return the internal MessageSource (never <code>null</code>)
+	 * Return the internal ApplicationEventMulticaster used by the context.
+	 * @return the internal ApplicationEventMulticaster (never <code>null</code>)
 	 * @throws IllegalStateException if the context has not been initialized yet
 	 */
 	private ApplicationEventMulticaster getApplicationEventMulticaster() throws IllegalStateException {
@@ -294,6 +308,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 					"call 'refresh' before multicasting events via the context: " + this);
 		}
 		return this.applicationEventMulticaster;
+	}
+
+	/**
+	 * Return the internal LifecycleProcessor used by the context.
+	 * @return the internal LifecycleProcessor (never <code>null</code>)
+	 * @throws IllegalStateException if the context has not been initialized yet
+	 */
+	private LifecycleProcessor getLifecycleProcessor() {
+		if (this.lifecycleProcessor == null) {
+			throw new IllegalStateException("LifecycleProcessor not initialized - " +
+					"call 'refresh' before invoking lifecycle methods via the context: " + this);
+		}
+		return this.lifecycleProcessor;
 	}
 
 	/**
@@ -336,13 +363,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	public void addApplicationListener(ApplicationListener listener) {
-		this.applicationListeners.add(listener);
+		if (isActive()) {
+			addListener(listener);
+		}
+		else {
+			this.applicationListeners.add(listener);
+		}
 	}
 
 	/**
 	 * Return the list of statically specified ApplicationListeners.
 	 */
-	public List<ApplicationListener> getApplicationListeners() {
+	public Collection<ApplicationListener> getApplicationListeners() {
 		return this.applicationListeners;
 	}
 
@@ -367,9 +399,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 				// Register bean processors that intercept bean creation.
 				registerBeanPostProcessors(beanFactory);
-
-				// Initialize conversion service for this context.
-				initConversionService();
 
 				// Initialize message source for this context.
 				initMessageSource();
@@ -459,6 +488,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
 		beanFactory.registerResolvableDependency(ApplicationContext.class, this);
 
+		// Initialize conversion service for this context.
+		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME)) {
+			beanFactory.setConversionService(
+					beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
+		}
+
 		// Detect a LoadTimeWeaver and prepare for weaving, if found.
 		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
 			beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
@@ -468,10 +503,53 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Register default environment beans.
 		if (!beanFactory.containsBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
-			beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, System.getProperties());
+			Map systemProperties;
+			try {
+				systemProperties = System.getProperties();
+			}
+			catch (AccessControlException ex) {
+				systemProperties = new ReadOnlySystemAttributesMap() {
+					@Override
+					protected String getSystemAttribute(String propertyName) {
+						try {
+							return System.getProperty(propertyName);
+						}
+						catch (AccessControlException ex) {
+							if (logger.isInfoEnabled()) {
+								logger.info("Not allowed to obtain system property [" + propertyName + "]: " +
+										ex.getMessage());
+							}
+							return null;
+						}
+					}
+				};
+			}
+			beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, systemProperties);
 		}
+
 		if (!beanFactory.containsBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
-			beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME, System.getenv());
+			Map<String,String> systemEnvironment;
+			try {
+				systemEnvironment = System.getenv();
+			}
+			catch (AccessControlException ex) {
+				systemEnvironment = new ReadOnlySystemAttributesMap() {
+					@Override
+					protected String getSystemAttribute(String variableName) {
+						try {
+							return System.getenv(variableName);
+						}
+						catch (AccessControlException ex) {
+							if (logger.isInfoEnabled()) {
+								logger.info("Not allowed to obtain system environment variable [" + variableName + "]: " +
+										ex.getMessage());
+							}
+							return null;
+						}
+					}
+				};
+			}
+			beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME, systemEnvironment);
 		}
 	}
 
@@ -564,11 +642,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Separate between BeanPostProcessors that implement PriorityOrdered,
 		// Ordered, and the rest.
 		List<BeanPostProcessor> priorityOrderedPostProcessors = new ArrayList<BeanPostProcessor>();
+		List<BeanPostProcessor> internalPostProcessors = new ArrayList<BeanPostProcessor>();
 		List<String> orderedPostProcessorNames = new ArrayList<String>();
 		List<String> nonOrderedPostProcessorNames = new ArrayList<String>();
 		for (String ppName : postProcessorNames) {
 			if (isTypeMatch(ppName, PriorityOrdered.class)) {
-				priorityOrderedPostProcessors.add(beanFactory.getBean(ppName, BeanPostProcessor.class));
+				BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
+				priorityOrderedPostProcessors.add(pp);
+				if (pp instanceof MergedBeanDefinitionPostProcessor) {
+					internalPostProcessors.add(pp);
+				}
 			}
 			else if (isTypeMatch(ppName, Ordered.class)) {
 				orderedPostProcessorNames.add(ppName);
@@ -584,18 +667,30 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Next, register the BeanPostProcessors that implement Ordered.
 		List<BeanPostProcessor> orderedPostProcessors = new ArrayList<BeanPostProcessor>();
-		for (String postProcessorName : orderedPostProcessorNames) {
-			orderedPostProcessors.add(getBean(postProcessorName, BeanPostProcessor.class));
+		for (String ppName : orderedPostProcessorNames) {
+			BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
+			orderedPostProcessors.add(pp);
+			if (pp instanceof MergedBeanDefinitionPostProcessor) {
+				internalPostProcessors.add(pp);
+			}
 		}
 		OrderComparator.sort(orderedPostProcessors);
 		registerBeanPostProcessors(beanFactory, orderedPostProcessors);
 
-		// Finally, register all other BeanPostProcessors.
+		// Now, register all regular BeanPostProcessors.
 		List<BeanPostProcessor> nonOrderedPostProcessors = new ArrayList<BeanPostProcessor>();
-		for (String postProcessorName : nonOrderedPostProcessorNames) {
-			nonOrderedPostProcessors.add(getBean(postProcessorName, BeanPostProcessor.class));
+		for (String ppName : nonOrderedPostProcessorNames) {
+			BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
+			nonOrderedPostProcessors.add(pp);
+			if (pp instanceof MergedBeanDefinitionPostProcessor) {
+				internalPostProcessors.add(pp);
+			}
 		}
 		registerBeanPostProcessors(beanFactory, nonOrderedPostProcessors);
+
+		// Finally, re-register all internal BeanPostProcessors.
+		OrderComparator.sort(internalPostProcessors);
+		registerBeanPostProcessors(beanFactory, internalPostProcessors);
 	}
 
 	/**
@@ -606,16 +701,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		for (BeanPostProcessor postProcessor : postProcessors) {
 			beanFactory.addBeanPostProcessor(postProcessor);
-		}
-	}
-
-	/**
-	 * Initialize the BeanFactory's ConversionService.
-	 */
-	protected void initConversionService() {
-		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME)) {
-			beanFactory.setConversionService(beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
 		}
 	}
 
@@ -679,6 +764,33 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * Initialize the LifecycleProcessor.
+	 * Uses DefaultLifecycleProcessor if none defined in the context.
+	 * @see org.springframework.context.support.DefaultLifecycleProcessor
+	 */
+	protected void initLifecycleProcessor() {
+		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		if (beanFactory.containsLocalBean(LIFECYCLE_PROCESSOR_BEAN_NAME)) {
+			this.lifecycleProcessor =
+					beanFactory.getBean(LIFECYCLE_PROCESSOR_BEAN_NAME, LifecycleProcessor.class);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using LifecycleProcessor [" + this.lifecycleProcessor + "]");
+			}
+		}
+		else {
+			DefaultLifecycleProcessor defaultProcessor = new DefaultLifecycleProcessor();
+			defaultProcessor.setBeanFactory(beanFactory);
+			this.lifecycleProcessor = defaultProcessor;
+			beanFactory.registerSingleton(LIFECYCLE_PROCESSOR_BEAN_NAME, this.lifecycleProcessor);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate LifecycleProcessor with name '" +
+						LIFECYCLE_PROCESSOR_BEAN_NAME +
+						"': using default [" + this.lifecycleProcessor + "]");
+			}
+		}
+	}
+
+	/**
 	 * Template method which can be overridden to add context-specific refresh work.
 	 * Called on initialization of special beans, before instantiation of singletons.
 	 * <p>This implementation is empty.
@@ -701,7 +813,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let post-processors apply to them!
 		String[] listenerBeanNames = getBeanNamesForType(ApplicationListener.class, true, false);
-		for (final String lisName : listenerBeanNames) {
+		for (String lisName : listenerBeanNames) {
 			getApplicationEventMulticaster().addApplicationListenerBean(lisName);
 		}
 	}
@@ -731,10 +843,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Finish the refresh of this context, publishing the
+	 * Finish the refresh of this context, invoking the LifecycleProcessor's
+	 * onRefresh() method and publishing the
 	 * {@link org.springframework.context.event.ContextRefreshedEvent}.
 	 */
 	protected void finishRefresh() {
+		// Initialize lifecycle processor for this context.
+		initLifecycleProcessor();
+
+		// Propagate refresh to lifecycle processor first.
+		getLifecycleProcessor().onRefresh();
+
 		// Publish the final event.
 		publishEvent(new ContextRefreshedEvent(this));
 	}
@@ -828,10 +947,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 
 			// Stop all Lifecycle beans, to avoid delays during individual destruction.
-			Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
-			for (String beanName : new LinkedHashSet<String>(lifecycleBeans.keySet())) {
-				doStop(lifecycleBeans, beanName);
-			}
+			getLifecycleProcessor().onClose();
 
 			// Destroy all cached singletons in the context's BeanFactory.
 			destroyBeans();
@@ -890,6 +1006,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		return getBeanFactory().getBean(name, requiredType);
+	}
+
+	public <T> T getBean(Class<T> requiredType) throws BeansException {
+		return getBeanFactory().getBean(requiredType);
 	}
 
 	public Object getBean(String name, Object... args) throws BeansException {
@@ -959,13 +1079,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			throws BeansException {
 
 		return getBeanFactory().getBeansWithAnnotation(annotationType);
-	}
-
-	public Map<String, Object> getBeansWithAnnotation(
-			Class<? extends Annotation> annotationType, boolean includeNonSingletons, boolean allowEagerInit)
-			throws BeansException {
-
-		return getBeanFactory().getBeansWithAnnotation(annotationType, includeNonSingletons, allowEagerInit);
 	}
 
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
@@ -1049,86 +1162,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	public void start() {
-		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
-		for (String beanName : new LinkedHashSet<String>(lifecycleBeans.keySet())) {
-			doStart(lifecycleBeans, beanName);
-		}
+		getLifecycleProcessor().start();
 		publishEvent(new ContextStartedEvent(this));
 	}
 
 	public void stop() {
-		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
-		for (String beanName : new LinkedHashSet<String>(lifecycleBeans.keySet())) {
-			doStop(lifecycleBeans, beanName);
-		}
+		getLifecycleProcessor().stop();
 		publishEvent(new ContextStoppedEvent(this));
 	}
 
 	public boolean isRunning() {
-		for (Lifecycle lifecycle : getLifecycleBeans().values()) {
-			if (!lifecycle.isRunning()) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Return a Map of all singleton beans that implement the
-	 * Lifecycle interface in this context.
-	 * @return Map of Lifecycle beans with bean name as key
-	 */
-	private Map<String, Lifecycle> getLifecycleBeans() {
-		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-		String[] beanNames = beanFactory.getSingletonNames();
-		Map<String, Lifecycle> beans = new LinkedHashMap<String, Lifecycle>();
-		for (String beanName : beanNames) {
-			Object bean = beanFactory.getSingleton(beanName);
-			if (bean instanceof Lifecycle) {
-				beans.put(beanName, (Lifecycle) bean);
-			}
-		}
-		return beans;
-	}
-
-	/**
-	 * Start the specified bean as part of the given set of Lifecycle beans,
-	 * making sure that any beans that it depends on are started first.
-	 * @param lifecycleBeans Map with bean name as key and Lifecycle instance as value
-	 * @param beanName the name of the bean to start
-	 */
-	private void doStart(Map<String, Lifecycle> lifecycleBeans, String beanName) {
-		Lifecycle bean = lifecycleBeans.get(beanName);
-		if (bean != null) {
-			String[] dependenciesForBean = getBeanFactory().getDependenciesForBean(beanName);
-			for (String dependency : dependenciesForBean) {
-				doStart(lifecycleBeans, dependency);
-			}
-			if (!bean.isRunning()) {
-				bean.start();
-			}
-			lifecycleBeans.remove(beanName);
-		}
-	}
-
-	/**
-	 * Stop the specified bean as part of the given set of Lifecycle beans,
-	 * making sure that any beans that depends on it are stopped first.
-	 * @param lifecycleBeans Map with bean name as key and Lifecycle instance as value
-	 * @param beanName the name of the bean to stop
-	 */
-	private void doStop(Map lifecycleBeans, String beanName) {
-		Lifecycle bean = (Lifecycle) lifecycleBeans.get(beanName);
-		if (bean != null) {
-			String[] dependentBeans = getBeanFactory().getDependentBeans(beanName);
-			for (String dependentBean : dependentBeans) {
-				doStop(lifecycleBeans, dependentBean);
-			}
-			if (bean.isRunning()) {
-				bean.stop();
-			}
-			lifecycleBeans.remove(beanName);
-		}
+		return getLifecycleProcessor().isRunning();
 	}
 
 

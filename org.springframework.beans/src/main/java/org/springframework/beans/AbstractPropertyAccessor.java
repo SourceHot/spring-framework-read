@@ -21,8 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.core.convert.ConversionService;
-
 /**
  * Abstract implementation of the {@link PropertyAccessor} interface.
  * Provides base implementations of all convenience methods, with the
@@ -52,7 +50,7 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 		setPropertyValue(pv.getName(), pv.getValue());
 	}
 
-	public void setPropertyValues(Map map) throws BeansException {
+	public void setPropertyValues(Map<?, ?> map) throws BeansException {
 		setPropertyValues(new MutablePropertyValues(map));
 	}
 

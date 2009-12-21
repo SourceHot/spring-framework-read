@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
-"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="orm">
   <title>Object Relational Mapping (ORM) Data Access</title>
 
   <section id="orm-introduction">
     <title>Introduction to ORM with Spring</title>
 
-    <para>The Spring Framework supports <!--Changed from *provides* to *supports* because *provides* is too vague. If the integration is something you configure, then say *supports*.--><!--If Spring is preconfigured with integration support, say it *includes* integration with.But it sounds like it's *supports* because --><!--later in paragraph it refers to configuring support packages. TR: OK-->integration
+    <para>The Spring Framework supports integration
     with Hibernate, Java Persistence API (JPA), Java Data Objects (JDO) and
     iBATIS SQL Maps for resource management, data access object (DAO)
-    implementation, and transaction strategies. For example for Hibernate,
-    there is first-class support with lots of IoC convenience features,
-    addressing many typical Hibernate integration issues. You can configure
-    all of these supported features for O/R (object relational) mappers <!--GLOBAL: I have changed O/R mapping to ORM, to make all reference consistent and to be consistent with name of chapter. But when you--><!--refer to *mappers* as you do above, it's O/R mappers. The M in ORM stands for *mapping*, not *mappers.*--><!--TR: OK -->through
-    Dependency Injection. <!--Identify *these support packages*. Do you mean Hibernate, JPA, etc? Is it correct to call them support packages? 
-TR: REVISED, PLS REVIEW. Changed to say features instead of packages. Reverted the "first-class support" sentence above since it is not 
-IoC itself providing the support.-->They can participate in Spring's resource
+    implementations, and transaction strategies. For example, for Hibernate
+    there is first-class support with several convenient IoC features that
+    address many typical Hibernate integration issues. You can configure
+    all of the supported features for O/R (object relational) mapping tools through
+    Dependency Injection. They can participate in Spring's resource
     and transaction management, and they comply with Spring's generic
     transaction and DAO exception hierarchies. The recommended integration
     style is to code DAOs against plain Hibernate, JPA, and JDO APIs. The
@@ -26,12 +24,12 @@ IoC itself providing the support.-->They can participate in Spring's resource
 
     <para>Spring adds significant enhancements to the ORM layer of your choice
     when you create data access applications. You can leverage as much of the
-    integration support as you wish and you should compare this integration
+    integration support as you wish, and you should compare this integration
     effort with the cost and risk of building a similar infrastructure
     in-house. You can use much of the ORM support as you would a library,
     regardless of technology, because everything is designed as a set of
-    reusable JavaBeans. ORM in a Spring IoC container does facilitate
-    configuration and deployment; thus most examples in this section show
+    reusable JavaBeans. ORM in a Spring IoC container facilitates
+    configuration and deployment. Thus most examples in this section show
     configuration inside a Spring container.</para>
 
     <para>Benefits of using the Spring Framework to create your ORM DAOs
@@ -237,10 +235,7 @@ public class ProductDaoImpl implements ProductDao {
     will then cover the other ORM technologies, showing briefer examples
     there.</para>
 
-    <para><note>
-        <para>As of Spring 2.5, Spring requires Hibernate 3.1 or later.
-        Neither Hibernate 2.1 nor Hibernate 3.0 are supported.</para>
-      </note></para>
+    <para><note>As of Spring 3.0, Spring requires Hibernate 3.2 or later.</note></para>
 
     <section id="orm-session-factory-setup">
       <title><interfacename>SessionFactory</interfacename> setup in a Spring
@@ -427,12 +422,14 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
 
   <lineannotation>&lt;!-- <interfacename>SessionFactory</interfacename>, <interfacename>DataSource</interfacename>, etc. omitted --&gt;</lineannotation>
 
-  &lt;bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager"&gt;
+  &lt;bean id="transactionManager" 
+            class="org.springframework.orm.hibernate3.HibernateTransactionManager"&gt;
     &lt;property name="sessionFactory" ref="sessionFactory"/&gt;
   &lt;/bean&gt;
   
   &lt;aop:config&gt;
-    &lt;aop:pointcut id="productServiceMethods" expression="execution(* product.ProductService.*(..))"/&gt;
+    &lt;aop:pointcut id="productServiceMethods" 
+            expression="execution(* product.ProductService.*(..))"/&gt;
     &lt;aop:advisor advice-ref="txAdvice" pointcut-ref="productServiceMethods"/&gt;
   &lt;/aop:config&gt;
 
@@ -461,7 +458,8 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
     }
 
     <lineannotation>// notice the absence of transaction demarcation code in this method</lineannotation>
-    <lineannotation>// Spring's declarative transaction infrastructure will be demarcating transactions on your behalf </lineannotation>
+    <lineannotation>// Spring's declarative transaction infrastructure will be demarcating</lineannotation>
+    <lineannotation>// transactions on your behalf </lineannotation>
     public void increasePriceOfAllProductsInCategory(final String category) {
         List productsToChange = this.productDao.loadProductsByCategory(category);
         <lineannotation>// ...</lineannotation>
@@ -517,7 +515,8 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
 
   <lineannotation>&lt;!-- <interfacename>SessionFactory</interfacename>, <interfacename>DataSource</interfacename>, etc. omitted --&gt;</lineannotation>
 
-  &lt;bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager"&gt;
+  &lt;bean id="transactionManager"
+            class="org.springframework.orm.hibernate3.HibernateTransactionManager"&gt;
     &lt;property name="sessionFactory" ref="sessionFactory"/&gt;
   &lt;/bean&gt;
   
@@ -635,7 +634,8 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
 
   &lt;jee:jndi-lookup id="dataSource2" jndi-name="java:comp/env/jdbc/myds2"/&gt;
 
-  &lt;bean id="mySessionFactory1" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
+  &lt;bean id="mySessionFactory1"
+            class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
     &lt;property name="dataSource" ref="myDataSource1"/&gt;
     &lt;property name="mappingResources"&gt;
       &lt;list&gt;
@@ -650,7 +650,8 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
     &lt;/property&gt;
   &lt;/bean&gt;
 
-  &lt;bean id="mySessionFactory2" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
+  &lt;bean id="mySessionFactory2"
+            class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
     &lt;property name="dataSource" ref="myDataSource2"/&gt;
     &lt;property name="mappingResources"&gt;
       &lt;list&gt;
@@ -680,7 +681,8 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
   &lt;/bean&gt;
 
   &lt;aop:config&gt;
-    &lt;aop:pointcut id="productServiceMethods" expression="execution(* product.ProductService.*(..))"/&gt;
+    &lt;aop:pointcut id="productServiceMethods"
+                expression="execution(* product.ProductService.*(..))"/&gt;
     &lt;aop:advisor advice-ref="txAdvice" pointcut-ref="productServiceMethods"/&gt;
   &lt;/aop:config&gt;
 
@@ -1171,7 +1173,8 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
   &lt;/tx:advice&gt;
 
   &lt;aop:config&gt;
-    &lt;aop:pointcut id="productServiceMethods" expression="execution(* product.ProductService.*(..))"/&gt;
+    &lt;aop:pointcut id="productServiceMethods"
+            expression="execution(* product.ProductService.*(..))"/&gt;
     &lt;aop:advisor advice-ref="txAdvice" pointcut-ref="productServiceMethods"/&gt;
   &lt;/aop:config&gt;
 
@@ -1200,13 +1203,13 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
       <title><interfacename>JdoDialect</interfacename></title>
 
       <para>As an advanced feature, both <classname>JdoTemplate</classname>
-      and <classname>interfacename</classname> support a custom
-      <interfacename>JdoDialect</interfacename>, to be passed into the
+      and <classname>JdoTransactionManager</classname> support a custom
+      <interfacename>JdoDialect</interfacename> that can be passed into the
       <code>jdoDialect</code> bean property. In this scenario, the DAOs will
       not receive a <interfacename>PersistenceManagerFactory</interfacename>
       reference but rather a full <classname>JdoTemplate</classname> instance
-      (for example, passed into the <code>jdo</code><code>Template</code>
-      property of <classname>JdoDaoSupport</classname>. Using a
+      (for example, passed into the <literal>jdoTemplate</literal>
+      property of <classname>JdoDaoSupport</classname>). Using a
       <interfacename>JdoDialect</interfacename> implementation, you can enable
       advanced features supported by Spring, usually in a vendor-specific
       manner:</para>
@@ -1506,7 +1509,8 @@ TR: OK AS IS. The requirement is to provide the classloader for the runtime envi
                 file:</para>
 
                 <programlisting language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
-    &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
+    &lt;Loader
+        loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
 &lt;/Context&gt;</programlisting>
 
                 <para>Tomcat 5.0.x and 5.5.x series support several context
@@ -1541,7 +1545,8 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
                 <emphasis>useSystemClassLoaderAsParent</emphasis> to
                 <literal>false</literal> to fix the problem: <programlisting
                 language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
-    &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
+    &lt;Loader
+        loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
             useSystemClassLoaderAsParent="false"/&gt;
 &lt;/Context&gt;</programlisting></para>
               </listitem>
@@ -1565,7 +1570,8 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
                 file:</para>
 
                 <programlisting language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
-    &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
+    &lt;Loader
+        loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
 &lt;/Context&gt;</programlisting>
 
                 <para>The Tomcat 6.0.x (similar to 5.0.x/5.5.x) series

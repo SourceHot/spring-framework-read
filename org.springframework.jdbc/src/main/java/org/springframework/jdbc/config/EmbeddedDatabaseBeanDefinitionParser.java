@@ -16,20 +16,20 @@
 
 package org.springframework.jdbc.config;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.core.io.Resource;
-import org.springframework.jdbc.datasource.embedded.DatabasePopulator;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean;
-import org.springframework.jdbc.datasource.embedded.ResourceDatabasePopulator;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses {@code embedded-database} element and
@@ -37,6 +37,7 @@ import org.w3c.dom.Element;
  * configures a {@link ResourceDatabasePopulator} for them.
  * 
  * @author Oliver Gierke
+ * @since 3.0
  */
 public class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
@@ -62,17 +63,25 @@ public class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinition
 		}
 	}
 
-	private DatabasePopulator createDatabasePopulator(List<Element> scripts, ParserContext context) {
-		ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+	private BeanDefinition createDatabasePopulator(List<Element> scripts, ParserContext context) {
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(ResourceDatabasePopulator.class);
+		List<String> locations = new ArrayList<String>();
 		for (Element scriptElement : scripts) {
-			Resource script = context.getReaderContext().getResourceLoader().getResource(scriptElement.getAttribute("location"));
-			populator.addScript(script);
+			locations.add(scriptElement.getAttribute("location"));
 		}
-		return populator;
+		// Use a factory bean for the resources so they can be given an order if a pattern is used
+		BeanDefinitionBuilder resourcesFactory = BeanDefinitionBuilder
+				.genericBeanDefinition(SortedResourcesFactoryBean.class);
+		resourcesFactory.addConstructorArgValue(context.getReaderContext().getResourceLoader());
+		resourcesFactory.addConstructorArgValue(locations);
+		builder.addPropertyValue("scripts", resourcesFactory.getBeanDefinition());
+
+		return builder.getBeanDefinition();
 	}
 
-	private AbstractBeanDefinition getSourcedBeanDefinition(BeanDefinitionBuilder builder, Element source,
-			ParserContext context) {
+	private AbstractBeanDefinition getSourcedBeanDefinition(
+			BeanDefinitionBuilder builder, Element source, ParserContext context) {
+
 		AbstractBeanDefinition definition = builder.getBeanDefinition();
 		definition.setSource(context.extractSource(source));
 		return definition;

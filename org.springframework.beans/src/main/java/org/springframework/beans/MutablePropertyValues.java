@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.springframework.util.StringUtils;
  */
 public class MutablePropertyValues implements PropertyValues, Serializable {
 
-	/** List of PropertyValue objects */
 	private final List<PropertyValue> propertyValueList;
 
 	private Set<String> processedProperties;
@@ -47,9 +46,8 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	/**
 	 * Creates a new empty MutablePropertyValues object.
-	 * Property values can be added with the <code>addPropertyValue</code> methods.
-	 * @see #addPropertyValue(PropertyValue)
-	 * @see #addPropertyValue(String, Object)
+	 * <p>Property values can be added with the <code>add</code> method.
+	 * @see #add(String, Object)
 	 */
 	public MutablePropertyValues() {
 		this.propertyValueList = new ArrayList<PropertyValue>();
@@ -120,12 +118,18 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
+	 * Return the number of PropertyValue entries in the list.
+	 */
+	public int size() {
+		return this.propertyValueList.size();
+	}
+
+	/**
 	 * Copy all given PropertyValues into this object. Guarantees PropertyValue
 	 * references are independent, although it can't deep copy objects currently
 	 * referenced by individual PropertyValue objects.
 	 * @param other the PropertyValues to copy
-	 * @return this object to allow creating objects, adding multiple PropertyValues
-	 * in a single statement
+	 * @return this in order to allow for adding multiple property values in a chain
 	 */
 	public MutablePropertyValues addPropertyValues(PropertyValues other) {
 		if (other != null) {
@@ -141,8 +145,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * Add all property values from the given Map.
 	 * @param other Map with property values keyed by property name,
 	 * which must be a String
-	 * @return this object to allow creating objects, adding multiple
-	 * PropertyValues in a single statement
+	 * @return this in order to allow for adding multiple property values in a chain
 	 */
 	public MutablePropertyValues addPropertyValues(Map<?, ?> other) {
 		if (other != null) {
@@ -154,11 +157,10 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
-	 * Add a PropertyValue object, replacing any existing one
-	 * for the corresponding property.
+	 * Add a PropertyValue object, replacing any existing one for the
+	 * corresponding property or getting merged with it (if applicable).
 	 * @param pv PropertyValue object to add
-	 * @return this object to allow creating objects, adding multiple
-	 * PropertyValues in a single statement
+	 * @return this in order to allow for adding multiple property values in a chain
 	 */
 	public MutablePropertyValues addPropertyValue(PropertyValue pv) {
 		for (int i = 0; i < this.propertyValueList.size(); i++) {
@@ -176,12 +178,26 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	/**
 	 * Overloaded version of <code>addPropertyValue</code> that takes
 	 * a property name and a property value.
+	 * <p>Note: As of Spring 3.0, we recommend using the more concise
+	 * and chaining-capable variant {@link #add}.
 	 * @param propertyName name of the property
 	 * @param propertyValue value of the property
 	 * @see #addPropertyValue(PropertyValue)
 	 */
 	public void addPropertyValue(String propertyName, Object propertyValue) {
 		addPropertyValue(new PropertyValue(propertyName, propertyValue));
+	}
+
+	/**
+	 * Add a PropertyValue object, replacing any existing one for the
+	 * corresponding property or getting merged with it (if applicable).
+	 * @param propertyName name of the property
+	 * @param propertyValue value of the property
+	 * @return this in order to allow for adding multiple property values in a chain
+	 */
+	public MutablePropertyValues add(String propertyName, Object propertyValue) {
+		addPropertyValue(new PropertyValue(propertyName, propertyValue));
+		return this;
 	}
 
 	/**
@@ -210,15 +226,6 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
-	 * Overloaded version of <code>removePropertyValue</code> that takes a property name.
-	 * @param propertyName name of the property
-	 * @see #removePropertyValue(PropertyValue)
-	 */
-	public void removePropertyValue(String propertyName) {
-		removePropertyValue(getPropertyValue(propertyName));
-	}
-
-	/**
 	 * Remove the given PropertyValue, if contained.
 	 * @param pv the PropertyValue to remove
 	 */
@@ -227,10 +234,12 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
-	 * Clear this holder, removing all PropertyValues.
+	 * Overloaded version of <code>removePropertyValue</code> that takes a property name.
+	 * @param propertyName name of the property
+	 * @see #removePropertyValue(PropertyValue)
 	 */
-	public void clear() {
-		this.propertyValueList.clear();
+	public void removePropertyValue(String propertyName) {
+		this.propertyValueList.remove(getPropertyValue(propertyName));
 	}
 
 
@@ -245,34 +254,6 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Register the specified property as "processed" in the sense
-	 * of some processor calling the corresponding setter method
-	 * outside of the PropertyValue(s) mechanism.
-	 * <p>This will lead to <code>true</code> being returned from
-	 * a {@link #contains} call for the specified property.
-	 * @param propertyName the name of the property.
-	 */
-	public void registerProcessedProperty(String propertyName) {
-		if (this.processedProperties == null) {
-			this.processedProperties = new HashSet<String>();
-		}
-		this.processedProperties.add(propertyName);
-	}
-
-	public boolean contains(String propertyName) {
-		return (getPropertyValue(propertyName) != null ||
-				(this.processedProperties != null && this.processedProperties.contains(propertyName)));
-	}
-
-	public boolean isEmpty() {
-		return this.propertyValueList.isEmpty();
-	}
-
-	public int size() {
-		return this.propertyValueList.size();
 	}
 
 	public PropertyValues changesSince(PropertyValues old) {
@@ -296,6 +277,30 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		return changes;
 	}
 
+	public boolean contains(String propertyName) {
+		return (getPropertyValue(propertyName) != null ||
+				(this.processedProperties != null && this.processedProperties.contains(propertyName)));
+	}
+
+	public boolean isEmpty() {
+		return this.propertyValueList.isEmpty();
+	}
+
+
+	/**
+	 * Register the specified property as "processed" in the sense
+	 * of some processor calling the corresponding setter method
+	 * outside of the PropertyValue(s) mechanism.
+	 * <p>This will lead to <code>true</code> being returned from
+	 * a {@link #contains} call for the specified property.
+	 * @param propertyName the name of the property.
+	 */
+	public void registerProcessedProperty(String propertyName) {
+		if (this.processedProperties == null) {
+			this.processedProperties = new HashSet<String>();
+		}
+		this.processedProperties.add(propertyName);
+	}
 
 	/**
 	 * Mark this holder as containing converted values only

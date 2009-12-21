@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,22 @@
 
 package org.springframework.scheduling.quartz;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
+import javax.sql.DataSource;
+
 import org.easymock.MockControl;
+import org.junit.Test;
 import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDetail;
@@ -43,29 +51,38 @@ import org.quartz.impl.SchedulerRepository;
 import org.quartz.spi.JobFactory;
 
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.scheduling.TestMethodInvokingTask;
 
 /**
  * @author Juergen Hoeller
  * @author Alef Arendsen
  * @author Rob Harrop
+ * @author Dave Syer
+ * @author Mark Fisher
  * @since 20.02.2004
  */
-public class QuartzSupportTests extends TestCase {
+public class QuartzSupportTests {
 
+	@Test
 	public void testSchedulerFactoryBean() throws Exception {
 		doTestSchedulerFactoryBean(false, false);
 	}
 
+	@Test
 	public void testSchedulerFactoryBeanWithExplicitJobDetail() throws Exception {
 		doTestSchedulerFactoryBean(true, false);
 	}
 
+	@Test
 	public void testSchedulerFactoryBeanWithPrototypeJob() throws Exception {
 		doTestSchedulerFactoryBean(false, true);
 	}
@@ -151,6 +168,7 @@ public class QuartzSupportTests extends TestCase {
 		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
+			schedulerFactoryBean.start();
 		}
 		finally {
 			schedulerFactoryBean.destroy();
@@ -159,10 +177,12 @@ public class QuartzSupportTests extends TestCase {
 		schedulerControl.verify();
 	}
 
+	@Test
 	public void testSchedulerFactoryBeanWithExistingJobs() throws Exception {
 		doTestSchedulerFactoryBeanWithExistingJobs(false);
 	}
 
+	@Test
 	public void testSchedulerFactoryBeanWithOverwriteExistingJobs() throws Exception {
 		doTestSchedulerFactoryBeanWithExistingJobs(true);
 	}
@@ -242,6 +262,7 @@ public class QuartzSupportTests extends TestCase {
 		}
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
+			schedulerFactoryBean.start();
 		}
 		finally {
 			schedulerFactoryBean.destroy();
@@ -250,10 +271,12 @@ public class QuartzSupportTests extends TestCase {
 		schedulerControl.verify();
 	}
 
+	@Test
 	public void testSchedulerFactoryBeanWithExistingJobsAndRaceCondition() throws Exception {
 		doTestSchedulerFactoryBeanWithExistingJobsAndRaceCondition(false);
 	}
 
+	@Test
 	public void testSchedulerFactoryBeanWithOverwriteExistingJobsAndRaceCondition() throws Exception {
 		doTestSchedulerFactoryBeanWithExistingJobsAndRaceCondition(true);
 	}
@@ -337,6 +360,7 @@ public class QuartzSupportTests extends TestCase {
 		}
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
+			schedulerFactoryBean.start();
 		}
 		finally {
 			schedulerFactoryBean.destroy();
@@ -345,6 +369,7 @@ public class QuartzSupportTests extends TestCase {
 		schedulerControl.verify();
 	}
 
+	@Test
 	public void testSchedulerFactoryBeanWithListeners() throws Exception {
 		JobFactory jobFactory = new AdaptableJobFactory();
 
@@ -388,6 +413,7 @@ public class QuartzSupportTests extends TestCase {
 		schedulerFactoryBean.setTriggerListeners(new TriggerListener[] {triggerListener});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
+			schedulerFactoryBean.start();
 		}
 		finally {
 			schedulerFactoryBean.destroy();
@@ -479,6 +505,7 @@ public class QuartzSupportTests extends TestCase {
 		schedulerFactoryBean.destroy();
 	}
 
+	@Test
 	public void testSchedulerFactoryBeanWithPlainQuartzObjects() throws Exception {
 		JobFactory jobFactory = new AdaptableJobFactory();
 
@@ -552,6 +579,7 @@ public class QuartzSupportTests extends TestCase {
 		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
+			schedulerFactoryBean.start();
 		}
 		finally {
 			schedulerFactoryBean.destroy();
@@ -560,6 +588,7 @@ public class QuartzSupportTests extends TestCase {
 		schedulerControl.verify();
 	}
 
+	@Test
 	public void testSchedulerFactoryBeanWithApplicationContext() throws Exception {
 		TestBean tb = new TestBean("tb", 99);
 		StaticApplicationContext ac = new StaticApplicationContext();
@@ -588,6 +617,7 @@ public class QuartzSupportTests extends TestCase {
 		schedulerFactoryBean.setApplicationContextSchedulerContextKey("appCtx");
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
+			schedulerFactoryBean.start();
 			Scheduler returnedScheduler = (Scheduler) schedulerFactoryBean.getObject();
 			assertEquals(tb, returnedScheduler.getContext().get("testBean"));
 			assertEquals(ac, returnedScheduler.getContext().get("appCtx"));
@@ -599,6 +629,7 @@ public class QuartzSupportTests extends TestCase {
 		schedulerControl.verify();
 	}
 
+	@Test
 	public void testJobDetailBeanWithApplicationContext() throws Exception {
 		TestBean tb = new TestBean("tb", 99);
 		StaticApplicationContext ac = new StaticApplicationContext();
@@ -617,6 +648,7 @@ public class QuartzSupportTests extends TestCase {
 		assertEquals(ac, jobDetail.getJobDataMap().get("appCtx"));
 	}
 
+	@Test
 	public void testMethodInvokingJobDetailFactoryBeanWithListenerNames() throws Exception {
 		TestMethodInvokingTask task = new TestMethodInvokingTask();
 		MethodInvokingJobDetailFactoryBean mijdfb = new MethodInvokingJobDetailFactoryBean();
@@ -632,6 +664,7 @@ public class QuartzSupportTests extends TestCase {
 		assertEquals(Arrays.asList(names), result);
 	}
 
+	@Test
 	public void testJobDetailBeanWithListenerNames() {
 		JobDetailBean jobDetail = new JobDetailBean();
 		String[] names = new String[] {"test1", "test2"};
@@ -640,6 +673,7 @@ public class QuartzSupportTests extends TestCase {
 		assertEquals(Arrays.asList(names), result);
 	}
 
+	@Test
 	public void testCronTriggerBeanWithListenerNames() {
 		CronTriggerBean trigger = new CronTriggerBean();
 		String[] names = new String[] {"test1", "test2"};
@@ -648,6 +682,7 @@ public class QuartzSupportTests extends TestCase {
 		assertEquals(Arrays.asList(names), result);
 	}
 
+	@Test
 	public void testSimpleTriggerBeanWithListenerNames() {
 		SimpleTriggerBean trigger = new SimpleTriggerBean();
 		String[] names = new String[] {"test1", "test2"};
@@ -656,6 +691,7 @@ public class QuartzSupportTests extends TestCase {
 		assertEquals(Arrays.asList(names), result);
 	}
 
+	@Test
 	public void testSchedulerWithTaskExecutor() throws Exception {
 		CountingTaskExecutor taskExecutor = new CountingTaskExecutor();
 		DummyJob.count = 0;
@@ -677,6 +713,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.setTriggers(new Trigger[] {trigger});
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
+		bean.start();
 
 		Thread.sleep(500);
 		assertTrue(DummyJob.count > 0);
@@ -685,6 +722,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.destroy();
 	}
 
+	@Test
 	public void testSchedulerWithRunnable() throws Exception {
 		DummyRunnable.count = 0;
 
@@ -704,6 +742,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.setTriggers(new Trigger[] {trigger});
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
+		bean.start();
 
 		Thread.sleep(500);
 		assertTrue(DummyRunnable.count > 0);
@@ -711,6 +750,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.destroy();
 	}
 
+	@Test
 	public void testSchedulerWithQuartzJobBean() throws Exception {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
@@ -732,6 +772,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.setTriggers(new Trigger[] {trigger});
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
+		bean.start();
 
 		Thread.sleep(500);
 		assertEquals(10, DummyJobBean.param);
@@ -740,6 +781,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.destroy();
 	}
 
+	@Test
 	public void testSchedulerWithSpringBeanJobFactory() throws Exception {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
@@ -763,6 +805,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.setTriggers(new Trigger[] {trigger});
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
+		bean.start();
 
 		Thread.sleep(500);
 		assertEquals(10, DummyJob.param);
@@ -771,6 +814,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.destroy();
 	}
 
+	@Test
 	public void testSchedulerWithSpringBeanJobFactoryAndParamMismatchNotIgnored() throws Exception {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
@@ -804,6 +848,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.destroy();
 	}
 
+	@Test
 	public void testSchedulerWithSpringBeanJobFactoryAndRunnable() throws Exception {
 		DummyRunnable.param = 0;
 		DummyRunnable.count = 0;
@@ -826,6 +871,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.setTriggers(new Trigger[] {trigger});
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
+		bean.start();
 
 		Thread.sleep(500);
 		assertEquals(10, DummyRunnable.param);
@@ -834,6 +880,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.destroy();
 	}
 
+	@Test
 	public void testSchedulerWithSpringBeanJobFactoryAndQuartzJobBean() throws Exception {
 		DummyJobBean.param = 0;
 		DummyJobBean.count = 0;
@@ -856,6 +903,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.setTriggers(new Trigger[] {trigger});
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
+		bean.start();
 
 		Thread.sleep(500);
 		assertEquals(10, DummyJobBean.param);
@@ -864,6 +912,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.destroy();
 	}
 
+	@Test
 	public void testSchedulerWithSpringBeanJobFactoryAndJobSchedulingData() throws Exception {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
@@ -873,6 +922,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.setJobSchedulingDataLocation("org/springframework/scheduling/quartz/job-scheduling-data.xml");
 		bean.setResourceLoader(new FileSystemResourceLoader());
 		bean.afterPropertiesSet();
+		bean.start();
 
 		Thread.sleep(500);
 		assertEquals(10, DummyJob.param);
@@ -884,6 +934,7 @@ public class QuartzSupportTests extends TestCase {
 	/**
 	 * Tests the creation of multiple schedulers (SPR-772)
 	 */
+	@Test
 	public void testMultipleSchedulers() throws Exception {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleSchedulers.xml");
@@ -899,6 +950,7 @@ public class QuartzSupportTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testWithTwoAnonymousMethodInvokingJobDetailFactoryBeans() throws InterruptedException {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleAnonymousMethodInvokingJobDetailFB.xml");
@@ -917,6 +969,7 @@ public class QuartzSupportTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSchedulerAccessorBean() throws InterruptedException {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/schedulerAccessorBean.xml");
@@ -935,6 +988,29 @@ public class QuartzSupportTests extends TestCase {
 		}
 	}
 
+	@Test
+	public void testSchedulerAutoStartsOnContextRefreshedEventByDefault() throws Exception {
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.registerBeanDefinition("scheduler", new RootBeanDefinition(SchedulerFactoryBean.class));
+		Scheduler bean = context.getBean("scheduler", Scheduler.class);
+		assertFalse(bean.isStarted());
+		context.refresh();
+		assertTrue(bean.isStarted());
+	}
+
+	@Test
+	public void testSchedulerAutoStartupFalse() throws Exception {
+		StaticApplicationContext context = new StaticApplicationContext();
+		BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(
+				SchedulerFactoryBean.class).addPropertyValue("autoStartup", false).getBeanDefinition();
+		context.registerBeanDefinition("scheduler", beanDefinition);
+		Scheduler bean = context.getBean("scheduler", Scheduler.class);
+		assertFalse(bean.isStarted());
+		context.refresh();
+		assertFalse(bean.isStarted());
+	}
+
+	@Test
 	public void testSchedulerRepositoryExposure() throws InterruptedException {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/schedulerRepositoryExposure.xml");
@@ -942,6 +1018,25 @@ public class QuartzSupportTests extends TestCase {
 		ctx.close();
 	}
 
+	// SPR-6038: detect HSQL and stop illegal locks being taken
+	@Test
+	public void testSchedulerWithHsqlDataSource() throws Exception {
+		DummyJob.param = 0;
+		DummyJob.count = 0;
+
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				"/org/springframework/scheduling/quartz/databasePersistence.xml");
+		SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(ctx.getBean(DataSource.class));
+		assertTrue("No triggers were persisted", jdbcTemplate.queryForList("SELECT * FROM qrtz_triggers").size()>0);
+		Thread.sleep(3000);
+		try {
+			// assertEquals(10, DummyJob.param);
+			assertTrue(DummyJob.count > 0);
+		} finally {
+			ctx.close();
+		}
+
+	}
 
 	private static class TestSchedulerListener implements SchedulerListener {
 

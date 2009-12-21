@@ -6,18 +6,18 @@
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd">
 
 	<jdbc:embedded-database id="dataSource" type="HSQL">
-		<jdbc:script location="classpath:org/springframework/jdbc/datasource/embedded/db-schema.sql"/>
-		<jdbc:script location="classpath:org/springframework/jdbc/datasource/embedded/db-test-data.sql"/>
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-schema.sql"/>
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-test-data.sql"/>
 	</jdbc:embedded-database>
 	
 	<jdbc:embedded-database id="h2DataSource" type="H2">
-		<jdbc:script location="classpath:org/springframework/jdbc/datasource/embedded/db-schema.sql"/>
-		<jdbc:script location="classpath:org/springframework/jdbc/datasource/embedded/db-test-data.sql"/>
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-schema.sql"/>
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-test-data.sql"/>
 	</jdbc:embedded-database>
 	
 	<jdbc:embedded-database id="derbyDataSource" type="DERBY">
-		<jdbc:script location="classpath:org/springframework/jdbc/datasource/embedded/db-schema-derby.sql"/>
-		<jdbc:script location="classpath:org/springframework/jdbc/datasource/embedded/db-test-data.sql"/>
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-schema-derby.sql"/>
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-test-data.sql"/>
 	</jdbc:embedded-database>
 	
 </beans>

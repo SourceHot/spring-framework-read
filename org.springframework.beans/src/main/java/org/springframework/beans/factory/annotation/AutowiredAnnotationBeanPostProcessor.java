@@ -27,6 +27,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -95,12 +96,11 @@ import org.springframework.util.ReflectionUtils;
  * @since 2.5
  * @see #setAutowiredAnnotationType
  * @see Autowired
- * @see org.springframework.context.annotation.CommonAnnotationBeanPostProcessor
  */
 public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
 		implements MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
 
-	protected final Log logger = LogFactory.getLog(AutowiredAnnotationBeanPostProcessor.class);
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final Set<Class<? extends Annotation>> autowiredAnnotationTypes =
 			new LinkedHashSet<Class<? extends Annotation>>();
@@ -132,6 +132,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		ClassLoader cl = AutowiredAnnotationBeanPostProcessor.class.getClassLoader();
 		try {
 			this.autowiredAnnotationTypes.add((Class<? extends Annotation>) cl.loadClass("javax.inject.Inject"));
+			logger.info("JSR-330 'javax.inject.Inject' annotation found and supported for autowiring");
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-330 API not available - simply skip.
@@ -143,7 +144,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * Set the 'autowired' annotation type, to be used on constructors, fields,
 	 * setter methods and arbitrary config methods.
 	 * <p>The default autowired annotation type is the Spring-provided
-	 * {@link Autowired} annotation.
+	 * {@link Autowired} annotation, as well as {@link Value}.
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation type to indicate that a member is
 	 * supposed to be autowired.
@@ -158,8 +159,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * Set the 'autowired' annotation types, to be used on constructors, fields,
 	 * setter methods and arbitrary config methods.
 	 * <p>The default autowired annotation type is the Spring-provided
-	 * {@link Autowired} annotation, as well as {@link Value} and raw
-	 * use of the {@link Qualifier} annotation.
+	 * {@link Autowired} annotation, as well as {@link Value}.
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation types to indicate that a member is
 	 * supposed to be autowired.
@@ -272,91 +272,96 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	@Override
-	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
-		InjectionMetadata metadata = findAutowiringMetadata(bean.getClass());
-		try {
-			metadata.injectFields(bean, beanName);
-		}
-		catch (Throwable ex) {
-			throw new BeanCreationException(beanName, "Autowiring of fields failed", ex);
-		}
-		return true;
-	}
-
-	@Override
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 
 		InjectionMetadata metadata = findAutowiringMetadata(bean.getClass());
 		try {
-			metadata.injectMethods(bean, beanName, pvs);
+			metadata.inject(bean, beanName, pvs);
 		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(beanName, "Autowiring of methods failed", ex);
+			throw new BeanCreationException(beanName, "Injection of autowired dependencies failed", ex);
 		}
 		return pvs;
 	}
 
 	/**
-	 * 'Native' processing method for direct calls with an arbitrary target
-	 * instance, resolving all of its fields and methods which are annotated
-	 * with <code>@Autowired</code>.
+	 * 'Native' processing method for direct calls with an arbitrary target instance,
+	 * resolving all of its fields and methods which are annotated with <code>@Autowired</code>.
 	 * @param bean the target instance to process
+	 * @throws BeansException if autowiring failed
 	 */
 	public void processInjection(Object bean) throws BeansException {
-		InjectionMetadata metadata = findAutowiringMetadata(bean.getClass());
+		Class<?> clazz = bean.getClass();
+		InjectionMetadata metadata = findAutowiringMetadata(clazz);
 		try {
-			metadata.injectFields(bean, null);
-			metadata.injectMethods(bean, null, null);
+			metadata.inject(bean, null, null);
 		}
 		catch (Throwable ex) {
-			throw new BeanCreationException("Autowiring of fields/methods failed", ex);
+			throw new BeanCreationException("Injection of autowired dependencies failed for class [" + clazz + "]", ex);
 		}
 	}
 
 
-	private InjectionMetadata findAutowiringMetadata(final Class clazz) {
+	private InjectionMetadata findAutowiringMetadata(Class clazz) {
 		// Quick check on the concurrent map first, with minimal locking.
 		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
 		if (metadata == null) {
 			synchronized (this.injectionMetadataCache) {
 				metadata = this.injectionMetadataCache.get(clazz);
 				if (metadata == null) {
-					final InjectionMetadata newMetadata = new InjectionMetadata(clazz);
-					ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
-						public void doWith(Field field) {
-							Annotation annotation = findAutowiredAnnotation(field);
-							if (annotation != null) {
-								if (Modifier.isStatic(field.getModifiers())) {
-									throw new IllegalStateException("Autowired annotation is not supported on static fields");
-								}
-								boolean required = determineRequiredStatus(annotation);
-								newMetadata.addInjectedField(new AutowiredFieldElement(field, required));
-							}
-						}
-					});
-					ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
-						public void doWith(Method method) {
-							Annotation annotation = findAutowiredAnnotation(method);
-							if (annotation != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-								if (Modifier.isStatic(method.getModifiers())) {
-									throw new IllegalStateException("Autowired annotation is not supported on static methods");
-								}
-								if (method.getParameterTypes().length == 0) {
-									throw new IllegalStateException("Autowired annotation requires at least one argument: " + method);
-								}
-								boolean required = determineRequiredStatus(annotation);
-								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-								newMetadata.addInjectedMethod(new AutowiredMethodElement(method, required, pd));
-							}
-						}
-					});
-					metadata = newMetadata;
+					metadata = buildAutowiringMetadata(clazz);
 					this.injectionMetadataCache.put(clazz, metadata);
 				}
 			}
 		}
 		return metadata;
+	}
+
+	private InjectionMetadata buildAutowiringMetadata(Class clazz) {
+		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
+		Class<?> targetClass = clazz;
+
+		do {
+			LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<InjectionMetadata.InjectedElement>();
+			for (Field field : targetClass.getDeclaredFields()) {
+				Annotation annotation = findAutowiredAnnotation(field);
+				if (annotation != null) {
+					if (Modifier.isStatic(field.getModifiers())) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Autowired annotation is not supported on static fields: " + field);
+						}
+						continue;
+					}
+					boolean required = determineRequiredStatus(annotation);
+					currElements.add(new AutowiredFieldElement(field, required));
+				}
+			}
+			for (Method method : targetClass.getDeclaredMethods()) {
+				Annotation annotation = findAutowiredAnnotation(method);
+				if (annotation != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+					if (Modifier.isStatic(method.getModifiers())) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Autowired annotation is not supported on static methods: " + method);
+						}
+						continue;
+					}
+					if (method.getParameterTypes().length == 0) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Autowired annotation should be used on methods with actual parameters: " + method);
+						}
+					}
+					boolean required = determineRequiredStatus(annotation);
+					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+					currElements.add(new AutowiredMethodElement(method, required, pd));
+				}
+			}
+			elements.addAll(0, currElements);
+			targetClass = targetClass.getSuperclass();
+		}
+		while (targetClass != null && targetClass != Object.class);
+
+		return new InjectionMetadata(clazz, elements);
 	}
 
 	private Annotation findAutowiredAnnotation(AccessibleObject ao) {

@@ -112,6 +112,16 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return (T) bean;
 	}
 
+	public <T> T getBean(Class<T> requiredType) throws BeansException {
+		String[] beanNames = getBeanNamesForType(requiredType);
+		if (beanNames.length == 1) {
+			return getBean(beanNames[0], requiredType);
+		}
+		else {
+			throw new NoSuchBeanDefinitionException(requiredType, "expected single bean but found " + beanNames.length);
+		}
+	}
+
 	public Object getBean(String name, Object... args) throws BeansException {
 		if (args != null) {
 			throw new UnsupportedOperationException(
@@ -247,12 +257,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType)
 			throws BeansException {
-
-		return getBeansWithAnnotation(annotationType, true, true);
-	}
-
-	public Map<String, Object> getBeansWithAnnotation(
-			Class<? extends Annotation> annotationType, boolean includeNonSingletons, boolean allowEagerInit) {
 
 		Map<String, Object> results = new LinkedHashMap<String, Object>();
 		for (String beanName : this.beans.keySet()) {

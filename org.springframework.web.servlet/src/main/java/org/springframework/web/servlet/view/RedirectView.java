@@ -32,11 +32,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.WebUtils;
+import org.springframework.web.servlet.View;
+import org.springframework.http.HttpStatus;
 
 /**
  * <p>View that redirects to an absolute, context relative, or current request
- * relative URL, by default exposing all model attributes as HTTP query
- * parameters.
+ * relative URL. By default all primitive model attributes (or collections
+ * thereof) are exposed as HTTP query parameters, but this behavior can be changed
+ * by overriding the {@link #isEligibleProperty(String, Object)} method.
  *
  * <p>A URL for this view is supposed to be a HTTP redirect URL, i.e.
  * suitable for HttpServletResponse's <code>sendRedirect</code> method, which
@@ -62,6 +65,7 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
  * @author Sam Brannen
+ * @author Arjen Poutsma
  * @see #setContextRelative
  * @see #setHttp10Compatible
  * @see #setExposeModelAttributes
@@ -76,6 +80,8 @@ public class RedirectView extends AbstractUrlBasedView {
 	private boolean exposeModelAttributes = true;
 
 	private String encodingScheme;
+
+	private HttpStatus statusCode;
 
 
 	/**
@@ -182,6 +188,14 @@ public class RedirectView extends AbstractUrlBasedView {
 		this.encodingScheme = encodingScheme;
 	}
 
+	/**
+	 * Set the status code for this view.
+	 * <p>Default is to send 302/303, depending on the value of the
+	 * {@link #setHttp10Compatible(boolean) http10Compatible} flag.
+	 */
+	public void setStatusCode(HttpStatus statusCode) {
+		this.statusCode = statusCode;
+	}
 
 	/**
 	 * Convert model to request parameters and redirect to the given URL.
@@ -380,10 +394,29 @@ public class RedirectView extends AbstractUrlBasedView {
 			response.sendRedirect(response.encodeRedirectURL(targetUrl));
 		}
 		else {
-			// Correct HTTP status code is 303, in particular for POST requests.
-			response.setStatus(303);
+			HttpStatus statusCode = getHttp11StatusCode(request, response, targetUrl);
+			response.setStatus(statusCode.value());
 			response.setHeader("Location", response.encodeRedirectURL(targetUrl));
 		}
+	}
+
+	/**
+	 * Determines the status code to use for HTTP 1.1 compatible requests.
+	 * <p>The default implemenetation returns the {@link #setStatusCode(HttpStatus) statusCode}
+	 * property if set, or the value of the {@link #RESPONSE_STATUS_ATTRIBUTE} attribute. If neither are
+	 * set, it defaults to {@link HttpStatus#SEE_OTHER} (303).
+	 * @param request the request to inspect
+	 * @return the response
+	 */
+	protected HttpStatus getHttp11StatusCode(HttpServletRequest request, HttpServletResponse response, String targetUrl) {
+		if (statusCode != null) {
+			return statusCode;
+		}
+		HttpStatus attributeStatusCode = (HttpStatus) request.getAttribute(View.RESPONSE_STATUS_ATTRIBUTE);
+		if (attributeStatusCode != null) {
+			return attributeStatusCode;
+		}
+		return HttpStatus.SEE_OTHER;
 	}
 
 }

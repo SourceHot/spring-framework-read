@@ -48,11 +48,13 @@ final class ConfigurationClass {
 
 	private final Resource resource;
 
-	private String beanName;
+	private final Map<String, Class> importedResources = new LinkedHashMap<String, Class>();
 
 	private final Set<ConfigurationClassMethod> methods = new LinkedHashSet<ConfigurationClassMethod>();
 
 	private final Map<String, Integer> overloadedMethodMap = new LinkedHashMap<String, Integer>();
+
+	private String beanName;
 
 
 	public ConfigurationClass(MetadataReader metadataReader, String beanName) {
@@ -61,7 +63,7 @@ final class ConfigurationClass {
 		this.beanName = beanName;
 	}
 
-	public ConfigurationClass(Class clazz, String beanName) {
+	public ConfigurationClass(Class<?> clazz, String beanName) {
 		this.metadata = new StandardAnnotationMetadata(clazz);
 		this.resource = new DescriptiveResource(clazz.toString());
 		this.beanName = beanName;
@@ -101,9 +103,18 @@ final class ConfigurationClass {
 		return this;
 	}
 
-	public Set<ConfigurationClassMethod> getConfigurationMethods() {
+	public Set<ConfigurationClassMethod> getMethods() {
 		return this.methods;
 	}
+
+	public void addImportedResource(String importedResource, Class readerClass) {
+		this.importedResources.put(importedResource, readerClass);
+	}
+
+	public Map<String, Class> getImportedResources() {
+		return this.importedResources;
+	}
+
 
 	public void validate(ProblemReporter problemReporter) {
 		// No overloading of factory methods allowed

@@ -35,7 +35,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -139,7 +138,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Well-known name for the HandlerMapping object in the bean factory for this namespace. Only used when
 	 * "detectAllHandlerMappings" is turned off.
-	 *
 	 * @see #setDetectAllHandlerMappings
 	 */
 	public static final String HANDLER_MAPPING_BEAN_NAME = "handlerMapping";
@@ -147,7 +145,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Well-known name for the HandlerAdapter object in the bean factory for this namespace. Only used when
 	 * "detectAllHandlerAdapters" is turned off.
-	 *
 	 * @see #setDetectAllHandlerAdapters
 	 */
 	public static final String HANDLER_ADAPTER_BEAN_NAME = "handlerAdapter";
@@ -155,7 +152,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Well-known name for the HandlerExceptionResolver object in the bean factory for this namespace. Only used when
 	 * "detectAllHandlerExceptionResolvers" is turned off.
-	 *
 	 * @see #setDetectAllHandlerExceptionResolvers
 	 */
 	public static final String HANDLER_EXCEPTION_RESOLVER_BEAN_NAME = "handlerExceptionResolver";
@@ -166,7 +162,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Well-known name for the ViewResolver object in the bean factory for this namespace. Only used when
 	 * "detectAllViewResolvers" is turned off.
-	 *
 	 * @see #setDetectAllViewResolvers
 	 */
 	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
@@ -177,28 +172,24 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Request attribute to hold the current web application context. Otherwise only the global web app context is
 	 * obtainable by tags etc.
-	 *
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getWebApplicationContext
 	 */
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = DispatcherServlet.class.getName() + ".CONTEXT";
 
 	/**
 	 * Request attribute to hold the current LocaleResolver, retrievable by views.
-	 *
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocaleResolver
 	 */
 	public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".LOCALE_RESOLVER";
 
 	/**
 	 * Request attribute to hold the current ThemeResolver, retrievable by views.
-	 *
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeResolver
 	 */
 	public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_RESOLVER";
 
 	/**
 	 * Request attribute to hold the current ThemeSource, retrievable by views.
-	 *
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeSource
 	 */
 	public static final String THEME_SOURCE_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_SOURCE";
@@ -330,7 +321,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * This implementation calls {@link #initStrategies}.
 	 */
 	@Override
-	protected void onRefresh(ApplicationContext context) throws BeansException {
+	protected void onRefresh(ApplicationContext context) {
 		initStrategies(context);
 	}
 
@@ -681,11 +672,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param context the current WebApplicationContext
 	 * @param clazz the strategy implementation class to instantiate
 	 * @return the fully configured strategy instance
-	 * @throws BeansException if initialization failed
 	 * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
 	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean
 	 */
-	protected Object createDefaultStrategy(ApplicationContext context, Class clazz) throws BeansException {
+	protected Object createDefaultStrategy(ApplicationContext context, Class<?> clazz) {
 		return context.getAutowireCapableBeanFactory().createBean(clazz);
 	}
 
@@ -750,7 +740,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		int interceptorIndex = -1;
 
 		try {
-			ModelAndView mv = null;
+			ModelAndView mv;
 			boolean errorView = false;
 
 			try {
@@ -1040,13 +1030,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @throws Exception if there's a problem rendering the view
 	 */
 	protected void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response) throws Exception {
-
 		// Determine locale for request and apply it to the response.
 		Locale locale = this.localeResolver.resolveLocale(request);
 		response.setLocale(locale);
 
-		View view = null;
-
+		View view;
 		if (mv.isReference()) {
 			// We need to resolve the view name.
 			view = resolveViewName(mv.getViewName(), mv.getModelInternal(), locale, request);
@@ -1084,7 +1072,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Resolve the given view name into a View object (to be rendered).
-	 * <p>Default implementations asks all ViewResolvers of this dispatcher.
+	 * <p>The default implementations asks all ViewResolvers of this dispatcher.
 	 * Can be overridden for custom resolution strategies, potentially based on
 	 * specific model attributes or request parameters.
 	 * @param viewName the name of the view to resolve
@@ -1096,9 +1084,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * (typically in case of problems creating an actual View object)
 	 * @see ViewResolver#resolveViewName
 	 */
-	protected View resolveViewName(String viewName,
-			Map<String, Object> model,
-			Locale locale,
+	protected View resolveViewName(String viewName, Map<String, Object> model, Locale locale,
 			HttpServletRequest request) throws Exception {
 
 		for (ViewResolver viewResolver : this.viewResolvers) {

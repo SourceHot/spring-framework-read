@@ -25,7 +25,7 @@ import java.util.concurrent.ThreadFactory;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
-import org.springframework.scheduling.support.ErrorHandler;
+import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -51,10 +51,6 @@ import org.springframework.util.ObjectUtils;
  * to continue execution after such an exception, switch this FactoryBean's
  * {@link #setContinueScheduledExecutionAfterException "continueScheduledExecutionAfterException"}
  * property to "true".
- *
- * <p>This class is analogous to the
- * {@link org.springframework.scheduling.timer.TimerFactoryBean}
- * class for the JDK 1.3 {@link java.util.Timer} facility.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -196,8 +192,8 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 	 */
 	protected Runnable getRunnableToSchedule(ScheduledExecutorTask task) {
 		return this.continueScheduledExecutionAfterException
-				? new DelegatingErrorHandlingRunnable(task.getRunnable(), ErrorHandler.LOG_AND_SUPPRESS)
-				: new DelegatingErrorHandlingRunnable(task.getRunnable(), ErrorHandler.LOG_AND_PROPAGATE);
+				? new DelegatingErrorHandlingRunnable(task.getRunnable(), TaskUtils.LOG_AND_SUPPRESS_ERROR_HANDLER)
+				: new DelegatingErrorHandlingRunnable(task.getRunnable(), TaskUtils.LOG_AND_PROPAGATE_ERROR_HANDLER);
 	}
 
 

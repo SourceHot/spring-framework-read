@@ -16,9 +16,9 @@
 
 package org.springframework.jdbc.datasource.embedded;
 
-import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
 /**
  * A builder that provides a fluent API for constructing an embedded database.
@@ -26,22 +26,22 @@ import org.springframework.core.io.ResourceLoader;
  * <p>Usage example:
  * <pre>
  * EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
- * EmbeddedDatabase db = builder.script("schema.sql").script("test-data.sql").build();
+ * EmbeddedDatabase db = builder.setType(H2).addScript("schema.sql").addScript("data.sql").build();
  * db.shutdown();
  * </pre>
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Dave Syer
  * @since 3.0
  */
 public class EmbeddedDatabaseBuilder {
 
 	private final EmbeddedDatabaseFactory databaseFactory;
-	
+
 	private final ResourceDatabasePopulator databasePopulator;
 
 	private final ResourceLoader resourceLoader;
-
 
 	/**
 	 * Create a new embedded database builder.
@@ -51,7 +51,7 @@ public class EmbeddedDatabaseBuilder {
 	}
 
 	/**
-	 * Create a new embedded database builder withfor the given ResourceLoader.
+	 * Create a new embedded database builder with the given ResourceLoader.
 	 * @param resourceLoader the ResourceLoader to delegate to
 	 */
 	public EmbeddedDatabaseBuilder(ResourceLoader resourceLoader) {
@@ -61,14 +61,13 @@ public class EmbeddedDatabaseBuilder {
 		this.resourceLoader = resourceLoader;
 	}
 
-
 	/**
 	 * Sets the name of the embedded database
 	 * Defaults to 'testdb' if not called.
 	 * @param databaseName the database name
 	 * @return this, for fluent call chaining
 	 */
-	public EmbeddedDatabaseBuilder name(String databaseName) {
+	public EmbeddedDatabaseBuilder setName(String databaseName) {
 		this.databaseFactory.setDatabaseName(databaseName);
 		return this;
 	}
@@ -79,48 +78,38 @@ public class EmbeddedDatabaseBuilder {
 	 * @param databaseType the database type
 	 * @return this, for fluent call chaining
 	 */
-	public EmbeddedDatabaseBuilder type(EmbeddedDatabaseType databaseType) {
+	public EmbeddedDatabaseBuilder setType(EmbeddedDatabaseType databaseType) {
 		this.databaseFactory.setDatabaseType(databaseType);
 		return this;
 	}
-	
+
 	/**
 	 * Adds a SQL script to execute to populate the database.
 	 * @param sqlResource the sql resource location
 	 * @return this, for fluent call chaining
 	 */
-	public EmbeddedDatabaseBuilder script(String sqlResource) {
-		this.databasePopulator.addScript(resourceLoader.getResource(sqlResource));
+	public EmbeddedDatabaseBuilder addScript(String sqlResource) {
+		this.databasePopulator.addScript(this.resourceLoader.getResource(sqlResource));
 		return this;
 	}
 
+	/**
+	 * Add default scripts to execute to populate the database.
+	 * The default scripts are <code>schema.sql</code> to create the db schema and <code>data.sql</code> to populate the db with data. 
+	 * @return this, for fluent call chaining
+	 */
+	public EmbeddedDatabaseBuilder addDefaultScripts() {
+		addScript("schema.sql");
+		addScript("data.sql");
+		return this;
+	}
+	
 	/**
 	 * Build the embedded database.
 	 * @return the embedded database
 	 */
 	public EmbeddedDatabase build() {
 		return this.databaseFactory.getDatabase();
-	}
-
-
-	/**
-	 * Factory method that builds a default EmbeddedDatabase instance.
-	 * The default instance is HSQL with a schema created from "classpath:schema.sql"
-	 * and test-data loaded from "classpath:test-data.sql".
-	 * @return an embedded database
-	 */
-	public static EmbeddedDatabase buildDefault() {
-		return new EmbeddedDatabaseBuilder().script("schema.sql").script("test-data.sql").build();
-	}
-
-	/**
-	 * Factory method that creates a EmbeddedDatabaseBuilder that loads SQL resources
-	 * relative to the provided class.
-	 * @param clazz the class to load relative to
-	 * @return the embedded database builder
-	 */
-	public static EmbeddedDatabaseBuilder relativeTo(Class clazz) {
-		return new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(clazz));
 	}
 
 }

@@ -286,7 +286,7 @@ public final class XmlBeanFactoryTests {
 		}
 	}
 
-	public @Test void testSingletonInheritanceFromParentFactorySingleton() throws Exception {
+	public @Test void testInheritanceFromParentFactoryPrototype() throws Exception {
 		XmlBeanFactory parent = new XmlBeanFactory(PARENT_CONTEXT);
 		XmlBeanFactory child = new XmlBeanFactory(CHILD_CONTEXT, parent);
 		assertEquals(TestBean.class, child.getType("inheritsFromParentFactory"));
@@ -296,7 +296,7 @@ public final class XmlBeanFactoryTests {
 		// Age property is inherited from bean in parent factory
 		assertTrue(inherits.getAge() == 1);
 		TestBean inherits2 = (TestBean) child.getBean("inheritsFromParentFactory");
-		assertTrue(inherits2 == inherits);
+		assertFalse(inherits2 == inherits);
 	}
 
 	public @Test void testInheritanceWithDifferentClass() throws Exception {
@@ -420,7 +420,7 @@ public final class XmlBeanFactoryTests {
 		// Age property is inherited from bean in parent factory
 		assertTrue(inherits.getAge() == 1);
 		TestBean inherits2 = (TestBean) child.getBean("inheritedTestBean");
-		assertTrue(inherits2 == inherits);
+		assertTrue(inherits2 != inherits);
 	}
 
 	/**
@@ -763,7 +763,7 @@ public final class XmlBeanFactoryTests {
 		XmlBeanFactory xbf = new XmlBeanFactory(AUTOWIRE_CONTEXT);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "kerry");
+		pvs.add("name", "kerry");
 		lbf.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class, pvs));
 		xbf.setParentBeanFactory(lbf);
 		doTestAutowire(xbf);
@@ -955,19 +955,24 @@ public final class XmlBeanFactoryTests {
 		assertEquals(kerry2, rod16.getSpouse1());
 		assertEquals(kerry1, rod16.getSpouse2());
 		assertEquals(29, rod16.getAge());
+
+		ConstructorDependenciesBean rod17 = (ConstructorDependenciesBean) xbf.getBean("rod17");
+		assertEquals(kerry1, rod17.getSpouse1());
+		assertEquals(kerry2, rod17.getSpouse2());
+		assertEquals(29, rod17.getAge());
 	}
 
 	public @Test void testPrototypeWithExplicitArguments() {
 		XmlBeanFactory xbf = new XmlBeanFactory(CONSTRUCTOR_ARG_CONTEXT);
-		SimpleConstructorArgBean cd1 = (SimpleConstructorArgBean) xbf.getBean("rod17");
+		SimpleConstructorArgBean cd1 = (SimpleConstructorArgBean) xbf.getBean("rod18");
 		assertEquals(0, cd1.getAge());
-		SimpleConstructorArgBean cd2 = (SimpleConstructorArgBean) xbf.getBean("rod17", 98);
+		SimpleConstructorArgBean cd2 = (SimpleConstructorArgBean) xbf.getBean("rod18", 98);
 		assertEquals(98, cd2.getAge());
-		SimpleConstructorArgBean cd3 = (SimpleConstructorArgBean) xbf.getBean("rod17", "myName");
+		SimpleConstructorArgBean cd3 = (SimpleConstructorArgBean) xbf.getBean("rod18", "myName");
 		assertEquals("myName", cd3.getName());
-		SimpleConstructorArgBean cd4 = (SimpleConstructorArgBean) xbf.getBean("rod17");
+		SimpleConstructorArgBean cd4 = (SimpleConstructorArgBean) xbf.getBean("rod18");
 		assertEquals(0, cd4.getAge());
-		SimpleConstructorArgBean cd5 = (SimpleConstructorArgBean) xbf.getBean("rod17", 97);
+		SimpleConstructorArgBean cd5 = (SimpleConstructorArgBean) xbf.getBean("rod18", 97);
 		assertEquals(97, cd5.getAge());
 	}
 

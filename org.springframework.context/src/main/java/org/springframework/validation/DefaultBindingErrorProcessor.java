@@ -18,6 +18,8 @@ package org.springframework.validation;
 
 import org.springframework.beans.PropertyAccessException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Default {@link BindingErrorProcessor} implementation.
@@ -65,16 +67,21 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 		String field = ex.getPropertyName();
 		String[] codes = bindingResult.resolveMessageCodes(ex.getErrorCode(), field);
 		Object[] arguments = getArgumentsForBindError(bindingResult.getObjectName(), field);
+		Object rejectedValue = ex.getValue();
+		if (rejectedValue != null && rejectedValue.getClass().isArray()) {
+			rejectedValue = StringUtils.arrayToCommaDelimitedString(ObjectUtils.toObjectArray(rejectedValue));
+		}
 		bindingResult.addError(new FieldError(
-				bindingResult.getObjectName(), field, ex.getValue(), true,
+				bindingResult.getObjectName(), field, rejectedValue, true,
 				codes, arguments, ex.getLocalizedMessage()));
 	}
 
 	/**
 	 * Return FieldError arguments for a binding error on the given field.
-	 * Invoked for each missing required fields and each type mismatch.
-	 * <p>Default implementation returns a DefaultMessageSourceResolvable
-	 * with "objectName.field" and "field" as codes.
+	 * Invoked for each missing required field and each type mismatch.
+	 * <p>The default implementation returns a single argument of type
+	 * DefaultMessageSourceResolvable, with "objectName.field" and "field" as codes.
+	 * @param objectName the name of the target object
 	 * @param field the field that caused the binding error
 	 * @return the Object array that represents the FieldError arguments
 	 * @see org.springframework.validation.FieldError#getArguments

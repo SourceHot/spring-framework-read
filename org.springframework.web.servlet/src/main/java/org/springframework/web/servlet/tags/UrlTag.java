@@ -18,7 +18,6 @@ package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,10 +27,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
+import org.springframework.web.util.UriUtils;
 
 /**
  * JSP tag for creating URLs. Modeled after the JSTL c:url tag with backwards
@@ -41,7 +42,7 @@ import org.springframework.web.util.TagUtils;
  * <ul>
  * <li>URL encoded template URI variables</li>
  * <li>HTML/XML escaping of URLs</li>
- * <li>JavaScipt escaping of URLs</li>
+ * <li>JavaScript escaping of URLs</li>
  * </ul>
  * 
  * <p>Template URI variables are indicated in the {@link #setValue(String) 'value'}
@@ -65,7 +66,7 @@ import org.springframework.web.util.TagUtils;
  *   &lt;spring:param name="variableName" value="more than JSTL c:url" /&gt;
  * &lt;/spring:url&gt;</pre>
  * Results in:
- * <code>/currentApplicationContext/url/path/more+than+JSTL+c%3Aurl</code>
+ * <code>/currentApplicationContext/url/path/more%20than%20JSTL%20c%3Aurl</code>
  * 
  * @author Scott Andrews
  * @since 3.0
@@ -232,25 +233,29 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 * @param includeQueryStringDelimiter true if the query string should start
 	 * with a '?' instead of '&'
 	 * @return the query string
-	 * @throws JspException
 	 */
-	protected String createQueryString(
-			List<Param> params, Set<String> usedParams, boolean includeQueryStringDelimiter)
+	protected String createQueryString(List<Param> params, Set<String> usedParams, boolean includeQueryStringDelimiter)
 			throws JspException {
 
+		String encoding = pageContext.getResponse().getCharacterEncoding();
 		StringBuilder qs = new StringBuilder();
 		for (Param param : params) {
-			if (!usedParams.contains(param.getName()) && param.getName() != null && !"".equals(param.getName())) {
+			if (!usedParams.contains(param.getName()) && StringUtils.hasLength(param.getName())) {
 				if (includeQueryStringDelimiter && qs.length() == 0) {
 					qs.append("?");
 				}
 				else {
 					qs.append("&");
 				}
-				qs.append(urlEncode(param.getName()));
-				if (param.getValue() != null) {
-					qs.append("=");
-					qs.append(urlEncode(param.getValue()));
+				try {
+					qs.append(UriUtils.encodeQueryParam(param.getName(), encoding));
+					if (param.getValue() != null) {
+						qs.append("=");
+						qs.append(UriUtils.encodeQueryParam(param.getValue(), encoding));
+					}
+				}
+				catch (UnsupportedEncodingException ex) {
+					throw new JspException(ex);
 				}
 			}
 		}
@@ -265,39 +270,25 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 * @param params parameters used to replace template markers
 	 * @param usedParams set of template parameter names that have been replaced
 	 * @return the URL with template parameters replaced
-	 * @throws JspException
 	 */
 	protected String replaceUriTemplateParams(String uri, List<Param> params, Set<String> usedParams)
 			throws JspException {
 
+		String encoding = pageContext.getResponse().getCharacterEncoding();
 		for (Param param : params) {
 			String template = URL_TEMPLATE_DELIMITER_PREFIX + param.getName() + URL_TEMPLATE_DELIMITER_SUFFIX;
 			if (uri.contains(template)) {
 				usedParams.add(param.getName());
-				uri = uri.replace(template, urlEncode(param.getValue()));
+				try {
+					uri = uri.replace(template, UriUtils.encodePath(param.getValue(), encoding));
+				}
+				catch (UnsupportedEncodingException ex) {
+					throw new JspException(ex);
+				}
 			}
 		}
 		return uri;
 	}
-
-	/**
-	 * URL-encode the providedSstring using the character encoding for the response.
-	 * @param value the value to encode
-	 * @return the URL encoded value
-	 * @throws JspException if the character encoding is invalid
-	 */
-	protected String urlEncode(String value) throws JspException {
-		if (value == null) {
-			return null;
-		}
-		try {
-			return URLEncoder.encode(value, pageContext.getResponse().getCharacterEncoding());
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw new JspException(ex);
-		}
-	}
-
 
 	/**
 	 * Internal enum that classifies URLs by type.

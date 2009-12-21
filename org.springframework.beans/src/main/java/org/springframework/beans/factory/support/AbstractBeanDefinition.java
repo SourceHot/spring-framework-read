@@ -33,6 +33,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Base class for concrete, full-fledged
@@ -53,6 +54,13 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccessor
 		implements BeanDefinition, Cloneable {
+
+	/**
+	 * Constant for the default scope name: "", equivalent to singleton status
+	 * but to be overridden from a parent bean definition (if applicable).
+	 */
+	public static final String SCOPE_DEFAULT = "";
+
 
 	/**
 	 * Constant that indicates no autowiring at all.
@@ -118,7 +126,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private volatile Object beanClass;
 
-	private String scope = SCOPE_SINGLETON;
+	private String scope = SCOPE_DEFAULT;
 
 	private boolean singleton = true;
 
@@ -170,6 +178,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	private String description;
 
 	private Resource resource;
+
 
 	/**
 	 * Create a new AbstractBeanDefinition with default settings.
@@ -272,16 +281,18 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * </ul>
 	 */
 	public void overrideFrom(BeanDefinition other) {
-		if (other.getBeanClassName() != null) {
+		if (StringUtils.hasLength(other.getBeanClassName())) {
 			setBeanClassName(other.getBeanClassName());
 		}
-		if (other.getFactoryBeanName() != null) {
+		if (StringUtils.hasLength(other.getFactoryBeanName())) {
 			setFactoryBeanName(other.getFactoryBeanName());
 		}
-		if (other.getFactoryMethodName() != null) {
+		if (StringUtils.hasLength(other.getFactoryMethodName())) {
 			setFactoryMethodName(other.getFactoryMethodName());
 		}
-		setScope(other.getScope());
+		if (StringUtils.hasLength(other.getScope())) {
+			setScope(other.getScope());
+		}
 		setAbstract(other.isAbstract());
 		setLazyInit(other.isLazyInit());
 		setRole(other.getRole());
@@ -303,11 +314,11 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setDependsOn(otherAbd.getDependsOn());
 			setNonPublicAccessAllowed(otherAbd.isNonPublicAccessAllowed());
 			setLenientConstructorResolution(otherAbd.isLenientConstructorResolution());
-			if (otherAbd.getInitMethodName() != null) {
+			if (StringUtils.hasLength(otherAbd.getInitMethodName())) {
 				setInitMethodName(otherAbd.getInitMethodName());
 				setEnforceInitMethod(otherAbd.isEnforceInitMethod());
 			}
-			if (otherAbd.getDestroyMethodName() != null) {
+			if (StringUtils.hasLength(otherAbd.getDestroyMethodName())) {
 				setDestroyMethodName(otherAbd.getDestroyMethodName());
 				setEnforceDestroyMethod(otherAbd.isEnforceDestroyMethod());
 			}
@@ -402,15 +413,17 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Set the name of the target scope for the bean.
-	 * <p>Default is "singleton"; the out-of-the-box alternative is "prototype".
-	 * Extended bean factories might support further scopes.
+	 * <p>Default is singleton status, although this is only applied once
+	 * a bean definition becomes active in the containing factory. A bean
+	 * definition may eventually inherit its scope from a parent bean definitionFor this
+	 * reason, the default scope name is empty (empty String), with
+	 * singleton status being assumed until a resolved scope will be set.
 	 * @see #SCOPE_SINGLETON
 	 * @see #SCOPE_PROTOTYPE
 	 */
 	public void setScope(String scope) {
-		Assert.notNull(scope, "Scope must not be null");
 		this.scope = scope;
-		this.singleton = SCOPE_SINGLETON.equals(scope);
+		this.singleton = SCOPE_SINGLETON.equals(scope) || SCOPE_DEFAULT.equals(scope);
 		this.prototype = SCOPE_PROTOTYPE.equals(scope);
 	}
 

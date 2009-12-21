@@ -28,7 +28,7 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
 /**
  * Base class for {@link org.springframework.context.ApplicationContext}
- * implementations which are supposed to support multiple refreshs,
+ * implementations which are supposed to support multiple calls to {@literal refresh},
  * creating a new internal bean factory instance every time.
  * Typically (but not necessarily), such a context will be driven by
  * a set of config locations to load bean definitions from.
@@ -48,7 +48,9 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
  * <p>Concrete standalone subclasses of this base class, reading in a
  * specific bean definition format, are {@link ClassPathXmlApplicationContext}
  * and {@link FileSystemXmlApplicationContext}, which both derive from the
- * common {@link AbstractXmlApplicationContext} base class.
+ * common {@link AbstractXmlApplicationContext} base class;
+ * {@link org.springframework.context.annotation.AnnotationConfigApplicationContext}
+ * supports {@literal @Configuration}-annotated classes as a source of bean definitions.
  *
  * @author Juergen Hoeller
  * @since 1.1.3
@@ -58,6 +60,7 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
  * @see AbstractXmlApplicationContext
  * @see ClassPathXmlApplicationContext
  * @see FileSystemXmlApplicationContext
+ * @see org.springframework.context.annotation.AnnotationConfigApplicationContext
  */
 public abstract class AbstractRefreshableApplicationContext extends AbstractApplicationContext {
 
@@ -130,7 +133,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 			}
 		}
 		catch (IOException ex) {
-			throw new ApplicationContextException("I/O error parsing XML document for " + getDisplayName(), ex);
+			throw new ApplicationContextException("I/O error parsing bean definition source for " + getDisplayName(), ex);
 		}
 	}
 
@@ -220,12 +223,12 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * Load bean definitions into the given bean factory, typically through
 	 * delegating to one or more bean definition readers.
 	 * @param beanFactory the bean factory to load bean definitions into
-	 * @throws IOException if loading of bean definition files failed
 	 * @throws BeansException if parsing of the bean definitions failed
+	 * @throws IOException if loading of bean definition files failed
 	 * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
 	 */
 	protected abstract void loadBeanDefinitions(DefaultListableBeanFactory beanFactory)
-			throws IOException, BeansException;
+			throws BeansException, IOException;
 
 }

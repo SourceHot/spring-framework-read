@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 						"Listener container 'resource-adapter' attribute contains empty value.", containerEle);
 			}
 			else {
-				containerDef.getPropertyValues().addPropertyValue("resourceAdapter",
+				containerDef.getPropertyValues().add("resourceAdapter",
 						new RuntimeBeanReference(resourceAdapterBeanName));
 			}
 		}
@@ -62,11 +62,11 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 						"'destination-resolver', not both. If you define a dedicated JmsActivationSpecFactory bean, " +
 						"specify the custom DestinationResolver there (if possible).", containerEle);
 			}
-			containerDef.getPropertyValues().addPropertyValue("activationSpecFactory",
+			containerDef.getPropertyValues().add("activationSpecFactory",
 					new RuntimeBeanReference(activationSpecFactoryBeanName));
 		}
 		if (StringUtils.hasText(destinationResolverBeanName)) {
-			containerDef.getPropertyValues().addPropertyValue("destinationResolver",
+			containerDef.getPropertyValues().add("destinationResolver",
 					new RuntimeBeanReference(destinationResolverBeanName));
 		}
 
@@ -79,26 +79,31 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 
 		Integer acknowledgeMode = parseAcknowledgeMode(containerEle, parserContext);
 		if (acknowledgeMode != null) {
-			configDef.getPropertyValues().addPropertyValue("acknowledgeMode", acknowledgeMode);
+			configDef.getPropertyValues().add("acknowledgeMode", acknowledgeMode);
 		}
 
 		String transactionManagerBeanName = containerEle.getAttribute(TRANSACTION_MANAGER_ATTRIBUTE);
 		if (StringUtils.hasText(transactionManagerBeanName)) {
-			containerDef.getPropertyValues().addPropertyValue("transactionManager",
+			containerDef.getPropertyValues().add("transactionManager",
 					new RuntimeBeanReference(transactionManagerBeanName));
 		}
 
 		int[] concurrency = parseConcurrency(containerEle, parserContext);
 		if (concurrency != null) {
-			configDef.getPropertyValues().addPropertyValue("maxConcurrency", concurrency[1]);
+			configDef.getPropertyValues().add("maxConcurrency", concurrency[1]);
+		}
+
+		String phase = containerEle.getAttribute(PHASE_ATTRIBUTE);
+		if (StringUtils.hasText(phase)) {
+			containerDef.getPropertyValues().add("phase", phase);
 		}
 
 		String prefetch = containerEle.getAttribute(PREFETCH_ATTRIBUTE);
 		if (StringUtils.hasText(prefetch)) {
-			configDef.getPropertyValues().addPropertyValue("prefetchSize", new Integer(prefetch));
+			configDef.getPropertyValues().add("prefetchSize", new Integer(prefetch));
 		}
 
-		containerDef.getPropertyValues().addPropertyValue("activationSpecConfig", configDef);
+		containerDef.getPropertyValues().add("activationSpecConfig", configDef);
 
 		return containerDef;
 	}

@@ -24,6 +24,9 @@
 				exclude-result-prefixes="xslthl"
 				version='1.0'>
 
+	<xsl:param name="chunk.section.depth">'5'</xsl:param>
+	<xsl:param name="use.id.as.filename" select="1"/>
+
 <!-- Extensions -->
 	<xsl:param name="use.extensions">1</xsl:param>
 	<xsl:param name="tablecolumns.extension">0</xsl:param>

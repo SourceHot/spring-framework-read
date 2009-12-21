@@ -22,9 +22,10 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 
 /**
- * A very simple hardcoded implementation of the Expression interface that represents a string literal. It is used with
- * CompositeStringExpression when representing a template expression which is made up of pieces - some being real
- * expressions to be handled by an EL implementation like Spel, and some being just textual elements.
+ * A very simple hardcoded implementation of the Expression interface that represents a string literal.
+ * It is used with CompositeStringExpression when representing a template expression which is made up
+ * of pieces - some being real expressions to be handled by an EL implementation like Spel, and some
+ * being just textual elements.
  *
  * @author Andy Clement
  * @since 3.0
@@ -49,6 +50,10 @@ public class LiteralExpression implements Expression {
 	}
 
 	public String getValue(EvaluationContext context) {
+		return this.literalValue;
+	}
+	
+	public String getValue(Object rootObject) {
 		return this.literalValue;
 	}
 
@@ -84,6 +89,52 @@ public class LiteralExpression implements Expression {
 
 	public Class getValueType() {
 		return String.class;
+	}
+
+	public <T> T getValue(Object rootObject, Class<T> desiredResultType) throws EvaluationException {
+		Object value = getValue(rootObject);
+		return ExpressionUtils.convert(null, value, desiredResultType);
+	}
+
+	public String getValue(EvaluationContext context, Object rootObject) throws EvaluationException {
+		return this.literalValue;
+	}
+
+	public <T> T getValue(EvaluationContext context, Object rootObject, Class<T> desiredResultType) throws EvaluationException {
+		Object value = getValue(context, rootObject);
+		return ExpressionUtils.convert(null, value, desiredResultType);
+	}
+
+	public Class getValueType(Object rootObject) throws EvaluationException {
+		return String.class;
+	}
+
+	public Class getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
+		return String.class;
+	}
+
+	public TypeDescriptor getValueTypeDescriptor(Object rootObject) throws EvaluationException {
+		return TypeDescriptor.valueOf(String.class);
+	}
+
+	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context, Object rootObject) throws EvaluationException {
+		return TypeDescriptor.valueOf(String.class);
+	}
+
+	public boolean isWritable(EvaluationContext context, Object rootObject) throws EvaluationException {
+		return false;
+	}
+
+	public void setValue(EvaluationContext context, Object rootObject, Object value) throws EvaluationException {
+		throw new EvaluationException(literalValue, "Cannot call setValue() on a LiteralExpression");
+	}
+
+	public boolean isWritable(Object rootObject) throws EvaluationException {
+		return false;
+	}
+
+	public void setValue(Object rootObject, Object value) throws EvaluationException {
+		throw new EvaluationException(literalValue, "Cannot call setValue() on a LiteralExpression");
 	}
 
 }

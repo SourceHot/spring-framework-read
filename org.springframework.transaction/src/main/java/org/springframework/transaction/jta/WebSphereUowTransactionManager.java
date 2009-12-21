@@ -268,7 +268,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 		if (debug) {
 			logger.debug("Creating new transaction with name [" + definition.getName() + "]: " + definition);
 		}
-		SuspendedResourcesHolder suspendedResources = (existingTx && !joinTx ? suspend(null) : null);
+		SuspendedResourcesHolder suspendedResources = (!joinTx ? suspend(null) : null);
 		try {
 			if (definition.getTimeout() > TransactionDefinition.TIMEOUT_DEFAULT) {
 				this.uowManager.setUOWTimeout(uowType, definition.getTimeout());
@@ -330,7 +330,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 		}
 
 		public void run() {
-			DefaultTransactionStatus status = newTransactionStatus(
+			DefaultTransactionStatus status = prepareTransactionStatus(
 					this.definition, (this.actualTransaction ? this : null),
 					this.newTransaction, this.newSynchronization, this.debug, null);
 			try {

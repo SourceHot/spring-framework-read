@@ -132,7 +132,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	void setFactoryMethodName(String factoryMethodName);
 
 	/**
-	 * Return the name of the current target scope for this bean.
+	 * Return the name of the current target scope for this bean,
+	 * or <code>null</code> if not known yet.
 	 */
 	String getScope();
 
@@ -210,8 +211,16 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Return whether this a <b>Singleton</b>, with a single, shared instance
 	 * returned on all calls.
+	 * @see #SCOPE_SINGLETON
 	 */
 	boolean isSingleton();
+
+	/**
+	 * Return whether this a <b>Prototype</b>, with an independent instance
+	 * returned for each call.
+	 * @see #SCOPE_PROTOTYPE
+	 */
+	boolean isPrototype();
 
 	/**
 	 * Return whether this bean is "abstract", that is, not meant to be instantiated.

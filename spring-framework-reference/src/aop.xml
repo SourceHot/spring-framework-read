@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
- "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+ "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 
 <chapter id="aop">
   <title>Aspect Oriented Programming with Spring</title>
@@ -891,6 +891,35 @@ public class SystemArchitecture {
             <programlisting language="java">bean(*Service)</programlisting>
           </listitem>
         </itemizedlist>
+      </section>
+      <section id="writing-good-pointcuts">
+        <title>Writing good pointcuts</title>
+
+        <para>During compilation, AspectJ processes pointcuts in order to try and optimize matching performance. Examining code 
+        and determining if each join point matches (statically or dynamically) a given pointcut is a costly process. (A dynamic 
+        match means the match cannot be fully determined from static analysis and a test will be placed in the code to 
+        determine if there is an actual match when the code is running). On first encountering a pointcut declaration, 
+        AspectJ will rewrite it into an optimal form for the matching process. What does this mean? Basically pointcuts 
+        are rewritten in DNF (Disjunctive Normal Form) and the components of the pointcut are sorted such that those 
+        components that are cheaper to evaluate are checked first. This means you do not have to worry about understanding 
+        the performance of various pointcut designators and may supply them in any order in a pointcut declaration.</para>
+        
+        <para>However, AspectJ can only work with what it is told, and for optimal performance of matching you should 
+        think about what they are trying to achieve and narrow the search space for matches as much as possible in the 
+        definition. The existing designators naturally fall into one of three groups: kinded, scoping and context:</para>
+        <itemizedlist>
+	        <listitem><para>Kinded designators are those which select a particular kind of join point. For example: execution, get, set, call, handler</para></listitem>
+    	    <listitem><para>Scoping designators are those which select a group of join points of interest (of probably many kinds). For example: within, withincode</para></listitem>
+        	<listitem><para>Contextual designators are those that match (and optionally bind) based on context. For example: this, target, @annotation</para></listitem>
+        </itemizedlist>
+        
+        <para>A well written pointcut should try and include at least the first two types (kinded and scoping), whilst 
+        the contextual designators may be included if wishing to match based on join point context, or bind that context 
+        for use in the advice. Supplying either just a kinded designator or just a contextual designator will work but 
+        could affect weaving performance (time and memory used) due to all the extra processing and analysis. Scoping 
+        designators are very fast to match and their usage means AspectJ can very quickly dismiss groups of 
+        join points that should not be further processed - that is why a good pointcut should always include 
+        one if possible.</para> 
       </section>
     </section>
 
@@ -3085,8 +3114,9 @@ public class Account {
       environments</link>, this support enables load-time weaving
       <emphasis>without making any modifications to the application server's
       launch script</emphasis> that will be needed to add
-      -javaagent:path/to/aspectjweaver.jar or (as we describe later in this
-      section) -javaagent:path/to/spring-agent.jar. Developers simply modify
+      <literal>-javaagent:path/to/aspectjweaver.jar</literal> or (as we describe later in this
+      section) <literal>-javaagent:path/to/spring-instrument.jar</literal> (previously named
+      <literal>spring-agent.jar</literal>). Developers simply modify
       one or more files that form the application context to enable load-time
       weaving instead of relying on administrators who typically are in charge
       of the deployment configuration such as the launch script.</para>
@@ -3183,8 +3213,10 @@ public class ProfilingAspect {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/context 
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
 
     <lineannotation>&lt;!-- a service object; we will be profiling its methods --&gt;</lineannotation>
     &lt;bean id="entitlementCalculationService"
@@ -3226,7 +3258,7 @@ public final class Main {
         (supplied with Spring) to switch on the LTW. This is the command line
         we will use to run the above <classname>Main</classname> class:</para>
 
-        <programlisting>java -javaagent:C:/projects/foo/lib/global/spring-agent.jar foo.Main</programlisting>
+        <programlisting>java -javaagent:C:/projects/foo/lib/global/spring-instrument.jar foo.Main</programlisting>
 
         <para>The '<literal>-javaagent</literal>' is a Java 5+ flag for
         specifying and enabling <ulink
@@ -3234,7 +3266,8 @@ public final class Main {
         to instrument programs running on the JVM</ulink>. The Spring
         Framework ships with such an agent, the
         <classname>InstrumentationSavingAgent</classname>, which is packaged
-        in the <filename class="libraryfile">spring-agent.jar</filename> that
+        in the <filename class="libraryfile">spring-instrument.jar</filename>
+		that
         was supplied as the value of the <literal>-javaagent</literal>
         argument in the above example.</para>
 
@@ -3335,8 +3368,8 @@ public final class Main {
 
         <orderedlist>
           <listitem>
-            <para><filename class="libraryfile">spring.jar</filename> (version
-            2.5 or later)</para>
+            <para><filename class="libraryfile">spring-aop.jar</filename> (version
+            2.5 or later, plus all mandatory dependencies)</para>
           </listitem>
 
           <listitem>
@@ -3357,7 +3390,7 @@ public final class Main {
         <orderedlist>
           <listitem>
             <para><filename
-            class="libraryfile">spring-agent.jar</filename></para>
+            class="libraryfile">spring-instrument.jar</filename></para>
           </listitem>
         </orderedlist>
       </section>
@@ -3408,8 +3441,10 @@ public final class Main {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
 
     &lt;context:load-time-weaver/&gt;
 
@@ -3473,7 +3508,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
                 <entry><para>JVM started with Spring
                 <classname>InstrumentationSavingAgent</classname></para>
                 <para><emphasis><literal>(java
-                -javaagent:path/to/spring-agent.jar)</literal></emphasis></para></entry>
+                -javaagent:path/to/spring-instrument.jar)</literal></emphasis></para></entry>
                 <entry><para><classname>InstrumentationLoadTimeWeaver</classname></para></entry>
               </row>
 
@@ -3501,8 +3536,10 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
 
     &lt;context:load-time-weaver
             <emphasis role="bold">weaver-class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"</emphasis>/&gt;
@@ -3585,7 +3622,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
           (standalone as well as application server based) through the use of
           the Spring-provided instrumentation agent. To do so, start
           the VM by by specifying the
-          <literal>-javaagent:path/to/spring-agent.jar</literal> option.
+          <literal>-javaagent:path/to/spring-instrument.jar</literal> option.
           Note that this requires modification of the VM launch script
           which may prevent you from using this in application server
           environments (depending on your operation policies).</para>
@@ -3600,12 +3637,13 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
           looks as follows, to be included either in Tomcat's central
           <literal>server.xml</literal> file or in an application-specific
           <literal>META-INF/context.xml</literal> file within the WAR root.
-          Spring's <literal>spring-tomcat-weaver.jar</literal> needs to be
+          Spring's <literal>spring-instrument-tomcat.jar</literal> needs to be
           included in Tomcat's common lib directory in order to make this
           setup work.</para>
 
           <programlisting language="xml">&lt;Context path="/myWebApp" docBase="/my/webApp/location"&gt;
-    &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
+    &lt;Loader
+        loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"
             useSystemClassLoaderAsParent="false"/&gt;
 &lt;/Context&gt;
 </programlisting>
@@ -3636,7 +3674,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
           You can enable LTW by simply activating <literal>context:load-time-weaver</literal>
           as described earlier. Specifically, you do <emphasis>not</emphasis>
           need to modify the launch script to add
-          <literal>-javaagent:path/to/spring-agent.jar</literal>.</para>
+          <literal>-javaagent:path/to/spring-instrument.jar</literal>.</para>
 
           <para>GlassFish provides an instrumentation-capable ClassLoader as well,
           but only in its EAR environment. For GlassFish web applications,

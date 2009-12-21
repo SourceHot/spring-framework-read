@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.context.support;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.FileNotFoundException;
 
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.MutablePropertyValues;
@@ -30,7 +30,6 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.config.PropertyResourceConfigurer;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
 
@@ -40,27 +39,19 @@ import org.springframework.util.StringUtils;
  * that contains ${..} tokens in its 'location' property requires being tested through an ApplicationContext
  * as opposed to using only a BeanFactory during testing.
  * 
- * @see org.springframework.beans.factory.config.PropertyResourceConfigurerTests;
- * 
  * @author Chris Beams
+ * @see org.springframework.beans.factory.config.PropertyResourceConfigurerTests
  */
 public class PropertyResourceConfigurerIntegrationTests {
 	
-	private DefaultListableBeanFactory factory;
-	
-	@Before
-	public void setUp() {
-		factory = new DefaultListableBeanFactory();
-	}
-
 	@Test
 	public void testPropertyPlaceholderConfigurerWithSystemPropertyInLocation() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		ac.registerSingleton("tb", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("location", "${user.dir}/test");
+		pvs.add("location", "${user.dir}/test");
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();
@@ -82,10 +73,10 @@ public class PropertyResourceConfigurerIntegrationTests {
 	public void testPropertyPlaceholderConfigurerWithSystemPropertiesInLocation() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		ac.registerSingleton("tb", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("location", "${user.dir}/test/${user.dir}");
+		pvs.add("location", "${user.dir}/test/${user.dir}");
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();
@@ -102,8 +93,8 @@ public class PropertyResourceConfigurerIntegrationTests {
 			/* the above hack doesn't work since the exception message is created without
 			   the leading / stripped so the test fails.  Changed 17/11/04. DD */
 			//assertTrue(ex.getMessage().indexOf(userDir + "/test/" + userDir) != -1);		
-			assertTrue(ex.getMessage().indexOf(userDir + "/test/" + userDir) != -1 ||
-			    ex.getMessage().indexOf(userDir + "/test//" + userDir) != -1);
+			assertTrue(ex.getMessage().contains(userDir + "/test/" + userDir) ||
+					ex.getMessage().contains(userDir + "/test//" + userDir));
 		}
 	}
 
@@ -111,19 +102,18 @@ public class PropertyResourceConfigurerIntegrationTests {
 	public void testPropertyPlaceholderConfigurerWithUnresolvableSystemPropertiesInLocation() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		ac.registerSingleton("tb", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("location", "${myprop}/test/${myprop}");
+		pvs.add("location", "${myprop}/test/${myprop}");
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();
-			fail("Should have thrown BeanDefinitionStoreException");
+			fail("Should have thrown BeanInitializationException");
 		}
 		catch (BeanInitializationException ex) {
 			// expected
-			assertTrue(ex.getCause() instanceof FileNotFoundException);
-			assertTrue(ex.getMessage().indexOf("myprop") != -1);
+			assertTrue(ex.getMessage().contains("myprop"));
 		}
 	}
 
@@ -131,10 +121,10 @@ public class PropertyResourceConfigurerIntegrationTests {
 	public void testPropertyPlaceholderConfigurerWithMultiLevelCircularReference() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "name${var}");
+		pvs.add("name", "name${var}");
 		ac.registerSingleton("tb1", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "var=${m}var\nm=${var2}\nvar2=${var}");
+		pvs.add("properties", "var=${m}var\nm=${var2}\nvar2=${var}");
 		ac.registerSingleton("configurer1", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();
@@ -149,10 +139,10 @@ public class PropertyResourceConfigurerIntegrationTests {
 	public void testPropertyPlaceholderConfigurerWithNestedCircularReference() {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("name", "name${var}");
+		pvs.add("name", "name${var}");
 		ac.registerSingleton("tb1", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "var=${m}var\nm=${var2}\nvar2=${m}");
+		pvs.add("properties", "var=${m}var\nm=${var2}\nvar2=${m}");
 		ac.registerSingleton("configurer1", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();

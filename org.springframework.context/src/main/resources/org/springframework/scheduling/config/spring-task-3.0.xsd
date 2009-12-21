@@ -20,7 +20,7 @@
 	<xsd:element name="annotation-driven">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Enables the detection of @Async annotations on any Spring-managed object. If present,
+	Enables the detection of @Async and @Scheduled annotations on any Spring-managed object. If present,
 	a proxy will be generated for executing the annotated methods asynchronously.
 			]]></xsd:documentation>
 		</xsd:annotation>
@@ -62,7 +62,7 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="size" type="xsd:string" use="optional">
+			<xsd:attribute name="pool-size" type="xsd:string" use="optional">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The size of the ScheduledExecutorService's thread pool. The default is 1.
@@ -84,11 +84,14 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The bean name for the generated ThreadPoolTaskExecutor instance.
-	It will also be used as the default thread name prefix.
+	This value will also be used as the thread name prefix which is why it is
+	required even when defining the executor as an inner bean: The executor
+	won't be directly accessible then but will nevertheless use the specified
+	id as the thread name prefix of the threads that it manages.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="size" type="xsd:string" use="optional">
+			<xsd:attribute name="pool-size" type="xsd:string" use="optional">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The size of the executor's thread pool as either a single value or a range

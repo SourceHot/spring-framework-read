@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
-"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="jdbc">
   <title>Data access with JDBC</title>
 
@@ -9,7 +9,7 @@
 
     <para>The value-add provided by the Spring Framework JDBC abstraction is
     perhaps best shown by the sequence of actions outlined in the table
-    bellow. The table shows what actions Spring will take care of and which
+    below. The table shows what actions Spring will take care of and which
     actions are the responsibility of you, the application developer.<!--Is this sequence correct, as far as what developer does and doesn't do? Does it adhere to info in the rest of the chapter?
 --><!--How does JDBC know what connection parameters are if a human does not at some point define them?--><!--TR: OK. I have rewritten this as a table indicating who has what responsibility. --></para>
 
@@ -2624,7 +2624,7 @@ clobReader.close();</programlisting>
 
       <para>The SQL standard allows for selecting rows based on an expression
       that includes a variable list of values. A typical example would be
-      "select * from <code>T_ACTOR where id in (1, 2, 3)</code>. This variable
+      <code>select * from T_ACTOR where id in (1, 2, 3)</code>. This variable
       list is not directly supported for prepared statements by the JDBC
       standard; you cannot declare a variable number of placeholders. You need
       a number of variations with the desired number of placeholders prepared,
@@ -2648,8 +2648,8 @@ clobReader.close();</programlisting>
       <para>In addition to the primitive values in the value list, you can
       create a <classname>java.util.List</classname> of object arrays. This
       list would support multiple expressions defined for the <code>in</code>
-      clause such as "<symbol>select * from T_ACTOR where (id, last_name) in
-      ((1, 'Johnson'), (2, 'Harrop'))</symbol>". <!--Is the preceding punctuated correctly? I'm not sure what to put in code font. TR: OK.-->This
+      clause such as <code>select * from T_ACTOR where (id, last_name) in
+      ((1, 'Johnson'), (2, 'Harrop'))</code>. This
       of course requires that your database supports this syntax.</para>
     </section>
 
@@ -2779,7 +2779,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
       this when you need to create an embedded database instance in a
       standalone environment, such as a data access object unit test:
       <programlisting language="java">    EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
-    EmbeddedDatabase db = builder.type(H2).script("schema.sql").script("test-data.sql").build();
+    EmbeddedDatabase db = builder.setType(H2).addScript("my-schema.sql").addScript("my-test-data.sql").build();
     // do stuff against the db (EmbeddedDatabase extends javax.sql.DataSource)
     db.shutdown()
 </programlisting></para>
@@ -2811,35 +2811,34 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
     <section id="jdbc-embedded-database-using-HSQL">
       <title>Using HSQL</title>
 
-      <para>Spring supports HSQL 1.0.0 to 2.0.0. HSQL is the default embedded
-      database if no type is specified explicitly. To specify HSQL explicitly,
-      <!--Why would you need to specify HSQL explicitly if it's the default? TR: For clarity, maybe?-->set
-      the <literal>type</literal> attribute of the
+      <para>Spring supports HSQL 1.8.0 and above. HSQL is the default embedded
+      database if no type is specified explicitly. To specify HSQL explicitly, 
+      set the <literal>type</literal> attribute of the
       <literal>embedded-database</literal> tag to <literal>HSQL</literal>. If
       you are using the builder API, call the
-      <literal>type(EmbeddedDatabaseType)</literal> method with
+      <literal>setType(EmbeddedDatabaseType)</literal> method with
       <literal>EmbeddedDatabaseType.HSQL</literal>.</para>
     </section>
 
     <section id="jdbc-embedded-database-using-H2">
       <title>Using H2</title>
 
-      <para>Spring supports H2 1.8.0 to 2.0.0. To enable H2, set the
+      <para>Spring supports the H2 database as well. To enable H2, set the
       <literal>type</literal> attribute of the
       <literal>embedded-database</literal> tag to <literal>H2</literal>. If
       you are using the builder API, call the
-      <literal>type(EmbeddedDatabaseType)</literal> method with
+      <literal>setType(EmbeddedDatabaseType)</literal> method with
       <literal>EmbeddedDatabaseType.H2</literal>.</para>
     </section>
 
     <section id="jdbc-embedded-database-using-Derby">
       <title>Using Derby</title>
 
-      <para>Spring supports Apache Derby 10.5.1.1 to 10.6.0. To enable Derby,
+      <para>Spring also supports Apache Derby 10.5 and above. To enable Derby,
       set the <literal>type</literal> attribute of the
       <literal>embedded-database</literal> tag to <literal>Derby</literal>. If
       using the builder API, call the
-      <literal>type(EmbeddedDatabaseType)</literal> method with
+      <literal>setType(EmbeddedDatabaseType)</literal> method with
       <literal>EmbeddedDatabaseType.Derby</literal>.</para>
     </section>
 
@@ -2856,8 +2855,8 @@ public class DataAccessUnitTestTemplate {
     
     @Before
     public void setUp() {
-        // creates a HSQL in-memory db populated from classpath:schema.sql and classpath:test-data.sql
-        db = EmbeddedDatabaseBuilder.buildDefault();		
+        // creates a HSQL in-memory db populated from default scripts classpath:schema.sql and classpath:test-data.sql
+        db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();		
     }
 
     @Test
@@ -2872,6 +2871,168 @@ public class DataAccessUnitTestTemplate {
     }
 }
 </programlisting>
+    </section>
+  </section>
+
+  <section>
+    <title>Initializing a DataSource</title>
+
+    <para>The <literal>org.springframework.jdbc.datasource.init</literal>
+    package provides support for initializing an existing
+    <classname>DataSource</classname>. The embedded database support provides
+    one option for creating and initializing a
+    <classname>DataSource</classname> for an application, but sometimes you
+    need to initialize an instance running on a server somewhere.</para>
+
+    <section>
+      <title>Initializing a database instance using Spring XML</title>
+
+      <para>If you want to initialize a database and you can provide a
+      reference to a DataSource bean, use the
+      <literal>initialize-datasource</literal> tag in the
+      <literal>spring-jdbc</literal> namespace:</para>
+
+      <programlisting>&lt;jdbc:initialize-database data-source="dataSource"&gt;
+  &lt;jdbc:script location="classpath:com/foo/sql/db-schema.sql"/&gt;
+  &lt;jdbc:script location="classpath:com/foo/sql/db-test-data.sql"/&gt;
+&lt;/jdbc:initialize-database&gt;</programlisting>
+
+      <para>The example above runs the two scripts specified against the
+      database: the first script is a schema creation, and the second is a
+      test data set insert. The script locations can also be patterns with
+      wildcards in the usual ant style used for resources in Spring (e.g.
+      <code>classpath*:/com/foo/**/sql/*-data.sql</code>). If a pattern is
+      used the scripts are executed in lexical order of their URL or
+      filename.</para>
+
+      <para>The default behaviour of the database initializer is to
+      unconditionally execute the scripts provided. This will not always be
+      what you want, for instance if running against an existing database that
+      already has test data in it. The likelihood of accidentally deleting
+      data is reduced by the commonest pattern (as shown above) that creates
+      the tables first and then inserts the data - the first step will fail if
+      the tables already exist.</para>
+
+      <para>However, to get more control the creation and deletion of existing
+      data the XML namespace provides a couple more options. The first is flag
+      to switch the initialization on and off. This can be set according to
+      the environment (e.g. to pull a boolean value from system properties or
+      an environment bean), e.g.<programlisting>&lt;jdbc:initialize-database data-source="dataSource" 
+    <emphasis role="bold">enabled="#{systemProperties.INITIALIZE_DATABASE}"</emphasis>&gt;
+  &lt;jdbc:script location="..."/&gt;
+&lt;/jdbc:initialize-database&gt;</programlisting></para>
+
+      <para>The second option to control what happens with existing data is to
+      be more tolerant of failures. To this end you can control the ability of
+      the initializer to ignore certain errors in the SQL it executes from the
+      scripts, e.g.</para>
+
+      <para><programlisting>&lt;jdbc:initialize-database data-source="dataSource" <emphasis
+            role="bold">ignore-failures="DROPS"</emphasis>&gt;
+  &lt;jdbc:script location="..."/&gt;
+&lt;/jdbc:initialize-database&gt;</programlisting>In this example we are
+      saying we expect that sometimes the scripts will be run against an empty
+      dtabase and there are some DROP statements in the scripts which would
+      therefore fail. So failed SQL <code>DROP</code> statements will be
+      ignored, but other failures will cause an exception. This is useful if
+      your SQL dialect doesn't support <code>DROP ... IF EXISTS</code> (or
+      similar) but you want to unconditionally remove all test data before
+      re-creating it. In that case the first script is usually a set of drops,
+      followed by a set of <code>CREATE</code> statements.</para>
+
+      <para>The <code>ignore-failures</code> option can be set to
+      <code>NONE</code> (the default), <code>DROPS</code> (ignore failed
+      drops) or <code>ALL</code> (ignore all failures).</para>
+
+      <para>If you need more control than you get from the XML namespace, you
+      can simply use the <classname>DataSourceInitializer</classname>
+      directly, and define it as a component in your application.</para>
+
+      <section>
+        <title>Initialization of Other Components that Depend on the
+        Database</title>
+
+        <para>A large class of applications can just use the database
+        initializer with no further complications: those that do not use the
+        database until after the Spring context has started. If your
+        application is <emphasis>not</emphasis> one of those then you might
+        need to read the rest of this section.</para>
+
+        <para>The database initializer depends on a data source instance and
+        runs the scripts provided in its initialization callback (c.f.
+        <code>init-method</code> in an XML bean definition or
+        <code>InitializingBean</code>). If other beans depend on the same data
+        source and also use the data source in an initialization callback then
+        there might be a problem because the data has not yet been
+        initialized. A common example of this is a cache that initializes
+        eagerly and loads up data from the database on application
+        startup.</para>
+
+        <para>To get round this issue you two options: change your cache
+        initialization strategy to a later phase, or ensure that the database
+        initializer is initialized first.</para>
+
+        <para>The first option might be easy if the application is in your
+        control, and not otherwise. Some suggestions for how to implement this
+        are<itemizedlist>
+
+            <listitem>
+              <para>Make the cache initialize lazily on first usage, which
+              improves application startup time</para>
+            </listitem>
+
+            <listitem>
+              <para>Have your cache or a separate component that
+              initializes the cache implement <code>Lifecycle</code> or 
+              <code>SmartLifecycle</code>.  When the application context
+              starts up a <code>SmartLifecycle</code> can be automatically
+              started if its <code>autoStartup</code> flag is set, 
+              and a <code>Lifecycle</code> can be started
+              manually by calling 
+              <code>ConfigurableApplicationContext.start()</code> on the
+              enclosing context.
+              </para>
+            </listitem>
+
+            <listitem>
+              <para>Use a Spring <code>ApplicationEvent</code> or similar
+              custom observer mechanism to trigger the cache initialization.
+              <code>ContextRefreshedEvent</code> is always published by the
+              context when it is ready for use (after all beans have been
+              initialized), so that is often a useful hook (this is
+              how the <code>SmartLifecycle</code> works by default).</para>
+            </listitem>
+
+          </itemizedlist></para>
+
+        <para>The second option can also be easy. Some suggestions on how to
+        implement this are<itemizedlist>
+            <listitem>
+              <para>Rely on Spring BeanFactory default behaviour, which is
+              that beans are initialized in registration order. You can easily
+              arrange that by adopting the common practice of a set of
+              &lt;import/&gt; elements that order your application modules,
+              and ensure that the database and database initialization are
+              listed first</para>
+            </listitem>
+
+            <listitem>
+              <para>Separate the datasource and the business components that
+              use it and control their startup order by putting them in
+              separate ApplicationContext instances (e.g. parent has the
+              datasource and child has the business components). This
+              structure is common in Spring web applications, but can be more
+              generally applied.</para>
+            </listitem>
+
+            <listitem>
+              <para>Use a modular runtime like SpringSource dm Server and
+              separate the data source and the components that depend on it.
+              E.g. specify the bundle start up order as datasource -&gt;
+              initializer -&gt; business components.</para>
+            </listitem>
+          </itemizedlist></para>
+      </section>
     </section>
   </section>
 </chapter>

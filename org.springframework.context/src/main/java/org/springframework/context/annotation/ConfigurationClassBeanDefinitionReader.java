@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -90,9 +91,12 @@ class ConfigurationClassBeanDefinitionReader {
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
 		doLoadBeanDefinitionForConfigurationClass(configClass);
-		for (ConfigurationClassMethod method : configClass.getConfigurationMethods()) {
+		
+		for (ConfigurationClassMethod method : configClass.getMethods()) {
 			loadBeanDefinitionsForModelMethod(method);
 		}
+		
+		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
 	}
 
 	/**
@@ -208,7 +212,27 @@ class ConfigurationClassBeanDefinitionReader {
 
 		registry.registerBeanDefinition(beanName, beanDefToRegister);
 	}
-
+	
+	private void loadBeanDefinitionsFromImportedResources(Map<String, Class> importedResources) {
+		Map<Class, BeanDefinitionReader> readerInstanceCache = new HashMap<Class, BeanDefinitionReader>();
+		for (Map.Entry<String, Class> entry : importedResources.entrySet()) {
+			String resource = entry.getKey();
+			Class readerClass = entry.getValue();
+			if (!readerInstanceCache.containsKey(readerClass)) {
+				try {
+					BeanDefinitionReader readerInstance = (BeanDefinitionReader)
+							readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
+					readerInstanceCache.put(readerClass, readerInstance);
+				}
+				catch (Exception ex) {
+					throw new IllegalStateException("Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]");
+				}
+			}
+			BeanDefinitionReader reader = readerInstanceCache.get(readerClass);
+			// TODO SPR-6310: qualify relatively pathed locations as done in AbstractContextLoader.modifyLocations
+			reader.loadBeanDefinitions(resource);
+		}
+	}
 
 	/**
 	 * {@link RootBeanDefinition} marker subclass used to signify that a bean definition
@@ -216,6 +240,7 @@ class ConfigurationClassBeanDefinitionReader {
 	 * Used in bean overriding cases where it's necessary to determine whether the bean
 	 * definition was created externally.
 	 */
+	@SuppressWarnings("serial")
 	private class ConfigurationClassBeanDefinition extends RootBeanDefinition implements AnnotatedBeanDefinition {
 
 		private AnnotationMetadata annotationMetadata;

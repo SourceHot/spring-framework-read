@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@
 package org.springframework.context.annotation;
 
 import java.util.Properties;
-
-import static org.junit.Assert.*;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+
+import org.springframework.beans.BeansException;
 import org.springframework.beans.INestedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.NestedTestBean;
@@ -33,10 +33,12 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
 import org.springframework.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.util.SerializationTestUtils;
@@ -56,6 +58,33 @@ public class CommonAnnotationBeanPostProcessorTests {
 		AnnotatedInitDestroyBean bean = (AnnotatedInitDestroyBean) bf.getBean("annotatedBean");
 		assertTrue(bean.initCalled);
 		bf.destroySingletons();
+		assertTrue(bean.destroyCalled);
+	}
+
+	@Test
+	public void testPostConstructAndPreDestroyWithPostProcessor() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.addBeanPostProcessor(new InitDestroyBeanPostProcessor());
+		bf.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(AnnotatedInitDestroyBean.class));
+
+		AnnotatedInitDestroyBean bean = (AnnotatedInitDestroyBean) bf.getBean("annotatedBean");
+		assertTrue(bean.initCalled);
+		bf.destroySingletons();
+		assertTrue(bean.destroyCalled);
+	}
+
+	@Test
+	public void testPostConstructAndPreDestroyWithApplicationContextAndPostProcessor() {
+		GenericApplicationContext ctx = new GenericApplicationContext();
+		ctx.registerBeanDefinition("bpp1", new RootBeanDefinition(InitDestroyBeanPostProcessor.class));
+		ctx.registerBeanDefinition("bpp2", new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class));
+		ctx.registerBeanDefinition("annotatedBean", new RootBeanDefinition(AnnotatedInitDestroyBean.class));
+		ctx.refresh();
+
+		AnnotatedInitDestroyBean bean = (AnnotatedInitDestroyBean) ctx.getBean("annotatedBean");
+		assertTrue(bean.initCalled);
+		ctx.close();
 		assertTrue(bean.destroyCalled);
 	}
 
@@ -235,7 +264,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		RootBeanDefinition annotatedBd = new RootBeanDefinition(ExtendedResourceInjectionBean.class);
 		TestBean tb5 = new TestBean();
-		annotatedBd.getPropertyValues().addPropertyValue("testBean2", tb5);
+		annotatedBd.getPropertyValues().add("testBean2", tb5);
 		bf.registerBeanDefinition("annotatedBean", annotatedBd);
 		bf.registerBeanDefinition("annotatedBean2", new RootBeanDefinition(NamedResourceInjectionBean.class));
 		TestBean tb = new TestBean();
@@ -336,6 +365,30 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 
+	public static class InitDestroyBeanPostProcessor implements DestructionAwareBeanPostProcessor {
+
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			if (bean instanceof AnnotatedInitDestroyBean) {
+				assertFalse(((AnnotatedInitDestroyBean) bean).initCalled);
+			}
+			return bean;
+		}
+
+		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+			if (bean instanceof AnnotatedInitDestroyBean) {
+				assertTrue(((AnnotatedInitDestroyBean) bean).initCalled);
+			}
+			return bean;
+		}
+
+		public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
+			if (bean instanceof AnnotatedInitDestroyBean) {
+				assertFalse(((AnnotatedInitDestroyBean) bean).destroyCalled);
+			}
+		}
+	}
+
+
 	public static class ResourceInjectionBean extends AnnotatedInitDestroyBean {
 
 		public boolean init2Called = false;
@@ -356,6 +409,9 @@ public class CommonAnnotationBeanPostProcessorTests {
 			if (this.testBean == null || this.testBean2 == null) {
 				throw new IllegalStateException("Resources not injected");
 			}
+			if (!this.initCalled) {
+				throw new IllegalStateException("Superclass init method not called yet");
+			}
 			if (this.init2Called) {
 				throw new IllegalStateException("Already called");
 			}
@@ -372,6 +428,9 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		@PreDestroy
 		protected void destroy2() {
+			if (this.destroyCalled) {
+				throw new IllegalStateException("Superclass destroy called too soon");
+			}
 			if (this.destroy2Called) {
 				throw new IllegalStateException("Already called");
 			}
@@ -380,6 +439,9 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		@PreDestroy
 		private void destroy() {
+			if (this.destroyCalled) {
+				throw new IllegalStateException("Superclass destroy called too soon");
+			}
 			if (this.destroy3Called) {
 				throw new IllegalStateException("Already called");
 			}

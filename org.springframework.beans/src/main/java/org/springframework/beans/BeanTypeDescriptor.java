@@ -44,14 +44,31 @@ class BeanTypeDescriptor extends TypeDescriptor {
 
 	/**
 	 * Create a new BeanTypeDescriptor for the given bean property.
-	 * @param methodParameter the target method parameter
 	 * @param propertyDescriptor the corresponding JavaBean PropertyDescriptor
 	 */
-	public BeanTypeDescriptor(MethodParameter methodParameter, PropertyDescriptor propertyDescriptor) {
-		super(methodParameter);
+	public BeanTypeDescriptor(PropertyDescriptor propertyDescriptor) {
+		super(BeanUtils.getWriteMethodParameter(propertyDescriptor));
 		this.propertyDescriptor = propertyDescriptor;
 	}
 
+	/**
+	 * Create a new BeanTypeDescriptor for the given bean property.
+	 * @param propertyDescriptor the corresponding JavaBean PropertyDescriptor
+	 * @param methodParameter the target method parameter
+	 * @param type the specific type to expose (may be an array/collection element)
+	 */
+	public BeanTypeDescriptor(PropertyDescriptor propertyDescriptor, MethodParameter methodParameter, Class type) {
+		super(methodParameter, type);
+		this.propertyDescriptor = propertyDescriptor;
+	}
+
+
+	/**
+	 * Return the underlying PropertyDescriptor.
+	 */
+	public PropertyDescriptor getPropertyDescriptor() {
+		return this.propertyDescriptor;
+	}
 
 	@Override
 	public Annotation[] getAnnotations() {

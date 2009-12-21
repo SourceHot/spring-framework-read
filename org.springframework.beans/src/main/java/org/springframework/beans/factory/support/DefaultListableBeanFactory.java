@@ -26,9 +26,11 @@ import java.lang.reflect.Type;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -92,6 +94,19 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
 		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
+
+	private static Class javaxInjectProviderClass = null;
+
+	static {
+		ClassLoader cl = DefaultListableBeanFactory.class.getClassLoader();
+		try {
+			javaxInjectProviderClass = cl.loadClass("javax.inject.Provider");
+		}
+		catch (ClassNotFoundException ex) {
+			// JSR-330 API not available - Provider interface simply not supported then.
+		}
+	}
+
 
 	/** Map from serialized id to factory instance */
 	private static final Map<String, Reference<DefaultListableBeanFactory>> serializableFactories =
@@ -228,6 +243,21 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	//---------------------------------------------------------------------
 	// Implementation of ListableBeanFactory interface
 	//---------------------------------------------------------------------
+
+	public <T> T getBean(Class<T> requiredType) throws BeansException {
+		Assert.notNull(requiredType, "Required type must not be null");
+		String[] beanNames = getBeanNamesForType(requiredType);
+		if (beanNames.length == 1) {
+			return getBean(beanNames[0], requiredType);
+		}
+		else if (beanNames.length == 0 && getParentBeanFactory() != null) {
+			return getParentBeanFactory().getBean(requiredType);
+		}
+		else {
+			throw new NoSuchBeanDefinitionException(requiredType, "expected single bean but found " +
+					beanNames.length + ": " + StringUtils.arrayToCommaDelimitedString(beanNames));
+		}
+	}
 
 	@Override
 	public boolean containsBeanDefinition(String beanName) {
@@ -376,14 +406,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
-		return getBeansWithAnnotation(annotationType, true, true);
-	}
-
-	public Map<String, Object> getBeansWithAnnotation(
-			Class<? extends Annotation> annotationType, boolean includeNonSingletons, boolean allowEagerInit) {
-
+		Set<String> beanNames = new LinkedHashSet<String>(getBeanDefinitionCount());
+		beanNames.addAll(Arrays.asList(getBeanDefinitionNames()));
+		beanNames.addAll(Arrays.asList(getSingletonNames()));
 		Map<String, Object> results = new LinkedHashMap<String, Object>();
-		for (String beanName : getBeanNamesForType(Object.class, includeNonSingletons, allowEagerInit)) {
+		for (String beanName : beanNames) {
 			if (findAnnotationOnBean(beanName, annotationType) != null) {
 				results.put(beanName, getBean(beanName));
 			}
@@ -646,7 +673,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (descriptor.getDependencyType().equals(ObjectFactory.class)) {
 			return new DependencyObjectFactory(descriptor, beanName);
 		}
-		else if (descriptor.getDependencyType().getName().equals("javax.inject.Provider")) {
+		else if (descriptor.getDependencyType().equals(javaxInjectProviderClass)) {
 			return new DependencyProviderFactory().createDependencyProvider(descriptor, beanName);
 		}
 		else {
@@ -735,16 +762,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (matchingBeans.isEmpty()) {
 				if (descriptor.isRequired()) {
-					throw new NoSuchBeanDefinitionException(type,
-							"Unsatisfied dependency of type [" + type + "]: expected at least 1 matching bean");
+					raiseNoSuchBeanDefinitionException(type, "", descriptor);
 				}
 				return null;
 			}
 			if (matchingBeans.size() > 1) {
 				String primaryBeanName = determinePrimaryCandidate(matchingBeans, descriptor);
 				if (primaryBeanName == null) {
-					throw new NoSuchBeanDefinitionException(type,
-							"expected single matching bean but found " + matchingBeans.size() + ": " + matchingBeans.keySet());
+					throw new NoSuchBeanDefinitionException(type, "expected single matching bean but found " +
+							matchingBeans.size() + ": " + matchingBeans.keySet());
 				}
 				if (autowiredBeanNames != null) {
 					autowiredBeanNames.add(primaryBeanName);

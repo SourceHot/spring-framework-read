@@ -17,7 +17,7 @@
 package org.springframework.web.bind.support;
 
 import org.springframework.beans.PropertyEditorRegistrar;
-import org.springframework.ui.format.FormatterRegistry;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.validation.BindingErrorProcessor;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -34,6 +34,8 @@ import org.springframework.web.context.request.WebRequest;
  * @see #setDirectFieldAccess
  * @see #setMessageCodesResolver
  * @see #setBindingErrorProcessor
+ * @see #setValidator(Validator)
+ * @see #setConversionService(ConversionService)
  * @see #setPropertyEditorRegistrar
  */
 public class ConfigurableWebBindingInitializer implements WebBindingInitializer {
@@ -46,7 +48,7 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 
 	private Validator validator;
 
-	private FormatterRegistry formatterRegistry;
+	private ConversionService conversionService;
 
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 
@@ -111,17 +113,18 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	}
 
 	/**
-	 * Specify a FormatterRegistry which will apply to every DataBinder.
+	 * Specify a ConversionService which will apply to every DataBinder.
+	 * @since 3.0
 	 */
-	public final void setFormatterRegistry(FormatterRegistry formatterRegistry) {
-		this.formatterRegistry = formatterRegistry;
+	public final void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
 	}
 
 	/**
-	 * Return a FormatterRegistry which will apply to every DataBinder.
+	 * Return the ConversionService which will apply to every DataBinder.
 	 */
-	public final FormatterRegistry getFormatterRegistry() {
-		return this.formatterRegistry;
+	public final ConversionService getConversionService() {
+		return this.conversionService;
 	}
 
 	/**
@@ -160,8 +163,8 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 				this.validator.supports(binder.getTarget().getClass())) {
 			binder.setValidator(this.validator);
 		}
-		if (this.formatterRegistry != null) {
-			binder.setFormatterRegistry(this.formatterRegistry);
+		if (this.conversionService != null) {
+			binder.setConversionService(this.conversionService);
 		}
 		if (this.propertyEditorRegistrars != null) {
 			for (PropertyEditorRegistrar propertyEditorRegistrar : this.propertyEditorRegistrars) {

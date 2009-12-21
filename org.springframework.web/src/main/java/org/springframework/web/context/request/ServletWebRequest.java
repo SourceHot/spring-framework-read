@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	 * @param response current HTTP response (for automatic last-modified handling)
 	 */
 	public ServletWebRequest(HttpServletRequest request, HttpServletResponse response) {
-		super(request);
+		this(request);
 		this.response = response;
 	}
 
@@ -89,6 +89,11 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	public String[] getHeaderValues(String headerName) {
 		String[] headerValues = StringUtils.toStringArray(getRequest().getHeaders(headerName));
 		return (!ObjectUtils.isEmpty(headerValues) ? headerValues : null);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Iterator<String> getHeaderNames() {
+		return CollectionUtils.toIterator(getRequest().getHeaderNames());
 	}
 
 	public String getParameter(String paramName) {
@@ -133,7 +138,6 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return getRequest().isSecure();
 	}
 
-
 	public boolean checkNotModified(long lastModifiedTimestamp) {
 		if (lastModifiedTimestamp >= 0 && !this.notModified &&
 				(this.response == null || !this.response.containsHeader(HEADER_LAST_MODIFIED))) {
@@ -155,7 +159,6 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return this.notModified;
 	}
 
-
 	public String getDescription(boolean includeClientInfo) {
 		HttpServletRequest request = getRequest();
 		StringBuilder sb = new StringBuilder();
@@ -176,6 +179,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		}
 		return sb.toString();
 	}
+
 
 	@Override
 	public String toString() {

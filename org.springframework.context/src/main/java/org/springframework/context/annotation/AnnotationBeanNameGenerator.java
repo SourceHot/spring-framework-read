@@ -39,7 +39,9 @@ import org.springframework.util.StringUtils;
  * themselves annotated with 
  * {@link org.springframework.stereotype.Component @Component}.
  *
- * <p>Also supports JSR-330's {@link javax.inject.Named} annotation, if available.
+ * <p>Also supports Java EE 6's {@link javax.annotation.ManagedBean} and
+ * JSR-330's {@link javax.inject.Named} annotations, if available. Note that
+ * Spring component annotations always override such standard annotations.
  *
  * <p>If the annotation's value doesn't indicate a bean name, an appropriate
  * name will be built based on the short name of the class (with the first
@@ -111,6 +113,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 		boolean isStereotype = annotationType.equals(COMPONENT_ANNOTATION_CLASSNAME) ||
 				(metaAnnotationTypes != null && metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME)) ||
+				annotationType.equals("javax.annotation.ManagedBean") ||
 				annotationType.equals("javax.inject.Named");
 		return (isStereotype && attributes != null && attributes.containsKey("value"));
 	}

@@ -16,12 +16,17 @@
 
 package org.springframework.validation.beanvalidation;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.metadata.BeanDescriptor;
+import javax.validation.metadata.ConstraintDescriptor;
 
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 
 /**
@@ -68,11 +73,36 @@ public class SpringValidatorAdapter implements Validator, javax.validation.Valid
 	public void validate(Object target, Errors errors) {
 		Set<ConstraintViolation<Object>> result = this.targetValidator.validate(target);
 		for (ConstraintViolation<Object> violation : result) {
-			errors.rejectValue(violation.getPropertyPath().toString(),
-					violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName(),
-					violation.getConstraintDescriptor().getAttributes().values().toArray(),
-					violation.getMessage());
+			String field = violation.getPropertyPath().toString();
+			FieldError fieldError = errors.getFieldError(field);
+			if (fieldError == null || !fieldError.isBindingFailure()) {
+				errors.rejectValue(field,
+						violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName(),
+						getArgumentsForConstraint(errors.getObjectName(), field, violation.getConstraintDescriptor()),
+						violation.getMessage());
+			}
 		}
+	}
+
+	/**
+	 * Return FieldError arguments for a validation error on the given field.
+	 * Invoked for each violated constraint.
+	 * <p>The default implementation returns a single argument of type
+	 * DefaultMessageSourceResolvable, with "objectName.field" and "field" as codes.
+	 * @param objectName the name of the target object
+	 * @param field the field that caused the binding error
+	 * @param descriptor the JSR-303 constraint descriptor
+	 * @return the Object array that represents the FieldError arguments
+	 * @see org.springframework.validation.FieldError#getArguments
+	 * @see org.springframework.context.support.DefaultMessageSourceResolvable
+	 * @see org.springframework.validation.DefaultBindingErrorProcessor#getArgumentsForBindError
+	 */
+	protected Object[] getArgumentsForConstraint(String objectName, String field, ConstraintDescriptor<?> descriptor) {
+		List<Object> arguments = new LinkedList<Object>();
+		String[] codes = new String[] {objectName + Errors.NESTED_PATH_SEPARATOR + field, field};
+		arguments.add(new DefaultMessageSourceResolvable(codes, field));
+		arguments.addAll(descriptor.getAttributes().values());
+		return arguments.toArray(new Object[arguments.size()]);
 	}
 
 
@@ -91,7 +121,7 @@ public class SpringValidatorAdapter implements Validator, javax.validation.Valid
 	public <T> Set<ConstraintViolation<T>> validateValue(
 			Class<T> beanType, String propertyName, Object value, Class<?>... groups) {
 
-		return this.targetValidator.validateValue(beanType, propertyName, groups);
+		return this.targetValidator.validateValue(beanType, propertyName, value, groups);
 	}
 
 	public BeanDescriptor getConstraintsForClass(Class<?> clazz) {

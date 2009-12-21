@@ -20,7 +20,6 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Represents a template expression broken into pieces. Each piece will be an Expression but pure text parts to the
@@ -58,7 +57,21 @@ public class CompositeStringExpression implements Expression {
 	public String getValue() throws EvaluationException {
 		StringBuilder sb = new StringBuilder();
 		for (Expression expression : this.expressions) {
-			sb.append(ObjectUtils.getDisplayString(expression.getValue()));
+			String value = expression.getValue(String.class);
+			if (value != null) {
+				sb.append(value);
+			}	
+		}
+		return sb.toString();
+	}
+
+	public String getValue(Object rootObject) throws EvaluationException {
+		StringBuilder sb = new StringBuilder();
+		for (Expression expression : this.expressions) {
+			String value = expression.getValue(rootObject, String.class);
+			if (value != null) {
+				sb.append(value);
+			}	
 		}
 		return sb.toString();
 	}
@@ -66,7 +79,21 @@ public class CompositeStringExpression implements Expression {
 	public String getValue(EvaluationContext context) throws EvaluationException {
 		StringBuilder sb = new StringBuilder();
 		for (Expression expression : this.expressions) {
-			sb.append(ObjectUtils.getDisplayString(expression.getValue(context)));
+			String value = expression.getValue(context, String.class);
+			if (value != null) {
+				sb.append(value);
+			}
+		}
+		return sb.toString();
+	}
+
+	public String getValue(EvaluationContext context, Object rootObject) throws EvaluationException {
+		StringBuilder sb = new StringBuilder();
+		for (Expression expression : this.expressions) {
+			String value = expression.getValue(context, rootObject, String.class);
+			if (value != null) {
+				sb.append(value);
+			}				
 		}
 		return sb.toString();
 	}
@@ -107,6 +134,50 @@ public class CompositeStringExpression implements Expression {
 	
 	public Expression[] getExpressions() {
 		return expressions;
+	}
+
+
+	public <T> T getValue(Object rootObject, Class<T> desiredResultType) throws EvaluationException {
+		Object value = getValue(rootObject);
+		return ExpressionUtils.convert(null, value, desiredResultType);
+	}
+
+	public <T> T getValue(EvaluationContext context, Object rootObject, Class<T> desiredResultType)
+			throws EvaluationException {
+		Object value = getValue(context,rootObject);
+		return ExpressionUtils.convert(context, value, desiredResultType);
+	}
+
+	public Class getValueType(Object rootObject) throws EvaluationException {
+		return String.class;
+	}
+
+	public Class getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
+		return String.class;
+	}
+
+	public TypeDescriptor getValueTypeDescriptor(Object rootObject) throws EvaluationException {
+		return TypeDescriptor.valueOf(String.class);
+	}
+
+	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context, Object rootObject) throws EvaluationException {
+		return TypeDescriptor.valueOf(String.class);
+	}
+
+	public boolean isWritable(EvaluationContext context, Object rootObject) throws EvaluationException {
+		return false;
+	}
+
+	public void setValue(EvaluationContext context, Object rootObject, Object value) throws EvaluationException {
+		throw new EvaluationException(this.expressionString, "Cannot call setValue on a composite expression");
+	}
+
+	public boolean isWritable(Object rootObject) throws EvaluationException {
+		return false;
+	}
+
+	public void setValue(Object rootObject, Object value) throws EvaluationException {
+		throw new EvaluationException(this.expressionString, "Cannot call setValue on a composite expression");
 	}
 
 }

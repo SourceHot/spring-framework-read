@@ -16,15 +16,19 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
  * Represents a NOT operation.
  *
  * @author Andy Clement
+ * @author Mark Fisher
  * @since 3.0
  */
 public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do not extend BinaryOperator
@@ -36,7 +40,11 @@ public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		try {
-			boolean value = (Boolean)state.convertValue(children[0].getValueInternal(state), BOOLEAN_TYPE_DESCRIPTOR);
+			TypedValue typedValue = children[0].getValueInternal(state);
+			if (TypedValue.NULL.equals(typedValue)) {
+				throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR, "null", "boolean");
+			}
+			boolean value = (Boolean) state.convertValue(typedValue, TypeDescriptor.valueOf(Boolean.class));
 			return BooleanTypedValue.forValue(!value);
 		}
 		catch (SpelEvaluationException see) {

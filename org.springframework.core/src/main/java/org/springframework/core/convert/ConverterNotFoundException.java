@@ -22,11 +22,12 @@ package org.springframework.core.convert;
  * @author Keith Donald
  * @since 3.0 
  */
-public class ConverterNotFoundException extends ConversionException {
+@SuppressWarnings("serial")
+public final class ConverterNotFoundException extends ConversionException {
 
-	private final Class<?> sourceType;
+	private final TypeDescriptor sourceType;
 
-	private final Class<?> targetType;
+	private final TypeDescriptor targetType;
 
 	/**
 	 * Creates a new conversion executor not found exception.
@@ -34,7 +35,7 @@ public class ConverterNotFoundException extends ConversionException {
 	 * @param targetType the target type requested to convert to
 	 * @param message a descriptive message
 	 */
-	public ConverterNotFoundException(Class<?> sourceType, Class<?> targetType) {
+	public ConverterNotFoundException(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		super("No converter found capable of converting from [" + sourceType.getName() + "] to [" + targetType.getName() + "]");
 		this.sourceType = sourceType;
 		this.targetType = targetType;
@@ -43,14 +44,14 @@ public class ConverterNotFoundException extends ConversionException {
 	/**
 	 * Returns the source type that was requested to convert from.
 	 */
-	public Class<?> getSourceType() {
+	public TypeDescriptor getSourceType() {
 		return this.sourceType;
 	}
 
 	/**
 	 * Returns the target type that was requested to convert to.
 	 */
-	public Class<?> getTargetType() {
+	public TypeDescriptor getTargetType() {
 		return this.targetType;
 	}
 

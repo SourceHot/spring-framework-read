@@ -191,6 +191,8 @@
       <entry name="*.dtd" />
       <entry name="*.xsd" />
       <entry name="*.tld" />
+      <entry name="*.xls" />
+      <entry name="*.vm" />
       <entry name="*.ftl" />
       <entry name="*.sql" />
       <entry name="*.types" />
@@ -978,6 +980,15 @@
       <JAVADOC />
       <SOURCES>
         <root url="jar://$PROJECT_DIR$/ivy-cache/repository/javax.inject/com.springsource.javax.inject/0.9.0.PFD/com.springsource.javax.inject-sources-0.9.0.PFD.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="javax.validation">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/javax.validation/com.springsource.javax.validation/1.0.0.GA/com.springsource.javax.validation-1.0.0.GA.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/javax.validation/com.springsource.javax.validation/1.0.0.GA/com.springsource.javax.validation-sources-1.0.0.GA.jar!/" />
       </SOURCES>
     </library>
   </component>

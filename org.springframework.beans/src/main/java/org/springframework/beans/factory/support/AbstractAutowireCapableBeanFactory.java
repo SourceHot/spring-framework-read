@@ -301,7 +301,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		RootBeanDefinition bd = null;
 		if (mbd instanceof RootBeanDefinition) {
 			RootBeanDefinition rbd = (RootBeanDefinition) mbd;
-			if (SCOPE_PROTOTYPE.equals(rbd.getScope())) {
+			if (rbd.isPrototype()) {
 				bd = rbd;
 			}
 		}
@@ -780,11 +780,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, Class beanType, String beanName)
 			throws BeansException {
 
-		for (BeanPostProcessor bp : getBeanPostProcessors()) {
-			if (bp instanceof MergedBeanDefinitionPostProcessor) {
-				MergedBeanDefinitionPostProcessor bdp = (MergedBeanDefinitionPostProcessor) bp;
-				bdp.postProcessMergedBeanDefinition(mbd, beanType, beanName);
+		try {
+			for (BeanPostProcessor bp : getBeanPostProcessors()) {
+				if (bp instanceof MergedBeanDefinitionPostProcessor) {
+					MergedBeanDefinitionPostProcessor bdp = (MergedBeanDefinitionPostProcessor) bp;
+					bdp.postProcessMergedBeanDefinition(mbd, beanType, beanName);
+				}
 			}
+		}
+		catch (Exception ex) {
+			throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+					"Post-processing failed of bean type [" + beanType + "] failed", ex);
 		}
 	}
 
@@ -1077,7 +1083,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		for (String propertyName : propertyNames) {
 			if (containsBean(propertyName)) {
 				Object bean = getBean(propertyName);
-				pvs.addPropertyValue(propertyName, bean);
+				pvs.add(propertyName, bean);
 				registerDependentBean(propertyName, beanName);
 				if (logger.isDebugEnabled()) {
 					logger.debug(
@@ -1125,7 +1131,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 				Object autowiredArgument = resolveDependency(desc, beanName, autowiredBeanNames, converter);
 				if (autowiredArgument != null) {
-					pvs.addPropertyValue(propertyName, autowiredArgument);
+					pvs.add(propertyName, autowiredArgument);
 				}
 				for (String autowiredBeanName : autowiredBeanNames) {
 					registerDependentBean(autowiredBeanName, beanName);

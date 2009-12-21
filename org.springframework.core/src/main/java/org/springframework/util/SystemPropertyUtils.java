@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,16 @@ import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
  * Helper class for resolving placeholders in texts. Usually applied to file paths.
  *
  * <p>A text may contain <code>${...}</code> placeholders, to be resolved as system properties: e.g.
- * <code>${user.dir}</code>.
+ * <code>${user.dir}</code>.  Default values can be supplied using the ":" separator between key 
+ * and value.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
+ * @author Dave Syer
+ * @since 1.2.5
  * @see #PLACEHOLDER_PREFIX
  * @see #PLACEHOLDER_SUFFIX
  * @see System#getProperty(String)
- * @since 1.2.5
  */
 public abstract class SystemPropertyUtils {
 
@@ -38,40 +41,69 @@ public abstract class SystemPropertyUtils {
 	/** Suffix for system property placeholders: "}" */
 	public static final String PLACEHOLDER_SUFFIX = "}";
 
-	private static final PropertyPlaceholderHelper HELPER = new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX);
+	/** Value separator for system property placeholders: ":" */
+	public static final String VALUE_SEPARATOR = ":";
+
+
+	private static final PropertyPlaceholderHelper strictHelper =
+			new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, false);
+
+	private static final PropertyPlaceholderHelper nonStrictHelper =
+			new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, true);
+
+
 	/**
 	 * Resolve ${...} placeholders in the given text, replacing them with corresponding system property values.
-	 *
 	 * @param text the String to resolve
 	 * @return the resolved String
 	 * @see #PLACEHOLDER_PREFIX
 	 * @see #PLACEHOLDER_SUFFIX
+	 * @throws IllegalArgumentException if there is an unresolvable placeholder
 	 */
 	public static String resolvePlaceholders(final String text) {
-		return HELPER.replacePlaceholders(text, new PlaceholderResolver() {
+		return resolvePlaceholders(text, false);
+	}
 
-			public String resolvePlaceholder(String placeholderName) {
-				String propVal = null;
-				try {
-					propVal = System.getProperty(placeholderName);
-					if (propVal == null) {
-						// Fall back to searching the system environment.
-						propVal = System.getenv(placeholderName);
-					}
+	/**
+	 * Resolve ${...} placeholders in the given text, replacing them with corresponding system property values.
+	 * Unresolvable placeholders with no default value are ignored and passed through unchanged if the
+	 * flag is set to true.
+	 * @param text the String to resolve
+	 * @param ignoreUnresolvablePlaceholders flag to determine is unresolved placeholders are ignored
+	 * @return the resolved String
+	 * @see #PLACEHOLDER_PREFIX
+	 * @see #PLACEHOLDER_SUFFIX
+	 * @throws IllegalArgumentException if there is an unresolvable placeholder and the flag is false
+	 */
+	public static String resolvePlaceholders(final String text, boolean ignoreUnresolvablePlaceholders) {
+		PropertyPlaceholderHelper helper = (ignoreUnresolvablePlaceholders ? nonStrictHelper : strictHelper);
+		return helper.replacePlaceholders(text, new SystemPropertyPlaceholderResolver(text));
+	}
 
-					if (propVal == null) {
-						System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" + text +
-								"] as system property: neither system property nor environment variable found");
-					}
-				}
-				catch (Throwable ex) {
-					System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" + text +
-							"] as system property: " + ex);
 
+	private static class SystemPropertyPlaceholderResolver implements PlaceholderResolver {
+
+		private final String text;
+
+		public SystemPropertyPlaceholderResolver(String text) {
+			this.text = text;
+		}
+
+		public String resolvePlaceholder(String placeholderName) {
+			try {
+				String propVal = System.getProperty(placeholderName);
+				if (propVal == null) {
+					// Fall back to searching the system environment.
+					propVal = System.getenv(placeholderName);
 				}
 				return propVal;
 			}
-		});
+			catch (Throwable ex) {
+				System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" +
+						this.text + "] as system property: " + ex);
+				return null;
+			}
+		}
 	}
 
 }

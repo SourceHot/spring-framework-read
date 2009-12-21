@@ -114,18 +114,41 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
+		return getAnnotationAttributes(annotationType, false);
+	}
+
+	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
 		for (Annotation ann : anns) {
 			if (ann.annotationType().getName().equals(annotationType)) {
-				return AnnotationUtils.getAnnotationAttributes(ann, true);
+				return AnnotationUtils.getAnnotationAttributes(ann, classValuesAsString);
 			}
 			for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
 				if (metaAnn.annotationType().getName().equals(annotationType)) {
-					return AnnotationUtils.getAnnotationAttributes(metaAnn, true);
+					return AnnotationUtils.getAnnotationAttributes(metaAnn, classValuesAsString);
 				}
 			}
 		}
 		return null;
+	}
+
+	public boolean hasAnnotatedMethods(String annotationType) {
+		Method[] methods = getIntrospectedClass().getDeclaredMethods();
+		for (Method method : methods) {
+			for (Annotation ann : method.getAnnotations()) {
+				if (ann.annotationType().getName().equals(annotationType)) {
+					return true;
+				}
+				else {
+					for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
+						if (metaAnn.annotationType().getName().equals(annotationType)) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {

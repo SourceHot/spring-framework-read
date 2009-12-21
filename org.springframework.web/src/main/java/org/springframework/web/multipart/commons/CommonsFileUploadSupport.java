@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.nio.charset.Charset;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -36,10 +37,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.WebUtils;
+import org.springframework.http.MediaType;
 
 /**
  * Base class for multipart resolvers that use Jakarta Commons FileUpload
- * 1.1 or higher.
+ * 1.2 or above.
  *
  * <p>Provides common configuration properties and parsing functionality
  * for multipart requests, using a Map of Spring CommonsMultipartFile instances
@@ -220,15 +222,16 @@ public abstract class CommonsFileUploadSupport {
 		// Extract multipart files and multipart parameters.
 		for (FileItem fileItem : fileItems) {
 			if (fileItem.isFormField()) {
-				String value = null;
-				if (encoding != null) {
+				String value;
+				String partEncoding = determineEncoding(fileItem.getContentType(), encoding);
+				if (partEncoding != null) {
 					try {
-						value = fileItem.getString(encoding);
+						value = fileItem.getString(partEncoding);
 					}
 					catch (UnsupportedEncodingException ex) {
 						if (logger.isWarnEnabled()) {
 							logger.warn("Could not decode multipart item '" + fileItem.getFieldName() +
-									"' with encoding '" + encoding + "': using platform default");
+									"' with encoding '" + partEncoding + "': using platform default");
 						}
 						value = fileItem.getString();
 					}
@@ -279,6 +282,15 @@ public abstract class CommonsFileUploadSupport {
 				}
 			}
 		}
+	}
+
+	private String determineEncoding(String contentTypeHeader, String defaultEncoding) {
+		if (!StringUtils.hasText(contentTypeHeader)) {
+			return defaultEncoding;
+		}
+		MediaType contentType = MediaType.parseMediaType(contentTypeHeader);
+		Charset charset = contentType.getCharSet();
+		return charset != null ? charset.name() : defaultEncoding;
 	}
 
 

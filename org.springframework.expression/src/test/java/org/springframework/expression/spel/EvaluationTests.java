@@ -20,15 +20,15 @@ import java.util.List;
 import java.util.Map;
 
 import junit.framework.Assert;
-
 import org.junit.Test;
+
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
+import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParserConfiguration;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 
@@ -36,12 +36,14 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
  * Tests the evaluation of real expressions in a real context.
  * 
  * @author Andy Clement
+ * @author Mark Fisher
+ * @since 3.0
  */
 public class EvaluationTests extends ExpressionTestCase {
 
 	@Test
 	public void testCreateListsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
-		ExpressionParser parser = new SpelExpressionParser(SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull | SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
+		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression expression = parser.parseExpression("list[0]");
 		TestClass testClass = new TestClass();
 		Object o = null;
@@ -65,7 +67,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testCreateMapsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
 		TestClass testClass = new TestClass();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(testClass);
-		ExpressionParser parser = new SpelExpressionParser(SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull | SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
+		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Object o = null;
 		o = parser.parseExpression("map['a']").getValue(ctx);
 		Assert.assertNull(o);
@@ -85,7 +87,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testCreateObjectsOnAttemptToReferenceNull() throws EvaluationException, ParseException {
 		TestClass testClass = new TestClass();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(testClass);
-		ExpressionParser parser = new SpelExpressionParser(SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull | SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize);
+		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Object o = null;
 		o = parser.parseExpression("wibble.bar").getValue(ctx);
 		Assert.assertEquals("hello",o);
@@ -234,7 +236,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	@Test
 	public void testPropertiesNested03() throws ParseException {
 		try {
-			new SpelExpressionParser().parse("placeOfBirth.23");
+			new SpelExpressionParser().parseRaw("placeOfBirth.23");
 			Assert.fail();
 		} catch (SpelParseException spe) {
 			Assert.assertEquals(spe.getMessageCode(), SpelMessage.UNEXPECTED_DATA_AFTER_DOT);
@@ -296,6 +298,36 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("!true", "false", Boolean.class);
 	}
 
+	@Test
+	public void testUnaryNot02() {
+		evaluate("!false", "true", Boolean.class);
+	}
+
+	@Test(expected = EvaluationException.class)
+	public void testUnaryNotWithNullValue() {
+		parser.parseExpression("!null").getValue();
+	}
+
+	@Test(expected = EvaluationException.class)
+	public void testAndWithNullValueOnLeft() {
+		parser.parseExpression("null and true").getValue();
+	}
+
+	@Test(expected = EvaluationException.class)
+	public void testAndWithNullValueOnRight() {
+		parser.parseExpression("true and null").getValue();
+	}
+
+	@Test(expected = EvaluationException.class)
+	public void testOrWithNullValueOnLeft() {
+		parser.parseExpression("null or false").getValue();
+	}
+
+	@Test(expected = EvaluationException.class)
+	public void testOrWithNullValueOnRight() {
+		parser.parseExpression("false or null").getValue();
+	}
+
 	// assignment
 	@Test
 	public void testAssignmentToVariables01() {
@@ -307,7 +339,6 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("2>4?1:2",2,Integer.class);
 	}
 
-	
 	@Test
 	public void testTernaryOperator02() {
 		evaluate("'abc'=='abc'?1:2",1,Integer.class);
@@ -332,6 +363,31 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("2>4?(3>2?true:false):(5<3?true:false)",false,Boolean.class);
 	}
 
+	@Test(expected = EvaluationException.class)
+	public void testTernaryOperatorWithNullValue() {
+		parser.parseExpression("null ? 0 : 1").getValue();
+	}
+	
+	@Test
+	public void methodCallWithRootReferenceThroughParameter() {
+		evaluate("placeOfBirth.doubleIt(inventions.length)", 18, Integer.class);
+	}
+
+	@Test
+	public void ctorCallWithRootReferenceThroughParameter() {
+		evaluate("new org.springframework.expression.spel.testresources.PlaceOfBirth(inventions[0].toString()).city", "Telephone repeater", String.class);
+	}
+
+	@Test
+	public void fnCallWithRootReferenceThroughParameter() {
+		evaluate("#reverseInt(inventions.length, inventions.length, inventions.length)", "int[3]{9,9,9}", int[].class);
+	}
+	
+	@Test
+	public void methodCallWithRootReferenceThroughParameterThatIsAFunctionCall() {
+		evaluate("placeOfBirth.doubleIt(#reverseInt(inventions.length,2,3)[2])", 18, Integer.class);
+	}
+	
 	@Test
 	public void testIndexer03() {
 		evaluate("'christian'[8]", "n", String.class);
@@ -451,4 +507,5 @@ public class EvaluationTests extends ExpressionTestCase {
 		Class stringClass = parser.parseExpression("T(String)").getValue(Class.class);
 		Assert.assertEquals(String.class,stringClass);
 	}
+
 }

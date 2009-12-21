@@ -26,6 +26,12 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>com.springsource.javax.inject</artifactId>
+      <version>0.9.0.PFD</version>
+      <scope>test</scope> 
+    </dependency>
+    <dependency>
       <groupId>javax.persistence</groupId>
       <artifactId>persistence-api</artifactId>
       <version>1.0</version>
@@ -50,22 +56,12 @@
       <scope>provided</scope>
     </dependency> 
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.2</version>
-      <optional>true</optional>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-jta_1.1_spec</artifactId>
+      <version>1.1</version>
+      <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.7</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
-      <scope>compile</scope>
-    </dependency>
+    <!-- common logging dependency is in spring-core -->
     <dependency>
       <groupId>taglibs</groupId>
       <artifactId>standard</artifactId>
@@ -75,14 +71,40 @@
     <dependency>
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjweaver</artifactId>
-      <version>1.6.2</version>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>5.10</version>
-      <classifier>jdk15</classifier>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>3.3.1.GA</version>
+      <optional>true</optional>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-cglib-repack</artifactId>
+      <version>2.1_3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>1.8.0.7</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.2</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -100,12 +122,6 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
-      <version>${project.version}</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-instrument-classloading</artifactId>
       <version>${project.version}</version>
       <optional>true</optional>
     </dependency>
@@ -146,23 +162,13 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
-      <version>1.8.0.7</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-core</artifactId>
-      <version>3.3.1.GA</version>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>5.10</version>
+      <classifier>jdk15</classifier>
       <optional>true</optional>
-      <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-cglib-repack</artifactId>
-      <version>2.1_3</version>
-      <scope>test</scope>
-    </dependency>
+
   </dependencies>
+
 </project>

@@ -184,7 +184,7 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 		parser.validate();
 
 		// Read the model and create bean definitions based on its content
-		new ConfigurationClassBeanDefinitionReader(registry, this.sourceExtractor).loadBeanDefinitions(parser.getModel());
+		new ConfigurationClassBeanDefinitionReader(registry, this.sourceExtractor).loadBeanDefinitions(parser.getConfigurationClasses());
 	}
 
 	/**
@@ -222,7 +222,8 @@ public class ConfigurationClassPostProcessor implements BeanFactoryPostProcessor
 				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 				return true;
 			}
-			else if (metadata.isAnnotated(Component.class.getName())) {
+			else if (metadata.isAnnotated(Component.class.getName()) ||
+					metadata.hasAnnotatedMethods(Bean.class.getName())) {
 				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 				return true;
 			}

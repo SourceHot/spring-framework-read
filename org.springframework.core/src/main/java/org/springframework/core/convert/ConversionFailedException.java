@@ -16,20 +16,19 @@
 
 package org.springframework.core.convert;
 
-import org.springframework.core.style.StylerUtils;
-import org.springframework.util.ClassUtils;
-
 /**
  * Thrown when an attempt to execute a type conversion fails.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
-public class ConversionFailedException extends ConversionException {
+public final class ConversionFailedException extends ConversionException {
 
-	private Class<?> sourceType;
+	private final TypeDescriptor sourceType;
 
-	private TypeDescriptor targetType;
+	private final TypeDescriptor targetType;
+
 
 	/**
 	 * Create a new conversion exception.
@@ -38,16 +37,18 @@ public class ConversionFailedException extends ConversionException {
 	 * @param targetType the value's target type
 	 * @param cause the cause of the conversion failure
 	 */
-	public ConversionFailedException(Class<?> sourceType, TypeDescriptor targetType, Object value, Throwable cause) {
-		super(buildDefaultMessage(value, sourceType, targetType, cause), cause);
+	public ConversionFailedException(TypeDescriptor sourceType, TypeDescriptor targetType, Object value, Throwable cause) {
+		super("Unable to convert value " + value + " from type '" + sourceType.getName() +
+				"' to type '" + targetType.getName() + "'", cause);
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 	}
 
+
 	/**
 	 * Return the source type we tried to convert the value from.
 	 */
-	public Class<?> getSourceType() {
+	public TypeDescriptor getSourceType() {
 		return this.sourceType;
 	}
 
@@ -56,13 +57,6 @@ public class ConversionFailedException extends ConversionException {
 	 */
 	public TypeDescriptor getTargetType() {
 		return this.targetType;
-	}
-
-
-	private static String buildDefaultMessage(Object value, Class<?> sourceType, TypeDescriptor targetType, Throwable cause) {
-		return "Unable to convert value " + StylerUtils.style(value) + " from type '" +
-				ClassUtils.getQualifiedName(sourceType) + "' to type '" +
-				ClassUtils.getQualifiedName(targetType.getType()) + "'; reason = '" + cause.getMessage() + "'";
 	}
 
 }

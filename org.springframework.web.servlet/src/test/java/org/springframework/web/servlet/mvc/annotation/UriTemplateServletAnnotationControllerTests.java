@@ -89,6 +89,30 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 	@Test
+	public void doubles() throws Exception {
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
+					throws BeansException {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(DoubleController.class));
+				RootBeanDefinition mappingDef = new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
+				mappingDef.getPropertyValues().add("useDefaultSuffixPattern", false);
+				wac.registerBeanDefinition("handlerMapping", mappingDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/lat/1.2/long/3.4");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+
+		assertEquals("latitude-1.2-longitude-3.4", response.getContentAsString());
+	}
+
+	@Test
 	public void ambiguous() throws Exception {
 		initServlet(AmbiguousUriTemplateController.class);
 
@@ -221,6 +245,22 @@ public class UriTemplateServletAnnotationControllerTests {
 
 	}
 
+	@Test
+	public void multiPaths() throws Exception {
+		initServlet(MultiPathController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/category/page/5");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("handle4-page-5", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/category/page/5.html");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("handle4-page-5", response.getContentAsString());
+	}
+
+
 	private void initServlet(final Class<?> controllerclass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -234,6 +274,40 @@ public class UriTemplateServletAnnotationControllerTests {
 		};
 		servlet.init(new MockServletConfig());
 	}
+
+	@Test
+	public void noDefaultSuffixPattern() throws Exception {
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
+					throws BeansException {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(ImplicitSubPathController.class));
+				RootBeanDefinition mappingDef = new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
+				mappingDef.getPropertyValues().add("useDefaultSuffixPattern", false);
+				wac.registerBeanDefinition("handlerMapping", mappingDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/hotel.with.dot");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("test-hotel.with.dot", response.getContentAsString());
+	}
+
+	@Test
+	public void customRegex() throws Exception {
+		initServlet(CustomRegexController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("test-42", response.getContentAsString());
+	}
+
 
 	/*
 	 * Controllers
@@ -355,6 +429,29 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 	@Controller
+	public static class CustomRegexController {
+
+		@RequestMapping("/{root:\\d+}")
+		public void handle(@PathVariable("root") int root, Writer writer) throws IOException {
+			assertEquals("Invalid path variable value", 42, root);
+			writer.write("test-" + root);
+		}
+
+	}
+
+	@Controller
+	public static class DoubleController {
+
+		@RequestMapping("/lat/{latitude}/long/{longitude}")
+		public void testLatLong(@PathVariable Double latitude, @PathVariable Double longitude, Writer writer)
+			throws IOException {
+			writer.write("latitude-" + latitude + "-longitude-" + longitude);
+		}
+
+	}
+
+
+	@Controller
 	@RequestMapping("hotels")
 	public static class CrudController {
 
@@ -406,5 +503,34 @@ public class UriTemplateServletAnnotationControllerTests {
 		}
 	}
 
+	@Controller
+	@RequestMapping("/category")
+	public static class MultiPathController {
+
+		@RequestMapping(value = {"/{category}/page/{page}", "/**/{category}/page/{page}"})
+		public void category(@PathVariable String category, @PathVariable int page, Writer writer) throws IOException {
+			writer.write("handle1-");
+			writer.write("category-" + category);
+			writer.write("page-" + page);
+		}
+
+		@RequestMapping(value = {"/{category}", "/**/{category}"})
+		public void category(@PathVariable String category, Writer writer) throws IOException {
+			writer.write("handle2-");
+			writer.write("category-" + category);
+		}
+
+		@RequestMapping(value = {""})
+		public void category(Writer writer) throws IOException {
+			writer.write("handle3");
+		}
+
+		@RequestMapping(value = {"/page/{page}"})
+		public void category(@PathVariable int page, Writer writer) throws IOException {
+			writer.write("handle4-");
+			writer.write("page-" + page);
+		}
+
+	}
 
 }

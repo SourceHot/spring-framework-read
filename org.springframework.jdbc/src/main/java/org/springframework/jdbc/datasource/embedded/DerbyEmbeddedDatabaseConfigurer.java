@@ -18,7 +18,6 @@ package org.springframework.jdbc.datasource.embedded;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.Properties;
 import javax.sql.DataSource;
@@ -41,7 +40,7 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 	
 	private static final String URL_TEMPLATE = "jdbc:derby:memory:%s;%s";
 
-	// Error codes that indicate successful shutdown
+	// Error code that indicates successful shutdown
 	private static final String SHUTDOWN_CODE = "08006";
 
 	private static DerbyEmbeddedDatabaseConfigurer INSTANCE;
@@ -54,8 +53,8 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 	public static synchronized DerbyEmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
 		if (INSTANCE == null) {
 			// disable log file
-			System.setProperty("derby.stream.error.method", 
-					DerbyEmbeddedDatabaseConfigurer.class.getName() + ".getNoopOutputStream");
+			System.setProperty("derby.stream.error.method",
+					OutputStreamFactory.class.getName() + ".getNoopOutputStream");
 			INSTANCE = new DerbyEmbeddedDatabaseConfigurer();
 		}
 		return INSTANCE;
@@ -101,17 +100,4 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 		}
 	}
 
-
-	/**
-	 * Returns an {@link OutputStream} that ignores all data given to it.
-	 * Used by {@link #getInstance()} to prevent writing to Derby.log file.
-	 */
-	static OutputStream getNoopOutputStream() {
-		return new OutputStream() {
-			public void write(int b) throws IOException {
-				// ignore the output
-			}
-		};
-	}
-	
 }

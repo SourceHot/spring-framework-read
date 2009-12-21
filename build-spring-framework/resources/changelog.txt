@@ -3,25 +3,140 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.0.RC1 (2009-09-14)
+Changes in version 3.0.0.GA (2009-12-16)
+----------------------------------------
+
+* component scanning autodetects the new EE 6 "javax.annotation.ManagedBean" stereotype
+* updated JPA 2.0 support to the final spec (tested compatibility with EclipseLink 2.0 GA)
+* full support for GlassFish V3 GA (includes component scanning and load-time weaving)
+* upgraded to JRuby 1.4 (while remaining compatible with JRuby 1.1 and above)
+* bean property names are matched leniently ("title" and "Title"; "ISBN" and "iSBN")
+* bean properties of type enum array/collection can be populated with comma-separated String
+* removed getBeansWithAnnotation(Class,boolean,boolean) method from ListableBeanFactory
+* PropertyPlaceholderConfigurer is compatible with Spring 2.5 extensions (again)
+* SmartLifecycle beans will get auto-started on demand even if marked as lazy-init
+* MBeanExporter detects FactoryBean-exported resources independent from declaration order
+* refactored SpelExpressionParser to accept SpelParserConfiguration object with boolean flags
+* revised TypeDescriptor's valueOf and forObject factory methods with some level of caching
+* revised GenericConverter's "getConvertibleTypes" signature to return Set of ConvertiblePair
+* GenericConversionService prefers matches against inherited interfaces over superclasses
+* renamed ConverterRegistry's addGenericConverter(GenericConverter) method to addConverter
+* no default converters for Object-to-Map and Map-To-Object anymore
+* default converter for String-to-Properties parsing only applies for actual Properties objects
+* default ObjectToStringConverter only stringifies objects that indicate proper toString behavior
+* added "converters" property to FormattingConversionServiceFactoryBean as well
+* full support for formatters and formatting annotations on array/collection elements
+* no default number formatter (relying on plain java.lang.Number parsing and rendering)
+* no default formatters for Date/Calendar (requiring explicit use of @DateTimeFormat)
+* BeanValidationPostProcessor runs in before-initialization phase (before init methods) by default
+* removed MultipartRequest mixin interface again (avoiding a package dependency cycle)
+* revised RestTemplate method signatures to accept Object values instead of just Strings
+* revised path variable extraction to properly deal with dots in variable values (again)
+* reintroduced createBinder template method in Servlet/Portlet AnnotationMethodHandlerAdapter
+
+
+Changes in version 3.0.0.RC3 (2009-12-01)
 -----------------------------------------
 
-* updated to AspectJ 1.6.5, Groovy 1.6.3, EHCache 1.6.2, JUnit 4.7, and TestNG 5.10
+* prepared for Grails and ROO requirements
+* restored compatibility with Apache CXF
+* fixed bean definition import via "classpath*:" URLs
+* added chaining-capable "add" method to MutablePropertyValues
+* constructor arguments can be overridden by name in child bean definitions
+* BeanDefinitions return isSingleton()=true by default again, with scope name empty
+* init/destroy methods get processed in the order of declaration at each hierarchy level
+* fixed lookup of LifecycleProcessor bean in a Spring Dynamic Modules environment
+* refined lifecycle processing through introduction of startup/shutdown phases
+* fixed transaction synchronization setup with TransactionAwareDataSourceProxy involved
+* added support for Hibernate 3.3 RegionFactory cache SPI to LocalSessionFactoryBean
+* JSR-303 SpringValidatorAdapter uses field name as first argument (analogous to bind errors)
+* replaced DefaultConversionService with ConversionServiceFactory(Bean)
+* revised FormatterRegistry interface and FormattingConversionServiceFactoryBean setup
+* mvc:annotation-driven exposes default Validator and ConversionService as top-level beans
+* mvc:annotation-driven registers applicable HttpMessageConverters by default, if available
+* added interceptors support to mvc namespace, for path-based interceptor mappings
+
+
+Changes in version 3.0.0.RC2 (2009-11-13)
+-----------------------------------------
+
+* updated to final versions of JSR-330 "javax.inject" and JSR-303 "javax.validation" APIs
+* full compliance with the JSR-330 TCK (i.e. full compliance with the final specification)
+* support for Hibernate Validator 4.0 GA (as the JSR-303 reference implementation)
+* added support for load-time weaving in JBoss 5.x
+* added support for recent EHCache 1.6 configuration properties to EHCacheFactoryBean
+* added AnnotatedBeanDefinitionReader helper for programmatic registration of annotated classes
+* added AnnotationConfig(Web)ApplicationContext for convenient registration/scanning of classes
+* added GenericXmlApplicationContext with flexible configuration options for its XML support
+* AbstractApplicationContext can also start up in case of system properties access failure
+* internal MergedBeanDefinitionPostProcessors apply after all other post-processors
+* inner beans detected as ApplicationListeners as well (only supported for inner singletons)
+* child bean definition's scope attribute can be inherited from parent bean definition now
+* introduced SmartLifecycle interface with auto-startup and shutdown order support
+* introduced LifecycleProcessor delegate, customizable through "lifecycleProcessor" bean
+* MessageListenerContainers and Quartz SchedulerFactoryBean start up on refresh instead of init
+* added initialize-database tag to jdbc namespace for populating external data sources with data
+* PathMatchingResourcePatternResolver leniently ignores non-existing root directories
+* DefaultConversionService understands "on"/"off", "yes"/"no", "1"/"0" as boolean values
+* CustomEditorConfigurer supports PropertyEditor instances again (with deprecation warning)
+* revised MethodParameter's annotation accessor methods
+* ClassUtils is now parameterized with Class<?> and Class<T> where appropriate
+* DataBinder now accepts var-args to set allowed, disallowed, and required fields
+* DataBinder auto-grows nested paths on traversal (avoiding NullValueInNestedPathException)
+* fixed enum binding regression with WebRequestDataBinder (as used by @MVC data binding now)
+* fixed FieldError to expose rejected input value as String value instead of as array
+* JSR-303 Validator will only register validation failures if no binding failure happened
+* ContentNegotiatingViewResolver works with ignoreAcceptHeader and defaultContentType as well
+* added Spring MVC namespace, with convenient mvc:annotation-driven configuration element
+* default number and datetime formatters configured when using the Spring MVC namespace
+* full support for datetime formatting using the Joda Time library (automatically enabled)
+* added convenient @NumberFormat and @DateTimeFormat annotations for declarative formatting
+* implicit T.valueOf(S) and constructor T(S) lookup if no explicit S->T converter matches
+* AbstractExcelView is compatible with Apache POI 3.0 as well as 3.5 now
+* TilesConfigurer only sets up EL support if JSP 2.1 is present (for JSP 2.0 compatibility)
+* re-introduced Struts 1.x support ("org.springframework.web.struts") in deprecated form
+* deprecated scheduling support for JDK 1.3 Timer ("org.springframework.scheduling.timer")
+* deprecated remoting support for JAX-RPC (in favor of JAX-WS)
+
+
+Changes in version 3.0.0.RC1 (2009-09-25)
+-----------------------------------------
+
+* upgraded to CGLIB 2.2, AspectJ 1.6.5, Groovy 1.6.3, EHCache 1.6.2, JUnit 4.7, TestNG 5.10
+* introduced early support for JSR-330 "javax.inject" annotations (for autowiring)
+* introduced early support for JSR-303 Bean Validation (setup and MVC integration)
+* added default editors for "java.util.Currency" and "java.util.TimeZone"
 * refined PathMatchingResourcePatternResolver's treatment of non-readable directories
+* PathMatchingResourcePatternResolver understands VFS resources (i.e. works on JBoss 5.x)
 * revised AccessControlContext access from BeanFactory
+* AbstractBeanDefinitionParser can deal with null return value as well
+* PropertyOverrideConfigurer's "ignoreInvalidKeys" ignores invalid property names as well
+* PropertyPlaceholderConfigurer supports "${myKey:myDefaultValue}" defaulting syntax
 * BeanFactory's default type conversion falls back to String constructor on target type
 * BeanFactory tries to create unknown collection implementation types via default constructor
 * BeanFactory supports ObjectFactory as a dependency type for @Autowired and @Value
+* BeanFactory supports JSR-330 Provider interface as a dependency type for @Inject
 * BeanFactory prefers local primary bean to primary bean in parent factory
+* protected @Autowired method can be overridden with non-annotated method to suppress injection
+* private @Autowired methods with same signature will be called individually across a hierarchy
+* @PostConstruct processed top-down (base class first); @PreDestroy bottom-up (subclass first)
+* ConfigurationClassPostProcessor detect @Bean methods on registered plain bean classes as well
 * support for default "conversionService" bean in an ApplicationContext
 * MBeanServerFactoryBean returns JDK 1.5 platform MBeanServer for agent id "" (empty String)
 * changed NamedParameter/SimpleJdbcOperations parameter signatures to accept any Map value type 
 * refined logging in JMS SingleConnectionFactory and DefaultMessageListenerContainer
 * introduced "ui.format" package as an alternative to PropertyEditors for data binding
-* introduced initial JSR-303 Bean Validation support in "validation.beanvalidation" package
-* JSR-303 support for validation of @MVC hander method arguments driven by @Valid annotations
 * @RequestMapping annotation now supported for annotated interfaces (and JDK proxies) as well
+* @RequestParam and co support placeholders and expressions in their defaultValue attributes
+* @Value expressions supported as MVC handler method arguments as well (against request scope)
+* JSR-303 support for validation of @MVC handler method arguments driven by @Valid annotations
 * refined response handling for @ExceptionHandler methods
+* @ResponseStatus usage in handler methods detected by RedirectView
+* all @SessionAttributes get exposed to the model before handler method execution
+* @Event/ResourceMapping uniquely mapped to through event/resource id, even across controllers
+* MultipartRequest is available as a mixin interface on (Native)WebRequest as well
+* removed outdated "cacheJspExpressions" feature from ExpressionEvaluationUtils
+* introduced common ErrorHandler strategy, supported by message listener container
 * Jpa/JdoTransactionManager passes resolved timeout into Jpa/JdoDialect's beginTransaction
 * HibernateJpaDialect applies timeout onto native Hibernate Transaction before begin call
 * Spring's Hibernate support is now compatible with Hibernate 3.5 beta 1 as well

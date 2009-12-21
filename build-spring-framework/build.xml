@@ -3,7 +3,7 @@
 
 	<path id="bundles">
 		<pathelement location="../org.springframework.instrument"/>
-		<pathelement location="../org.springframework.instrument.classloading"/>
+		<pathelement location="../org.springframework.instrument.tomcat"/>
 		<pathelement location="../org.springframework.asm"/>
 		<pathelement location="../org.springframework.core"/>
 		<pathelement location="../org.springframework.expression"/>
@@ -13,14 +13,15 @@
 		<pathelement location="../org.springframework.transaction"/>
 		<pathelement location="../org.springframework.oxm"/>
 		<pathelement location="../org.springframework.jms"/>
-		<pathelement location="../org.springframework.aspects"/>
 		<pathelement location="../org.springframework.jdbc"/>
 		<pathelement location="../org.springframework.web"/>
 		<pathelement location="../org.springframework.orm"/>
 		<pathelement location="../org.springframework.context.support"/>
+		<pathelement location="../org.springframework.aspects"/>
 		<pathelement location="../org.springframework.web.servlet"/>
 		<pathelement location="../org.springframework.web.portlet"/>
 		<pathelement location="../org.springframework.test"/>
+		<pathelement location="../org.springframework.web.struts"/>
 		<pathelement location="../org.springframework.spring-library"/>
 		<pathelement location="../org.springframework.integration-tests"/>
 	</path>

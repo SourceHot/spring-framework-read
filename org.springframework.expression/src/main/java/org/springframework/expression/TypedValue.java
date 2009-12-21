@@ -28,13 +28,13 @@ import org.springframework.core.convert.TypeDescriptor;
  */
 public class TypedValue {
 
-	public static final TypedValue NULL_TYPED_VALUE = new TypedValue(null, TypeDescriptor.NULL);
+	public static final TypedValue NULL = new TypedValue(null, TypeDescriptor.NULL);
 
 
 	private final Object value;
 
-	private final TypeDescriptor typeDescriptor;
-	
+	private TypeDescriptor typeDescriptor;
+
 
 	/**
 	 * Create a TypedValue for a simple object. The type descriptor is inferred
@@ -43,9 +43,9 @@ public class TypedValue {
 	 */
 	public TypedValue(Object value) {
 		this.value = value;
-		this.typeDescriptor = TypeDescriptor.forObject(value);
+		this.typeDescriptor = null;  // initialized when/if requested
 	}
-	
+
 	/**
 	 * Create a TypedValue for a particular value with a particular type descriptor.
 	 * @param value the object value
@@ -62,6 +62,9 @@ public class TypedValue {
 	}
 	
 	public TypeDescriptor getTypeDescriptor() {
+		if (this.typeDescriptor == null) {
+			this.typeDescriptor = TypeDescriptor.forObject(this.value);
+		}
 		return this.typeDescriptor;
 	}
 
@@ -69,7 +72,7 @@ public class TypedValue {
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder();
-		str.append("TypedValue: ").append(this.value).append(" of type ").append(this.typeDescriptor.asString());
+		str.append("TypedValue: ").append(this.value).append(" of type ").append(this.getTypeDescriptor().asString());
 		return str.toString();
 	}
 

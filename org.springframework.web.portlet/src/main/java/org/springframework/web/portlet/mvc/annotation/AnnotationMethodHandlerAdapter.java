@@ -59,6 +59,7 @@ import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.Ordered;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.StylerUtils;
@@ -69,6 +70,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.support.BindingAwareModelMap;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -86,6 +88,7 @@ import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.portlet.HandlerAdapter;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.bind.MissingPortletRequestParameterException;
+import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.EventMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
@@ -117,7 +120,8 @@ import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
  * @see #setWebBindingInitializer
  * @see #setSessionAttributeStore
  */
-public class AnnotationMethodHandlerAdapter extends PortletContentGenerator implements HandlerAdapter, BeanFactoryAware {
+public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
+		implements HandlerAdapter, Ordered, BeanFactoryAware {
 
 	private static final String IMPLICIT_MODEL_ATTRIBUTE = "org.springframework.web.portlet.mvc.ImplicitModel";
 
@@ -135,6 +139,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	private WebArgumentResolver[] customArgumentResolvers;
 
 	private ModelAndViewResolver[] customModelAndViewResolvers;
+
+	private int order = Ordered.LOWEST_PRECEDENCE;
 
 	private ConfigurableBeanFactory beanFactory;
 
@@ -208,7 +214,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	}
 
 	/**
-	 * Set a custom WebArgumentResolvers to use for special method parameter types.
+	 * Set a custom WebArgumentResolver to use for special method parameter types.
 	 * Such a custom WebArgumentResolver will kick in first, having a chance to
 	 * resolve an argument value before the standard argument handling kicks in.
 	 */
@@ -240,6 +246,19 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	 */
 	public void setCustomModelAndViewResolvers(ModelAndViewResolver[] customModelAndViewResolvers) {
 		this.customModelAndViewResolvers = customModelAndViewResolvers;
+	}
+
+	/**
+	 * Specify the order value for this HandlerAdapter bean.
+	 * <p>Default value is <code>Integer.MAX_VALUE</code>, meaning that it's non-ordered.
+	 * @see org.springframework.core.Ordered#getOrder()
+	 */
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	public int getOrder() {
+		return this.order;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
@@ -362,6 +381,29 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	}
 
 
+	/**
+	 * Template method for creating a new PortletRequestDataBinder instance.
+	 * <p>The default implementation creates a standard PortletRequestDataBinder.
+	 * This can be overridden for custom PortletRequestDataBinder subclasses.
+	 * @param request current portlet request
+	 * @param target the target object to bind onto (or <code>null</code>
+	 * if the binder is just used to convert a plain parameter value)
+	 * @param objectName the objectName of the target object
+	 * @return the PortletRequestDataBinder instance to use
+	 * @throws Exception in case of invalid state or arguments
+	 * @see PortletRequestDataBinder#bind(javax.portlet.PortletRequest)
+	 * @see PortletRequestDataBinder#convertIfNecessary(Object, Class, MethodParameter)
+	 */
+	protected PortletRequestDataBinder createBinder(
+			PortletRequest request, Object target, String objectName) throws Exception {
+
+		return new PortletRequestDataBinder(target, objectName);
+	}
+
+
+	/**
+	 * Portlet-specific subclass of {@link HandlerMethodResolver}.
+	 */
 	private static class PortletHandlerMethodResolver extends HandlerMethodResolver {
 
 		private final Map<Method, RequestMappingInfo> mappings = new HashMap<Method, RequestMappingInfo>();
@@ -385,13 +427,14 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				mappingInfo.initPhaseMapping(PortletRequest.RENDER_PHASE, renderMapping.value(), renderMapping.params());
 			}
 			if (resourceMapping != null) {
-				mappingInfo.initPhaseMapping(PortletRequest.RESOURCE_PHASE, resourceMapping.value(), resourceMapping.params());
+				mappingInfo.initPhaseMapping(PortletRequest.RESOURCE_PHASE, resourceMapping.value(), new String[0]);
 			}
 			if (eventMapping != null) {
-				mappingInfo.initPhaseMapping(PortletRequest.EVENT_PHASE, eventMapping.value(), eventMapping.params());
+				mappingInfo.initPhaseMapping(PortletRequest.EVENT_PHASE, eventMapping.value(), new String[0]);
 			}
 			if (requestMapping != null) {
-				mappingInfo.initStandardMapping(requestMapping.value(), requestMapping.method(), requestMapping.params());
+				mappingInfo.initStandardMapping(requestMapping.value(), requestMapping.method(),
+						requestMapping.params(), requestMapping.headers());
 				if (mappingInfo.phase == null) {
 					mappingInfo.phase = determineDefaultPhase(method);
 				}
@@ -466,95 +509,9 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	}
 
 
-	private static class RequestMappingInfo  {
-
-		public Set<PortletMode> modes = new HashSet<PortletMode>();
-
-		public String phase;
-
-		public String value;
-
-		public Set<String> methods = new HashSet<String>();
-
-		public String[] params = new String[0];
-
-		public void initStandardMapping(String[] modes, RequestMethod[] methods, String[] params) {
-			for (String mode : modes) {
-				this.modes.add(new PortletMode(mode));
-			}
-			for (RequestMethod method : methods) {
-				this.methods.add(method.name());
-			}
-			this.params = StringUtils.mergeStringArrays(this.params, params);
-		}
-
-		public void initPhaseMapping(String phase, String value, String[] params) {
-			if (this.phase != null) {
-				throw new IllegalStateException(
-						"Invalid mapping - more than one phase specified: '" + this.phase + "', '" + phase + "'");
-			}
-			this.phase = phase;
-			this.value = value;
-			this.params = StringUtils.mergeStringArrays(this.params, params);
-		}
-
-		public boolean match(PortletRequest request) {
-			if (!this.modes.isEmpty() && !this.modes.contains(request.getPortletMode())) {
-				return false;
-			}
-			if (StringUtils.hasLength(this.phase) &&
-					!this.phase.equals(request.getAttribute(PortletRequest.LIFECYCLE_PHASE))) {
-				return false;
-			}
-			if (StringUtils.hasLength(this.value)) {
-				if (this.phase.equals(PortletRequest.ACTION_PHASE) &&
-						!this.value.equals(request.getParameter(ActionRequest.ACTION_NAME))) {
-					return false;
-				}
-				else if (this.phase.equals(PortletRequest.RENDER_PHASE) &&
-						!(new WindowState(this.value)).equals(request.getWindowState())) {
-					return false;
-				}
-				else if (this.phase.equals(PortletRequest.RESOURCE_PHASE) &&
-						!this.value.equals(((ResourceRequest) request).getResourceID())) {
-					return false;
-				}
-				else if (this.phase.equals(PortletRequest.EVENT_PHASE)) {
-					Event event = ((EventRequest) request).getEvent();
-					if (!this.value.equals(event.getName()) && !this.value.equals(event.getQName().toString())) {
-						return false;
-					}
-				}
-			}
-			return PortletAnnotationMappingUtils.checkRequestMethod(this.methods, request) &&
-					PortletAnnotationMappingUtils.checkParameters(this.params, request);
-		}
-
-		public boolean isBetterMatchThan(RequestMappingInfo other) {
-			return ((!this.modes.isEmpty() && other.modes.isEmpty()) ||
-					(StringUtils.hasLength(this.phase) && !StringUtils.hasLength(other.phase)) ||
-					(StringUtils.hasLength(this.value) && !StringUtils.hasLength(other.value)) ||
-					(!this.methods.isEmpty() && other.methods.isEmpty()) ||
-					this.params.length > other.params.length);
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			RequestMappingInfo other = (RequestMappingInfo) obj;
-			return (this.modes.equals(other.modes) &&
-					ObjectUtils.nullSafeEquals(this.phase, other.phase) &&
-					ObjectUtils.nullSafeEquals(this.value, other.value) &&
-					this.methods.equals(other.methods) &&
-					Arrays.equals(this.params, other.params));
-		}
-
-		@Override
-		public int hashCode() {
-			return (ObjectUtils.nullSafeHashCode(this.modes) * 29 + this.phase.hashCode());
-		}
-	}
-
-
+	/**
+	 * Portlet-specific subclass of {@link HandlerMethodInvoker}.
+	 */
 	private class PortletHandlerMethodInvoker extends HandlerMethodInvoker {
 
 		public PortletHandlerMethodInvoker(HandlerMethodResolver resolver) {
@@ -570,6 +527,20 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		@Override
 		protected void raiseSessionRequiredException(String message) throws Exception {
 			throw new PortletSessionRequiredException(message);
+		}
+
+		@Override
+		protected WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName)
+				throws Exception {
+
+			return AnnotationMethodHandlerAdapter.this.createBinder(
+					(PortletRequest) webRequest.getNativeRequest(), target, objectName);
+		}
+
+		@Override
+		protected void doBind(WebDataBinder binder, NativeWebRequest webRequest) throws Exception {
+			PortletRequestDataBinder portletBinder = (PortletRequestDataBinder) binder;
+			portletBinder.bind((PortletRequest) webRequest.getNativeRequest());
 		}
 
 		@Override
@@ -594,8 +565,11 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			if (Cookie.class.isAssignableFrom(paramType)) {
 				return cookieValue;
 			}
-			else {
+			else if (cookieValue != null) {
 				return cookieValue.getValue();
+			}
+			else {
+				return null;
 			}
 		}
 
@@ -672,8 +646,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			// Invoke custom resolvers if present...
 			if (customModelAndViewResolvers != null) {
 				for (ModelAndViewResolver mavResolver : customModelAndViewResolvers) {
-					org.springframework.web.servlet.ModelAndView smav = mavResolver
-							.resolveModelAndView(handlerMethod, handlerType, returnValue, implicitModel, webRequest);
+					org.springframework.web.servlet.ModelAndView smav =
+							mavResolver.resolveModelAndView(handlerMethod, handlerType, returnValue, implicitModel, webRequest);
 					if (smav != ModelAndViewResolver.UNRESOLVED) {
 						return (smav.isReference() ?
 								new ModelAndView(smav.getViewName(), smav.getModelMap()) :
@@ -723,6 +697,103 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			else {
 				throw new IllegalArgumentException("Invalid handler method return value: " + returnValue);
 			}
+		}
+	}
+
+
+	/**
+	 * Holder for request mapping metadata. Allows for finding a best matching candidate.
+	 */
+	private static class RequestMappingInfo {
+
+		public final Set<PortletMode> modes = new HashSet<PortletMode>();
+
+		public String phase;
+
+		public String value;
+
+		public final Set<String> methods = new HashSet<String>();
+
+		public String[] params = new String[0];
+
+		public String[] headers = new String[0];
+
+		public void initStandardMapping(String[] modes, RequestMethod[] methods, String[] params, String[] headers) {
+			for (String mode : modes) {
+				this.modes.add(new PortletMode(mode));
+			}
+			for (RequestMethod method : methods) {
+				this.methods.add(method.name());
+			}
+			this.params = StringUtils.mergeStringArrays(this.params, params);
+			this.headers = StringUtils.mergeStringArrays(this.headers, headers);
+		}
+
+		public void initPhaseMapping(String phase, String value, String[] params) {
+			if (this.phase != null) {
+				throw new IllegalStateException(
+						"Invalid mapping - more than one phase specified: '" + this.phase + "', '" + phase + "'");
+			}
+			this.phase = phase;
+			this.value = value;
+			this.params = StringUtils.mergeStringArrays(this.params, params);
+		}
+
+		public boolean match(PortletRequest request) {
+			if (!this.modes.isEmpty() && !this.modes.contains(request.getPortletMode())) {
+				return false;
+			}
+			if (StringUtils.hasLength(this.phase) &&
+					!this.phase.equals(request.getAttribute(PortletRequest.LIFECYCLE_PHASE))) {
+				return false;
+			}
+			if (StringUtils.hasLength(this.value)) {
+				if (this.phase.equals(PortletRequest.ACTION_PHASE) &&
+						!this.value.equals(request.getParameter(ActionRequest.ACTION_NAME))) {
+					return false;
+				}
+				else if (this.phase.equals(PortletRequest.RENDER_PHASE) &&
+						!(new WindowState(this.value)).equals(request.getWindowState())) {
+					return false;
+				}
+				else if (this.phase.equals(PortletRequest.RESOURCE_PHASE) &&
+						!this.value.equals(((ResourceRequest) request).getResourceID())) {
+					return false;
+				}
+				else if (this.phase.equals(PortletRequest.EVENT_PHASE)) {
+					Event event = ((EventRequest) request).getEvent();
+					if (!this.value.equals(event.getName()) && !this.value.equals(event.getQName().toString())) {
+						return false;
+					}
+				}
+			}
+			return PortletAnnotationMappingUtils.checkRequestMethod(this.methods, request) &&
+					PortletAnnotationMappingUtils.checkParameters(this.params, request) &&
+					PortletAnnotationMappingUtils.checkHeaders(this.headers, request);
+		}
+
+		public boolean isBetterMatchThan(RequestMappingInfo other) {
+			return ((!this.modes.isEmpty() && other.modes.isEmpty()) ||
+					(StringUtils.hasLength(this.phase) && !StringUtils.hasLength(other.phase)) ||
+					(StringUtils.hasLength(this.value) && !StringUtils.hasLength(other.value)) ||
+					(!this.methods.isEmpty() && other.methods.isEmpty()) ||
+					this.params.length > other.params.length);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			RequestMappingInfo other = (RequestMappingInfo) obj;
+			return (this.modes.equals(other.modes) &&
+					ObjectUtils.nullSafeEquals(this.phase, other.phase) &&
+					ObjectUtils.nullSafeEquals(this.value, other.value) &&
+					this.methods.equals(other.methods) &&
+					Arrays.equals(this.params, other.params) &&
+					Arrays.equals(this.headers, other.headers));
+		}
+
+		@Override
+		public int hashCode() {
+			return (ObjectUtils.nullSafeHashCode(this.modes) * 29 + this.phase.hashCode());
 		}
 	}
 

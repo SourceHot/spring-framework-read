@@ -77,7 +77,7 @@ public class HandlerMethodResolver {
 			ReflectionUtils.doWithMethods(currentHandlerType, new ReflectionUtils.MethodCallback() {
 				public void doWith(Method method) {
 					Method specificMethod = ClassUtils.getMostSpecificMethod(method, currentHandlerType);
-					if (isHandlerMethod(specificMethod)) {
+					if (isHandlerMethod(method)) {
 						handlerMethods.add(specificMethod);
 					}
 					else if (method.isAnnotationPresent(InitBinder.class)) {
@@ -87,7 +87,7 @@ public class HandlerMethodResolver {
 						modelAttributeMethods.add(specificMethod);
 					}
 				}
-			});
+			}, ReflectionUtils.NON_BRIDGED_METHODS);
 		}
 		this.typeLevelMapping = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
 		SessionAttributes sessionAttributes = handlerType.getAnnotation(SessionAttributes.class);

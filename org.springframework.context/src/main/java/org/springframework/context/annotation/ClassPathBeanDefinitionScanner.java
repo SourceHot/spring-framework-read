@@ -43,9 +43,13 @@ import org.springframework.util.PatternMatchUtils;
  * {@link org.springframework.stereotype.Service @Service}, or
  * {@link org.springframework.stereotype.Controller @Controller} stereotype.
  *
+ * <p>Also supports Java EE 6's {@link javax.annotation.ManagedBean} and
+ * JSR-330's {@link javax.inject.Named} annotations, if available.
+ *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
+ * @see AnnotationConfigApplicationContext#scan
  * @see org.springframework.stereotype.Component
  * @see org.springframework.stereotype.Repository
  * @see org.springframework.stereotype.Service
@@ -145,7 +149,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @see #setScopedProxyMode
 	 */
 	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
-		this.scopeMetadataResolver = scopeMetadataResolver;
+		this.scopeMetadataResolver = (scopeMetadataResolver != null ? scopeMetadataResolver : new AnnotationScopeMetadataResolver());
 	}
 
 	/**
@@ -206,22 +210,11 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
 				if (candidate instanceof AnnotatedBeanDefinition) {
-					AnnotatedBeanDefinition abd = (AnnotatedBeanDefinition) candidate;
-					if (abd.getMetadata().isAnnotated(Primary.class.getName())) {
-						abd.setPrimary(true);
-					}
-					if (abd.getMetadata().isAnnotated(Lazy.class.getName())) {
-						Boolean value = (Boolean) abd.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value");
-						abd.setLazyInit(value);
-					}
-					if (abd.getMetadata().isAnnotated(DependsOn.class.getName())) {
-						String[] value = (String[]) abd.getMetadata().getAnnotationAttributes(DependsOn.class.getName()).get("value");
-						abd.setDependsOn(value);
-					}
+					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
 				if (checkCandidate(beanName, candidate)) {
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
-					definitionHolder = applyScopedProxyMode(definitionHolder, scopeMetadata);
+					definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 					beanDefinitions.add(definitionHolder);
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
@@ -299,21 +292,5 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				newDefinition.getSource().equals(existingDefinition.getSource()) ||  // scanned same file twice
 				newDefinition.equals(existingDefinition));  // scanned equivalent class twice
 	}
-
-	/**
-	 * Apply the specified scope to the given bean definition.
-	 * @param definition the bean definition to configure
-	 * @param metadata the corresponding scope metadata
-	 * @return the final bean definition to use (potentially a proxy)
-	 */
-	private BeanDefinitionHolder applyScopedProxyMode(BeanDefinitionHolder definition, ScopeMetadata metadata) {
-		ScopedProxyMode scopedProxyMode = metadata.getScopedProxyMode();
-		if (scopedProxyMode.equals(ScopedProxyMode.NO)) {
-			return definition;
-		}
-		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
-		return ScopedProxyCreator.createScopedProxy(definition, this.registry, proxyTargetClass);
-	}
-
 
 }

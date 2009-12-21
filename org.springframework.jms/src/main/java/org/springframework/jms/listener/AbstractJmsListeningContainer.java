@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import javax.jms.JMSException;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.context.Lifecycle;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.support.JmsUtils;
@@ -59,11 +59,13 @@ import org.springframework.util.ClassUtils;
  * @see #doShutdown()
  */
 public abstract class AbstractJmsListeningContainer extends JmsDestinationAccessor
-		implements Lifecycle, BeanNameAware, DisposableBean {
+		implements SmartLifecycle, BeanNameAware, DisposableBean {
 
 	private String clientId;
 
 	private boolean autoStartup = true;
+
+	private int phase = Integer.MAX_VALUE;
 
 	private String beanName;
 
@@ -110,6 +112,28 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 */
 	public void setAutoStartup(boolean autoStartup) {
 		this.autoStartup = autoStartup;
+	}
+
+	public boolean isAutoStartup() {
+		return this.autoStartup;
+	}
+
+	/**
+	 * Specify the phase in which this container should be started and
+	 * stopped. The startup order proceeds from lowest to highest, and
+	 * the shutdown order is the reverse of that. By default this value
+	 * is Integer.MAX_VALUE meaning that this container starts as late
+	 * as possible and stops as soon as possible.
+	 */
+	public void setPhase(int phase) {
+		this.phase = phase;
+	}
+
+	/**
+	 * Return the phase in which this container will be started and stopped.
+	 */
+	public int getPhase() {
+		return this.phase;
 	}
 
 	public void setBeanName(String beanName) {
@@ -166,9 +190,6 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 			synchronized (this.lifecycleMonitor) {
 				this.active = true;
 				this.lifecycleMonitor.notifyAll();
-			}
-			if (this.autoStartup) {
-				doStart();
 			}
 			doInitialize();
 		}
@@ -283,6 +304,11 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		catch (JMSException ex) {
 			throw convertJmsAccessException(ex);
 		}
+	}
+
+	public void stop(Runnable callback) {
+		this.stop();
+		callback.run();
 	}
 
 	/**

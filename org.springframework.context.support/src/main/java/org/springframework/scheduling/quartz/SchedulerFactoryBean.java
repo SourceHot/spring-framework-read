@@ -38,7 +38,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.Lifecycle;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -86,8 +86,8 @@ import org.springframework.util.CollectionUtils;
  * @see org.quartz.impl.StdSchedulerFactory
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
-public class SchedulerFactoryBean extends SchedulerAccessor
-		implements FactoryBean<Scheduler>, BeanNameAware, ApplicationContextAware, InitializingBean, DisposableBean, Lifecycle {
+public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBean<Scheduler>, BeanNameAware,
+		ApplicationContextAware, InitializingBean, DisposableBean, SmartLifecycle {
 
 	public static final String PROP_THREAD_COUNT = "org.quartz.threadPool.threadCount";
 
@@ -159,7 +159,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	}
 
 
-	private Class schedulerFactoryClass = StdSchedulerFactory.class;
+	private Class<?> schedulerFactoryClass = StdSchedulerFactory.class;
 
 	private String schedulerName;
 
@@ -189,6 +189,8 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	private boolean autoStartup = true;
 
 	private int startupDelay = 0;
+
+	private int phase = Integer.MAX_VALUE;
 
 	private boolean exposeSchedulerInRepository = false;
 
@@ -365,6 +367,33 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	}
 
 	/**
+	 * Return whether this scheduler is configured for auto-startup. If "true",
+	 * the scheduler will start after the context is refreshed and after the
+	 * start delay, if any.
+	 */
+	public boolean isAutoStartup() {
+		return this.autoStartup;
+	}
+
+	/**
+	 * Specify the phase in which this scheduler should be started and
+	 * stopped. The startup order proceeds from lowest to highest, and
+	 * the shutdown order is the reverse of that. By default this value
+	 * is Integer.MAX_VALUE meaning that this scheduler starts as late
+	 * as possible and stops as soon as possible.
+	 */
+	public void setPhase(int phase) {
+		this.phase = phase;
+	}
+
+	/**
+	 * Return the phase in which this scheduler will be started and stopped.
+	 */
+	public int getPhase() {
+		return this.phase;
+	}
+
+	/**
 	 * Set the number of seconds to wait after initialization before
 	 * starting the scheduler asynchronously. Default is 0, meaning
 	 * immediate synchronous startup on initialization of this bean.
@@ -424,7 +453,8 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 		}
 
 		// Create SchedulerFactory instance.
-		SchedulerFactory schedulerFactory = (SchedulerFactory) BeanUtils.instantiateClass(this.schedulerFactoryClass);
+		SchedulerFactory schedulerFactory = (SchedulerFactory)
+				BeanUtils.instantiateClass(this.schedulerFactoryClass);
 
 		initSchedulerFactory(schedulerFactory);
 
@@ -481,11 +511,6 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 
 		registerListeners();
 		registerJobsAndTriggers();
-
-		// Start Scheduler immediately, if demanded.
-		if (this.autoStartup) {
-			startScheduler(this.scheduler, this.startupDelay);
-		}
 	}
 
 
@@ -651,6 +676,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 				}
 			};
 			schedulerThread.setName("Quartz Scheduler [" + scheduler.getSchedulerName() + "]");
+			schedulerThread.setDaemon(true);
 			schedulerThread.start();
 		}
 	}
@@ -685,7 +711,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 	public void start() throws SchedulingException {
 		if (this.scheduler != null) {
 			try {
-				this.scheduler.start();
+				startScheduler(this.scheduler, this.startupDelay);
 			}
 			catch (SchedulerException ex) {
 				throw new SchedulingException("Could not start Quartz Scheduler", ex);
@@ -702,6 +728,11 @@ public class SchedulerFactoryBean extends SchedulerAccessor
 				throw new SchedulingException("Could not stop Quartz Scheduler", ex);
 			}
 		}
+	}
+
+	public void stop(Runnable callback) throws SchedulingException {
+		stop();
+		callback.run();
 	}
 
 	public boolean isRunning() throws SchedulingException {

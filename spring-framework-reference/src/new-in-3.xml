@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
-"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="new-in-3">
   <title>New Features and Enhancements in Spring 3.0</title>
 
@@ -65,12 +65,6 @@
     url="http://www.springsource.org/documentation"> Spring
     Documentation</ulink> page.</para>
 
-    <sidebar id="new-in-3-intro-work-in-progress">
-      <title>Note:</title>
-
-      <para>This document is not yet available. It will
-      be available for the Spring 3.0 final release.</para>
-    </sidebar>
   </section>
 
   <section id="new-in-3-modules-build">
@@ -139,6 +133,10 @@
       <listitem>
         <para>org.springframework.web.servlet</para>
       </listitem>
+
+      <listitem>
+        <para>org.springframework.web.struts</para>
+      </listitem>
     </itemizedlist>
 
     <sidebar id="new-in-3-intro-spring-jar">
@@ -186,7 +184,8 @@
       </listitem>
 
       <listitem>
-        <para>General-purpose type conversion system and UI field formatting system</para>
+        <para>General-purpose type conversion system and field formatting
+        system</para>
       </listitem>
 
       <listitem>
@@ -220,6 +219,10 @@
 
       <para>BeanFactory interface returns typed bean instances as far as
       possible: <itemizedlist>
+          <listitem>
+            <para>T getBean(Class&lt;T&gt; requiredType)</para>
+          </listitem>
+
           <listitem>
             <para>T getBean(String name, Class&lt;T&gt; requiredType)</para>
           </listitem>
@@ -267,7 +270,8 @@
       across all the products in the Spring portfolio. Its language features
       are driven by the requirements of the projects in the Spring portfolio,
       including tooling requirements for code completion support within the
-      Eclipse based SpringSource Tool Suite.</para>
+      Eclipse based <ulink url="http://www.springsource.com/products/sts">SpringSource
+      Tool Suite</ulink>.</para>
 
       <para>The following is an example of how the Expression Language can be
       used to configure some properties of a database setup <programlisting
@@ -287,7 +291,7 @@ public class RewardsTestDatabase {
     public void setDatabaseName(String dbName) { … }
 
     @Value("#{strategyBean.databaseKeyGenerator}")
-    public voidsetKeyGenerator(KeyGenerator kg) { … }
+    public void setKeyGenerator(KeyGenerator kg) { … }
 }
 </programlisting></para>
     </section>
@@ -324,6 +328,10 @@ public class RewardsTestDatabase {
 
             <listitem>
               <para>@Import</para>
+            </listitem>
+
+            <listitem>
+              <para>@ImportResource</para>
             </listitem>
 
             <listitem>
@@ -369,7 +377,16 @@ public class AppConfig {
         scanning entry in your minimal application context XML file.
         <programlisting language="xml">&lt;context:component-scan base-package="org.example.config"/&gt;
 &lt;util:properties id="jdbcProperties" location="classpath:org/example/config/jdbc.properties"/&gt;
-        </programlisting></para>
+        </programlisting>
+        Or you can bootstrap a <literal>@Configuration</literal> class directly using
+        <literal>AnnotationConfigApplicationContext</literal>:
+        <programlisting language="java">public static void main(String[] args) {
+    ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+    FooService fooService = ctx.getBean(FooService.class);
+    fooService.doStuff();
+}</programlisting>
+        See <xref linkend="beans-java-instantiating-container"/> for full information on
+        <literal>AnnotationConfigApplicationContext</literal>.</para>
       </section>
 
       <section>
@@ -384,15 +401,18 @@ public class AppConfig {
     </section>
 
     <section id="new-feature-convert-and-format">
-      <title>General purpose type conversion system and UI field formatting system</title>
-      <para>
-		A general purpose <link linkend="core.convert">type conversion system</link> has been introduced.
-		The system is currently used by SpEL for type coersion, and may also be used by a Spring Container when binding bean property values.
-	  </para>
-	  <para>
-		In addition, a <link linkend="ui.format">ui.format</link> system has been introduced for formatting UI field values.
-		This system provides a simpler and more robust alternative to JavaBean PropertyEditors in UI environments such as Spring MVC.
-	  </para>
+      <title>General purpose type conversion system and field formatting
+      system</title>
+
+      <para>A general purpose <link linkend="core-convert">type conversion
+      system</link> has been introduced. The system is currently used by SpEL
+      for type conversion, and may also be used by a Spring Container and DataBinder when
+      binding bean property values.</para>
+
+      <para>In addition, a <link linkend="format">formatter</link> SPI
+      has been introduced for formatting field values. This SPI provides
+      a simpler and more robust alternative to JavaBean PropertyEditors for use in client
+      environments such as Spring MVC.</para>
     </section>
 
     <section id="new-feature-oxm">
@@ -424,20 +444,22 @@ public class AppConfig {
         <classname>JmsTemplate</classname>. Both server and client side REST
         functionality make use of
         <interfacename>HttpConverter</interfacename>s to facilitate the
-        conversion between objects and their representation in HTTP request
-        and replies.</para>
+        conversion between objects and their representation in HTTP requests
+        and responses.</para>
 
         <para>The <classname>MarshallingHttpMessageConverter</classname> uses
         the <emphasis>Object to XML mapping</emphasis> functionality mentioned
         earlier.</para>
 
-        <para>Refer to the section on <link linkend="mvc">MVC</link> and
-        <link linkend="rest-resttemplate">the RestTemplate</link>
-        for more information.</para>
+        <para>Refer to the sections on <link linkend="mvc">MVC</link> and <link
+        linkend="rest-resttemplate">the RestTemplate</link> for more
+        information.</para>
       </section>
 
       <section>
         <title>@MVC additions</title>
+
+        <para>A <literal>mvc</literal> namespace has been introduced that greatly simplifies Spring MVC configuration.</para>
 
         <para>Additional annotations such as
         <classname>@CookieValue</classname> and
@@ -452,9 +474,8 @@ public class AppConfig {
     <section id="new-feature-validation">
       <title>Declarative model validation</title>
 
-      <para>Hibernate Validator, JSR 303</para>
-
-      <para>Work in progress... not part of the Spring 3.0 M3 release.</para>
+      <para>Several <link linkend="validation-beanvalidation">validation enhancements</link>,
+      including JSR 303 support that uses Hibernate Validator as the default provider.</para>
     </section>
 
     <section id="new-feature-jee-6">
@@ -464,9 +485,8 @@ public class AppConfig {
       use of the new @Async annotation (or EJB 3.1's @Asynchronous
       annotation).</para>
 
-      <para>JSF 2.0, JPA 2.0, etc</para>
+      <para>JSR 303, JSF 2.0, JPA 2.0, etc</para>
 
-      <para>Work in progress... not part of the Spring 3.0 M3 release.</para>
     </section>
 
     <section id="new-feature-embedded-databases">

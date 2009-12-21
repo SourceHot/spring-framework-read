@@ -38,25 +38,25 @@ import org.springframework.util.NumberUtils;
  * @see java.math.BigDecimal
  * @see NumberUtils
  */
-class StringToNumberConverterFactory implements ConverterFactory<String, Number> {
+final class StringToNumberConverterFactory implements ConverterFactory<String, Number> {
 
 	public <T extends Number> Converter<String, T> getConverter(Class<T> targetType) {
 		return new StringToNumber<T>(targetType);
 	}
 
-	private static class StringToNumber<T extends Number> implements Converter<String, T> {
+	private static final class StringToNumber<T extends Number> implements Converter<String, T> {
 
 		private final Class<T> targetType;
-		
+
 		public StringToNumber(Class<T> targetType) {
 			this.targetType = targetType;
 		}
-	
+
 		public T convert(String source) {
-			if ("".equals(source)) {
+			if (source.length() == 0) {
 				return null;
 			}
-			return NumberUtils.parseNumber(source, targetType);
+			return NumberUtils.parseNumber(source, this.targetType);
 		}
 	}
 

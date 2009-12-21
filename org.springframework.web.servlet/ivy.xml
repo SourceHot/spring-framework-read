@@ -11,7 +11,7 @@
 
 	<configurations>
 		<include file="${spring.build.dir}/common/default-ivy-configurations.xml"/>
-		<conf name="commons-attributes" extends="runtime" description="JARs needed to run with Commons Attributes"/>
+		<conf name="commons-logging" extends="runtime" description="JARs needed to run with Commons Logging"/>
 		<conf name="feed" extends="runtime" description="JARs needed to create beans for Atom and RSS feeds"/>
 		<conf name="freemarker" extends="runtime" description="JARs needed to create beans for Freemarker"/>
 		<conf name="itext" extends="runtime" description="JARs needed to create beans for iText"/>
@@ -47,7 +47,7 @@
 		<dependency org="net.sourceforge.jasperreports" name="com.springsource.net.sf.jasperreports" rev="2.0.5"
                     conf="optional, jasper-reports->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1"
-                    conf="compile->compile"/>
+                    conf="compile, commons-logging->compile"/>
 		<dependency org="org.apache.poi" name="com.springsource.org.apache.poi" rev="3.0.2.FINAL"
                     conf="optional, poi->compile"/>
 		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles" rev="2.1.2.osgi"
@@ -97,9 +97,10 @@
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.3.1.GA" 
 		            conf="test->compile"/>
 		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="provided->runtime"/>
-		<dependency org="javax.validation" name="com.springsource.javax.validation" rev="1.0.0.CR3"/>
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate.validator" rev="4.0.0.Beta2"/>
+		<dependency org="javax.validation" name="com.springsource.javax.validation" rev="1.0.0.GA" conf="test->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate.validator" rev="4.0.0.GA" conf="test->runtime"/>
 		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="1.5.3" conf="test->runtime"/>
+		<dependency org="org.joda" name="com.springsource.org.joda.time" rev="1.6.0" conf="test->runtime"/>
 	</dependencies>
 
 </ivy-module>

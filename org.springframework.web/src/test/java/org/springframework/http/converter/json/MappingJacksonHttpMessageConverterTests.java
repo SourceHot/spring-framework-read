@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -33,25 +34,33 @@ import org.springframework.http.MockHttpOutputMessage;
 /** @author Arjen Poutsma */
 public class MappingJacksonHttpMessageConverterTests {
 
-	private MappingJacksonHttpMessageConverter<MyBean> converter;
+	private MappingJacksonHttpMessageConverter converter;
 
 	@Before
 	public void setUp() {
-		converter = new MappingJacksonHttpMessageConverter<MyBean>();
-	}
-	
-	@Test
-	public void supports() {
-		assertTrue(converter.supports(MyBean.class));
+		converter = new MappingJacksonHttpMessageConverter();
 	}
 
 	@Test
+	public void canRead() {
+		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "json")));
+		assertTrue(converter.canRead(Map.class, new MediaType("application", "json")));
+	}
+
+	@Test
+	public void canWrite() {
+		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "json")));
+		assertTrue(converter.canWrite(Map.class, new MediaType("application", "json")));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
 	public void readTyped() throws IOException {
 		String body =
 				"{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
-		MyBean result = converter.read(MyBean.class, inputMessage);
+		MyBean result = (MyBean) converter.read((Class) MyBean.class, inputMessage);
 		assertEquals("Foo", result.getString());
 		assertEquals(42, result.getNumber());
 		assertEquals(42F, result.getFraction(), 0F);
@@ -61,17 +70,16 @@ public class MappingJacksonHttpMessageConverterTests {
 	}
 
 	@Test
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings("unchecked")
 	public void readUntyped() throws IOException {
-		MappingJacksonHttpMessageConverter<HashMap> converter = new MappingJacksonHttpMessageConverter<HashMap>();
 		String body =
 				"{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
-		HashMap<String,Object> result = converter.read(HashMap.class, inputMessage);
+		HashMap<String, Object> result = (HashMap<String, Object>) converter.read((Class)HashMap.class, inputMessage);
 		assertEquals("Foo", result.get("string"));
 		assertEquals(42, result.get("number"));
-		assertEquals(42D, (Double)result.get("fraction"), 0D);
+		assertEquals(42D, (Double) result.get("fraction"), 0D);
 		List array = new ArrayList();
 		array.add("Foo");
 		array.add("Bar");
@@ -90,7 +98,7 @@ public class MappingJacksonHttpMessageConverterTests {
 		body.setArray(new String[]{"Foo", "Bar"});
 		body.setBool(true);
 		body.setBytes(new byte[]{0x1, 0x2});
-		converter.write(body, outputMessage);
+		converter.write(body, null, outputMessage);
 		Charset utf8 = Charset.forName("UTF-8");
 		String result = outputMessage.getBodyAsString(utf8);
 		assertTrue(result.contains("\"string\":\"Foo\""));
@@ -102,6 +110,18 @@ public class MappingJacksonHttpMessageConverterTests {
 		assertEquals("Invalid content-type", new MediaType("application", "json", utf8),
 				outputMessage.getHeaders().getContentType());
 	}
+
+	@Test
+	public void writeUTF16() throws IOException {
+		Charset utf16 = Charset.forName("UTF-16BE");
+		MediaType contentType = new MediaType("application", "json", utf16);
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		String body = "H\u00e9llo W\u00f6rld";
+		converter.write(body, contentType, outputMessage);
+		assertEquals("Invalid result", "\"" + body + "\"", outputMessage.getBodyAsString(utf16));
+		assertEquals("Invalid content-type", contentType, outputMessage.getHeaders().getContentType());
+	}
+
 
 	public static class MyBean {
 

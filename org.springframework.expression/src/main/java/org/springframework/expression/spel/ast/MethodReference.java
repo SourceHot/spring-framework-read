@@ -52,12 +52,18 @@ public class MethodReference extends SpelNodeImpl {
 		TypedValue currentContext = state.getActiveContextObject();
 		Object[] arguments = new Object[getChildCount()];
 		for (int i = 0; i < arguments.length; i++) {
-//			System.out.println(i);
-			arguments[i] = children[i].getValueInternal(state).getValue();
+			// Make the root object the active context again for evaluating the parameter
+			// expressions
+			try {
+				state.pushActiveContextObject(state.getRootContextObject());
+				arguments[i] = children[i].getValueInternal(state).getValue();
+			} finally {
+				state.popActiveContextObject();	
+			}
 		}
 		if (currentContext.getValue() == null) {
 			if (nullSafe) {
-				return TypedValue.NULL_TYPED_VALUE;
+				return TypedValue.NULL;
 			} else {
 				throw new SpelEvaluationException(getStartPosition(), SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
 						FormatHelper.formatMethodForMessage(name, getTypes(arguments)));

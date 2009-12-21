@@ -29,7 +29,6 @@ import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.standard.SpelExpressionParserConfiguration;
 
 /**
  * An ExpressionState is for maintaining per-expression-evaluation state, any changes to it are not seen by other
@@ -46,60 +45,73 @@ public class ExpressionState {
 
 	private final EvaluationContext relatedContext;
 	
-	private final Stack<VariableScope> variableScopes = new Stack<VariableScope>();
+	private Stack<VariableScope> variableScopes; 
 
-	private final Stack<TypedValue> contextObjects = new Stack<TypedValue>();
+	private Stack<TypedValue> contextObjects;
 	
-	private int configuration = 0;
+	private final TypedValue rootObject;
+	
+	private SpelParserConfiguration configuration;
+
 
 	public ExpressionState(EvaluationContext context) {
 		this.relatedContext = context;
-		createVariableScope();
+		this.rootObject = context.getRootObject();
 	}
 	
-	public ExpressionState(EvaluationContext context, int configuration) {
+	public ExpressionState(EvaluationContext context, SpelParserConfiguration configuration) {
 		this.relatedContext = context;
 		this.configuration = configuration;
-		createVariableScope();
+		this.rootObject = context.getRootObject();
 	}
 	
-	// create an empty top level VariableScope
-	private void createVariableScope() {
-		this.variableScopes.add(new VariableScope()); 
+	public ExpressionState(EvaluationContext context, TypedValue rootObject) {
+		this.relatedContext = context;
+		this.rootObject = rootObject;
+	}
+	
+	public ExpressionState(EvaluationContext context, TypedValue rootObject, SpelParserConfiguration configuration) {
+		this.relatedContext = context;
+		this.configuration = configuration;
+		this.rootObject = rootObject;
+	}
+	
+
+	private void ensureVariableScopesInitialized() {
+		if (this.variableScopes == null) {
+			this.variableScopes = new Stack<VariableScope>();
+			// top level empty variable scope
+			this.variableScopes.add(new VariableScope()); 
+		}
 	}
 
 	/**
 	 * The active context object is what unqualified references to properties/etc are resolved against.
 	 */
 	public TypedValue getActiveContextObject() {
-		if (this.contextObjects.isEmpty()) {
-			TypedValue rootObject = this.relatedContext.getRootObject();
-			if (rootObject == null) {
-				return TypedValue.NULL_TYPED_VALUE;
-			}
-			else {
-				return rootObject;
-			}
+		if (this.contextObjects==null || this.contextObjects.isEmpty()) {
+			return this.rootObject;
 		}
+		
 		return this.contextObjects.peek();
 	}
 
 	public void pushActiveContextObject(TypedValue obj) {
+		if (this.contextObjects==null) {
+			this.contextObjects =  new Stack<TypedValue>();
+		}
 		this.contextObjects.push(obj);
 	}
 
 	public void popActiveContextObject() {
+		if (this.contextObjects==null) {
+			this.contextObjects =  new Stack<TypedValue>();
+		}
 		this.contextObjects.pop();
 	}
 
 	public TypedValue getRootContextObject() {
-		TypedValue root = this.relatedContext.getRootObject();
-		if (root == null) {
-			return TypedValue.NULL_TYPED_VALUE;
-		}
-		else {
-			return root;
-		}
+		return this.rootObject;
 	}
 
 	public void setVariable(String name, Object value) {
@@ -109,7 +121,7 @@ public class ExpressionState {
 	public TypedValue lookupVariable(String name) {
 		Object value = this.relatedContext.lookupVariable(name);
 		if (value == null) {
-			return TypedValue.NULL_TYPED_VALUE;
+			return TypedValue.NULL;
 		}
 		else {
 			return new TypedValue(value, TypeDescriptor.forObject(value));
@@ -137,22 +149,27 @@ public class ExpressionState {
 	 */
 	
 	public void enterScope(Map<String, Object> argMap) {
+		ensureVariableScopesInitialized();
 		this.variableScopes.push(new VariableScope(argMap));
 	}
 
 	public void enterScope(String name, Object value) {
+		ensureVariableScopesInitialized();
 		this.variableScopes.push(new VariableScope(name, value));
 	}
 
 	public void exitScope() {
+		ensureVariableScopesInitialized();
 		this.variableScopes.pop();
 	}
 
 	public void setLocalVariable(String name, Object value) {
+		ensureVariableScopesInitialized();
 		this.variableScopes.peek().setVariable(name, value);
 	}
 
 	public Object lookupLocalVariable(String name) {
+		ensureVariableScopesInitialized();
 		int scopeNumber = this.variableScopes.size() - 1;
 		for (int i = scopeNumber; i >= 0; i--) {
 			if (this.variableScopes.get(i).definesVariable(name)) {
@@ -182,7 +199,11 @@ public class ExpressionState {
 	public EvaluationContext getEvaluationContext() {
 		return this.relatedContext;
 	}
-	
+
+	public SpelParserConfiguration getConfiguration() {
+		return this.configuration;
+	}
+
 	/**
 	 * A new scope is entered when a function is called and it is used to hold the parameters to the function call.  If the names
 	 * of the parameters clash with those in a higher level scope, those in the higher level scope will not be accessible whilst
@@ -215,14 +236,6 @@ public class ExpressionState {
 		public boolean definesVariable(String name) {
 			return this.vars.containsKey(name);
 		}
-	}
-
-	public boolean configuredToGrowCollection() {
-		return (configuration & SpelExpressionParserConfiguration.GrowListsOnIndexBeyondSize)!=0;
-	}
-
-	public boolean configuredToDynamicallyCreateNullObjects() {
-		return (configuration & SpelExpressionParserConfiguration.CreateObjectIfAttemptToReferenceNull)!=0;
 	}
 
 }

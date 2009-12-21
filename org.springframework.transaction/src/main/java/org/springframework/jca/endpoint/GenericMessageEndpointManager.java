@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import javax.resource.spi.endpoint.MessageEndpointFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.Lifecycle;
+import org.springframework.context.SmartLifecycle;
 
 /**
  * Generic bean that manages JCA 1.5 message endpoints within a Spring
@@ -144,7 +144,7 @@ import org.springframework.context.Lifecycle;
  * @see javax.resource.spi.endpoint.MessageEndpointFactory
  * @see javax.resource.spi.ActivationSpec
  */
-public class GenericMessageEndpointManager implements InitializingBean, Lifecycle, DisposableBean {
+public class GenericMessageEndpointManager implements SmartLifecycle, InitializingBean, DisposableBean {
 
 	private ResourceAdapter resourceAdapter;
 
@@ -153,6 +153,8 @@ public class GenericMessageEndpointManager implements InitializingBean, Lifecycl
 	private ActivationSpec activationSpec;
 
 	private boolean autoStartup = true;
+
+	private int phase = Integer.MAX_VALUE;
 
 	private boolean running = false;
 
@@ -209,8 +211,8 @@ public class GenericMessageEndpointManager implements InitializingBean, Lifecycl
 	}
 
 	/**
-	 * Set whether to auto-start the endpoint activation along with
-	 * this endpoint manager's initialization.
+	 * Set whether to auto-start the endpoint activation after this endpoint
+	 * manager has been initialized and the context has been refreshed.
 	 * <p>Default is "true". Turn this flag off to defer the endpoint
 	 * activation until an explicit {#start()} call.
 	 */
@@ -218,6 +220,31 @@ public class GenericMessageEndpointManager implements InitializingBean, Lifecycl
 		this.autoStartup = autoStartup;
 	}
 
+	/**
+	 * Return the value for the 'autoStartup' property.	If "true", this
+	 * endpoint manager will start upon a ContextRefreshedEvent.
+	 */
+	public boolean isAutoStartup() {
+		return this.autoStartup;
+	}
+
+	/**
+	 * Specify the phase in which this endpoint manager should be started
+	 * and stopped. The startup order proceeds from lowest to highest, and
+	 * the shutdown order is the reverse of that. By default this value is
+	 * Integer.MAX_VALUE meaning that this endpoint manager starts as late
+	 * as possible and stops as soon as possible.
+	 */
+	public void setPhase(int phase) {
+		this.phase = phase;
+	}
+
+	/**
+	 * Return the phase in which this endpoint manager will be started and stopped.
+	 */
+	public int getPhase() {
+		return this.phase;
+	}
 
 	/**
 	 * Prepares the message endpoint, and automatically activates it
@@ -241,10 +268,6 @@ public class GenericMessageEndpointManager implements InitializingBean, Lifecycl
 		else if (activationSpec.getResourceAdapter() != getResourceAdapter()) {
 			throw new IllegalArgumentException("ActivationSpec [" + activationSpec +
 					"] is associated with a different ResourceAdapter: " + activationSpec.getResourceAdapter());
-		}
-
-		if (this.autoStartup) {
-			start();
 		}
 	}
 
@@ -274,6 +297,13 @@ public class GenericMessageEndpointManager implements InitializingBean, Lifecycl
 				getResourceAdapter().endpointDeactivation(getMessageEndpointFactory(), getActivationSpec());
 				this.running = false;
 			}
+		}
+	}
+
+	public void stop(Runnable callback) {
+		synchronized (this.lifecycleMonitor) {
+			this.stop();
+			callback.run();
 		}
 	}
 

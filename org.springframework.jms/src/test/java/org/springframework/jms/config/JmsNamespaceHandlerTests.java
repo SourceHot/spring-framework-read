@@ -28,7 +28,7 @@ import javax.jms.TextMessage;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
-import org.springframework.beans.BeansException;
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
@@ -37,10 +37,12 @@ import org.springframework.beans.factory.parsing.EmptyReaderEventListener;
 import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.Phased;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jca.endpoint.GenericMessageEndpointManager;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
+import org.springframework.util.ErrorHandler;
 
 /**
  * @author Mark Fisher
@@ -133,9 +135,45 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		control3.verify();
 	}
 
+	public void testErrorHandlers() {
+		ErrorHandler expected = this.context.getBean("testErrorHandler", ErrorHandler.class);
+		ErrorHandler errorHandler1 = getErrorHandler("listener1");
+		ErrorHandler errorHandler2 = getErrorHandler("listener2");
+		ErrorHandler defaultErrorHandler = getErrorHandler(DefaultMessageListenerContainer.class.getName() + "#0");
+		assertSame(expected, errorHandler1);
+		assertSame(expected, errorHandler2);
+		assertNull(defaultErrorHandler);
+	}
+
+	public void testPhases() {
+		int phase1 = getPhase("listener1");
+		int phase2 = getPhase("listener2");
+		int phase3 = getPhase("listener3");
+		int phase4 = getPhase("listener4");
+		int defaultPhase = getPhase(DefaultMessageListenerContainer.class.getName() + "#0");
+		assertEquals(99, phase1);
+		assertEquals(99, phase2);
+		assertEquals(77, phase3);
+		assertEquals(77, phase4);
+		assertEquals(Integer.MAX_VALUE, defaultPhase);
+	}
+
 	private MessageListener getListener(String containerBeanName) {
 		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
 		return (MessageListener) container.getMessageListener();
+	}
+
+	private ErrorHandler getErrorHandler(String containerBeanName) {
+		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
+		return (ErrorHandler) new DirectFieldAccessor(container).getPropertyValue("errorHandler");
+	}
+
+	public int getPhase(String containerBeanName) {
+		Object container = this.context.getBean(containerBeanName);
+		if (!(container instanceof Phased)) {
+			throw new IllegalStateException("Container '" + containerBeanName + "' does not implement Phased.");
+		}
+		return ((Phased) container).getPhase();
 	}
 
 	public void testComponentRegistration() {
@@ -228,6 +266,13 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		
 		public void componentRegistered(ComponentDefinition componentDefinition) {
 			this.registeredComponents.add(componentDefinition);
+		}
+	}
+
+
+	static class TestErrorHandler implements ErrorHandler {
+
+		public void handleError(Throwable t) {
 		}
 	}
 
