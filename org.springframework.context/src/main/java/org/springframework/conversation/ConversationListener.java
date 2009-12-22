@@ -1,0 +1,41 @@
+/*
+ * Copyright 2002-2008 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+package org.springframework.conversation;
+
+/**
+ * The conversation listener can be registered within a {@link Conversation} in
+ * order to be invoked for special conversation events. If the listener
+ * interface is implemented on a conversation scoped bean, the bean will be
+ * registered with its conversation automatically through the conversation
+ * manager.
+ * 
+ * @author Micha Kiener
+ * @since 3.1
+ */
+public interface ConversationListener {
+	/**
+	 * Invoked by the conversation manager if the given conversation was ended.
+	 * The additional status object contains further information like how the
+	 * conversation was ended for instance.
+	 * 
+	 * @param conversation the conversation being ended
+	 * @param status the current status of the conversation
+	 */
+	void conversationEnded(Conversation conversation, ConversationStatus status);
+
+	// TODO: add more event-based methods
+}
