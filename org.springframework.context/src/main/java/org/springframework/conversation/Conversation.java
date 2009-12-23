@@ -44,10 +44,14 @@ public interface Conversation {
 	 * Ends the current conversation. If this is a nested conversation, this
 	 * method will switch back to its parent, making it the current
 	 * conversation. This method is invoking the
-	 * {@link ConversationManager#endConversation(Conversation)} accordingly to
-	 * remove this conversation from the conversation store.
+	 * {@link ConversationManager#endConversation(Conversation, ConversationEndingType)}
+	 * accordingly to remove this conversation from the conversation store.
+	 * 
+	 * @param endingType the type qualifying on how this conversation is to be
+	 * ended (only passed on to any listeners, does not have an impact on the
+	 * conversation manager)
 	 */
-	void end();
+	void end(ConversationEndingType endingType);
 
 	/**
 	 * Stores the given value in this conversation using the specified name. If
@@ -121,9 +125,10 @@ public interface Conversation {
 
 	/**
 	 * Returns <code>true</code>, if this conversation has already be ended.
-	 * This is the case, if the method {@link #end()} has been invoked or the
-	 * conversation was ended through
-	 * {@link ConversationManager#endConversation(Conversation)}.
+	 * This is the case, if the method {@link #end(ConversationEndingType)} has
+	 * been invoked or the conversation was ended through
+	 * {@link ConversationManager#endConversation(Conversation, ConversationEndingType)}
+	 * .
 	 * 
 	 * @return <code>true</code>, if this conversation has already be ended
 	 */
