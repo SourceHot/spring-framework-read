@@ -16,6 +16,8 @@
 
 package org.springframework.conversation;
 
+import org.springframework.conversation.manager.ConversationManager;
+
 /**
  * The interface for a conversation, the instance behind the
  * {@link ConversationScope}.<br/>
