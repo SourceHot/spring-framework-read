@@ -22,12 +22,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.conversation.ConversationEndingType;
+import org.springframework.conversation.ConversationListener;
 import org.springframework.conversation.manager.ConversationManager;
 
 /**
  * This annotation can be placed on a method to end the current conversation. It
  * has the same effect as a manual invocation of
- * {@link ConversationManager#endCurrentConversation()}.<br/>
+ * {@link ConversationManager#endCurrentConversation(ConversationEndingType)}.<br/>
  * The conversation is ended AFTER the method was invoked as an after-advice.
  * 
  * @author Micha Kiener
@@ -38,4 +40,13 @@ import org.springframework.conversation.manager.ConversationManager;
 @Documented
 public @interface EndConversation {
 
+	/**
+	 * Returns the qualifier on how the conversation is about to be ended. This
+	 * value will be passed on to any {@link ConversationListener} registered
+	 * with the conversation being ended.
+	 * 
+	 * @return the type of ending, {@link ConversationEndingType#SUCCESS} if not
+	 * explicitly specified
+	 */
+	ConversationEndingType value() default ConversationEndingType.SUCCESS;
 }

@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.conversation.Conversation;
+import org.springframework.conversation.ConversationEndingType;
 import org.springframework.conversation.JoinMode;
 import org.springframework.conversation.manager.ConversationManager;
 
@@ -34,9 +35,10 @@ import org.springframework.conversation.manager.ConversationManager;
  * specified within the annotation or {@link JoinMode#NEW} as the default.<br/>
  * The new conversation is always long running (not a temporary one) and is
  * ended by either manually invoke
- * {@link ConversationManager#endCurrentConversation()}, invoking the
- * {@link Conversation#end()} method on the conversation itself or by placing
- * the {@link EndConversation} annotation on a method.<br/>
+ * {@link ConversationManager#endCurrentConversation(ConversationEndingType)},
+ * invoking the {@link Conversation#end(ConversationEndingType)} method on the
+ * conversation itself or by placing the {@link EndConversation} annotation on a
+ * method.<br/>
  * The new conversation is created BEFORE the method itself is invoked as a
  * before-advice.
  * 
@@ -58,4 +60,15 @@ public @interface BeginConversation {
 	 * @return the join mode to use for creating a new conversation
 	 */
 	JoinMode value() default JoinMode.NEW;
+
+	/**
+	 * Returns the timeout to be set within the newly created conversation,
+	 * default is <code>-1</code> which means to use the default timeout as
+	 * being configured on the {@link ConversationManager}. A value of
+	 * <code>0</code> means there is no timeout any other positive value is
+	 * interpreted as a timeout in milliseconds.
+	 * 
+	 * @return the timeout in milliseconds to be set on the new conversation
+	 */
+	long timeout() default -1;
 }
