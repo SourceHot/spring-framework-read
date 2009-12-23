@@ -19,6 +19,7 @@ package org.springframework.conversation.manager;
 import java.util.List;
 
 import org.springframework.conversation.Conversation;
+import org.springframework.conversation.ConversationEndingType;
 import org.springframework.conversation.ConversationListener;
 import org.springframework.conversation.ConversationType;
 import org.springframework.conversation.JoinMode;
@@ -61,12 +62,12 @@ import org.springframework.conversation.scope.ConversationScope;
  * <b>Ending a conversation</b><br/>
  * A current conversation is ended by either placing the {@link EndConversation}
  * annotation on the ending method or by manually invoke the
- * {@link ConversationManager#endCurrentConversation()} method. A current
- * conversation might also be ended, if a new conversation is started having
- * {@link JoinMode#NEW} being declared where the current conversation is ended
- * silently and a new one is created. This might be the obvious way to end a
- * conversation, if the end of a use case is not always forced to be invoked by
- * a user.<br/>
+ * {@link ConversationManager#endCurrentConversation(ConversationEndingType)}
+ * method. A current conversation might also be ended, if a new conversation is
+ * started having {@link JoinMode#NEW} being declared where the current
+ * conversation is ended silently and a new one is created. This might be the
+ * obvious way to end a conversation, if the end of a use case is not always
+ * forced to be invoked by a user.<br/>
  * <br/>
  * 
  * <b>Temporary conversations</b><br/>
@@ -169,26 +170,32 @@ public interface ConversationManager {
 	 * Ends the given conversation. If it is a nested one, ends it and switches
 	 * back to its parent to be the current conversation. This method is usually
 	 * used to end a switched conversation which is not the current one. To end
-	 * the current conversation, the method {@link #endCurrentConversation()}
-	 * might be used.
+	 * the current conversation, the method
+	 * {@link #endCurrentConversation(ConversationEndingType)} might be used.
 	 * 
 	 * @param conversation the conversation to end
+	 * @param endingType the type qualifying on how this conversation is to be
+	 * ended (only passed on to any listeners, does not have an impact on the
+	 * conversation manager)
 	 */
-	void endConversation(Conversation conversation);
+	void endConversation(Conversation conversation, ConversationEndingType endingType);
 
 	/**
 	 * Ends the given conversation to the final root conversation, if it is a
 	 * nested or joined one. In addition to
-	 * {@link #endConversation(Conversation)} this one recursively invokes
-	 * itself until the root conversation has been ended. If the given
-	 * conversation is not the tail of the conversation, the most nested one is
-	 * searched and ended too.<br/>
+	 * {@link #endConversation(Conversation, ConversationEndingType)} this one
+	 * recursively invokes itself until the root conversation has been ended. If
+	 * the given conversation is not the tail of the conversation, the most
+	 * nested one is searched and ended too.<br/>
 	 * Use this method with caution as this could break the chain of nested
 	 * conversations.
 	 * 
 	 * @param conversation the conversation to be ended finally
+	 * @param endingType the type qualifying on how this conversation is to be
+	 * ended (only passed on to any listeners, does not have an impact on the
+	 * conversation manager)
 	 */
-	void finalEndConversation(Conversation conversation);
+	void finalEndConversation(Conversation conversation, ConversationEndingType endingType);
 
 	/**
 	 * Returns the current conversation, if any available, <code>null</code>
@@ -203,11 +210,14 @@ public interface ConversationManager {
 	/**
 	 * Ends the current conversation, if any is in progress. This is the same as
 	 * ending the conversation returned by {@link #getCurrentConversation()}
-	 * using {@link #endConversation(Conversation)}.
+	 * using {@link #endConversation(Conversation, ConversationEndingType)}.
 	 * 
+	 * @param endingType the type qualifying on how this conversation is to be
+	 * ended (only passed on to any listeners, does not have an impact on the
+	 * conversation manager)
 	 * @return the current conversation which has been ended
 	 */
-	Conversation endCurrentConversation();
+	Conversation endCurrentConversation(ConversationEndingType endingType);
 
 	/**
 	 * Returns a list of available conversations within the current store.
