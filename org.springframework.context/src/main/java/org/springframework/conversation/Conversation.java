@@ -16,6 +16,8 @@
 
 package org.springframework.conversation;
 
+import java.util.Map;
+
 import org.springframework.conversation.manager.ConversationManager;
 import org.springframework.conversation.scope.ConversationScope;
 
@@ -85,6 +87,17 @@ public interface Conversation {
 	 * @return the removed value, if found, <code>null</code> otherwise
 	 */
 	Object removeAttribute(String name);
+
+	/**
+	 * Returns the map holding the attributes of this conversation. The map will
+	 * NOT include the attributes being stored within the parent of this
+	 * conversation, if it is a nested one, hence {@link #getAttribute(String)}
+	 * could return attributes which are not available within the map being
+	 * returned by this method, if stored within the map of the parent.
+	 * 
+	 * @return the map holding the attributes of this conversation
+	 */
+	Map<String, Object> getAttributeMap();
 
 	/**
 	 * Returns the id of this conversation which is its identifier to be used
