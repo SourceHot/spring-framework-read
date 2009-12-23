@@ -23,7 +23,8 @@ import org.springframework.conversation.manager.ConversationManager;
  * <ul>
  * <li>explicitly ended using the {@link EndConversation} annotation</li>
  * <li>explicitly ended using the
- * {@link ConversationManager#endCurrentConversation()} method</li>
+ * {@link ConversationManager#endCurrentConversation(ConversationEndingType)}
+ * method</li>
  * <li>implicitly ended while creating a new conversation</li>
  * <li>implicitly ended if timed out</li>
  * </ul>
