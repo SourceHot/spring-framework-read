@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 
 import org.springframework.conversation.Conversation;
 import org.springframework.conversation.JoinMode;
+import org.springframework.conversation.manager.ConversationManager;
 
 /**
  * This annotation can be placed on any method to start a new conversation. This

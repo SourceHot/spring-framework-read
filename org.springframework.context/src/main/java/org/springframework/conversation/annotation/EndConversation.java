@@ -22,6 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.conversation.manager.ConversationManager;
+
 /**
  * This annotation can be placed on a method to end the current conversation. It
  * has the same effect as a manual invocation of
