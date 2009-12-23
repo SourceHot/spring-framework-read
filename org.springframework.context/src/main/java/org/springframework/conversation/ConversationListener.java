@@ -33,9 +33,9 @@ public interface ConversationListener {
 	 * conversation was ended for instance.
 	 * 
 	 * @param conversation the conversation being ended
-	 * @param status the current status of the conversation
+	 * @param endingType the type qualifying how the conversation was ended
 	 */
-	void conversationEnded(Conversation conversation, ConversationStatus status);
+	void conversationEnded(Conversation conversation, ConversationEndingType endingType);
 
 	// TODO: add more event-based methods
 }
