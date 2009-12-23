@@ -82,7 +82,7 @@ import org.springframework.conversation.scope.ConversationScope;
  * conversation, the {@link ConversationInitializationCallback} might be used to
  * be invoked if the new conversation was started in order to initialize it.
  * This is done by providing such a callback to the
- * {@link ConversationManager#beginConversation(JoinMode, ConversationType, Object, ConversationInitializationCallback...)}
+ * {@link ConversationManager#beginConversation(JoinMode, ConversationType, ConversationInitializationCallback...)}
  * method. The callback feature is not available through the annotation support
  * and hence is only available through the conversation manager API. Here is an
  * example on such an initializing feature; if a conversation is used in
@@ -154,8 +154,6 @@ public interface ConversationManager {
 	 * conversation, if any
 	 * @param conversationType the optional type of conversation to be started,
 	 * used to pass along to the callback(s)
-	 * @param context the optional context holding additional information and
-	 * references beans to be used for initialization
 	 * @param callbacks the optional callback(s) to be invoked after the new
 	 * conversation has been created in exactly the same order they are passed
 	 * in
@@ -163,12 +161,9 @@ public interface ConversationManager {
 	 * 
 	 * @param <T> the conversation type passed along to distinguish the use case
 	 * behind starting a new conversation
-	 * @param <C> an optional context object passed along to provide additional
-	 * information or references like a data access object or an entity manager,
-	 * mainly what will be necessary to initialize the conversation
 	 */
-	<T extends ConversationType, C> Conversation beginConversation(JoinMode joinMode, T conversationType, C context,
-			ConversationInitializationCallback<T, C>... callbacks);
+	<T extends ConversationType, C> Conversation beginConversation(JoinMode joinMode, T conversationType,
+			ConversationInitializationCallback<T>... callbacks);
 
 	/**
 	 * Ends the given conversation. If it is a nested one, ends it and switches

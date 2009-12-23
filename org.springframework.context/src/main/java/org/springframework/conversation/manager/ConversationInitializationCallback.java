@@ -36,26 +36,19 @@ import org.springframework.conversation.ConversationType;
  * 
  * @param <T> the conversation type passed along to distinguish the use case
  * behind starting a new conversation
- * @param <C> an optional context object passed along to provide additional
- * information or references like a data access object or an entity manager,
- * mainly what will be necessary to initialize the conversation
  */
-public interface ConversationInitializationCallback<T extends ConversationType, C> {
+public interface ConversationInitializationCallback<T extends ConversationType> {
 	/**
 	 * Invoked by the {@link ConversationManager} after a new conversation has
 	 * been started to basically initialize the conversation.<br/>
 	 * 
-	 * The conversation type and context are optional and might be used to
-	 * distinguish the type of use case represented by the new conversation and
-	 * additional information or references used to initialize the conversation.
+	 * The conversation type is optional and might be used to distinguish the
+	 * type of use case represented by the new conversation.
 	 * 
 	 * @param conversation the conversation which has been started
 	 * @param type the optional conversation type representing the use case this
 	 * conversation was created for
-	 * @param context the optional context holding additional information or
-	 * references to beans like a data access object or an entity manager used
-	 * to initialize the conversation
 	 */
-	void conversationStarted(Conversation conversation, T type, C context);
+	void conversationStarted(Conversation conversation, T type);
 
 }
