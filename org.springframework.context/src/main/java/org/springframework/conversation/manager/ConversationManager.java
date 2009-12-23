@@ -238,4 +238,23 @@ public interface ConversationManager {
 	 * current one
 	 */
 	void switchConversation(Conversation conversation);
+
+	/**
+	 * Returns the timeout to be set on a newly created conversation by default
+	 * whereas <code>0</code> means no timeout and any positive value represents
+	 * the timeout in milliseconds.
+	 * 
+	 * @return the default timeout in milliseconds for a new conversation
+	 */
+	long getDefaultConversationTimeout();
+
+	/**
+	 * Set the default timeout to be set on newly created conversations, if not
+	 * overwritten by the conversation itself. A value of <code>0</code> means
+	 * no timeout at all.
+	 * 
+	 * @param timeout the timeout in milliseconds or <code>0</code> if no
+	 * timeout should be set by default
+	 */
+	void setDefaultConversationTimeout(long timeout);
 }
