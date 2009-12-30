@@ -16,6 +16,8 @@
 package org.springframework.conversation.manager;
 
 import org.springframework.conversation.Conversation;
+import org.springframework.conversation.ConversationActivationType;
+import org.springframework.conversation.ConversationDeactivationType;
 import org.springframework.conversation.ConversationEndingType;
 
 /**
@@ -127,4 +129,24 @@ public interface MutableConversation extends Conversation {
 	 * scope and beans are being accessed or added to it.
 	 */
 	void touch();
+
+	/**
+	 * Invoked by the conversation manager if this conversation was made active.
+	 * The type qualifies how the this conversation was actually made active.
+	 * This method must invoke any listeners registered to this conversation.
+	 * 
+	 * @param activationType the type qualifying the activation
+	 * @param oldCurrentConversation the old current conversation, if available,
+	 * <code>null</code> otherwise
+	 */
+	void activated(ConversationActivationType activationType, Conversation oldCurrentConversation);
+
+	/**
+	 * Invoked by the conversation manager if this conversation was deactivated.
+	 * The type qualifies how the this conversation was deactivated.
+	 * 
+	 * @param deactivationType the type qualifying the deactivation
+	 * @param newCurrentConversation the conversation made the current one
+	 */
+	void deactivated(ConversationDeactivationType deactivationType, Conversation newCurrentConversation);
 }

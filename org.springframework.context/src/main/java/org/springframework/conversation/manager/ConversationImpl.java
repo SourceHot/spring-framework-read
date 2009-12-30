@@ -21,6 +21,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.config.DestructionAwareAttributeMap;
 import org.springframework.conversation.Conversation;
+import org.springframework.conversation.ConversationActivationType;
+import org.springframework.conversation.ConversationDeactivationType;
 import org.springframework.conversation.ConversationEndingType;
 import org.springframework.conversation.ConversationListener;
 import org.springframework.conversation.JoinMode;
@@ -159,6 +161,10 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	}
 
 	/**
+	 * Is just delegated to
+	 * {@link ConversationManager#finalEndConversation(Conversation, ConversationEndingType)}
+	 * .
+	 * 
 	 * @see org.springframework.conversation.manager.MutableConversation#finalEnd(org.springframework.conversation.ConversationEndingType)
 	 */
 	public void finalEnd(ConversationEndingType endingType) {
@@ -175,8 +181,18 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 			return;
 		}
 
-		// set the ended flag and flush the state
 		ended = true;
+
+		// invoke listeners, if any
+		List<ConversationListener> list = getListeners();
+		if (list != null) {
+			for (ConversationListener listener : list) {
+				listener.conversationEnded(this, endingType);
+			}
+		}
+
+		// flush the state of this conversation AFTER the listeners have been
+		// invoked as there could be some state still needed
 		clear();
 	}
 
@@ -331,6 +347,38 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 		// current conversation is one of its nested conversations
 		if (parent != null) {
 			parent.touch();
+		}
+	}
+
+	/**
+	 * @see org.springframework.conversation.manager.MutableConversation#activated(org.springframework.conversation.ConversationActivationType,
+	 * org.springframework.conversation.Conversation)
+	 */
+	public void activated(ConversationActivationType activationType, Conversation oldCurrentConversation) {
+		touch();
+		List<ConversationListener> list = getListeners();
+		if (list == null) {
+			return;
+		}
+
+		for (ConversationListener listener : list) {
+			listener.conversationActivated(this, oldCurrentConversation, activationType);
+		}
+	}
+
+	/**
+	 * @see org.springframework.conversation.manager.MutableConversation#deactivated(org.springframework.conversation.ConversationDeactivationType,
+	 * org.springframework.conversation.Conversation)
+	 */
+	public void deactivated(ConversationDeactivationType deactivationType, Conversation newCurrentConversation) {
+		touch();
+		List<ConversationListener> list = getListeners();
+		if (list == null) {
+			return;
+		}
+
+		for (ConversationListener listener : list) {
+			listener.conversationDeactivated(this, newCurrentConversation, deactivationType);
 		}
 	}
 
