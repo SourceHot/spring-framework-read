@@ -73,7 +73,7 @@ public interface MutableConversation extends Conversation {
 	 * conversation or this instance, if there are no nested conversations or
 	 * this is the last nested one.
 	 * 
-	 * @return the last nested conversation
+	 * @return the last nested conversation, never <code>null</code>
 	 */
 	MutableConversation getTail();
 
