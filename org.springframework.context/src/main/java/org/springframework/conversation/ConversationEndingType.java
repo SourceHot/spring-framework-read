@@ -57,7 +57,7 @@ public enum ConversationEndingType {
 	TIMED_OUT,
 
 	/**
-	 * Implicitly ended while creating a new conversation and ending the curent
+	 * Implicitly ended while creating a new conversation and ending the current
 	 * one.
 	 */
 	TRANSCRIBED;
