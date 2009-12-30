@@ -23,5 +23,15 @@ package org.springframework.conversation;
  * @since 3.1
  */
 public enum ConversationActivationType {
+	/** The conversation was newly created and hence made active. */
+	NEW,
 
+	/** The conversation was made active as it was manually switched to. */
+	SWITCHED,
+
+	/**
+	 * The conversation was made active as its nested or isolated one ended and
+	 * the parent was made active.
+	 */
+	NESTED_ENDED;
 }
