@@ -86,7 +86,7 @@ public enum JoinMode {
 	 * @return <code>true</code>, if this join mode allows nesting,
 	 * <code>false</code> otherwise
 	 */
-	public boolean canBeNested() {
+	public boolean mustBeNested() {
 		return (this == NESTED || this == ISOLATED);
 	}
 
@@ -118,7 +118,7 @@ public enum JoinMode {
 	 * @return <code>true</code>, if the this join mode allows joining an
 	 * already existing conversation
 	 */
-	public boolean canBeJoined() {
+	public boolean mustBeJoined() {
 		return (this == JOINED);
 	}
 
