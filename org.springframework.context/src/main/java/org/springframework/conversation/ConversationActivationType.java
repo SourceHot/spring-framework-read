@@ -30,8 +30,14 @@ public enum ConversationActivationType {
 	SWITCHED,
 
 	/**
-	 * The conversation was made active as its nested or isolated one ended and
+	 * The conversation was made active as its nested child conversation ended
+	 * and the parent was made active.
+	 */
+	NESTING_ENDED,
+
+	/**
+	 * The conversation was made active as its isolated conversation ended and
 	 * the parent was made active.
 	 */
-	NESTED_ENDED;
+	ISOLATING_ENDED;
 }
