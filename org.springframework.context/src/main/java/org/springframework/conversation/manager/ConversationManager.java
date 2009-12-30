@@ -234,10 +234,13 @@ public interface ConversationManager {
 	 * Switches to the given conversation, making it the current one, however,
 	 * the previously conversation is not removed.
 	 * 
-	 * @param conversation the conversation to be switched to, making it the
-	 * current one
+	 * @param conversationId the id of the conversation to be switched to,
+	 * making it the current one
+	 * @return the conversation object switched to, if the given id was actually
+	 * available, <code>null</code>, if the conversation was not found and hence
+	 * the old current conversation remains the same
 	 */
-	void switchConversation(Conversation conversation);
+	Conversation switchConversation(String conversationId);
 
 	/**
 	 * Returns the timeout to be set on a newly created conversation by default
