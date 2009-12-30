@@ -37,5 +37,16 @@ public interface ConversationListener {
 	 */
 	void conversationEnded(Conversation conversation, ConversationEndingType endingType);
 
+	/**
+	 * Invoked by the conversation manager if the given conversation was made
+	 * active. This is called if a new conversation was created and made active,
+	 * if a conversation was switched to or if a nested one ended and its parent
+	 * was made active.
+	 * 
+	 * @param conversation the conversation made active
+	 * @param activationType the type of activation
+	 */
+	void conversationActivated(Conversation conversation, ConversationActivationType activationType);
+
 	// TODO: add more event-based methods
 }
