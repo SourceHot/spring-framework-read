@@ -48,5 +48,15 @@ public interface ConversationListener {
 	 */
 	void conversationActivated(Conversation conversation, ConversationActivationType activationType);
 
+	/**
+	 * Invoked by the conversation manager if the given conversation was
+	 * deactivated. This is called if a conversation was switched to or if a
+	 * nested child conversation was created.
+	 * 
+	 * @param conversation the conversation which has been deactivated
+	 * @param deactivationType the type of deactivation
+	 */
+	void conversationDeactivated(Conversation conversation, ConversationDeactivationType deactivationType);
+
 	// TODO: add more event-based methods
 }
