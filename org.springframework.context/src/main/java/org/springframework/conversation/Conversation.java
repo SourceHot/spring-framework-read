@@ -16,6 +16,7 @@
 
 package org.springframework.conversation;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.conversation.manager.ConversationManager;
@@ -184,6 +185,12 @@ public interface Conversation {
 	 * @param listener the listener to be removed
 	 */
 	void removeListener(ConversationListener listener);
+
+	/**
+	 * @return a list of registered listeners of this conversation, might be
+	 * empty, never <code>null</code>
+	 */
+	List<ConversationListener> getListeners();
 
 	/**
 	 * Returns the system time in milliseconds this conversation was last

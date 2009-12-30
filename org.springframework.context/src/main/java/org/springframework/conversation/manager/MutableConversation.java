@@ -15,11 +15,8 @@
  */
 package org.springframework.conversation.manager;
 
-import java.util.List;
-
 import org.springframework.conversation.Conversation;
 import org.springframework.conversation.ConversationEndingType;
-import org.springframework.conversation.ConversationListener;
 
 /**
  * <p>
@@ -130,10 +127,4 @@ public interface MutableConversation extends Conversation {
 	 * scope and beans are being accessed or added to it.
 	 */
 	void touch();
-
-	/**
-	 * @return a list of registered listeners of this conversation, might be
-	 * empty, never <code>null</code>
-	 */
-	List<ConversationListener> getListeners();
 }
