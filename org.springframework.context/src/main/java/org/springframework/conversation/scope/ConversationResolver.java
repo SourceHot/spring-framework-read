@@ -53,7 +53,7 @@ public interface ConversationResolver {
 	 * @param conversationId the id of the conversation to be made the current
 	 * one
 	 */
-	void setCurrentConversation(String conversationId);
+	void setCurrentConversationId(String conversationId);
 
 	/**
 	 * Returns <code>true</code>, if this resolver holds a current conversation
@@ -64,5 +64,5 @@ public interface ConversationResolver {
 	 * @return <code>true</code>, if there is a current conversation id
 	 * available
 	 */
-	boolean hasCurrentConversation();
+	boolean hasCurrentConversationId();
 }
