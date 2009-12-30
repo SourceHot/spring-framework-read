@@ -20,11 +20,10 @@ import java.util.List;
 
 import org.springframework.conversation.Conversation;
 import org.springframework.conversation.scope.ConversationResolver;
-import org.springframework.conversation.scope.ConversationScope;
 
 /**
- * The conversation store is used within the {@link ConversationScope} to store
- * conversations in depending on where they should be mapped.<br/>
+ * The conversation store is used within the {@link ConversationManager} to
+ * store conversations in depending on where they should be mapped.<br/>
  * Usually the store is session scoped, if there is a session available and the
  * store should provide alternatives, if a conversation is being initiated from
  * within a non-web thread.<br/>
