@@ -163,7 +163,7 @@ public interface ConversationManager {
 	 * @param <T> the conversation type passed along to distinguish the use case
 	 * behind starting a new conversation
 	 */
-	<T extends ConversationType, C> Conversation beginConversation(JoinMode joinMode, T conversationType,
+	<T extends ConversationType> Conversation beginConversation(JoinMode joinMode, T conversationType,
 			ConversationInitializationCallback<T>... callbacks);
 
 	/**
