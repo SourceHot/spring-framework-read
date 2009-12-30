@@ -172,9 +172,9 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	}
 
 	/**
-	 * @see org.springframework.conversation.manager.MutableConversation#endConversation(org.springframework.conversation.ConversationEndingType)
+	 * @see org.springframework.conversation.manager.MutableConversation#internallyEndConversation(org.springframework.conversation.ConversationEndingType)
 	 */
-	public void endConversation(ConversationEndingType endingType) {
+	public void internallyEndConversation(ConversationEndingType endingType) {
 		// check, if this conversation was joined before and do not end it if so
 		if (joinCount > 0) {
 			joinCount--;

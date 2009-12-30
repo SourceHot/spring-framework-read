@@ -107,7 +107,7 @@ public interface MutableConversation extends Conversation {
 	 * ended (only passed on to any listeners, does not have an impact on the
 	 * conversation manager)
 	 */
-	void endConversation(ConversationEndingType endingType);
+	void internallyEndConversation(ConversationEndingType endingType);
 
 	/**
 	 * This method is a convenience method to
