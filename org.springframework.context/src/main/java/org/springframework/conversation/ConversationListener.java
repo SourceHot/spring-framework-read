@@ -44,9 +44,12 @@ public interface ConversationListener {
 	 * was made active.
 	 * 
 	 * @param conversation the conversation made active
+	 * @param oldCurrentConversation the old current conversation, if available,
+	 * <code>null</code> otherwise
 	 * @param activationType the type of activation
 	 */
-	void conversationActivated(Conversation conversation, ConversationActivationType activationType);
+	void conversationActivated(Conversation conversation, Conversation oldCurrentConversation,
+			ConversationActivationType activationType);
 
 	/**
 	 * Invoked by the conversation manager if the given conversation was
@@ -54,9 +57,11 @@ public interface ConversationListener {
 	 * nested child conversation was created.
 	 * 
 	 * @param conversation the conversation which has been deactivated
+	 * @param newCurrentConversation the conversation made the current one
 	 * @param deactivationType the type of deactivation
 	 */
-	void conversationDeactivated(Conversation conversation, ConversationDeactivationType deactivationType);
+	void conversationDeactivated(Conversation conversation, Conversation newCurrentConversation,
+			ConversationDeactivationType deactivationType);
 
 	// TODO: add more event-based methods
 }
