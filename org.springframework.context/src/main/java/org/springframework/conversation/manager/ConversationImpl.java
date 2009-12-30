@@ -194,6 +194,9 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 		// flush the state of this conversation AFTER the listeners have been
 		// invoked as there could be some state still needed
 		clear();
+
+		// remove this conversation from its parent, if it is a nested one
+		removeFromParent();
 	}
 
 	/**
@@ -263,6 +266,17 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	 */
 	public void setNestedConversation(MutableConversation nestedConversation) {
 		this.child = nestedConversation;
+	}
+
+	/**
+	 * If this is a nested conversation, this method removes it from its parent
+	 * by setting the nested child conversation to <code>null</code> on its
+	 * parent.
+	 */
+	protected void removeFromParent() {
+		if (parent != null) {
+			parent.setNestedConversation(null);
+		}
 	}
 
 	/**
