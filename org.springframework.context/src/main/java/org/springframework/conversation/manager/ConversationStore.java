@@ -41,7 +41,7 @@ public interface ConversationStore {
 	 * store. Registering should be done using the id of the conversation as
 	 * being returned by {@link Conversation#getId()}. The manager usually
 	 * invoked this method to register a newly created conversation and will
-	 * invoke {@link ConversationResolver#setCurrentConversation(String)} to
+	 * invoke {@link ConversationResolver#setCurrentConversationId(String)} to
 	 * make it the current one.
 	 * 
 	 * @param conversation the conversation to be registered
