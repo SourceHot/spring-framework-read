@@ -76,7 +76,8 @@ public interface ConversationStore {
 	/**
 	 * Returns a list of available conversations in the current store which have
 	 * been registered using the {@link #registerConversation(Conversation)}
-	 * method.
+	 * method. The list being returned is not backed by the store so it can be
+	 * modified safely from outside.
 	 * 
 	 * @return the list of available conversations or an empty list, never
 	 * <code>null</code>
