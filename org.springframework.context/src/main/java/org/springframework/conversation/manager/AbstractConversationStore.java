@@ -103,7 +103,12 @@ public abstract class AbstractConversationStore implements ConversationStore {
 	 */
 	protected Map<String, Conversation> getConversationMapSafe() {
 		try {
-			return getConversationMap();
+			Map<String, Conversation> conversationMap = getConversationMap();
+			if (conversationMap == null && isUseFallbackMap()) {
+				return getConversationMapFallback();
+			}
+
+			return conversationMap;
 		} catch (Exception e) {
 			// if the map is not reachable and fallback is on, return the
 			// fallback map
