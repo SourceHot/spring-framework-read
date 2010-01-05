@@ -105,6 +105,12 @@ public interface Conversation {
 	Map<String, Object> getAttributeMap();
 
 	/**
+	 * @see org.springframework.beans.factory.config.Scope#registerDestructionCallback(String,
+	 * Runnable)
+	 */
+	void registerDestructionCallback(String name, Runnable callback);
+
+	/**
 	 * Returns the id of this conversation which is its identifier to be used
 	 * within forms, redirections or anywhere else to define the current
 	 * conversation.
