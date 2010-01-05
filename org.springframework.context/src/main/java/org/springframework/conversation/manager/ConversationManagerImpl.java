@@ -285,7 +285,9 @@ public class ConversationManagerImpl implements ConversationManager {
 	 * @return the newly created conversation object
 	 */
 	protected MutableConversation createNewConversation() {
-		return new ConversationImpl();
+		ConversationImpl conversation = new ConversationImpl();
+		conversation.setManager(this);
+		return conversation;
 	}
 
 	/**
