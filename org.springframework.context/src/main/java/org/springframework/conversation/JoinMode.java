@@ -86,7 +86,7 @@ public enum JoinMode {
 	 * @return the default join mode to be used for creating new, temporary
 	 * conversations ({@link JoinMode#NEW})
 	 */
-	public JoinMode getDefaultJoinMode() {
+	public static JoinMode getDefaultJoinMode() {
 		return NEW;
 	}
 
