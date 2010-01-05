@@ -49,6 +49,8 @@ public class BasicConversationTests {
 	public void testContext() {
 		assertNotNull(context);
 		assertNotNull(manager);
+		assertNotNull(resolver);
+		assertNotNull(store);
 	}
 
 	@Test
