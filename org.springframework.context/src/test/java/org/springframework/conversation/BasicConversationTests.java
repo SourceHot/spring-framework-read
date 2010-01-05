@@ -17,7 +17,7 @@ package org.springframework.conversation;
 
 import static org.junit.Assert.*;
 
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
@@ -32,29 +32,28 @@ import org.springframework.conversation.scope.ConversationResolver;
  * @since 3.1
  */
 public class BasicConversationTests {
-	private ConfigurableApplicationContext ctx;
-	private ConversationManager manager;
-	private ConversationStore store;
-	private ConversationResolver resolver;
+	private static ConfigurableApplicationContext context;
+	private static ConversationManager manager;
+	private static ConversationStore store;
+	private static ConversationResolver resolver;
 
-	@Before
-	public void setUp() {
-		ctx = loadContext(getContextLocation());
-		manager = ctx.getBean(ConversationManager.class);
-		store = ctx.getBean(ConversationStore.class);
-		resolver = ctx.getBean(ConversationResolver.class);
+	@BeforeClass
+	public static void setUp() {
+		context = loadContext(getContextLocation());
+		manager = context.getBean(ConversationManager.class);
+		store = context.getBean(ConversationStore.class);
+		resolver = context.getBean(ConversationResolver.class);
 	}
 
 	@Test
 	public void testContext() {
-		ConfigurableApplicationContext context = getContext();
 		assertNotNull(context);
 		assertNotNull(manager);
 	}
 
 	@Test
 	public void testTemporaryConversation() {
-		ConversationalBean bean = (ConversationalBean) getContext().getBean("testBean");
+		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
 		assertNotNull(bean);
 		assertNull(bean.getName());
 		String id = resolver.getCurrentConversationId();
@@ -71,16 +70,11 @@ public class BasicConversationTests {
 		assertNull(resolver.getCurrentConversationId());
 	}
 
-	protected String getContextLocation() {
+	protected static String getContextLocation() {
 		return "org/springframework/conversation/conversationTestContext.xml";
 	}
 
-	protected ConfigurableApplicationContext loadContext(String configLocation) {
-		GenericXmlApplicationContext ctx = new GenericXmlApplicationContext(getContextLocation());
-		return ctx;
-	}
-
-	protected ConfigurableApplicationContext getContext() {
-		return ctx;
+	protected static ConfigurableApplicationContext loadContext(String configLocation) {
+		return new GenericXmlApplicationContext(getContextLocation());
 	}
 }
