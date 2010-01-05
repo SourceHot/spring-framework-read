@@ -26,6 +26,21 @@ import org.springframework.beans.factory.config.Scope;
  * @since 3.1
  */
 public interface ConversationScope extends Scope {
+	/**
+	 * The name of the contextual object for the conversation manager (see
+	 * {@link Scope#resolveContextualObject(String)}).
+	 */
+	public static final String REFERENCE_CONVERSATION_MANAGER = "conversationManager";
 
-	// TODO: add methods
+	/**
+	 * The name of the contextual object for the conversation store (see
+	 * {@link Scope#resolveContextualObject(String)}).
+	 */
+	public static final String REFERENCE_CONVERSATION_STORE = "conversationStore";
+
+	/**
+	 * The name of the contextual object for the conversation resolver (see
+	 * {@link Scope#resolveContextualObject(String)}).
+	 */
+	public static final String REFERENCE_CONVERSATION_RESOLVER = "conversationResolver";
 }

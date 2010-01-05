@@ -32,15 +32,6 @@ import org.springframework.util.Assert;
  * @since 3.1
  */
 public class DefaultConversationScope implements ConversationScope {
-	/** The name of the contextual object for the conversation manager. */
-	public static final String CTX_ATTR_NAME_MANAGER = "conversationManager";
-
-	/** The name of the contextual object for the conversation store. */
-	public static final String CTX_ATTR_NAME_STORE = "conversationStore";
-
-	/** The name of the contextual object for the conversation resolver. */
-	public static final String CTX_ATTR_NAME_RESOLVER = "conversationResolver";
-
 	/** Holds the conversation manager reference, if statically injected. */
 	private ConversationManager conversationManager;
 
@@ -149,11 +140,11 @@ public class DefaultConversationScope implements ConversationScope {
 	 * @see org.springframework.beans.factory.config.Scope#resolveContextualObject(java.lang.String)
 	 */
 	public Object resolveContextualObject(String key) {
-		if (CTX_ATTR_NAME_MANAGER.equals(key)) {
+		if (ConversationScope.REFERENCE_CONVERSATION_MANAGER.equals(key)) {
 			return getConversationManager();
-		} else if (CTX_ATTR_NAME_STORE.equals(key)) {
+		} else if (ConversationScope.REFERENCE_CONVERSATION_STORE.equals(key)) {
 			return getConversationStore();
-		} else if (CTX_ATTR_NAME_RESOLVER.equals(key)) {
+		} else if (ConversationScope.REFERENCE_CONVERSATION_RESOLVER.equals(key)) {
 			return getConversationResolver();
 		}
 
