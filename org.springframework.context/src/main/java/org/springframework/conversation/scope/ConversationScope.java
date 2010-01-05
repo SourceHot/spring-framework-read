@@ -26,6 +26,9 @@ import org.springframework.beans.factory.config.Scope;
  * @since 3.1
  */
 public interface ConversationScope extends Scope {
+	/** The name of the scope being exposed within the application context. */
+	public static final String CONVERSATION_SCOPE_NAME = "conversation";
+
 	/**
 	 * The name of the contextual object for the conversation manager (see
 	 * {@link Scope#resolveContextualObject(String)}).
