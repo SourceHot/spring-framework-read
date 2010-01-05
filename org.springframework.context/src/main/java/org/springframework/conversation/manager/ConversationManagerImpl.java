@@ -132,16 +132,21 @@ public class ConversationManagerImpl implements ConversationManager {
 			ConversationStore store = getConversationStore();
 			store.removeConversation(conversation.getId());
 
-			// if this was a nested conversation and it was the current one,
-			// switch to its parent and set it as the current one
-			if (wasCurrent && conversation.isNested()) {
-				MutableConversation parent = silentlyCastConversation(conversation.getParent());
-				resolver.setCurrentConversationId(parent.getId());
+			if (wasCurrent) {
+				// if this was a nested conversation and it was the current one,
+				// switch to its parent and set it as the current one
+				if (conversation.isNested()) {
+					MutableConversation parent = silentlyCastConversation(conversation.getParent());
+					resolver.setCurrentConversationId(parent.getId());
 
-				// invoke listener on the parent because it was made active
-				parent.activated(conversation.isIsolated() ? ConversationActivationType.ISOLATING_ENDED
-						: ConversationActivationType.NESTING_ENDED, conversation);
+					// invoke listener on the parent because it was made active
+					parent.activated(conversation.isIsolated() ? ConversationActivationType.ISOLATING_ENDED
+							: ConversationActivationType.NESTING_ENDED, conversation);
+				} else {
+					resolver.setCurrentConversationId(null);
+				}
 			}
+
 		}
 
 		// invoke ending hook
