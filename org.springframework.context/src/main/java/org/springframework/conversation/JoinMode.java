@@ -83,6 +83,14 @@ public enum JoinMode {
 	SWITCHED;
 
 	/**
+	 * @return the default join mode to be used for creating new, temporary
+	 * conversations ({@link JoinMode#NEW})
+	 */
+	public JoinMode getDefaultJoinMode() {
+		return NEW;
+	}
+
+	/**
 	 * @return <code>true</code>, if this join mode allows nesting,
 	 * <code>false</code> otherwise
 	 */
