@@ -124,6 +124,13 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	 */
 	public Object setAttribute(String name, Object value) {
 		touch();
+
+		// check for implementing the ConversationListener interface and
+		// register the object as a listener, if so
+		if (value instanceof ConversationListener) {
+			addListener((ConversationListener) value);
+		}
+
 		return super.put(name, value);
 	}
 
@@ -132,7 +139,15 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	 */
 	public Object removeAttribute(String name) {
 		touch();
-		return super.remove(name);
+		Object value = super.remove(name);
+
+		// if the attribute implements the listener interface, remove it from
+		// the registered listeners
+		if (value instanceof ConversationListener) {
+			removeListener((ConversationListener) value);
+		}
+
+		return value;
 	}
 
 	/**
