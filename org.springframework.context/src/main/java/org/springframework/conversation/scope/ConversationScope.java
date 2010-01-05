@@ -15,6 +15,8 @@
  */
 package org.springframework.conversation.scope;
 
+import org.springframework.beans.factory.config.Scope;
+
 /**
  * This interface is implemented by the conversation scope used to hold and
  * expose conversation scoped beans. It will be registered as a custom scope
@@ -23,7 +25,7 @@ package org.springframework.conversation.scope;
  * @author Micha Kiener
  * @since 3.1
  */
-public interface ConversationScope {
+public interface ConversationScope extends Scope {
 
 	// TODO: add methods
 }
