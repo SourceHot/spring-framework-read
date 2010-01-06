@@ -316,6 +316,13 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	}
 
 	/**
+	 * @see org.springframework.conversation.manager.MutableConversation#isParent()
+	 */
+	public boolean isParent() {
+		return (child != null && !child.isEnded());
+	}
+
+	/**
 	 * @see org.springframework.conversation.Conversation#isTemporary()
 	 */
 	public boolean isTemporary() {

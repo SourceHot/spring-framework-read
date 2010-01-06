@@ -78,6 +78,15 @@ public interface MutableConversation extends Conversation {
 	MutableConversation getTail();
 
 	/**
+	 * Returns <code>true</code>, if this is a parent conversation which is the
+	 * case, if it has an active, nested conversation, even if it is nested
+	 * itself and hence having a parent conversation.
+	 * 
+	 * @return <code>true</code>, if this is a parent conversation
+	 */
+	boolean isParent();
+
+	/**
 	 * This method is invoked if this conversation is joined which is the case,
 	 * if a new conversation is being created through the manager with join mode
 	 * allowing to join. This method should increase an internal counter which
