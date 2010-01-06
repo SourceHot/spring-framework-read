@@ -72,6 +72,113 @@ public class BasicConversationTests {
 		assertNull(resolver.getCurrentConversationId());
 	}
 
+	@Test
+	public void testNewConversation() {
+		Conversation conversation = manager.beginConversation(false, JoinMode.NEW);
+		assertNotNull(conversation);
+		assertFalse(conversation.isTemporary());
+		assertSame(conversation, manager.getCurrentConversation());
+
+		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
+		assertNotNull(bean);
+
+		conversation.end(ConversationEndingType.SUCCESS);
+		assertTrue(conversation.isEnded());
+		assertNull(resolver.getCurrentConversationId());
+		assertNull(manager.getCurrentConversation());
+	}
+
+	@Test
+	public void testRootConversation() {
+		Conversation conversation = manager.beginConversation(false, JoinMode.ROOT);
+		assertNotNull(conversation);
+		assertFalse(conversation.isTemporary());
+		assertSame(conversation, manager.getCurrentConversation());
+
+		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
+		assertNotNull(bean);
+
+		conversation.end(ConversationEndingType.SUCCESS);
+		assertTrue(conversation.isEnded());
+		assertNull(resolver.getCurrentConversationId());
+		assertNull(manager.getCurrentConversation());
+	}
+
+	@Test
+	public void testRootConversationFailure() {
+		Conversation conversation = manager.beginConversation(false, JoinMode.ROOT);
+		assertNotNull(conversation);
+		assertFalse(conversation.isTemporary());
+		assertSame(conversation, manager.getCurrentConversation());
+
+		try {
+			manager.beginConversation(false, JoinMode.ROOT);
+			fail("IllegalStateException must be thrown as there is a current conversation in place already.");
+		} catch (IllegalStateException e) {
+			// must happen!
+		}
+
+		conversation.end(ConversationEndingType.SUCCESS);
+		assertTrue(conversation.isEnded());
+		assertNull(resolver.getCurrentConversationId());
+		assertNull(manager.getCurrentConversation());
+	}
+
+	@Test
+	public void testNestedConversation() {
+		Conversation conversation = manager.beginConversation(false, JoinMode.ROOT);
+		assertNotNull(conversation);
+		assertFalse(conversation.isTemporary());
+		assertSame(conversation, manager.getCurrentConversation());
+
+		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
+		assertNotNull(bean);
+
+		Conversation nestedConversation = manager.beginConversation(false, JoinMode.NESTED);
+		assertNotNull(nestedConversation);
+		assertSame(nestedConversation, manager.getCurrentConversation());
+		assertNotSame(conversation, nestedConversation);
+
+		assertSame(bean, context.getBean("testBean"));
+
+		nestedConversation.end(ConversationEndingType.SUCCESS);
+		assertSame(conversation, manager.getCurrentConversation());
+
+		conversation.end(ConversationEndingType.SUCCESS);
+		assertTrue(conversation.isEnded());
+		assertTrue(nestedConversation.isEnded());
+		assertNull(resolver.getCurrentConversationId());
+		assertNull(manager.getCurrentConversation());
+	}
+
+	@Test
+	public void testNestedConversationEndingFailure() {
+		Conversation conversation = manager.beginConversation(false, JoinMode.ROOT);
+		assertNotNull(conversation);
+		assertFalse(conversation.isTemporary());
+		assertSame(conversation, manager.getCurrentConversation());
+
+		Conversation nestedConversation = manager.beginConversation(false, JoinMode.NESTED);
+		assertNotNull(nestedConversation);
+		assertNotSame(conversation, nestedConversation);
+
+		try {
+			conversation.end(ConversationEndingType.SUCCESS);
+			fail("There must be an IllegalStateException as trying to end a parent conversation without having its nested conversation ended first");
+		} catch (IllegalStateException e) {
+			// must happen
+		}
+
+		nestedConversation.end(ConversationEndingType.SUCCESS);
+		assertSame(conversation, manager.getCurrentConversation());
+
+		conversation.end(ConversationEndingType.SUCCESS);
+		assertTrue(conversation.isEnded());
+		assertTrue(nestedConversation.isEnded());
+		assertNull(resolver.getCurrentConversationId());
+		assertNull(manager.getCurrentConversation());
+	}
+
 	protected static String getContextLocation() {
 		return "org/springframework/conversation/conversationTestContext.xml";
 	}
