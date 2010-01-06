@@ -177,6 +177,8 @@ public interface ConversationManager {
 	 * @param endingType the type qualifying on how this conversation is to be
 	 * ended (only passed on to any listeners, does not have an impact on the
 	 * conversation manager)
+	 * @throws IllegalStateException if the given conversation has a nested
+	 * conversation which is not ended which is an illegal condition
 	 */
 	void endConversation(Conversation conversation, ConversationEndingType endingType);
 

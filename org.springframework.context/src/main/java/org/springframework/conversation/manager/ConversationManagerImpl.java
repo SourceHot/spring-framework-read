@@ -116,11 +116,15 @@ public class ConversationManagerImpl implements ConversationManager {
 	 * org.springframework.conversation.ConversationEndingType)
 	 */
 	public void endConversation(Conversation conversation, ConversationEndingType endingType) {
+		MutableConversation c = silentlyCastConversation(conversation);
+		if (c.isParent()) {
+			throw new IllegalStateException(
+					"Illegal attempt to end a conversation, still having a nested, active conversation.");
+		}
+
 		ConversationResolver resolver = getConversationResolver();
 		String currentId = resolver.getCurrentConversationId();
 		boolean wasCurrent = (currentId != null && currentId.equals(conversation.getId()));
-
-		MutableConversation c = silentlyCastConversation(conversation);
 
 		// let the conversation object end (this will invoke any listeners too,
 		// if the conversation was finally ended)
@@ -146,7 +150,6 @@ public class ConversationManagerImpl implements ConversationManager {
 					resolver.setCurrentConversationId(null);
 				}
 			}
-
 		}
 
 		// invoke ending hook
