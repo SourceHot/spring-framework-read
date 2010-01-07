@@ -55,6 +55,16 @@ public interface Conversation {
 	void end(ConversationEndingType endingType);
 
 	/**
+	 * If this is a switched conversation (was created through
+	 * {@link JoinMode#SWITCHED}, this method might be used to make this
+	 * conversation the active one. If there is a current one active which is
+	 * not switched, it is ended, if the current one is also a switched one, it
+	 * is deactivated, but not ended. Invoking this method has the same effect
+	 * as {@link ConversationManager#switchConversation(String)}.
+	 */
+	void switchTo();
+
+	/**
 	 * Stores the given value in this conversation using the specified name. If
 	 * this state already contains a value attached to the given name, it is
 	 * returned, <code>null</code> otherwise.<br/>
@@ -166,6 +176,17 @@ public interface Conversation {
 	 * <code>false</code> otherwise
 	 */
 	boolean isNested();
+
+	/**
+	 * Returns <code>true</code>, if this is a switched conversation. A switched
+	 * conversation must be ended explicitly as it is not ended implicitly by
+	 * creating a new one for instance, however, if there is a timeout being
+	 * specified and a switched conversation is not used, it is ended
+	 * implicitly, otherwise you have to end a switched conversation manually.
+	 * 
+	 * @return <code>true</code>, if this is a switched conversation
+	 */
+	boolean isSwtiched();
 
 	/**
 	 * Returns <code>true</code>, if this is a nested, isolated conversation so

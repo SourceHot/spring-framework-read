@@ -69,6 +69,9 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	 */
 	private boolean isolated;
 
+	/** Flag, indicating whether this is a switched conversation. */
+	private boolean switched;
+
 	/**
 	 * The join count which is increased on the joining method and decreased on
 	 * the end method.
@@ -162,6 +165,13 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	 */
 	public void begin() {
 		temporary = false;
+	}
+
+	/**
+	 * @see org.springframework.conversation.Conversation#switchTo()
+	 */
+	public void switchTo() {
+		manager.switchConversation(getId());
 	}
 
 	/**
@@ -334,6 +344,13 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	 */
 	public boolean isIsolated() {
 		return isolated;
+	}
+
+	/**
+	 * @see org.springframework.conversation.Conversation#isSwtiched()
+	 */
+	public boolean isSwtiched() {
+		return switched;
 	}
 
 	/**
