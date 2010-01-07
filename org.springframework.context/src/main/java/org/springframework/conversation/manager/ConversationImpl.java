@@ -161,6 +161,13 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	}
 
 	/**
+	 * @see org.springframework.conversation.manager.MutableConversation#setSwitched(boolean)
+	 */
+	public void setSwitched(boolean switched) {
+		this.switched = switched;
+	}
+
+	/**
 	 * @see org.springframework.conversation.Conversation#begin()
 	 */
 	public void begin() {
@@ -347,9 +354,9 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	}
 
 	/**
-	 * @see org.springframework.conversation.Conversation#isSwtiched()
+	 * @see org.springframework.conversation.Conversation#isSwitched()
 	 */
-	public boolean isSwtiched() {
+	public boolean isSwitched() {
 		return switched;
 	}
 

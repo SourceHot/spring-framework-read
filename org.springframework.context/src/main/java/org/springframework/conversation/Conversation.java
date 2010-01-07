@@ -186,7 +186,7 @@ public interface Conversation {
 	 * 
 	 * @return <code>true</code>, if this is a switched conversation
 	 */
-	boolean isSwtiched();
+	boolean isSwitched();
 
 	/**
 	 * Returns <code>true</code>, if this is a nested, isolated conversation so

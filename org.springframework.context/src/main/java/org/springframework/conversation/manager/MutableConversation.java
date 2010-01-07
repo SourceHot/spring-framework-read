@@ -19,6 +19,7 @@ import org.springframework.conversation.Conversation;
 import org.springframework.conversation.ConversationActivationType;
 import org.springframework.conversation.ConversationDeactivationType;
 import org.springframework.conversation.ConversationEndingType;
+import org.springframework.conversation.JoinMode;
 
 /**
  * <p>
@@ -46,6 +47,15 @@ public interface MutableConversation extends Conversation {
 	 * @param temporary the temporary flag
 	 */
 	void setTemporary(boolean temporary);
+
+	/**
+	 * Set the flag whether this conversation is a switched one or not. See
+	 * {@link JoinMode#SWITCHED} for a detailed description about switched
+	 * conversations.
+	 * 
+	 * @param switched <code>true</code>, if this is a switched conversation
+	 */
+	void setSwitched(boolean switched);
 
 	/**
 	 * Set the given conversation as the parent conversation of this one. So
