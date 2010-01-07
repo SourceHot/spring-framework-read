@@ -201,27 +201,31 @@ public class ConversationManagerImpl implements ConversationManager {
 	 * org.springframework.conversation.JoinMode)
 	 */
 	public Conversation beginConversation(boolean temporary, JoinMode joinMode) {
-		// create a new conversation and initialize it
-		MutableConversation newConversation = createNewConversation();
-
-		// set the default timeout according the setup of this manager
-		newConversation.setTimeout(getDefaultConversationTimeout());
-
-		// set the temporary flag of the newly created conversation and also
-		// assign it a newly created, unique id
-		newConversation.setTemporary(temporary);
-		newConversation.setId(createNewConversationId());
-
 		ConversationResolver resolver = getConversationResolver();
 		ConversationStore store = getConversationStore();
-		store.registerConversation(newConversation);
-
 		MutableConversation currentConversation = silentlyCastConversation(getCurrentConversation());
+		MutableConversation newConversation = null;
+
+		if (currentConversation == null || !joinMode.mustBeJoined()) {
+			// create a new conversation and initialize it
+			newConversation = createNewConversation();
+
+			// set the default timeout according the setup of this manager
+			newConversation.setTimeout(getDefaultConversationTimeout());
+
+			// set the temporary flag of the newly created conversation and also
+			// assign it a newly created, unique id
+			newConversation.setTemporary(temporary);
+			newConversation.setId(createNewConversationId());
+
+			store.registerConversation(newConversation);
+		}
 
 		// check, if there is a current conversation
 		if (currentConversation != null) {
 			if (joinMode.mustBeJoined()) {
 				currentConversation.joinConversation();
+				return currentConversation;
 			}
 
 			if (joinMode.mustBeSwitched()) {
@@ -248,8 +252,8 @@ public class ConversationManagerImpl implements ConversationManager {
 			}
 		}
 
-		// make the newly created conversation the current one, invoke listeners
-		// and return it
+		// make the newly created conversation the current one, invoke
+		// listeners and return it
 		resolver.setCurrentConversationId(newConversation.getId());
 		newConversation.activated(joinMode.mustBeSwitched() ? ConversationActivationType.SWITCHED
 				: ConversationActivationType.NEW, currentConversation);

@@ -74,11 +74,11 @@ public enum JoinMode {
 
 	/**
 	 * This mode is the same as {@link #ROOT} or {@link #NEW}, but it will not
-	 * terminate the current one but rather switch it in order to still be
-	 * available but the newly created one will become the current conversation.
-	 * Using this mode assumes the manual ending and removing of the switched
-	 * conversation as it is not terminated automatically, unless there is a
-	 * timeout.
+	 * implicitly ended as there might be more than one active, switched
+	 * conversations. If there is a current, non-switched conversation, it is
+	 * implicitly ended, however, if a switched one is the current one and a new
+	 * one is created, it is not ended, so ending a switched conversation must
+	 * either be cone manually or by specifying a timeout.
 	 */
 	SWITCHED;
 
