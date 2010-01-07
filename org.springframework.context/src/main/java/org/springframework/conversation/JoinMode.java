@@ -115,11 +115,22 @@ public enum JoinMode {
 	}
 
 	/**
+	 * Returns <code>true</code>, if the given, current conversation must be
+	 * ended as a new one having this join mode was created. This is the case,
+	 * if the current one is not a switched one and if the join mode is either
+	 * new or switched.
+	 * 
+	 * @param currentConversation the current conversation to check whether it
+	 * should be ended implicitly according to this join mode
 	 * @return <code>true</code>, if an already existing conversation must be
 	 * ended before creating a new one
 	 */
-	public boolean mustEndCurrent() {
-		return (this == NEW);
+	public boolean mustEndCurrent(Conversation currentConversation) {
+		if (currentConversation != null && currentConversation.isSwitched()) {
+			return false;
+		}
+
+		return (this == NEW || this == SWITCHED);
 	}
 
 	/**

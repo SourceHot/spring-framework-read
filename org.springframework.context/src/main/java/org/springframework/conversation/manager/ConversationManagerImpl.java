@@ -216,6 +216,7 @@ public class ConversationManagerImpl implements ConversationManager {
 			// set the temporary flag of the newly created conversation and also
 			// assign it a newly created, unique id
 			newConversation.setTemporary(temporary);
+			newConversation.setSwitched(joinMode == JoinMode.SWITCHED);
 			newConversation.setId(createNewConversationId());
 
 			store.registerConversation(newConversation);
@@ -223,31 +224,31 @@ public class ConversationManagerImpl implements ConversationManager {
 
 		// check, if there is a current conversation
 		if (currentConversation != null) {
-			if (joinMode.mustBeJoined()) {
-				currentConversation.joinConversation();
-				return currentConversation;
-			}
-
-			if (joinMode.mustBeSwitched()) {
-				currentConversation.deactivated(ConversationDeactivationType.NEW_SWITCHED, newConversation);
-			}
-
-			// check, if the current one must be ended before creating a new one
-			if (joinMode.mustEndCurrent()) {
-				endConversation(currentConversation, ConversationEndingType.TRANSCRIBED);
-			}
-
 			// check, if nesting is not allowed and throw an exception if so
 			if (joinMode.mustBeRoot()) {
 				throw new IllegalStateException(
 						"Beginning a new conversation while one is still in progress and nesting is not allowed is not possible.");
 			}
 
+			if (joinMode.mustBeJoined()) {
+				currentConversation.joinConversation();
+				return currentConversation;
+			}
+
+			if (joinMode.mustBeSwitched() && currentConversation.isSwitched()) {
+				currentConversation.deactivated(ConversationDeactivationType.NEW_SWITCHED, newConversation);
+			}
+
+			// check, if the current one must be ended before creating a new one
+			if (joinMode.mustEndCurrent(currentConversation)) {
+				endConversation(currentConversation, ConversationEndingType.TRANSCRIBED);
+			}
+
 			// nest the new conversation to the current one, if available and
 			// set the current one as the parent of the new one
 			if (joinMode.mustBeNested()) {
 				newConversation.setParentConversation(currentConversation, joinMode.mustBeIsolated());
-				newConversation.deactivated(joinMode.mustBeIsolated() ? ConversationDeactivationType.NEW_ISOLATED
+				currentConversation.deactivated(joinMode.mustBeIsolated() ? ConversationDeactivationType.NEW_ISOLATED
 						: ConversationDeactivationType.NEW_NESTED, newConversation);
 			}
 		}
