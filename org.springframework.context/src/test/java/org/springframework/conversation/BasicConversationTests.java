@@ -23,6 +23,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.conversation.manager.ConversationManager;
 import org.springframework.conversation.manager.ConversationStore;
+import org.springframework.conversation.manager.MutableConversation;
 import org.springframework.conversation.scope.ConversationResolver;
 
 /**
@@ -130,6 +131,8 @@ public class BasicConversationTests {
 		assertNotNull(conversation);
 		assertFalse(conversation.isTemporary());
 		assertSame(conversation, manager.getCurrentConversation());
+		assertFalse(conversation.isNested());
+		assertFalse(((MutableConversation) conversation).isParent());
 
 		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
 		assertNotNull(bean);
@@ -138,6 +141,8 @@ public class BasicConversationTests {
 		assertNotNull(nestedConversation);
 		assertSame(nestedConversation, manager.getCurrentConversation());
 		assertNotSame(conversation, nestedConversation);
+		assertTrue(nestedConversation.isNested());
+		assertTrue(((MutableConversation) conversation).isParent());
 
 		assertSame(bean, context.getBean("testBean"));
 
@@ -157,10 +162,14 @@ public class BasicConversationTests {
 		assertNotNull(conversation);
 		assertFalse(conversation.isTemporary());
 		assertSame(conversation, manager.getCurrentConversation());
+		assertFalse(conversation.isNested());
+		assertFalse(((MutableConversation) conversation).isParent());
 
 		Conversation nestedConversation = manager.beginConversation(false, JoinMode.NESTED);
 		assertNotNull(nestedConversation);
 		assertNotSame(conversation, nestedConversation);
+		assertTrue(nestedConversation.isNested());
+		assertTrue(((MutableConversation) conversation).isParent());
 
 		try {
 			conversation.end(ConversationEndingType.SUCCESS);
@@ -175,6 +184,131 @@ public class BasicConversationTests {
 		conversation.end(ConversationEndingType.SUCCESS);
 		assertTrue(conversation.isEnded());
 		assertTrue(nestedConversation.isEnded());
+		assertNull(resolver.getCurrentConversationId());
+		assertNull(manager.getCurrentConversation());
+	}
+
+	@Test
+	public void testIsolatedConversation() {
+		Conversation conversation = manager.beginConversation(false, JoinMode.ROOT);
+		assertNotNull(conversation);
+		assertFalse(conversation.isTemporary());
+		assertSame(conversation, manager.getCurrentConversation());
+		assertFalse(conversation.isNested());
+		assertFalse(((MutableConversation) conversation).isParent());
+
+		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
+		assertNotNull(bean);
+
+		Conversation nestedConversation = manager.beginConversation(false, JoinMode.ISOLATED);
+		assertNotNull(nestedConversation);
+		assertSame(nestedConversation, manager.getCurrentConversation());
+		assertNotSame(conversation, nestedConversation);
+		assertTrue(nestedConversation.isNested());
+		assertTrue(((MutableConversation) conversation).isParent());
+
+		assertNotSame(bean, context.getBean("testBean"));
+
+		nestedConversation.end(ConversationEndingType.SUCCESS);
+		assertSame(conversation, manager.getCurrentConversation());
+
+		assertSame(bean, context.getBean("testBean"));
+
+		conversation.end(ConversationEndingType.SUCCESS);
+		assertTrue(conversation.isEnded());
+		assertTrue(nestedConversation.isEnded());
+		assertNull(resolver.getCurrentConversationId());
+		assertNull(manager.getCurrentConversation());
+	}
+
+	@Test
+	public void testJoinedConversation() {
+		Conversation conversation = manager.beginConversation(false, JoinMode.ROOT);
+		assertNotNull(conversation);
+		assertFalse(conversation.isTemporary());
+		assertSame(conversation, manager.getCurrentConversation());
+		assertFalse(conversation.isNested());
+		assertFalse(((MutableConversation) conversation).isParent());
+
+		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
+		assertNotNull(bean);
+
+		Conversation joinedConversation = manager.beginConversation(false, JoinMode.JOINED);
+		assertNotNull(joinedConversation);
+		assertSame(joinedConversation, manager.getCurrentConversation());
+		assertSame(conversation, joinedConversation);
+		assertFalse(joinedConversation.isNested());
+		assertFalse(((MutableConversation) joinedConversation).isParent());
+
+		assertSame(bean, context.getBean("testBean"));
+
+		joinedConversation.end(ConversationEndingType.SUCCESS);
+		assertSame(conversation, manager.getCurrentConversation());
+
+		assertSame(bean, context.getBean("testBean"));
+
+		conversation.end(ConversationEndingType.SUCCESS);
+		assertTrue(conversation.isEnded());
+		assertTrue(joinedConversation.isEnded());
+		assertNull(resolver.getCurrentConversationId());
+		assertNull(manager.getCurrentConversation());
+	}
+
+	@Test
+	public void testSwitchedConversation() {
+		Conversation conversation = manager.beginConversation(false, JoinMode.SWITCHED);
+		assertNotNull(conversation);
+		assertFalse(conversation.isTemporary());
+		assertSame(conversation, manager.getCurrentConversation());
+		assertFalse(conversation.isNested());
+		assertFalse(((MutableConversation) conversation).isParent());
+
+		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
+		assertNotNull(bean);
+
+		Conversation switchedConversation = manager.beginConversation(false, JoinMode.SWITCHED);
+		assertNotNull(switchedConversation);
+		assertSame(switchedConversation, manager.getCurrentConversation());
+		assertNotSame(conversation, switchedConversation);
+		assertFalse(switchedConversation.isNested());
+		assertFalse(((MutableConversation) switchedConversation).isParent());
+
+		ConversationalBean bean2 = (ConversationalBean) context.getBean("testBean");
+		assertNotSame(bean, bean2);
+
+		manager.switchConversation(conversation.getId());
+		assertSame(bean, context.getBean("testBean"));
+
+		manager.switchConversation(switchedConversation.getId());
+		assertSame(bean2, context.getBean("testBean"));
+
+		switchedConversation.end(ConversationEndingType.SUCCESS);
+		conversation.end(ConversationEndingType.SUCCESS);
+		assertTrue(conversation.isEnded());
+		assertTrue(switchedConversation.isEnded());
+		assertNull(resolver.getCurrentConversationId());
+		assertNull(manager.getCurrentConversation());
+	}
+
+	@Test
+	public void testSwitchedConversationEnding() {
+		Conversation conversation = manager.beginConversation(false, JoinMode.SWITCHED);
+		assertNotNull(conversation);
+		assertSame(conversation, manager.getCurrentConversation());
+
+		Conversation switchedConversation = manager.beginConversation(false, JoinMode.SWITCHED);
+		assertNotNull(switchedConversation);
+		assertSame(switchedConversation, manager.getCurrentConversation());
+		assertNotSame(conversation, switchedConversation);
+
+		manager.switchConversation(conversation.getId());
+		manager.switchConversation(switchedConversation.getId());
+
+		switchedConversation.end(ConversationEndingType.SUCCESS);
+		conversation.end(ConversationEndingType.SUCCESS);
+
+		assertTrue(conversation.isEnded());
+		assertTrue(switchedConversation.isEnded());
 		assertNull(resolver.getCurrentConversationId());
 		assertNull(manager.getCurrentConversation());
 	}
