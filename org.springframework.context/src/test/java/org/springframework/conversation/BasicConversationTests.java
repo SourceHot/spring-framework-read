@@ -110,6 +110,7 @@ public class BasicConversationTests {
 		Conversation conversation = manager.beginConversation(false, JoinMode.ROOT);
 		assertNotNull(conversation);
 		assertFalse(conversation.isTemporary());
+		assertFalse(conversation.isSwitched());
 		assertSame(conversation, manager.getCurrentConversation());
 
 		try {
@@ -167,6 +168,7 @@ public class BasicConversationTests {
 
 		Conversation nestedConversation = manager.beginConversation(false, JoinMode.NESTED);
 		assertNotNull(nestedConversation);
+		assertFalse(nestedConversation.isSwitched());
 		assertNotSame(conversation, nestedConversation);
 		assertTrue(nestedConversation.isNested());
 		assertTrue(((MutableConversation) conversation).isParent());
@@ -202,6 +204,7 @@ public class BasicConversationTests {
 
 		Conversation nestedConversation = manager.beginConversation(false, JoinMode.ISOLATED);
 		assertNotNull(nestedConversation);
+		assertFalse(nestedConversation.isSwitched());
 		assertSame(nestedConversation, manager.getCurrentConversation());
 		assertNotSame(conversation, nestedConversation);
 		assertTrue(nestedConversation.isNested());
@@ -226,6 +229,7 @@ public class BasicConversationTests {
 		Conversation conversation = manager.beginConversation(false, JoinMode.ROOT);
 		assertNotNull(conversation);
 		assertFalse(conversation.isTemporary());
+		assertFalse(conversation.isSwitched());
 		assertSame(conversation, manager.getCurrentConversation());
 		assertFalse(conversation.isNested());
 		assertFalse(((MutableConversation) conversation).isParent());
@@ -235,6 +239,7 @@ public class BasicConversationTests {
 
 		Conversation joinedConversation = manager.beginConversation(false, JoinMode.JOINED);
 		assertNotNull(joinedConversation);
+		assertFalse(joinedConversation.isSwitched());
 		assertSame(joinedConversation, manager.getCurrentConversation());
 		assertSame(conversation, joinedConversation);
 		assertFalse(joinedConversation.isNested());
@@ -259,6 +264,7 @@ public class BasicConversationTests {
 		Conversation conversation = manager.beginConversation(false, JoinMode.SWITCHED);
 		assertNotNull(conversation);
 		assertFalse(conversation.isTemporary());
+		assertTrue(conversation.isSwitched());
 		assertSame(conversation, manager.getCurrentConversation());
 		assertFalse(conversation.isNested());
 		assertFalse(((MutableConversation) conversation).isParent());
@@ -268,6 +274,7 @@ public class BasicConversationTests {
 
 		Conversation switchedConversation = manager.beginConversation(false, JoinMode.SWITCHED);
 		assertNotNull(switchedConversation);
+		assertTrue(conversation.isSwitched());
 		assertSame(switchedConversation, manager.getCurrentConversation());
 		assertNotSame(conversation, switchedConversation);
 		assertFalse(switchedConversation.isNested());
@@ -277,6 +284,7 @@ public class BasicConversationTests {
 		assertNotSame(bean, bean2);
 
 		manager.switchConversation(conversation.getId());
+		assertSame(conversation, manager.getCurrentConversation());
 		assertSame(bean, context.getBean("testBean"));
 
 		manager.switchConversation(switchedConversation.getId());
@@ -305,7 +313,30 @@ public class BasicConversationTests {
 		manager.switchConversation(switchedConversation.getId());
 
 		switchedConversation.end(ConversationEndingType.SUCCESS);
+		assertNull(manager.getCurrentConversation());
 		conversation.end(ConversationEndingType.SUCCESS);
+		assertNull(manager.getCurrentConversation());
+
+		assertTrue(conversation.isEnded());
+		assertTrue(switchedConversation.isEnded());
+		assertNull(resolver.getCurrentConversationId());
+		assertNull(manager.getCurrentConversation());
+	}
+
+	@Test
+	public void testImplicitConversationEnding() {
+		Conversation conversation = manager.beginConversation(false, JoinMode.ROOT);
+		assertNotNull(conversation);
+		assertSame(conversation, manager.getCurrentConversation());
+
+		Conversation switchedConversation = manager.beginConversation(false, JoinMode.SWITCHED);
+		assertNotNull(switchedConversation);
+		assertSame(switchedConversation, manager.getCurrentConversation());
+		assertNotSame(conversation, switchedConversation);
+		assertTrue(conversation.isEnded());
+
+		switchedConversation.end(ConversationEndingType.SUCCESS);
+		assertNull(manager.getCurrentConversation());
 
 		assertTrue(conversation.isEnded());
 		assertTrue(switchedConversation.isEnded());
