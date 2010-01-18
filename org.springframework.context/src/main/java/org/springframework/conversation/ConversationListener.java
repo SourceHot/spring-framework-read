@@ -62,6 +62,4 @@ public interface ConversationListener {
 	 */
 	void conversationDeactivated(Conversation conversation, Conversation newCurrentConversation,
 			ConversationDeactivationType deactivationType);
-
-	// TODO: add more event-based methods
 }
