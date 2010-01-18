@@ -33,6 +33,9 @@ import org.springframework.conversation.scope.ConversationResolver;
  * @since 3.1
  */
 public class BasicConversationTests {
+	private static final String TEST_BEAN1_NAME = "testBean1";
+	private static final String TEST_BEAN2_NAME = "testBean2";
+
 	private static ConfigurableApplicationContext context;
 	private static ConversationManager manager;
 	private static ConversationStore store;
@@ -56,7 +59,7 @@ public class BasicConversationTests {
 
 	@Test
 	public void testTemporaryConversation() {
-		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
+		ConversationalBean bean = (ConversationalBean) context.getBean(TEST_BEAN1_NAME);
 		assertNotNull(bean);
 		assertNull(bean.getName());
 		String id = resolver.getCurrentConversationId();
@@ -64,7 +67,7 @@ public class BasicConversationTests {
 		Conversation conversation = store.getConversation(id);
 		assertNotNull(conversation);
 		assertTrue(conversation.isTemporary());
-		Object attribute = conversation.getAttribute("testBean");
+		Object attribute = conversation.getAttribute(TEST_BEAN1_NAME);
 		assertNotNull(attribute);
 		assertSame(bean, attribute);
 
@@ -80,7 +83,7 @@ public class BasicConversationTests {
 		assertFalse(conversation.isTemporary());
 		assertSame(conversation, manager.getCurrentConversation());
 
-		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
+		ConversationalBean bean = (ConversationalBean) context.getBean(TEST_BEAN1_NAME);
 		assertNotNull(bean);
 
 		conversation.end(ConversationEndingType.SUCCESS);
@@ -96,7 +99,7 @@ public class BasicConversationTests {
 		assertFalse(conversation.isTemporary());
 		assertSame(conversation, manager.getCurrentConversation());
 
-		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
+		ConversationalBean bean = (ConversationalBean) context.getBean(TEST_BEAN1_NAME);
 		assertNotNull(bean);
 
 		conversation.end(ConversationEndingType.SUCCESS);
@@ -135,7 +138,7 @@ public class BasicConversationTests {
 		assertFalse(conversation.isNested());
 		assertFalse(((MutableConversation) conversation).isParent());
 
-		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
+		ConversationalBean bean = (ConversationalBean) context.getBean(TEST_BEAN1_NAME);
 		assertNotNull(bean);
 
 		Conversation nestedConversation = manager.beginConversation(false, JoinMode.NESTED);
@@ -145,7 +148,7 @@ public class BasicConversationTests {
 		assertTrue(nestedConversation.isNested());
 		assertTrue(((MutableConversation) conversation).isParent());
 
-		assertSame(bean, context.getBean("testBean"));
+		assertSame(bean, context.getBean(TEST_BEAN1_NAME));
 
 		nestedConversation.end(ConversationEndingType.SUCCESS);
 		assertSame(conversation, manager.getCurrentConversation());
@@ -199,7 +202,7 @@ public class BasicConversationTests {
 		assertFalse(conversation.isNested());
 		assertFalse(((MutableConversation) conversation).isParent());
 
-		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
+		ConversationalBean bean = (ConversationalBean) context.getBean(TEST_BEAN1_NAME);
 		assertNotNull(bean);
 
 		Conversation nestedConversation = manager.beginConversation(false, JoinMode.ISOLATED);
@@ -210,12 +213,12 @@ public class BasicConversationTests {
 		assertTrue(nestedConversation.isNested());
 		assertTrue(((MutableConversation) conversation).isParent());
 
-		assertNotSame(bean, context.getBean("testBean"));
+		assertNotSame(bean, context.getBean(TEST_BEAN1_NAME));
 
 		nestedConversation.end(ConversationEndingType.SUCCESS);
 		assertSame(conversation, manager.getCurrentConversation());
 
-		assertSame(bean, context.getBean("testBean"));
+		assertSame(bean, context.getBean(TEST_BEAN1_NAME));
 
 		conversation.end(ConversationEndingType.SUCCESS);
 		assertTrue(conversation.isEnded());
@@ -234,7 +237,7 @@ public class BasicConversationTests {
 		assertFalse(conversation.isNested());
 		assertFalse(((MutableConversation) conversation).isParent());
 
-		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
+		ConversationalBean bean = (ConversationalBean) context.getBean(TEST_BEAN1_NAME);
 		assertNotNull(bean);
 
 		Conversation joinedConversation = manager.beginConversation(false, JoinMode.JOINED);
@@ -245,12 +248,12 @@ public class BasicConversationTests {
 		assertFalse(joinedConversation.isNested());
 		assertFalse(((MutableConversation) joinedConversation).isParent());
 
-		assertSame(bean, context.getBean("testBean"));
+		assertSame(bean, context.getBean(TEST_BEAN1_NAME));
 
 		joinedConversation.end(ConversationEndingType.SUCCESS);
 		assertSame(conversation, manager.getCurrentConversation());
 
-		assertSame(bean, context.getBean("testBean"));
+		assertSame(bean, context.getBean(TEST_BEAN1_NAME));
 
 		conversation.end(ConversationEndingType.SUCCESS);
 		assertTrue(conversation.isEnded());
@@ -269,7 +272,7 @@ public class BasicConversationTests {
 		assertFalse(conversation.isNested());
 		assertFalse(((MutableConversation) conversation).isParent());
 
-		ConversationalBean bean = (ConversationalBean) context.getBean("testBean");
+		ConversationalBean bean = (ConversationalBean) context.getBean(TEST_BEAN1_NAME);
 		assertNotNull(bean);
 
 		Conversation switchedConversation = manager.beginConversation(false, JoinMode.SWITCHED);
@@ -280,15 +283,15 @@ public class BasicConversationTests {
 		assertFalse(switchedConversation.isNested());
 		assertFalse(((MutableConversation) switchedConversation).isParent());
 
-		ConversationalBean bean2 = (ConversationalBean) context.getBean("testBean");
+		ConversationalBean bean2 = (ConversationalBean) context.getBean(TEST_BEAN1_NAME);
 		assertNotSame(bean, bean2);
 
 		manager.switchConversation(conversation.getId());
 		assertSame(conversation, manager.getCurrentConversation());
-		assertSame(bean, context.getBean("testBean"));
+		assertSame(bean, context.getBean(TEST_BEAN1_NAME));
 
 		manager.switchConversation(switchedConversation.getId());
-		assertSame(bean2, context.getBean("testBean"));
+		assertSame(bean2, context.getBean(TEST_BEAN1_NAME));
 
 		switchedConversation.end(ConversationEndingType.SUCCESS);
 		conversation.end(ConversationEndingType.SUCCESS);
@@ -345,7 +348,7 @@ public class BasicConversationTests {
 	}
 
 	@Test
-	public void testConversationAnnotation() {
+	public void testConversationAnnotation1() {
 		ConversationalServiceBean serviceBean = context.getBean(ConversationalServiceBean.class);
 		assertNotNull(serviceBean);
 
@@ -374,6 +377,87 @@ public class BasicConversationTests {
 		assertNotSame(conversation2, conversation3);
 
 		assertNull(manager.getCurrentConversation());
+
+		serviceBean.clean();
+	}
+
+	@Test
+	public void testConversationAnnotation2() {
+		ConversationalServiceBean serviceBean = context.getBean(ConversationalServiceBean.class);
+		assertNotNull(serviceBean);
+
+		serviceBean.startConversation();
+		Conversation conversation = manager.getCurrentConversation();
+		assertNotNull(conversation);
+
+		ConversationEventAwareBean bean = (ConversationEventAwareBean) context.getBean(TEST_BEAN2_NAME);
+		assertNotNull(bean);
+		assertNull(bean.getConversation1());
+		assertNull(bean.getConversation2());
+		assertNull(bean.getActivationType());
+		assertNull(bean.getDeactivationType());
+		assertNull(bean.getEndingType());
+
+		serviceBean.endConversation();
+
+		assertNotNull(bean.getEndingType());
+		assertSame(ConversationEndingType.SUCCESS, bean.getEndingType());
+		assertNotNull(bean.getConversation1());
+		assertSame(conversation, bean.getConversation1());
+
+		serviceBean.clean();
+	}
+
+	@Test
+	public void testConversationAnnotation3() {
+		ConversationalServiceBean serviceBean = context.getBean(ConversationalServiceBean.class);
+		assertNotNull(serviceBean);
+		serviceBean.setFailureFlag(true);
+
+		serviceBean.startConversation();
+		Conversation conversation = manager.getCurrentConversation();
+		assertNotNull(conversation);
+
+		ConversationEventAwareBean bean = (ConversationEventAwareBean) context.getBean(TEST_BEAN2_NAME);
+		assertNotNull(bean);
+
+		try {
+			serviceBean.endConversationSuccess();
+		} catch (RuntimeException e) {
+			// must happen
+		}
+
+		assertNotNull(bean.getEndingType());
+		assertSame(ConversationEndingType.FAILURE_SUCCESS, bean.getEndingType());
+		assertNotNull(bean.getConversation1());
+		assertSame(conversation, bean.getConversation1());
+
+		serviceBean.clean();
+	}
+
+	@Test
+	public void testConversationAnnotation4() {
+		ConversationalServiceBean serviceBean = context.getBean(ConversationalServiceBean.class);
+		assertNotNull(serviceBean);
+		serviceBean.setFailureFlag(true);
+
+		serviceBean.startConversation();
+		Conversation conversation = manager.getCurrentConversation();
+		assertNotNull(conversation);
+
+		ConversationEventAwareBean bean = (ConversationEventAwareBean) context.getBean(TEST_BEAN2_NAME);
+		assertNotNull(bean);
+
+		try {
+			serviceBean.endConversationCancel();
+		} catch (RuntimeException e) {
+			// must happen
+		}
+
+		assertNotNull(bean.getEndingType());
+		assertSame(ConversationEndingType.FAILURE_CANCEL, bean.getEndingType());
+		assertNotNull(bean.getConversation1());
+		assertSame(conversation, bean.getConversation1());
 
 		serviceBean.clean();
 	}

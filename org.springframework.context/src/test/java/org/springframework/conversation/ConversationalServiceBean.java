@@ -25,6 +25,10 @@ public interface ConversationalServiceBean {
 
 	public void endConversation();
 
+	public void endConversationSuccess();
+
+	public void endConversationCancel();
+
 	public void doInConversation();
 
 	public Conversation getStartingConversation();
@@ -34,4 +38,6 @@ public interface ConversationalServiceBean {
 	public Conversation getConversationalConversation();
 
 	public void clean();
+
+	public void setFailureFlag(boolean failureFlag);
 }

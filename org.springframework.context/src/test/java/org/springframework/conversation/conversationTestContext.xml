@@ -33,9 +33,11 @@
         <property name="conversationResolver" ref="conversationResolver"/>
     </bean>
     
-    <bean id="testBean" class="org.springframework.conversation.ConversationalBean" scope="conversation"/>
+    <bean id="testBean1" class="org.springframework.conversation.ConversationalBean" scope="conversation"/>
+    <bean id="testBean2" class="org.springframework.conversation.ConversationEventAwareBean" scope="conversation"/>
     
     <bean id="testService" class="org.springframework.conversation.ConversationalServiceBeanImpl">
         <property name="conversationManager" ref="conversationManager"/>
     </bean>
+    
 </beans>

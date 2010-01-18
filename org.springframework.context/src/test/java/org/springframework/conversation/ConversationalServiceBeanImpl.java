@@ -28,6 +28,7 @@ import org.springframework.conversation.manager.ConversationManager;
  */
 public class ConversationalServiceBeanImpl implements ConversationalServiceBean {
 	private ConversationManager manager;
+	private boolean failureFlag;
 
 	private Conversation startingConversation;
 	private Conversation endingConversation;
@@ -36,6 +37,22 @@ public class ConversationalServiceBeanImpl implements ConversationalServiceBean 
 	@BeginConversation
 	public void startConversation() {
 		startingConversation = manager.getCurrentConversation();
+	}
+
+	@EndConversation(ConversationEndingType.SUCCESS)
+	public void endConversationSuccess() {
+		endingConversation = manager.getCurrentConversation();
+		if (failureFlag) {
+			throw new RuntimeException("Test failure while ending conversation...");
+		}
+	}
+
+	@EndConversation(ConversationEndingType.CANCEL)
+	public void endConversationCancel() {
+		endingConversation = manager.getCurrentConversation();
+		if (failureFlag) {
+			throw new RuntimeException("Test failure while ending conversation...");
+		}
 	}
 
 	@EndConversation
@@ -64,6 +81,11 @@ public class ConversationalServiceBeanImpl implements ConversationalServiceBean 
 		startingConversation = null;
 		endingConversation = null;
 		conversationalConversation = null;
+		failureFlag = false;
+	}
+
+	public void setFailureFlag(boolean failureFlag) {
+		this.failureFlag = failureFlag;
 	}
 
 	public void setConversationManager(ConversationManager manager) {
