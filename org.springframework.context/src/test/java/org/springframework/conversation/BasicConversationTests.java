@@ -344,6 +344,28 @@ public class BasicConversationTests {
 		assertNull(manager.getCurrentConversation());
 	}
 
+	@Test
+	public void testConversationAnnotation() {
+		ConversationalServiceBean serviceBean = context.getBean(ConversationalServiceBean.class);
+		assertNotNull(serviceBean);
+
+		assertNull(serviceBean.getStartingConversation());
+		assertNull(serviceBean.getEndingConversation());
+		assertNull(serviceBean.getConversationalConversation());
+
+		serviceBean.startConversation();
+		Conversation conversation1 = serviceBean.getStartingConversation();
+		assertNotNull(conversation1);
+		assertNull(serviceBean.getEndingConversation());
+		assertNull(serviceBean.getConversationalConversation());
+
+		serviceBean.endConversation();
+		Conversation conversation2 = serviceBean.getEndingConversation();
+		assertNotNull(conversation2);
+		assertSame(conversation1, conversation2);
+		assertNull(serviceBean.getConversationalConversation());
+	}
+
 	protected static String getContextLocation() {
 		return "org/springframework/conversation/conversationTestContext.xml";
 	}
