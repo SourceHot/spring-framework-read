@@ -17,6 +17,7 @@ package org.springframework.conversation.annotation;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.conversation.Conversation;
 import org.springframework.conversation.ConversationEndingType;
@@ -30,6 +31,7 @@ import org.springframework.conversation.manager.ConversationManager;
  * @author Micha Kiener
  * @since 3.1
  */
+@Aspect
 public class ConversationAdvice {
 	/***
 	 * The conversation manager injected into this advice used to handle
