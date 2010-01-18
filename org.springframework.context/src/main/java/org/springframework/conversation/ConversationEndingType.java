@@ -43,22 +43,49 @@ public enum ConversationEndingType {
 
 	/**
 	 * Explicitly ended using a success path, but an exception occurred while
-	 * committing.
+	 * committing. Do not use this type directly, it is indirectly used by the
+	 * conversation manager.
 	 */
 	FAILURE_SUCCESS,
 
 	/**
 	 * Explicitly ended using a cancel path, but an exception occurred while
-	 * canceling.
+	 * canceling. Do not use this type directly, it is indirectly used by the
+	 * conversation manager.
 	 */
 	FAILURE_CANCEL,
 
-	/** Implicitly ended through a time out of the conversation object. */
+	/**
+	 * Implicitly ended through a time out of the conversation object. Do not
+	 * use this type directly, it is indirectly used by the conversation
+	 * manager.
+	 */
 	TIMED_OUT,
 
 	/**
 	 * Implicitly ended while creating a new conversation and ending the current
-	 * one.
+	 * one. Do not use this type directly, it is indirectly used by the
+	 * conversation manager.
 	 */
 	TRANSCRIBED;
+
+	/**
+	 * Returns the ending type for the specified one if ending a conversation
+	 * failed with an exception. It only works for {@link #SUCCESS} and
+	 * {@link #CANCEL} as the other types are only used internally. For every
+	 * other type, the same type is being returned in order to use this method
+	 * as a convenience no mather which type provided.
+	 * 
+	 * @param type the ending type specified by an ending annotation
+	 * @return the type to be used instead as ending failed
+	 */
+	public static ConversationEndingType getFailureType(ConversationEndingType type) {
+		if (type == SUCCESS) {
+			return FAILURE_SUCCESS;
+		} else if (type == CANCEL) {
+			return FAILURE_CANCEL;
+		}
+
+		return type;
+	}
 }
