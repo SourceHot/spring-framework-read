@@ -423,6 +423,7 @@ public class BasicConversationTests {
 
 		try {
 			serviceBean.endConversationSuccess();
+			fail("RuntimeException must happen while ending conversation");
 		} catch (RuntimeException e) {
 			// must happen
 		}
@@ -450,6 +451,7 @@ public class BasicConversationTests {
 
 		try {
 			serviceBean.endConversationCancel();
+			fail("RuntimeException must happen while ending conversation");
 		} catch (RuntimeException e) {
 			// must happen
 		}
