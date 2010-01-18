@@ -60,6 +60,12 @@ public class ConversationalServiceBeanImpl implements ConversationalServiceBean 
 		return conversationalConversation;
 	}
 
+	public void clean() {
+		startingConversation = null;
+		endingConversation = null;
+		conversationalConversation = null;
+	}
+
 	public void setConversationManager(ConversationManager manager) {
 		this.manager = manager;
 	}

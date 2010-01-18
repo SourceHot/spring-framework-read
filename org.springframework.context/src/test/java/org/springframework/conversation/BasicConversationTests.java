@@ -356,14 +356,26 @@ public class BasicConversationTests {
 		serviceBean.startConversation();
 		Conversation conversation1 = serviceBean.getStartingConversation();
 		assertNotNull(conversation1);
+		assertSame(conversation1, manager.getCurrentConversation());
 		assertNull(serviceBean.getEndingConversation());
 		assertNull(serviceBean.getConversationalConversation());
 
 		serviceBean.endConversation();
 		Conversation conversation2 = serviceBean.getEndingConversation();
 		assertNotNull(conversation2);
+		assertNull(manager.getCurrentConversation());
 		assertSame(conversation1, conversation2);
 		assertNull(serviceBean.getConversationalConversation());
+
+		serviceBean.doInConversation();
+		Conversation conversation3 = serviceBean.getConversationalConversation();
+		assertNotNull(conversation3);
+		assertNotSame(conversation1, conversation3);
+		assertNotSame(conversation2, conversation3);
+
+		assertNull(manager.getCurrentConversation());
+
+		serviceBean.clean();
 	}
 
 	protected static String getContextLocation() {

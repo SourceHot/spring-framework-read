@@ -15,7 +15,6 @@
  */
 package org.springframework.conversation;
 
-
 /**
  * @author Micha Kiener
  * @since 3.1
@@ -33,4 +32,6 @@ public interface ConversationalServiceBean {
 	public Conversation getEndingConversation();
 
 	public Conversation getConversationalConversation();
+
+	public void clean();
 }
