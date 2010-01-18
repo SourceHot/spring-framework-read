@@ -74,7 +74,7 @@ public enum ConversationEndingType {
 	 * failed with an exception. It only works for {@link #SUCCESS} and
 	 * {@link #CANCEL} as the other types are only used internally. For every
 	 * other type, the same type is being returned in order to use this method
-	 * as a convenience no mather which type provided.
+	 * as a convenience no matter which type provided.
 	 * 
 	 * @param type the ending type specified by an ending annotation
 	 * @return the type to be used instead as ending failed
