@@ -22,7 +22,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.conversation.ConversationEndingType;
+import org.springframework.conversation.ConversationListener;
 import org.springframework.conversation.JoinMode;
+import org.springframework.conversation.manager.ConversationManager;
 
 /**
  * If this annotation is placed on a method, it will create a new conversation
@@ -56,5 +59,26 @@ public @interface Conversational {
 	 * 
 	 * @return the join mode to use for creating a new conversation
 	 */
-	JoinMode value() default JoinMode.NEW;
+	JoinMode joinMode() default JoinMode.NEW;
+
+	/**
+	 * Returns the timeout to be set within the newly created conversation,
+	 * default is <code>-1</code> which means to use the default timeout as
+	 * being configured on the {@link ConversationManager}. A value of
+	 * <code>0</code> means there is no timeout any other positive value is
+	 * interpreted as a timeout in milliseconds.
+	 * 
+	 * @return the timeout in milliseconds to be set on the new conversation
+	 */
+	long timeout() default -1;
+
+	/**
+	 * Returns the qualifier on how the conversation is about to be ended. This
+	 * value will be passed on to any {@link ConversationListener} registered
+	 * with the conversation being ended.
+	 * 
+	 * @return the type of ending, {@link ConversationEndingType#SUCCESS} if not
+	 * explicitly specified
+	 */
+	ConversationEndingType endingType() default ConversationEndingType.SUCCESS;
 }

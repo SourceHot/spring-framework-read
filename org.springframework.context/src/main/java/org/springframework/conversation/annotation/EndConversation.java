@@ -39,7 +39,6 @@ import org.springframework.conversation.manager.ConversationManager;
 @Target(ElementType.METHOD)
 @Documented
 public @interface EndConversation {
-
 	/**
 	 * Returns the qualifier on how the conversation is about to be ended. This
 	 * value will be passed on to any {@link ConversationListener} registered
