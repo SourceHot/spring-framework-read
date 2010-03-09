@@ -164,9 +164,9 @@ public class DestructionAwareAttributeMap implements Serializable {
 	 * Note that 'destruction' refers to to automatic destruction of the object
 	 * as part of the scope's own lifecycle, not to the individual scoped object
 	 * having been explicitly removed by the application. If a scoped object
-	 * gets removed via this facade's {@link #remove(String)} method, any
-	 * registered destruction callback should be removed as well, assuming that
-	 * the removed object will be reused or manually destroyed.
+	 * gets removed via this facade's {@link #removeAttribute(String)} method,
+	 * any registered destruction callback should be removed as well, assuming
+	 * that the removed object will be reused or manually destroyed.
 	 * 
 	 * @param name
 	 *            the name of the object to execute the destruction callback for
