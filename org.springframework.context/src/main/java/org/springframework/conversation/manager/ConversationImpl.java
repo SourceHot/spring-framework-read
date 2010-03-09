@@ -101,12 +101,13 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	 * 
 	 * @see org.springframework.conversation.Conversation#getAttribute(java.lang.String)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAttribute(String name) {
 		touch();
 
 		// first try to get the attribute from this conversation state
-		T value = super.getAttribute(name);
+		T value = (T) super.getAttribute(name);
 		if (value != null) {
 			return value;
 		}
@@ -114,7 +115,7 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 		// the value was not found, try the parent conversation, if any and if
 		// not isolated
 		if (parent != null && !isolated) {
-			return parent.getAttribute(name);
+			return (T) parent.getAttribute(name);
 		}
 
 		// this is the root conversation and the requested bean is not
@@ -142,10 +143,11 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	/**
 	 * @see org.springframework.conversation.Conversation#removeAttribute(java.lang.String)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T removeAttribute(String name) {
 		touch();
-		T value = super.removeAttribute(name);
+		T value = (T) super.removeAttribute(name);
 
 		// if the attribute implements the listener interface, remove it from
 		// the registered listeners
