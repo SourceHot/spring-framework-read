@@ -44,13 +44,21 @@ public abstract class AbstractMapScope extends DestructionAwareAttributeMap
 	 *      org.springframework.beans.factory.ObjectFactory)
 	 */
 	public Object get(String name, ObjectFactory<?> objectFactory) {
-		Object scopedObject = super.get(name);
+		Object scopedObject = super.getAttribute(name);
 		if (scopedObject == null) {
 			scopedObject = objectFactory.getObject();
-			super.put(name, scopedObject);
+			super.setAttribute(name, scopedObject);
 		}
 
 		return scopedObject;
+	}
+
+	/**
+	 * @see org.springframework.beans.factory.config.Scope#remove(java.lang.String)
+	 */
+	@Override
+	public Object remove(String name) {
+		return super.removeAttribute(name);
 	}
 
 	/**

@@ -101,11 +101,12 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	 * 
 	 * @see org.springframework.conversation.Conversation#getAttribute(java.lang.String)
 	 */
-	public Object getAttribute(String name) {
+	@Override
+	public <T> T getAttribute(String name) {
 		touch();
 
 		// first try to get the attribute from this conversation state
-		Object value = super.get(name);
+		T value = super.getAttribute(name);
 		if (value != null) {
 			return value;
 		}
@@ -125,7 +126,8 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	 * @see org.springframework.conversation.Conversation#setAttribute(java.lang.String,
 	 * java.lang.Object)
 	 */
-	public Object setAttribute(String name, Object value) {
+	@Override
+	public <T> T setAttribute(String name, T value) {
 		touch();
 
 		// check for implementing the ConversationListener interface and
@@ -134,15 +136,16 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 			addListener((ConversationListener) value);
 		}
 
-		return super.put(name, value);
+		return super.setAttribute(name, value);
 	}
 
 	/**
 	 * @see org.springframework.conversation.Conversation#removeAttribute(java.lang.String)
 	 */
-	public Object removeAttribute(String name) {
+	@Override
+	public <T> T removeAttribute(String name) {
 		touch();
-		Object value = super.remove(name);
+		T value = super.removeAttribute(name);
 
 		// if the attribute implements the listener interface, remove it from
 		// the registered listeners

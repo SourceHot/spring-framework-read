@@ -57,12 +57,15 @@ public class DestructionAwareAttributeMap implements Serializable {
 	/**
 	 * Returns the attribute having the specified name, if available,
 	 * <code>null</code> otherwise.
-	 * @param name the name of the attribute to be returned
+	 * 
+	 * @param name
+	 *            the name of the attribute to be returned
 	 * @return the attribute value or <code>null</code> if not available
 	 */
-	public Object get(String name) {
+	@SuppressWarnings("unchecked")
+	public <T> T getAttribute(String name) {
 		synchronized (attributes) {
-			return attributes.get(name);
+			return (T) attributes.get(name);
 		}
 	}
 
@@ -70,14 +73,17 @@ public class DestructionAwareAttributeMap implements Serializable {
 	 * Puts the given object with the specified name as an attribute to the
 	 * underlying map.
 	 * 
-	 * @param name the name of the attribute
-	 * @param value the value to be stored
+	 * @param name
+	 *            the name of the attribute
+	 * @param value
+	 *            the value to be stored
 	 * @return any previously object stored under the same name, if any,
-	 * <code>null</code> otherwise
+	 *         <code>null</code> otherwise
 	 */
-	public Object put(String name, Object value) {
+	@SuppressWarnings("unchecked")
+	public <T> T setAttribute(String name, T value) {
 		synchronized (attributes) {
-			return attributes.put(name, value);
+			return (T) attributes.put(name, value);
 		}
 	}
 
@@ -96,14 +102,17 @@ public class DestructionAwareAttributeMap implements Serializable {
 	 * <b>Note: This is an optional operation.</b> Implementations may throw
 	 * {@link UnsupportedOperationException} if they do not support explicitly
 	 * removing an object.
-	 * @param name the name of the object to remove
+	 * 
+	 * @param name
+	 *            the name of the object to remove
 	 * @return the removed object, or <code>null</code> if no object was present
 	 * @see #registerDestructionCallback
 	 */
-	public Object remove(String name) {
-		Object value = null;
+	@SuppressWarnings("unchecked")
+	public <T> T removeAttribute(String name) {
+		T value = null;
 		synchronized (attributes) {
-			value = attributes.remove(name);
+			value = (T) attributes.remove(name);
 		}
 
 		// check for a destruction callback to be invoked
@@ -124,7 +133,8 @@ public class DestructionAwareAttributeMap implements Serializable {
 			// step through the attribute map and invoke destruction callbacks,
 			// if any
 			if (registeredDescructionCallbacks != null) {
-				Iterator<Runnable> it = registeredDescructionCallbacks.values().iterator();
+				Iterator<Runnable> it = registeredDescructionCallbacks.values()
+						.iterator();
 				while (it.hasNext()) {
 					it.next().run();
 				}
@@ -157,13 +167,15 @@ public class DestructionAwareAttributeMap implements Serializable {
 	 * gets removed via this facade's {@link #remove(String)} method, any
 	 * registered destruction callback should be removed as well, assuming that
 	 * the removed object will be reused or manually destroyed.
-	 * @param name the name of the object to execute the destruction callback
-	 * for
-	 * @param callback the destruction callback to be executed. Note that the
-	 * passed-in Runnable will never throw an exception, so it can safely be
-	 * executed without an enclosing try-catch block. Furthermore, the Runnable
-	 * will usually be serializable, provided that its target object is
-	 * serializable as well.
+	 * 
+	 * @param name
+	 *            the name of the object to execute the destruction callback for
+	 * @param callback
+	 *            the destruction callback to be executed. Note that the
+	 *            passed-in Runnable will never throw an exception, so it can
+	 *            safely be executed without an enclosing try-catch block.
+	 *            Furthermore, the Runnable will usually be serializable,
+	 *            provided that its target object is serializable as well.
 	 * @see org.springframework.beans.factory.DisposableBean
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getDestroyMethodName()
 	 * @see DestructionAwareBeanPostProcessor
@@ -183,9 +195,11 @@ public class DestructionAwareAttributeMap implements Serializable {
 	 * with the given name or <code>null</code> if no such callback was
 	 * registered.
 	 * 
-	 * @param name the name of the registered callback requested
-	 * @param remove <code>true</code>, if the callback should be removed after
-	 * this call, <code>false</code>, if it stays
+	 * @param name
+	 *            the name of the registered callback requested
+	 * @param remove
+	 *            <code>true</code>, if the callback should be removed after
+	 *            this call, <code>false</code>, if it stays
 	 * @return the callback, if found, <code>null</code> otherwise
 	 */
 	public Runnable getDesctructionCallback(String name, boolean remove) {

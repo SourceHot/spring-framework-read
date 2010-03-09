@@ -76,7 +76,7 @@ public interface Conversation {
 	 * @return the old value attached to the same name, if any,
 	 * <code>null</code> otherwise
 	 */
-	Object setAttribute(String name, Object value);
+	<T> T setAttribute(String name, T value);
 
 	/**
 	 * Returns the value attached to the given name, if any previously
@@ -90,7 +90,7 @@ public interface Conversation {
 	 * @return the value, if available in the current state, <code>null</code>
 	 * otherwise
 	 */
-	Object getAttribute(String name);
+	<T> T getAttribute(String name);
 
 	/**
 	 * Removes the value in the current conversation having the given name and
@@ -101,7 +101,7 @@ public interface Conversation {
 	 * @param name the name of the value to be removed from this conversation
 	 * @return the removed value, if found, <code>null</code> otherwise
 	 */
-	Object removeAttribute(String name);
+	<T> T removeAttribute(String name);
 
 	/**
 	 * Returns the map holding the attributes of this conversation. The map will
