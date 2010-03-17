@@ -16,8 +16,8 @@
 package org.springframework.web.conversation;
 
 import org.springframework.conversation.Conversation;
-import org.springframework.conversation.scope.ConversationResolver;
-import org.springframework.conversation.scope.ThreadAttachedConversationResolver;
+import org.springframework.conversation.manager.ConversationResolver;
+import org.springframework.conversation.manager.ThreadAttachedConversationResolver;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
@@ -63,7 +63,7 @@ public class WebBasedConversationResolver extends
 	}
 
 	/**
-	 * @see org.springframework.conversation.scope.ThreadAttachedConversationResolver#getCurrentConversationId()
+	 * @see org.springframework.conversation.manager.ThreadAttachedConversationResolver#getCurrentConversationId()
 	 */
 	@Override
 	public String getCurrentConversationId() {
@@ -82,7 +82,7 @@ public class WebBasedConversationResolver extends
 	}
 
 	/**
-	 * @see org.springframework.conversation.scope.ThreadAttachedConversationResolver#setCurrentConversationId(java.lang.String)
+	 * @see org.springframework.conversation.manager.ThreadAttachedConversationResolver#setCurrentConversationId(java.lang.String)
 	 */
 	@Override
 	public void setCurrentConversationId(String conversationId) {

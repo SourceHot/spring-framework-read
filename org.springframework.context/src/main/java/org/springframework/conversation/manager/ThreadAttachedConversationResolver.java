@@ -13,7 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.conversation.scope;
+package org.springframework.conversation.manager;
+
 
 /**
  * An implementation of the {@link ConversationResolver} where the currently
@@ -28,14 +29,14 @@ public class ThreadAttachedConversationResolver extends AbstractConversationReso
 	private static final ThreadLocal<String> CURRENT_CONVERSATION_ID = new ThreadLocal<String>();
 
 	/**
-	 * @see org.springframework.conversation.scope.ConversationResolver#getCurrentConversationId()
+	 * @see org.springframework.conversation.manager.ConversationResolver#getCurrentConversationId()
 	 */
 	public String getCurrentConversationId() {
 		return CURRENT_CONVERSATION_ID.get();
 	}
 
 	/**
-	 * @see org.springframework.conversation.scope.ConversationResolver#setCurrentConversationId(java.lang.String)
+	 * @see org.springframework.conversation.manager.ConversationResolver#setCurrentConversationId(java.lang.String)
 	 */
 	public void setCurrentConversationId(String conversationId) {
 		CURRENT_CONVERSATION_ID.set(conversationId);

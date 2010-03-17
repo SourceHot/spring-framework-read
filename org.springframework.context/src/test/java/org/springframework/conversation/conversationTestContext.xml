@@ -25,7 +25,7 @@
         <property name="useFallbackMap" value="false"/>
     </bean>
     
-    <bean id="conversationResolver" class="org.springframework.conversation.scope.ThreadAttachedConversationResolver" />
+    <bean id="conversationResolver" class="org.springframework.conversation.manager.ThreadAttachedConversationResolver" />
     
     <bean id="conversationScope" class="org.springframework.conversation.scope.DefaultConversationScope" lazy-init="false">
         <property name="conversationManager" ref="conversationManager"/>

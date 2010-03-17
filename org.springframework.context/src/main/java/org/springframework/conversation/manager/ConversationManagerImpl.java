@@ -23,7 +23,6 @@ import org.springframework.conversation.ConversationDeactivationType;
 import org.springframework.conversation.ConversationEndingType;
 import org.springframework.conversation.ConversationType;
 import org.springframework.conversation.JoinMode;
-import org.springframework.conversation.scope.ConversationResolver;
 
 /**
  * The default implementation for the {@link ConversationManager} interface.

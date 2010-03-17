@@ -19,7 +19,6 @@ package org.springframework.conversation.manager;
 import java.util.List;
 
 import org.springframework.conversation.Conversation;
-import org.springframework.conversation.scope.ConversationResolver;
 
 /**
  * The conversation store is used within the {@link ConversationManager} to

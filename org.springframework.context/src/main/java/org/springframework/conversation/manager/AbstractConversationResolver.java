@@ -13,7 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.conversation.scope;
+package org.springframework.conversation.manager;
+
 
 /**
  * The abstract implementation for a {@link ConversationResolver}.
@@ -24,7 +25,7 @@ package org.springframework.conversation.scope;
 public abstract class AbstractConversationResolver implements ConversationResolver {
 
 	/**
-	 * @see org.springframework.conversation.scope.ConversationResolver#hasCurrentConversationId()
+	 * @see org.springframework.conversation.manager.ConversationResolver#hasCurrentConversationId()
 	 */
 	public boolean hasCurrentConversationId() {
 		return (getCurrentConversationId() != null);

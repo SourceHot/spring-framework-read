@@ -22,9 +22,9 @@ import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.conversation.manager.ConversationManager;
+import org.springframework.conversation.manager.ConversationResolver;
 import org.springframework.conversation.manager.ConversationStore;
 import org.springframework.conversation.manager.MutableConversation;
-import org.springframework.conversation.scope.ConversationResolver;
 
 /**
  * Basic conversation management tests.

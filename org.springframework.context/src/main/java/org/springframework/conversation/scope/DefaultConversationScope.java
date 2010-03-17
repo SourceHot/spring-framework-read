@@ -25,6 +25,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.conversation.Conversation;
 import org.springframework.conversation.JoinMode;
 import org.springframework.conversation.manager.ConversationManager;
+import org.springframework.conversation.manager.ConversationResolver;
 import org.springframework.conversation.manager.ConversationStore;
 import org.springframework.util.Assert;
 

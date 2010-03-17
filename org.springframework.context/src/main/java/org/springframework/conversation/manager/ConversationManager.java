@@ -26,7 +26,6 @@ import org.springframework.conversation.JoinMode;
 import org.springframework.conversation.annotation.BeginConversation;
 import org.springframework.conversation.annotation.Conversational;
 import org.springframework.conversation.annotation.EndConversation;
-import org.springframework.conversation.scope.ConversationResolver;
 import org.springframework.conversation.scope.ConversationScope;
 
 /**
