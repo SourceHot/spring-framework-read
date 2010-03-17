@@ -28,6 +28,13 @@ import org.springframework.web.filter.FlashMapFilter;
  * <p>
  * If window management is activated, the flash map is stored within window scope to avoid concurrent tabs / windows
  * affecting each other, it falls back to the session, if window management is not activated.
+ * <p>
+ * Typically, you will use the flash map by manually adding parameters to it before redirecting which could look like:
+ * 
+ * <pre>
+ * FlashMap.put(&quot;paramName&quot;, paramValue);
+ * redirect(...);
+ * </pre>
  * 
  * @author Micha Kiener
  * @since 3.1
