@@ -26,6 +26,7 @@ Import-Template:
  org.aopalliance.*;version="[1.0.0, 2.0.0)";resolution:=optional,
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
  org.aspectj.weaver.*;version="[1.5.4, 2.0.0)";resolution:=optional,
+ org.aspectj.lang.*;version="[1.5.4, 2.0.0)";resolution:=optional,
  org.codehaus.groovy.*;version="[1.5.0, 2.0.0)";resolution:=optional,
  org.joda.*;version="[1.6.0, 2.0.0)";resolution:=optional,
  org.jruby.*;version="[1.1.0, 2.0.0)";resolution:=optional,

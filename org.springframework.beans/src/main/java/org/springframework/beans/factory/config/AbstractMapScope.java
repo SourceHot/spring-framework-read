@@ -15,7 +15,6 @@
  */
 package org.springframework.beans.factory.config;
 
-import java.io.Serializable;
 import java.util.Map;
 
 import org.springframework.beans.factory.ObjectFactory;
@@ -25,12 +24,12 @@ import org.springframework.beans.factory.ObjectFactory;
  * state of the scope and also supporting destruction callbacks. It might be
  * used as the base for any other scope implementation or in tests to easily
  * register a scope based on a map implementation.
- * 
+ *
  * @author Micha Kiener
  * @since 3.1
  */
 public abstract class AbstractMapScope extends DestructionAwareAttributeMap
-		implements Scope, Serializable {
+		implements Scope {
 
 	/**
 	 * @return a map based representation of the state of this scope
@@ -56,7 +55,6 @@ public abstract class AbstractMapScope extends DestructionAwareAttributeMap
 	/**
 	 * @see org.springframework.beans.factory.config.Scope#remove(java.lang.String)
 	 */
-	@Override
 	public Object remove(String name) {
 		return super.removeAttribute(name);
 	}
