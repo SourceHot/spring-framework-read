@@ -23,7 +23,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.conversation.ConversationEndingType;
-import org.springframework.conversation.ConversationListener;
 import org.springframework.conversation.manager.ConversationManager;
 
 /**
@@ -39,13 +38,9 @@ import org.springframework.conversation.manager.ConversationManager;
 @Target(ElementType.METHOD)
 @Documented
 public @interface EndConversation {
+
 	/**
-	 * Returns the qualifier on how the conversation is about to be ended. This
-	 * value will be passed on to any {@link ConversationListener} registered
-	 * with the conversation being ended.
-	 * 
-	 * @return the type of ending, {@link ConversationEndingType#SUCCESS} if not
-	 * explicitly specified
+	 * The {@link ConversationEndingType} for this conversation.
 	 */
 	ConversationEndingType value() default ConversationEndingType.SUCCESS;
 }

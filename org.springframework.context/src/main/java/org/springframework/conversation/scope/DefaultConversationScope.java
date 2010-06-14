@@ -15,13 +15,7 @@
  */
 package org.springframework.conversation.scope;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.conversation.Conversation;
 import org.springframework.conversation.JoinMode;
 import org.springframework.conversation.manager.ConversationManager;
@@ -38,9 +32,7 @@ import org.springframework.util.Assert;
  * @author Micha Kiener
  * @since 3.1
  */
-public class DefaultConversationScope implements ConversationScope, ApplicationContextAware {
-	/** The application context used to register the scope. */
-	private ApplicationContext context;
+public class DefaultConversationScope implements ConversationScope{
 
 	/** Holds the conversation manager reference, if statically injected. */
 	private ConversationManager conversationManager;
@@ -65,7 +57,7 @@ public class DefaultConversationScope implements ConversationScope, ApplicationC
 		Assert.notNull(resolver, "No conversation resolver available within the conversation scope");
 
 		String conversationId = resolver.getCurrentConversationId();
-		Conversation conversation = null;
+		Conversation conversation;
 		if (conversationId == null) {
 			if (createNewIfNotExisting) {
 				// start a new, temporary conversation using the default join
@@ -84,32 +76,6 @@ public class DefaultConversationScope implements ConversationScope, ApplicationC
 		}
 
 		return conversation;
-	}
-
-	/**
-	 * Post constructor, registering this scope implementation using the name
-	 * returned by {@link #getScopeName()}.
-	 */
-	@PostConstruct
-	public void registerScope() {
-		if (context instanceof ConfigurableApplicationContext) {
-			((ConfigurableApplicationContext) context).getBeanFactory().registerScope(getScopeName(), this);
-		}
-	}
-
-	/**
-	 * @return the name of the scope this implementation should be registered
-	 * with, default is <code>"conversation"</code>
-	 */
-	public String getScopeName() {
-		return ConversationScope.CONVERSATION_SCOPE_NAME;
-	}
-
-	/**
-	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext(org.springframework.context.ApplicationContext)
-	 */
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.context = applicationContext;
 	}
 
 	/**

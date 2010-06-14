@@ -23,9 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.conversation.ConversationEndingType;
-import org.springframework.conversation.ConversationListener;
 import org.springframework.conversation.JoinMode;
-import org.springframework.conversation.manager.ConversationManager;
+import org.springframework.conversation.interceptor.ConversationAttribute;
 
 /**
  * If this annotation is placed on a method, it will create a new conversation
@@ -43,6 +42,7 @@ import org.springframework.conversation.manager.ConversationManager;
  * terminated.
  * 
  * @author Micha Kiener
+ * @author Agim Emruli
  * @since 3.1
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -50,35 +50,17 @@ import org.springframework.conversation.manager.ConversationManager;
 @Documented
 public @interface Conversational {
 	/**
-	 * Returns the {@link JoinMode} used to start a new conversation. See
-	 * {@link JoinMode} for a more detailed description of the different modes
-	 * available.<br/>
-	 * Default join mode is {@link JoinMode#NEW} which will create a new root
-	 * conversation and will automatically end the current one, if not ended
-	 * before.
-	 * 
-	 * @return the join mode to use for creating a new conversation
+	 * The {@link JoinMode} used for this conversation.
 	 */
 	JoinMode joinMode() default JoinMode.NEW;
 
 	/**
-	 * Returns the timeout to be set within the newly created conversation,
-	 * default is <code>-1</code> which means to use the default timeout as
-	 * being configured on the {@link ConversationManager}. A value of
-	 * <code>0</code> means there is no timeout any other positive value is
-	 * interpreted as a timeout in milliseconds.
-	 * 
-	 * @return the timeout in milliseconds to be set on the new conversation
+	 * The timeout for this conversation.
 	 */
-	long timeout() default -1;
+	int timeout() default ConversationAttribute.DEFAULT_TIMEOUT;
 
 	/**
-	 * Returns the qualifier on how the conversation is about to be ended. This
-	 * value will be passed on to any {@link ConversationListener} registered
-	 * with the conversation being ended.
-	 * 
-	 * @return the type of ending, {@link ConversationEndingType#SUCCESS} if not
-	 * explicitly specified
+	 * The {@link ConversationEndingType} for this conversation.
 	 */
 	ConversationEndingType endingType() default ConversationEndingType.SUCCESS;
 }

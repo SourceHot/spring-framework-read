@@ -3,24 +3,28 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xmlns:context="http://www.springframework.org/schema/context"
     xmlns:aop="http://www.springframework.org/schema/aop" 
-    xsi:schemaLocation="
-        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
-        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
-    
-    <aop:aspectj-autoproxy/>
-    <context:annotation-config/>
-    
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<bean id="conversationAttributeSource" class="org.springframework.conversation.annotation.AnnotationConversationAttributeSource"/>
+
+	<bean id="conversationInterceptor" class="org.springframework.conversation.interceptor.ConversationInterceptor">
+		<property name="conversationAttributeSource" ref="conversationAttributeSource"/>
+		<property name="conversationManager" ref="conversationManager"/>
+	</bean>
+
+	<bean id="conversationAdvisor" class="org.springframework.conversation.interceptor.BeanFactoryConversationAttributeSourceAdvisor">
+		<property name="adviceBeanName" value="conversationInterceptor"/>
+		<property name="conversationAttributeSource" ref="conversationAttributeSource"/>
+	</bean>
+
+	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />
+
     <bean id="conversationManager" class="org.springframework.conversation.manager.ConversationManagerImpl">
         <property name="defaultConversationTimeout" value="0"/>
         <property name="conversationStore" ref="conversationStore"/>
         <property name="conversationResolver" ref="conversationResolver"/>
     </bean>
 
-    <bean id="conversationAnnotationAdvice" class="org.springframework.conversation.annotation.ConversationAdvice">
-        <property name="conversationManager" ref="conversationManager"/>
-    </bean>
-    
     <bean id="conversationStore" class="org.springframework.conversation.SingletonConversationStore">
         <property name="useFallbackMap" value="false"/>
     </bean>
@@ -32,12 +36,19 @@
         <property name="conversationStore" ref="conversationStore"/>
         <property name="conversationResolver" ref="conversationResolver"/>
     </bean>
-    
+
+	<bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
+		<property name="scopes">
+			<map>
+				<entry key="conversation" value-ref="conversationScope"/>
+			</map>
+		</property>
+	</bean>
+
     <bean id="testBean1" class="org.springframework.conversation.ConversationalBean" scope="conversation"/>
     <bean id="testBean2" class="org.springframework.conversation.ConversationEventAwareBean" scope="conversation"/>
     
     <bean id="testService" class="org.springframework.conversation.ConversationalServiceBeanImpl">
         <property name="conversationManager" ref="conversationManager"/>
     </bean>
-    
 </beans>

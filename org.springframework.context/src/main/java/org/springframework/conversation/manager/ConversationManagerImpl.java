@@ -54,7 +54,7 @@ public class ConversationManagerImpl implements ConversationManager {
 	 * using the Spring configuration of the manager. A value of <code>0</code>
 	 * means there is no timeout.
 	 */
-	private long defaultTimeout = 0;
+	private int defaultTimeout = 0;
 
 	/**
 	 * @see org.springframework.conversation.manager.ConversationManager#getCurrentConversation()
@@ -335,16 +335,16 @@ public class ConversationManagerImpl implements ConversationManager {
 	}
 
 	/**
-	 * @see org.springframework.conversation.manager.ConversationManager#setDefaultConversationTimeout(long)
+	 * @see ConversationManager#setDefaultConversationTimeout(int)
 	 */
-	public void setDefaultConversationTimeout(long defaultTimeout) {
+	public void setDefaultConversationTimeout(int defaultTimeout) {
 		this.defaultTimeout = defaultTimeout;
 	}
 
 	/**
 	 * @see org.springframework.conversation.manager.ConversationManager#getDefaultConversationTimeout()
 	 */
-	public long getDefaultConversationTimeout() {
+	public int getDefaultConversationTimeout() {
 		return defaultTimeout;
 	}
 

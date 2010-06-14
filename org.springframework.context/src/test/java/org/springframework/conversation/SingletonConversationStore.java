@@ -18,8 +18,6 @@ package org.springframework.conversation;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.conversation.manager.AbstractConversationStore;
 
 /**
@@ -28,12 +26,7 @@ import org.springframework.conversation.manager.AbstractConversationStore;
  */
 public class SingletonConversationStore extends AbstractConversationStore {
 	/** The map for the conversation storage. */
-	private Map<String, Conversation> conversationMap;
-
-	@PostConstruct
-	public void initialize() {
-		conversationMap = new HashMap<String, Conversation>();
-	}
+	private Map<String, Conversation> conversationMap = new HashMap<String, Conversation>();
 
 	/**
 	 * @see org.springframework.conversation.manager.AbstractConversationStore#getConversationMap()

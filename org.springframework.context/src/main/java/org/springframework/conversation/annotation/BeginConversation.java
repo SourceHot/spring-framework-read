@@ -25,50 +25,30 @@ import java.lang.annotation.Target;
 import org.springframework.conversation.Conversation;
 import org.springframework.conversation.ConversationEndingType;
 import org.springframework.conversation.JoinMode;
+import org.springframework.conversation.interceptor.ConversationAttribute;
 import org.springframework.conversation.manager.ConversationManager;
 
 /**
- * This annotation can be placed on any method to start a new conversation. This
- * has the same effect as invoking
- * {@link ConversationManager#beginConversation(boolean, JoinMode)} using
- * <code>false</code> for the temporary mode and the join mode as being
- * specified within the annotation or {@link JoinMode#NEW} as the default.<br/>
- * The new conversation is always long running (not a temporary one) and is
- * ended by either manually invoke
- * {@link ConversationManager#endCurrentConversation(ConversationEndingType)},
- * invoking the {@link Conversation#end(ConversationEndingType)} method on the
- * conversation itself or by placing the {@link EndConversation} annotation on a
- * method.<br/>
- * The new conversation is created BEFORE the method itself is invoked as a
- * before-advice.
- * 
+ * This annotation can be placed on any method to start a new conversation. This has the same effect as invoking {@link
+ * ConversationManager#beginConversation(boolean, JoinMode)} using <code>false</code> for the temporary mode and the
+ * join mode as being specified within the annotation or {@link JoinMode#NEW} as the default.<br/> The new conversation
+ * is always long running (not a temporary one) and is ended by either manually invoke {@link
+ * ConversationManager#endCurrentConversation(ConversationEndingType)}, invoking the {@link
+ * Conversation#end(ConversationEndingType)} method on the conversation itself or by placing the {@link EndConversation}
+ * annotation on a method.<br/> The new conversation is created BEFORE the method itself is invoked as a before-advice.
+ *
  * @author Micha Kiener
+ * @author Agim Emruli
  * @since 3.1
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Documented
 public @interface BeginConversation {
-	/**
-	 * Returns the {@link JoinMode} used to start a new conversation. See
-	 * {@link JoinMode} for a more detailed description of the different modes
-	 * available.<br/>
-	 * Default join mode is {@link JoinMode#NEW} which will create a new root
-	 * conversation and will automatically end the current one, if not ended
-	 * before.
-	 * 
-	 * @return the join mode to use for creating a new conversation
-	 */
+
+	/** The {@link JoinMode} used for this conversation. */
 	JoinMode value() default JoinMode.NEW;
 
-	/**
-	 * Returns the timeout to be set within the newly created conversation,
-	 * default is <code>-1</code> which means to use the default timeout as
-	 * being configured on the {@link ConversationManager}. A value of
-	 * <code>0</code> means there is no timeout any other positive value is
-	 * interpreted as a timeout in milliseconds.
-	 * 
-	 * @return the timeout in milliseconds to be set on the new conversation
-	 */
-	long timeout() default -1;
+	/** The timeout for this conversation. */
+	int timeout() default ConversationAttribute.DEFAULT_TIMEOUT;
 }

@@ -248,5 +248,5 @@ public interface Conversation {
 	 * @param timeout the timeout in milliseconds after inactivity of the
 	 * conversation or <code>0</code>, if there should be no timeout
 	 */
-	void setTimeout(long timeout);
+	void setTimeout(int timeout);
 }

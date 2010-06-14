@@ -250,7 +250,7 @@ public interface ConversationManager {
 	 * 
 	 * @return the default timeout in milliseconds for a new conversation
 	 */
-	long getDefaultConversationTimeout();
+	int getDefaultConversationTimeout();
 
 	/**
 	 * Set the default timeout to be set on newly created conversations, if not
@@ -260,5 +260,5 @@ public interface ConversationManager {
 	 * @param timeout the timeout in milliseconds or <code>0</code> if no
 	 * timeout should be set by default
 	 */
-	void setDefaultConversationTimeout(long timeout);
+	void setDefaultConversationTimeout(int timeout);
 }

@@ -82,7 +82,7 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	private List<ConversationListener> listeners;
 
 	/** The timeout in milliseconds or <code>0</code>, if no timeout specified. */
-	private long timeout;
+	private int timeout;
 
 	/** The timestamp in milliseconds of the last access to this conversation. */
 	private long lastAccess;
@@ -380,9 +380,9 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
 	}
 
 	/**
-	 * @see org.springframework.conversation.Conversation#setTimeout(long)
+	 * @see org.springframework.conversation.Conversation#setTimeout(int)
 	 */
-	public void setTimeout(long timeout) {
+	public void setTimeout(int timeout) {
 		this.timeout = timeout;
 	}
 

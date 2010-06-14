@@ -15,6 +15,7 @@
  */
 package org.springframework.conversation.manager;
 
+import org.springframework.core.NamedThreadLocal;
 
 /**
  * An implementation of the {@link ConversationResolver} where the currently
@@ -22,11 +23,12 @@ package org.springframework.conversation.manager;
  * should only be used in a batch environment, never in a web environment.
  * 
  * @author Micha Kiener
+ * @author Agim Emruli
  * @since 3.1
  */
 public class ThreadAttachedConversationResolver extends AbstractConversationResolver {
 	/** The thread local attribute where the current conversation id is stored. */
-	private static final ThreadLocal<String> CURRENT_CONVERSATION_ID = new ThreadLocal<String>();
+	private static final NamedThreadLocal<String> CURRENT_CONVERSATION_ID = new NamedThreadLocal<String>("Current Conversation");
 
 	/**
 	 * @see org.springframework.conversation.manager.ConversationResolver#getCurrentConversationId()
