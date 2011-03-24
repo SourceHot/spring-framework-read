@@ -361,8 +361,20 @@ public class ConversationImpl extends DestructionAwareAttributeMap implements Mu
      * @see org.springframework.conversation.manager.MutableConversation#isParent()
      */
     public boolean isParent() {
-        return (children != null && children.size() > 0);
-    }
+		if (children == null || children.size() == 0) {
+			return false;
+		}
+
+		// step through the list of children and search for at least one active child conversation in order to
+		// make this an active parent
+		for (MutableConversation conversation : children) {
+			if (!conversation.isEnded()) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 
     /**
      * @see org.springframework.conversation.Conversation#isTemporary()
