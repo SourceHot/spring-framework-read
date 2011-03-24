@@ -168,6 +168,13 @@ public interface Conversation {
 	 */
 	Conversation getRoot();
 
+    /**
+     * Returns a list of child conversations, if any, an empty list otherwise, must never return <code>null</code>.
+     *
+     * @return a list of child conversations (may be empty, never <code>null</code>).
+     */
+    List<? extends Conversation> getChildConversations();
+
 	/**
 	 * Returns <code>true</code>, if this is a nested conversation and hence
 	 * {@link #getParent()} will returns a non-null value.
@@ -248,5 +255,5 @@ public interface Conversation {
 	 * @param timeout the timeout in milliseconds after inactivity of the
 	 * conversation or <code>0</code>, if there should be no timeout
 	 */
-	void setTimeout(int timeout);
+	void setTimeout(long timeout);
 }

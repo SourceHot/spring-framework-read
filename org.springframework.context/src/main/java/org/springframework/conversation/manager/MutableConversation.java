@@ -24,9 +24,19 @@ import org.springframework.conversation.JoinMode;
 /**
  * <p>
  * The extended {@link Conversation} interface for a conversation object to be
- * modified.
+ * modified.<br/>
+ * A conversation can hold one or more child conversations. Basically there are two modes allowed for a conversation to
+ * hold child conversations:
+ * <ul>
+ * <li><b>Conversation Nesting</b></li>
+ * The nesting conversation mode only allows one conversation to be nested within its parent. It is usually used within
+ * web based conversations.
+ * <li><b>Conversation Hierarchy</b></li>
+ * This mode allows a conversation to have a fully blown conversation hierarchy, meaning it can have an unlimited number
+ * of child conversations. This mode is usually used within persisted conversations.
+ * </ul>
  * </p>
- * 
+ *
  * @author Micha Kiener
  * @since 3.1
  */
@@ -58,31 +68,37 @@ public interface MutableConversation extends Conversation {
 	void setSwitched(boolean switched);
 
 	/**
-	 * Set the given conversation as the parent conversation of this one. So
-	 * this conversation will be a nested conversation of the given parent.
-	 * 
+	 * Makes the given conversation the parent conversation of this one. This method is usually invoked within
+	 * #addChildConversation to reference the child conversation back to its parent.
+	 *
 	 * @param parentConversation the parent conversation to be set
-	 * @param isIsolated flag indicating whether this conversation should be
-	 * isolated from the given parent conversation so that it does not inherit
-	 * the state of the parent but rather has its own, isolated state
+	 * @param isIsolated         flag indicating whether this conversation should be
+	 *                           isolated from the given parent conversation so that it does not inherit
+	 *                           the state of the parent but rather has its own, isolated state
 	 */
 	void setParentConversation(MutableConversation parentConversation, boolean isIsolated);
 
 	/**
-	 * Invoked by {@link #setParentConversation(MutableConversation, boolean)}
-	 * on the parent conversation to double link parent and nested conversations
-	 * in order to be able to return the tail of nested conversations.
-	 * 
-	 * @param nestedConversation the nested conversation to be set on this
-	 * parent conversation
+	 * Method being invoked to add the given conversation as a child conversation to this parent conversation.
+	 *
+	 * @param conversation the conversation to be added as a child to this parent conversation
+	 * @param isIsolated   flag indicating whether this conversation should be
+	 *                     isolated from the given parent conversation so that it does not inherit
+	 *                     the state of the parent but rather has its own, isolated state
 	 */
-	void setNestedConversation(MutableConversation nestedConversation);
+	void addChildConversation(MutableConversation conversation, boolean isIsolated);
 
 	/**
-	 * Returns the tail of this conversation which is the last nested
-	 * conversation or this instance, if there are no nested conversations or
-	 * this is the last nested one.
-	 * 
+	 * Removes the given child conversation from this parent conversation.
+	 *
+	 * @param conversation the conversation to be removed from this one
+	 */
+	void removeChildConversation(MutableConversation conversation);
+
+	/**
+	 * Returns the tail of this conversation which is the last nested conversation. It wil return this instance, if
+	 * there are no nested conversations or this is the last nested one.
+	 *
 	 * @return the last nested conversation, never <code>null</code>
 	 */
 	MutableConversation getTail();
