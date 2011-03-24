@@ -20,11 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.conversation.manager.ConversationManager;
-import org.springframework.conversation.scope.ConversationScope;
 
 /**
  * The interface for a conversation, the instance behind the
- * {@link ConversationScope}.<br/>
+ * {@link org.springframework.conversation.scope.ConversationScope}.<br/>
  * Conversations are created through the {@link ConversationManager} which is
  * the main API for conversation management unless the annotations are used. See
  * {@link ConversationManager} for a more detailed description on how the

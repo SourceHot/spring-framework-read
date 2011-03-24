@@ -31,7 +31,7 @@
     
     <bean id="conversationResolver" class="org.springframework.conversation.manager.ThreadAttachedConversationResolver" />
     
-    <bean id="conversationScope" class="org.springframework.conversation.scope.DefaultConversationScope" lazy-init="false">
+    <bean id="conversationScope" class="org.springframework.conversation.scope.ConversationScope" lazy-init="false">
         <property name="conversationManager" ref="conversationManager"/>
         <property name="conversationStore" ref="conversationStore"/>
         <property name="conversationResolver" ref="conversationResolver"/>

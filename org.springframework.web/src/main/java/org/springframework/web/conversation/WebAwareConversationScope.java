@@ -15,22 +15,22 @@
  */
 package org.springframework.web.conversation;
 
-import org.springframework.conversation.scope.DefaultConversationScope;
+import org.springframework.conversation.scope.ConversationScope;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
 /**
  * The extension of the default conversation scope (
- * {@link DefaultConversationScope}) by supporting contextual web objects
+ * {@link org.springframework.conversation.scope.ConversationScope}) by supporting contextual web objects
  * returned by overwriting {@link #resolveContextualObject(String)}.
  * 
  * @author Micha Kiener
  * @since 3.1
  */
-public class WebAwareConversationScope extends DefaultConversationScope {
+public class WebAwareConversationScope extends ConversationScope {
 
 	/**
-	 * @see org.springframework.conversation.scope.DefaultConversationScope#resolveContextualObject(java.lang.String)
+	 * @see org.springframework.conversation.scope.ConversationScope#resolveContextualObject(java.lang.String)
 	 */
 	@Override
 	public Object resolveContextualObject(String key) {

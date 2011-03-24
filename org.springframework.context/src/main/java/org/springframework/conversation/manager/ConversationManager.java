@@ -26,105 +26,68 @@ import org.springframework.conversation.JoinMode;
 import org.springframework.conversation.annotation.BeginConversation;
 import org.springframework.conversation.annotation.Conversational;
 import org.springframework.conversation.annotation.EndConversation;
-import org.springframework.conversation.scope.ConversationScope;
 
 /**
- * <p>
- * The interface to be implemented by any conversation manager. It is used by
- * the advice behind the conversational annotations like
- * {@link BeginConversation}, {@link EndConversation} and {@link Conversational}
- * but might be used for even fine grained access to the underlying conversation
- * management, if a initializer callback is needed for instance or if
- * conversation switching should be used. If used directly, the conversation
- * manager can be injected into any bean to be used as it is a singleton and
- * thread safe.<br/>
- * 
- * Conversations are a good way to scope beans and attributes depending on
- * business logic boundary rather than a technical boundary of a scope like
- * session, request etc. Usually a conversation boundary is defined by the
- * starting point of a use case and ended accordingly or in other words a
- * conversation defines the boundary for a unit of work.<br/>
- * <br/>
- * 
- * Here is a short description on how to use the conversation management:<br/>
- * <br/>
- * <b>Starting a conversation</b><br/>
- * A conversation can be started in two different ways, either by placing the
- * {@link BeginConversation} annotation on a method defining the starting point
- * of the conversation (use case) or by invoking
- * {@link ConversationManager#beginConversation(boolean, JoinMode)} manually
- * through the conversation manager. The {@link JoinMode} declares on how a new
- * conversation is created (see its javadoc for more details on the different
- * join modes).<br/>
- * <br/>
- * 
- * <b>Ending a conversation</b><br/>
- * A current conversation is ended by either placing the {@link EndConversation}
- * annotation on the ending method or by manually invoke the
- * {@link ConversationManager#endCurrentConversation(ConversationEndingType)}
- * method. A current conversation might also be ended, if a new conversation is
- * started having {@link JoinMode#NEW} being declared where the current
- * conversation is ended silently and a new one is created. This might be the
- * obvious way to end a conversation, if the end of a use case is not always
- * forced to be invoked by a user.<br/>
- * <br/>
- * 
- * <b>Temporary conversations</b><br/>
- * A temporary conversation is automatically created, if the container is about
- * to create a bean having conversation scope but there is no current
- * conversation in progress, hence a new, temporary conversation is created. A
- * temporary conversation might be turned into a long running one by joining it
- * or manually invoke {@link Conversation#begin()}.<br/>
- * <br/>
- * 
- * <b>Initializing the conversation</b><br/>
- * If there is any need to initialize beans or entities while starting a new
- * conversation, the {@link ConversationInitializationCallback} might be used to
- * be invoked if the new conversation was started in order to initialize it.
- * This is done by providing such a callback to the
- * {@link ConversationManager#beginConversation(JoinMode, ConversationType, ConversationInitializationCallback...)}
- * method. The callback feature is not available through the annotation support
- * and hence is only available through the conversation manager API. Here is an
- * example on such an initializing feature; if a conversation is used in
- * conjunction of a JPA entity manager or Hibernate session, there might be
- * entity beans already loaded, cached or referenced within backing beans which
- * have to be merged into the entity manager or session in order to be used
- * within the conversation's work. So it would be possible to implement the
- * callback, merging the necessary entities used within the conversation into
- * the entity manager.<br/>
- * <br/>
- * 
- * <b>Listening to conversation events</b><br/>
- * If there is a need to listening to events of a conversation, add yourself as
- * a {@link ConversationListener} to a new {@link Conversation} as being
- * returned by this {@link ConversationManager}. The same goal can be achieved
- * by implementing the {@link ConversationListener} interface on a conversation
- * scoped bean which will be registered automatically to receive events.<br/>
- * <br/>
- * 
- * <b>Nesting conversations</b><br/>
- * Conversations might be nested either by inheriting the state of the parent (
- * {@link JoinMode#NESTED}) or by isolating its state from the parent (
- * {@link JoinMode#ISOLATED}). Ending a nested conversation automatically
- * switches back to its parent making it the current conversation.<br/>
- * <br/>
- * 
- * <b>Where are conversations stored?</b><br/>
- * Conversations are created by the {@link ConversationManager} and registered
- * within the {@link ConversationScope}. The scope handler is injected into the
- * manager by Spring (statically as both beans are singletons) and registered as
- * a custom scope. As the scope handler is a singleton, it needs a store where
- * conversations are stored within which is usually bound to the current session
- * or window of a user and represented by the {@link ConversationStore}
- * interface. The store is usually being injected into the scope handler using
- * method injection as the store has a narrower scope than the scope handler. In
- * a web environment, the store would typically live in session scope to
- * separate the conversations from each of the sessions. There is always one
- * current conversation either stored within the session or as a request
- * parameter passed along every request to set the current conversation and is
- * accessed by the manager using a {@link ConversationResolver}.
- * </p>
- * 
+ * <p> The interface to be implemented by any conversation manager. It is used by the advice behind the conversational
+ * annotations like {@link BeginConversation}, {@link EndConversation} and {@link Conversational} but might be used for
+ * even fine grained access to the underlying conversation management, if a initializer callback is needed for instance
+ * or if conversation switching should be used. If used directly, the conversation manager can be injected into any bean
+ * to be used as it is a singleton and thread safe.<br/>
+ *
+ * Conversations are a good way to scope beans and attributes depending on business logic boundary rather than a
+ * technical boundary of a scope like session, request etc. Usually a conversation boundary is defined by the starting
+ * point of a use case and ended accordingly or in other words a conversation defines the boundary for a unit of
+ * work.<br/> <br/>
+ *
+ * Here is a short description on how to use the conversation management:<br/> <br/> <b>Starting a conversation</b><br/>
+ * A conversation can be started in two different ways, either by placing the {@link BeginConversation} annotation on a
+ * method defining the starting point of the conversation (use case) or by invoking {@link
+ * ConversationManager#beginConversation(boolean, JoinMode)} manually through the conversation manager. The {@link
+ * JoinMode} declares on how a new conversation is created (see its javadoc for more details on the different join
+ * modes).<br/> <br/>
+ *
+ * <b>Ending a conversation</b><br/> A current conversation is ended by either placing the {@link EndConversation}
+ * annotation on the ending method or by manually invoke the {@link ConversationManager#endCurrentConversation(ConversationEndingType)}
+ * method. A current conversation might also be ended, if a new conversation is started having {@link JoinMode#NEW}
+ * being declared where the current conversation is ended silently and a new one is created. This might be the obvious
+ * way to end a conversation, if the end of a use case is not always forced to be invoked by a user.<br/> <br/>
+ *
+ * <b>Temporary conversations</b><br/> A temporary conversation is automatically created, if the container is about to
+ * create a bean having conversation scope but there is no current conversation in progress, hence a new, temporary
+ * conversation is created. A temporary conversation might be turned into a long running one by joining it or manually
+ * invoke {@link Conversation#begin()}.<br/> <br/>
+ *
+ * <b>Initializing the conversation</b><br/> If there is any need to initialize beans or entities while starting a new
+ * conversation, the {@link ConversationInitializationCallback} might be used to be invoked if the new conversation was
+ * started in order to initialize it. This is done by providing such a callback to the {@link
+ * ConversationManager#beginConversation(JoinMode, ConversationType, ConversationInitializationCallback...)} method. The
+ * callback feature is not available through the annotation support and hence is only available through the conversation
+ * manager API. Here is an example on such an initializing feature; if a conversation is used in conjunction of a JPA
+ * entity manager or Hibernate session, there might be entity beans already loaded, cached or referenced within backing
+ * beans which have to be merged into the entity manager or session in order to be used within the conversation's work.
+ * So it would be possible to implement the callback, merging the necessary entities used within the conversation into
+ * the entity manager.<br/> <br/>
+ *
+ * <b>Listening to conversation events</b><br/> If there is a need to listening to events of a conversation, add
+ * yourself as a {@link ConversationListener} to a new {@link Conversation} as being returned by this {@link
+ * ConversationManager}. The same goal can be achieved by implementing the {@link ConversationListener} interface on a
+ * conversation scoped bean which will be registered automatically to receive events.<br/> <br/>
+ *
+ * <b>Nesting conversations</b><br/> Conversations might be nested either by inheriting the state of the parent ( {@link
+ * JoinMode#NESTED}) or by isolating its state from the parent ( {@link JoinMode#ISOLATED}). Ending a nested
+ * conversation automatically switches back to its parent making it the current conversation.<br/> <br/>
+ *
+ * <b>Where are conversations stored?</b><br/> Conversations are created by the {@link ConversationManager} and
+ * registered within the {@link org.springframework.conversation.scope.ConversationScope}. The scope handler is
+ * injected into the manager by Spring (statically as both beans are singletons) and registered as a custom scope. As
+ * the scope handler is a singleton, it needs a store where conversations are stored within which is usually bound to
+ * the current session or window of a user and represented by the {@link ConversationStore} interface. The store is
+ * usually being injected into the scope handler using method injection as the store has a narrower scope than the scope
+ * handler. In a web environment, the store would typically live in session scope to separate the conversations from
+ * each of the sessions. There is always one current conversation either stored within the session or as a request
+ * parameter passed along every request to set the current conversation and is accessed by the manager using a {@link
+ * ConversationResolver}. </p>
+ *
  * @author Micha Kiener
  * @since 3.1
  */
@@ -132,7 +95,7 @@ public interface ConversationManager {
 
 	/**
 	 * This method starts a new {@link Conversation} and registers it within the
-	 * {@link ConversationScope} to be exposed as the current conversation.
+	 * {@link org.springframework.conversation.scope.ConversationScope} to be exposed as the current conversation.
 	 * 
 	 * @param temporary flag indicating whether this new conversation is
 	 * temporary (if invoked from elsewhere as the scope, it should always be
