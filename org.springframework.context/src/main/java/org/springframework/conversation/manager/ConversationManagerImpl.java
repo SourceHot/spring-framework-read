@@ -246,7 +246,7 @@ public class ConversationManagerImpl implements ConversationManager {
 			// nest the new conversation to the current one, if available and
 			// set the current one as the parent of the new one
 			if (joinMode.mustBeNested()) {
-				newConversation.setParentConversation(currentConversation, joinMode.mustBeIsolated());
+				currentConversation.addChildConversation(newConversation, joinMode.mustBeIsolated());
 				currentConversation.deactivated(joinMode.mustBeIsolated() ? ConversationDeactivationType.NEW_ISOLATED
 						: ConversationDeactivationType.NEW_NESTED, newConversation);
 			}
