@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.support;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -27,19 +28,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.SmartContextLoader;
-import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.test.util.MetaAnnotationUtils.UntypedAnnotationDescriptor;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 import static org.springframework.core.annotation.AnnotationUtils.getAnnotation;
 import static org.springframework.core.annotation.AnnotationUtils.isAnnotationDeclaredLocally;
-import static org.springframework.test.util.MetaAnnotationUtils.findAnnotationDescriptor;
 import static org.springframework.test.util.MetaAnnotationUtils.findAnnotationDescriptorForTypes;
 
 /**
@@ -183,7 +184,7 @@ abstract class ContextLoaderUtils {
 	 * @see #resolveContextHierarchyAttributes(Class)
 	 */
 	static Map<String, List<ContextConfigurationAttributes>> buildContextHierarchyMap(Class<?> testClass) {
-		final Map<String, List<ContextConfigurationAttributes>> map = new LinkedHashMap<>();
+		Map<String, List<ContextConfigurationAttributes>> map = new LinkedHashMap<>();
 		int hierarchyLevel = 1;
 
 		for (List<ContextConfigurationAttributes> configAttributesList : resolveContextHierarchyAttributes(testClass)) {
@@ -239,32 +240,24 @@ abstract class ContextLoaderUtils {
 		Assert.notNull(testClass, "Class must not be null");
 
 		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
-		AnnotationDescriptor<ContextConfiguration> descriptor = findAnnotationDescriptor(testClass, annotationType);
-		Assert.notNull(descriptor, () -> String.format(
-					"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
-					annotationType.getName(), testClass.getName()));
+		MergedAnnotations mergedAnnotations = MergedAnnotations.from(testClass,
+			SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES);
+		Assert.isTrue(mergedAnnotations.isPresent(annotationType), () -> String.format(
+			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
+			annotationType.getName(), testClass.getName()));
 
 		List<ContextConfigurationAttributes> attributesList = new ArrayList<>();
-		resolveContextConfigurationAttributes(attributesList, descriptor);
+		mergedAnnotations.stream(annotationType).forEach(mergedAnnotation ->
+				resolveContextConfigurationAttributes(attributesList, mergedAnnotation));
 		return attributesList;
 	}
 
 	private static void resolveContextConfigurationAttributes(List<ContextConfigurationAttributes> attributesList,
-			AnnotationDescriptor<ContextConfiguration> descriptor) {
+			MergedAnnotation<ContextConfiguration> mergedAnnotation) {
 
-		if (descriptor != null) {
-			Class<?> rootDeclaringClass = descriptor.getRootDeclaringClass();
-			convertContextConfigToConfigAttributesAndAddToList(descriptor.synthesizeAnnotation(),
-					rootDeclaringClass, attributesList);
-			// Search on superclass
-			resolveContextConfigurationAttributes(attributesList,
-				findAnnotationDescriptor(rootDeclaringClass.getSuperclass(), ContextConfiguration.class));
-			// Search on enclosing class for "nested test class"
-			if (ClassUtils.isInnerClass(rootDeclaringClass)) {
-				resolveContextConfigurationAttributes(attributesList,
-					findAnnotationDescriptor(rootDeclaringClass.getDeclaringClass(), ContextConfiguration.class));
-			}
-		}
+		Class<?> rootDeclaringClass = (Class<?>) mergedAnnotation.getSource();
+		convertContextConfigToConfigAttributesAndAddToList(mergedAnnotation.synthesize(),
+				rootDeclaringClass, attributesList);
 	}
 
 	/**
@@ -273,7 +266,7 @@ abstract class ContextLoaderUtils {
 	 * declaring class and then adding the attributes to the supplied list.
 	 */
 	private static void convertContextConfigToConfigAttributesAndAddToList(ContextConfiguration contextConfiguration,
-			Class<?> declaringClass, final List<ContextConfigurationAttributes> attributesList) {
+			Class<?> declaringClass, List<ContextConfigurationAttributes> attributesList) {
 
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
