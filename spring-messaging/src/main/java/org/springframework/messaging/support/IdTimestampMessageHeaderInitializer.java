@@ -29,67 +29,66 @@ import org.springframework.util.IdGenerator;
  */
 public class IdTimestampMessageHeaderInitializer implements MessageHeaderInitializer {
 
-	private static final IdGenerator ID_VALUE_NONE_GENERATOR = () -> MessageHeaders.ID_VALUE_NONE;
+    private static final IdGenerator ID_VALUE_NONE_GENERATOR = () -> MessageHeaders.ID_VALUE_NONE;
 
 
-	@Nullable
-	private IdGenerator idGenerator;
+    @Nullable
+    private IdGenerator idGenerator;
 
-	private boolean enableTimestamp;
+    private boolean enableTimestamp;
 
+    /**
+     * Return the configured {@code IdGenerator}, if any.
+     */
+    @Nullable
+    public IdGenerator getIdGenerator() {
+        return this.idGenerator;
+    }
 
-	/**
-	 * Configure the IdGenerator strategy to initialize {@code MessageHeaderAccessor}
-	 * instances with.
-	 * <p>By default this property is set to {@code null} in which case the default
-	 * IdGenerator of {@link org.springframework.messaging.MessageHeaders} is used.
-	 * <p>To have no ids generated at all, see {@link #setDisableIdGeneration()}.
-	 */
-	public void setIdGenerator(@Nullable IdGenerator idGenerator) {
-		this.idGenerator = idGenerator;
-	}
+    /**
+     * Configure the IdGenerator strategy to initialize {@code MessageHeaderAccessor}
+     * instances with.
+     * <p>By default this property is set to {@code null} in which case the default
+     * IdGenerator of {@link org.springframework.messaging.MessageHeaders} is used.
+     * <p>To have no ids generated at all, see {@link #setDisableIdGeneration()}.
+     */
+    public void setIdGenerator(@Nullable IdGenerator idGenerator) {
+        this.idGenerator = idGenerator;
+    }
 
-	/**
-	 * Return the configured {@code IdGenerator}, if any.
-	 */
-	@Nullable
-	public IdGenerator getIdGenerator() {
-		return this.idGenerator;
-	}
+    /**
+     * A shortcut for calling {@link #setIdGenerator} with an id generation strategy
+     * to disable id generation completely.
+     */
+    public void setDisableIdGeneration() {
+        this.idGenerator = ID_VALUE_NONE_GENERATOR;
+    }
 
-	/**
-	 * A shortcut for calling {@link #setIdGenerator} with an id generation strategy
-	 * to disable id generation completely.
-	 */
-	public void setDisableIdGeneration() {
-		this.idGenerator = ID_VALUE_NONE_GENERATOR;
-	}
+    /**
+     * Return whether the timestamp header is enabled or not.
+     */
+    public boolean isEnableTimestamp() {
+        return this.enableTimestamp;
+    }
 
-	/**
-	 * Whether to enable the automatic addition of the
-	 * {@link org.springframework.messaging.MessageHeaders#TIMESTAMP} header on
-	 * {@code MessageHeaderAccessor} instances being initialized.
-	 * <p>By default this property is set to false.
-	 */
-	public void setEnableTimestamp(boolean enableTimestamp) {
-		this.enableTimestamp = enableTimestamp;
-	}
+    /**
+     * Whether to enable the automatic addition of the
+     * {@link org.springframework.messaging.MessageHeaders#TIMESTAMP} header on
+     * {@code MessageHeaderAccessor} instances being initialized.
+     * <p>By default this property is set to false.
+     */
+    public void setEnableTimestamp(boolean enableTimestamp) {
+        this.enableTimestamp = enableTimestamp;
+    }
 
-	/**
-	 * Return whether the timestamp header is enabled or not.
-	 */
-	public boolean isEnableTimestamp() {
-		return this.enableTimestamp;
-	}
-
-
-	@Override
-	public void initHeaders(MessageHeaderAccessor headerAccessor) {
-		IdGenerator idGenerator = getIdGenerator();
-		if (idGenerator != null) {
-			headerAccessor.setIdGenerator(idGenerator);
-		}
-		headerAccessor.setEnableTimestamp(isEnableTimestamp());
-	}
+    @Override
+    public void initHeaders(MessageHeaderAccessor headerAccessor) {
+        // ID 生成器
+        IdGenerator idGenerator = getIdGenerator();
+        if (idGenerator != null) {
+            headerAccessor.setIdGenerator(idGenerator);
+        }
+        headerAccessor.setEnableTimestamp(isEnableTimestamp());
+    }
 
 }

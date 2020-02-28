@@ -32,6 +32,7 @@ import org.springframework.lang.Nullable;
  * {@link AnnotatedBeanDefinitionReader} for standard JSR-330 compliance. However,
  * in practice, you will typically use Spring's rich default scoping instead - or extend
  * this resolver with custom scoping annotations that point to extended Spring scopes.
+ * jsr 330 作用域数据注册
  *
  * @author Juergen Hoeller
  * @since 3.0

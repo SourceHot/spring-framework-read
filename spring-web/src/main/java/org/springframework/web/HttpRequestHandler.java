@@ -16,11 +16,10 @@
 
 package org.springframework.web;
 
-import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * Plain handler interface for components that process HTTP requests,
@@ -64,7 +63,6 @@ import javax.servlet.http.HttpServletResponse;
  * header processing manually within its {@code handle} method.
  *
  * @author Juergen Hoeller
- * @since 2.0
  * @see org.springframework.web.context.support.HttpRequestHandlerServlet
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.servlet.ModelAndView
@@ -73,18 +71,21 @@ import javax.servlet.http.HttpServletResponse;
  * @see org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter
  * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
  * @see org.springframework.remoting.caucho.HessianServiceExporter
+ * @since 2.0
  */
 @FunctionalInterface
 public interface HttpRequestHandler {
 
-	/**
-	 * Process the given request, generating a response.
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @throws ServletException in case of general errors
-	 * @throws IOException in case of I/O errors
-	 */
-	void handleRequest(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException;
+    /**
+     * Process the given request, generating a response.
+     * 处理请求
+     *
+     * @param request  current HTTP request
+     * @param response current HTTP response
+     * @throws ServletException in case of general errors
+     * @throws IOException      in case of I/O errors
+     */
+    void handleRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException;
 
 }

@@ -28,6 +28,7 @@ public interface IdGenerator {
 
 	/**
 	 * Generate a new identifier.
+	 * 创建uuid
 	 * @return the generated identifier
 	 */
 	UUID generateId();

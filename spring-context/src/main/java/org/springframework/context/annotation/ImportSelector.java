@@ -38,6 +38,7 @@ import org.springframework.core.type.AnnotationMetadata;
  * selection of imports until all {@code @Configuration} classes have been processed
  * (see {@link DeferredImportSelector} for details).
  *
+ * 导入什么东西,对应注解 ->{@link Import}
  * @author Chris Beams
  * @since 3.1
  * @see DeferredImportSelector

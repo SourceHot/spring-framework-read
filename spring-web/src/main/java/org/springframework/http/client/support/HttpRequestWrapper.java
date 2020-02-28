@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
  *
  * <p>These methods default to calling through to the wrapped request object.
  *
+ * HttpRequest 的包装对象
  * @author Arjen Poutsma
  * @since 3.1
  */

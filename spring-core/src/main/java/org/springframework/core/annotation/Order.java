@@ -68,6 +68,8 @@ public @interface Order {
 	/**
 	 * The order value.
 	 * <p>Default is {@link Ordered#LOWEST_PRECEDENCE}.
+	 *
+	 * 启动顺序,默认integer最大值
 	 * @see Ordered#getOrder()
 	 */
 	int value() default Ordered.LOWEST_PRECEDENCE;

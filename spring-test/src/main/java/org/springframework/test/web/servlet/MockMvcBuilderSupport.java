@@ -40,12 +40,15 @@ import org.springframework.web.context.WebApplicationContext;
  * @since 3.2
  */
 public abstract class MockMvcBuilderSupport {
-
+	/**
+	 * 构造 MockMvc 的方法
+	 */
 	protected final MockMvc createMockMvc(Filter[] filters, MockServletConfig servletConfig,
 			WebApplicationContext webAppContext, @Nullable RequestBuilder defaultRequestBuilder,
 			List<ResultMatcher> globalResultMatchers, List<ResultHandler> globalResultHandlers,
 			@Nullable List<DispatcherServletCustomizer> dispatcherServletCustomizers) {
 
+		// 创建 DispatcherServlet
 		TestDispatcherServlet dispatcherServlet = new TestDispatcherServlet(webAppContext);
 		if (dispatcherServletCustomizers != null) {
 			for (DispatcherServletCustomizer customizers : dispatcherServletCustomizers) {

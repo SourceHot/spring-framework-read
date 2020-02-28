@@ -40,6 +40,7 @@ package org.springframework.context;
  * {@link SmartLifecycle} interface provides sophisticated integration with the
  * application context's startup and shutdown phases.
  *
+ * 生命周期
  * @author Juergen Hoeller
  * @since 2.0
  * @see SmartLifecycle
@@ -54,6 +55,9 @@ public interface Lifecycle {
 	 * <p>Should not throw an exception if the component is already running.
 	 * <p>In the case of a container, this will propagate the start signal to all
 	 * components that apply.
+	 *
+	 *
+	 * 开始链接
 	 * @see SmartLifecycle#isAutoStartup()
 	 */
 	void start();
@@ -70,6 +74,8 @@ public interface Lifecycle {
 	 * <p>Should not throw an exception if the component is not running (not started yet).
 	 * <p>In the case of a container, this will propagate the stop signal to all components
 	 * that apply.
+	 *
+	 * 停止连接
 	 * @see SmartLifecycle#stop(Runnable)
 	 * @see org.springframework.beans.factory.DisposableBean#destroy()
 	 */
@@ -79,6 +85,9 @@ public interface Lifecycle {
 	 * Check whether this component is currently running.
 	 * <p>In the case of a container, this will return {@code true} only if <i>all</i>
 	 * components that apply are currently running.
+	 *
+	 *
+	 * 是否属于运行状态
 	 * @return whether the component is currently running
 	 */
 	boolean isRunning();

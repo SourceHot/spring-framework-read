@@ -149,13 +149,21 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 	/**
 	 * Create new PropertiesBeanDefinitionReader for the given bean factory.
+	 *
 	 * @param registry the BeanFactory to load bean definitions into,
-	 * in the form of a BeanDefinitionRegistry
+	 *                 in the form of a BeanDefinitionRegistry
 	 */
 	public PropertiesBeanDefinitionReader(BeanDefinitionRegistry registry) {
 		super(registry);
 	}
 
+	/**
+	 * Return the default parent bean for this bean factory.
+	 */
+	@Nullable
+	public String getDefaultParentBean() {
+		return this.defaultParentBean;
+	}
 
 	/**
 	 * Set the default parent bean for this bean factory.
@@ -174,16 +182,16 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	}
 
 	/**
-	 * Return the default parent bean for this bean factory.
+	 * Return the PropertiesPersister to use for parsing properties files.
 	 */
-	@Nullable
-	public String getDefaultParentBean() {
-		return this.defaultParentBean;
+	public PropertiesPersister getPropertiesPersister() {
+		return this.propertiesPersister;
 	}
 
 	/**
 	 * Set the PropertiesPersister to use for parsing properties files.
 	 * The default is DefaultPropertiesPersister.
+	 *
 	 * @see org.springframework.util.DefaultPropertiesPersister
 	 */
 	public void setPropertiesPersister(@Nullable PropertiesPersister propertiesPersister) {
@@ -192,16 +200,10 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	}
 
 	/**
-	 * Return the PropertiesPersister to use for parsing properties files.
-	 */
-	public PropertiesPersister getPropertiesPersister() {
-		return this.propertiesPersister;
-	}
-
-
-	/**
 	 * Load bean definitions from the specified properties file,
 	 * using all property keys (i.e. not filtering by prefix).
+	 *
+	 * 加载bean定义文件
 	 * @param resource the resource descriptor for the properties file
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
@@ -214,9 +216,10 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 	/**
 	 * Load bean definitions from the specified properties file.
+	 *
 	 * @param resource the resource descriptor for the properties file
-	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
-	 * (can be empty or {@code null})
+	 * @param prefix   a filter within the keys in the map: e.g. 'beans.'
+	 *                 (can be empty or {@code null})
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
@@ -226,8 +229,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 	/**
 	 * Load bean definitions from the specified properties file.
+	 *
 	 * @param encodedResource the resource descriptor for the properties file,
-	 * allowing to specify an encoding to use for parsing the file
+	 *                        allowing to specify an encoding to use for parsing the file
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
@@ -237,10 +241,11 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 	/**
 	 * Load bean definitions from the specified properties file.
+	 *
 	 * @param encodedResource the resource descriptor for the properties file,
-	 * allowing to specify an encoding to use for parsing the file
-	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
-	 * (can be empty or {@code null})
+	 *                        allowing to specify an encoding to use for parsing the file
+	 * @param prefix          a filter within the keys in the map: e.g. 'beans.'
+	 *                        (can be empty or {@code null})
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
@@ -262,6 +267,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				}
 			}
 
+			// 获取bean的定义数量
 			int count = registerBeanDefinitions(props, prefix, encodedResource.getResource().getDescription());
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loaded " + count + " bean definitions from " + encodedResource);
@@ -276,6 +282,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	/**
 	 * Register bean definitions contained in a resource bundle,
 	 * using all property keys (i.e. not filtering by prefix).
+	 *
 	 * @param rb the ResourceBundle to load from
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
@@ -289,9 +296,10 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * Register bean definitions contained in a ResourceBundle.
 	 * <p>Similar syntax as for a Map. This method is useful to enable
 	 * standard Java internationalization support.
-	 * @param rb the ResourceBundle to load from
+	 *
+	 * @param rb     the ResourceBundle to load from
 	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
-	 * (can be empty or {@code null})
+	 *               (can be empty or {@code null})
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
@@ -310,9 +318,10 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	/**
 	 * Register bean definitions contained in a Map, using all property keys (i.e. not
 	 * filtering by prefix).
+	 *
 	 * @param map a map of {@code name} to {@code property} (String or Object). Property
-	 * values will be strings if coming from a Properties file etc. Property names
-	 * (keys) <b>must</b> be Strings. Class keys must be Strings.
+	 *            values will be strings if coming from a Properties file etc. Property names
+	 *            (keys) <b>must</b> be Strings. Class keys must be Strings.
 	 * @return the number of bean definitions found
 	 * @throws BeansException in case of loading or parsing errors
 	 * @see #registerBeanDefinitions(java.util.Map, String, String)
@@ -324,11 +333,14 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	/**
 	 * Register bean definitions contained in a Map.
 	 * Ignore ineligible properties.
-	 * @param map a map of {@code name} to {@code property} (String or Object). Property
-	 * values will be strings if coming from a Properties file etc. Property names
-	 * (keys) <b>must</b> be Strings. Class keys must be Strings.
+	 *
+	 * 注册bean定义
+	 * @param map    a map of {@code name} to {@code property} (String or Object). Property
+	 *               values will be strings if coming from a Properties file etc. Property names
+	 *               (keys) <b>must</b> be Strings. Class keys must be Strings.
+	 *
 	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
-	 * (can be empty or {@code null})
+	 *               (can be empty or {@code null})
 	 * @return the number of bean definitions found
 	 * @throws BeansException in case of loading or parsing errors
 	 */
@@ -339,13 +351,16 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	/**
 	 * Register bean definitions contained in a Map.
 	 * Ignore ineligible properties.
-	 * @param map a map of {@code name} to {@code property} (String or Object). Property
-	 * values will be strings if coming from a Properties file etc. Property names
-	 * (keys) <b>must</b> be Strings. Class keys must be Strings.
-	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
-	 * (can be empty or {@code null})
+	 *
+	 * @param map                 a map of {@code name} to {@code property} (String or Object). Property
+	 *                            values will be strings if coming from a Properties file etc. Property names
+	 *                            (keys) <b>must</b> be Strings. Class keys must be Strings.
+	 *                            key是beanName value是class
+	 * @param prefix              a filter within the keys in the map: e.g. 'beans.'
+	 *                            (can be empty or {@code null})
+	 *                            前缀
 	 * @param resourceDescription description of the resource that the
-	 * Map came from (for logging purposes)
+	 *                            Map came from (for logging purposes)
 	 * @return the number of bean definitions found
 	 * @throws BeansException in case of loading or parsing errors
 	 * @see #registerBeanDefinitions(Map, String)
@@ -382,7 +397,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 					}
 					if (!getRegistry().containsBeanDefinition(beanName)) {
 						// If we haven't already registered it...
+						// bean 注册
 						registerBeanDefinition(beanName, map, prefix + beanName, resourceDescription);
+						// bean累加数量
 						++beanCount;
 					}
 				}
@@ -402,18 +419,22 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	/**
 	 * Get all property values, given a prefix (which will be stripped)
 	 * and add the bean they define to the factory with the given name.
-	 * @param beanName name of the bean to define
-	 * @param map a Map containing string pairs
-	 * @param prefix prefix of each entry, which will be stripped
+	 *
+	 * @param beanName            name of the bean to define
+	 * @param map                 a Map containing string pairs
+	 * @param prefix              prefix of each entry, which will be stripped
 	 * @param resourceDescription description of the resource that the
-	 * Map came from (for logging purposes)
+	 *                            Map came from (for logging purposes)
 	 * @throws BeansException if the bean definition could not be parsed or registered
 	 */
 	protected void registerBeanDefinition(String beanName, Map<?, ?> map, String prefix, String resourceDescription)
 			throws BeansException {
 
+		// 类名
 		String className = null;
+		// 父级
 		String parent = null;
+		// 默认作用域
 		String scope = GenericBeanDefinition.SCOPE_SINGLETON;
 		boolean isAbstract = false;
 		boolean lazyInit = false;
@@ -424,11 +445,14 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		for (Map.Entry<?, ?> entry : map.entrySet()) {
 			String key = StringUtils.trimWhitespace((String) entry.getKey());
 			if (key.startsWith(prefix + SEPARATOR)) {
+				// 截取key
 				String property = key.substring(prefix.length() + SEPARATOR.length());
 				if (CLASS_KEY.equals(property)) {
+					// 设置className
 					className = StringUtils.trimWhitespace((String) entry.getValue());
 				}
 				else if (PARENT_KEY.equals(property)) {
+					// 设置父级
 					parent = StringUtils.trimWhitespace((String) entry.getValue());
 				}
 				else if (ABSTRACT_KEY.equals(property)) {

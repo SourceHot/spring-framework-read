@@ -34,13 +34,16 @@ import org.springframework.lang.Nullable;
  * and {@link #addLast}, this is with regard to the order in which property sources
  * will be searched when resolving a given property with a {@link PropertyResolver}.
  *
+ * 多个配置源
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.1
  * @see PropertySourcesPropertyResolver
  */
 public class MutablePropertySources implements PropertySources {
-
+	/**
+	 * 线程安全的List
+	 */
 	private final List<PropertySource<?>> propertySourceList = new CopyOnWriteArrayList<>();
 
 

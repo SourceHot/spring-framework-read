@@ -35,6 +35,7 @@ import org.springframework.web.util.UrlPathHelper;
  * <li>ResourcesMappings</li>
  * </ul>
  *
+ * 地址匹配配置
  * @author Brian Clozel
  * @since 4.0.3
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
@@ -65,6 +66,8 @@ public class PathMatchConfigurer {
 	 * Whether to use suffix pattern match (".*") when matching patterns to
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
 	 * <p>By default this is set to {@code true}.
+	 *
+	 * 最后是否匹配.*
 	 * @see #registeredSuffixPatternMatch
 	 */
 	public PathMatchConfigurer setUseSuffixPatternMatch(Boolean suffixPatternMatch) {
@@ -76,6 +79,8 @@ public class PathMatchConfigurer {
 	 * Whether to match to URLs irrespective of the presence of a trailing slash.
 	 * If enabled a method mapped to "/users" also matches to "/users/".
 	 * <p>The default value is {@code true}.
+	 *
+	 * 最后添加/和不添加/是否相同,默认相同
 	 */
 	public PathMatchConfigurer setUseTrailingSlashMatch(Boolean trailingSlashMatch) {
 		this.trailingSlashMatch = trailingSlashMatch;
@@ -89,31 +94,11 @@ public class PathMatchConfigurer {
 	 * negotiation}. This is generally recommended to reduce ambiguity and to
 	 * avoid issues such as when a "." appears in the path for other reasons.
 	 * <p>By default this is set to "false".
+	 *
 	 * @see WebMvcConfigurer#configureContentNegotiation
 	 */
 	public PathMatchConfigurer setUseRegisteredSuffixPatternMatch(Boolean registeredSuffixPatternMatch) {
 		this.registeredSuffixPatternMatch = registeredSuffixPatternMatch;
-		return this;
-	}
-
-	/**
-	 * Set the UrlPathHelper to use for resolution of lookup paths.
-	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
-	 * or to share common UrlPathHelper settings across multiple HandlerMappings
-	 * and MethodNameResolvers.
-	 */
-	public PathMatchConfigurer setUrlPathHelper(UrlPathHelper urlPathHelper) {
-		this.urlPathHelper = urlPathHelper;
-		return this;
-	}
-
-	/**
-	 * Set the PathMatcher implementation to use for matching URL paths
-	 * against registered URL patterns. Default is AntPathMatcher.
-	 * @see org.springframework.util.AntPathMatcher
-	 */
-	public PathMatchConfigurer setPathMatcher(PathMatcher pathMatcher) {
-		this.pathMatcher = pathMatcher;
 		return this;
 	}
 
@@ -124,7 +109,8 @@ public class PathMatchConfigurer {
 	 * {@code Predicate}. The prefix for the first matching predicate is used.
 	 * <p>Consider using {@link org.springframework.web.method.HandlerTypePredicate
 	 * HandlerTypePredicate} to group controllers.
-	 * @param prefix the prefix to apply
+	 *
+	 * @param prefix    the prefix to apply
 	 * @param predicate a predicate for matching controller types
 	 * @since 5.1
 	 */
@@ -135,7 +121,6 @@ public class PathMatchConfigurer {
 		this.pathPrefixes.put(prefix, predicate);
 		return this;
 	}
-
 
 	@Nullable
 	public Boolean isUseSuffixPatternMatch() {
@@ -157,9 +142,31 @@ public class PathMatchConfigurer {
 		return this.urlPathHelper;
 	}
 
+	/**
+	 * Set the UrlPathHelper to use for resolution of lookup paths.
+	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
+	 * or to share common UrlPathHelper settings across multiple HandlerMappings
+	 * and MethodNameResolvers.
+	 */
+	public PathMatchConfigurer setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		this.urlPathHelper = urlPathHelper;
+		return this;
+	}
+
 	@Nullable
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
+	}
+
+	/**
+	 * Set the PathMatcher implementation to use for matching URL paths
+	 * against registered URL patterns. Default is AntPathMatcher.
+	 *
+	 * @see org.springframework.util.AntPathMatcher
+	 */
+	public PathMatchConfigurer setPathMatcher(PathMatcher pathMatcher) {
+		this.pathMatcher = pathMatcher;
+		return this;
 	}
 
 	@Nullable

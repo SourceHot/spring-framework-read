@@ -74,6 +74,7 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	public static HttpServerErrorException create(
 			HttpStatus statusCode, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 
+		// 服务端失败的处理信息
 		switch (statusCode) {
 			case INTERNAL_SERVER_ERROR:
 				return new HttpServerErrorException.InternalServerError(statusText, headers, body, charset);

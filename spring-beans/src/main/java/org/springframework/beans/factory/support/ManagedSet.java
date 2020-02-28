@@ -94,6 +94,12 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 		return this.mergeEnabled;
 	}
 
+	/**
+	 * 将对象合并成一个set
+
+	 * @param parent the object to merge with
+	 * @return
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public Set<E> merge(@Nullable Object parent) {
@@ -106,6 +112,7 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 		if (!(parent instanceof Set)) {
 			throw new IllegalArgumentException("Cannot merge with object of type [" + parent.getClass() + "]");
 		}
+		// 转成set 返回
 		Set<E> merged = new ManagedSet<>();
 		merged.addAll((Set<E>) parent);
 		merged.addAll(this);

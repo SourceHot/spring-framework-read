@@ -28,6 +28,7 @@ import java.lang.annotation.Target;
  * candidate beans when autowiring. It may also be used to annotate other
  * custom annotations that can then in turn be used as qualifiers.
  *
+ * 注解索引,注解限定符
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5

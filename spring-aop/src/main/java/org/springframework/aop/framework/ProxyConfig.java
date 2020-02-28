@@ -30,20 +30,25 @@ import org.springframework.util.Assert;
  */
 public class ProxyConfig implements Serializable {
 
-	/** use serialVersionUID from Spring 1.2 for interoperability. */
+	/**
+	 * use serialVersionUID from Spring 1.2 for interoperability.
+	 */
 	private static final long serialVersionUID = -8409359707199703185L;
-
-
-	private boolean proxyTargetClass = false;
-
-	private boolean optimize = false;
-
 	boolean opaque = false;
-
 	boolean exposeProxy = false;
-
+	/**
+	 * {@code <aop:aspectj-autoproxy proxy-target-class="true"/>} 中的属性
+	 */
+	private boolean proxyTargetClass = false;
+	private boolean optimize = false;
 	private boolean frozen = false;
 
+	/**
+	 * Return whether to proxy the target class directly as well as any interfaces.
+	 */
+	public boolean isProxyTargetClass() {
+		return this.proxyTargetClass;
+	}
 
 	/**
 	 * Set whether to proxy the target class directly, instead of just proxying
@@ -55,6 +60,7 @@ public class ProxyConfig implements Serializable {
 	 * <p>Note: Depending on the configuration of the concrete proxy factory,
 	 * the proxy-target-class behavior will also be applied if no interfaces
 	 * have been specified (and no interface autodetection is activated).
+	 *
 	 * @see org.springframework.aop.TargetSource#getTargetClass()
 	 */
 	public void setProxyTargetClass(boolean proxyTargetClass) {
@@ -62,10 +68,10 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
-	 * Return whether to proxy the target class directly as well as any interfaces.
+	 * Return whether proxies should perform aggressive optimizations.
 	 */
-	public boolean isProxyTargetClass() {
-		return this.proxyTargetClass;
+	public boolean isOptimize() {
+		return this.optimize;
 	}
 
 	/**
@@ -84,10 +90,11 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
-	 * Return whether proxies should perform aggressive optimizations.
+	 * Return whether proxies created by this configuration should be
+	 * prevented from being cast to {@link Advised}.
 	 */
-	public boolean isOptimize() {
-		return this.optimize;
+	public boolean isOpaque() {
+		return this.opaque;
 	}
 
 	/**
@@ -101,11 +108,11 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
-	 * Return whether proxies created by this configuration should be
-	 * prevented from being cast to {@link Advised}.
+	 * Return whether the AOP proxy will expose the AOP proxy for
+	 * each invocation.
 	 */
-	public boolean isOpaque() {
-		return this.opaque;
+	public boolean isExposeProxy() {
+		return this.exposeProxy;
 	}
 
 	/**
@@ -122,11 +129,10 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
-	 * Return whether the AOP proxy will expose the AOP proxy for
-	 * each invocation.
+	 * Return whether the config is frozen, and no advice changes can be made.
 	 */
-	public boolean isExposeProxy() {
-		return this.exposeProxy;
+	public boolean isFrozen() {
+		return this.frozen;
 	}
 
 	/**
@@ -140,15 +146,8 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
-	 * Return whether the config is frozen, and no advice changes can be made.
-	 */
-	public boolean isFrozen() {
-		return this.frozen;
-	}
-
-
-	/**
 	 * Copy configuration from the other config object.
+	 *
 	 * @param other object to copy configuration from
 	 */
 	public void copyFrom(ProxyConfig other) {

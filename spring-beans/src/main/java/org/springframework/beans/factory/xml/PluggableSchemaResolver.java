@@ -16,23 +16,22 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link EntityResolver} implementation that attempts to resolve schema URLs into
@@ -57,126 +56,133 @@ import org.springframework.util.CollectionUtils;
  */
 public class PluggableSchemaResolver implements EntityResolver {
 
-	/**
-	 * The location of the file that defines schema mappings.
-	 * Can be present in multiple JAR files.
-	 */
-	public static final String DEFAULT_SCHEMA_MAPPINGS_LOCATION = "META-INF/spring.schemas";
+    /**
+     * The location of the file that defines schema mappings.
+     * Can be present in multiple JAR files.
+     */
+    public static final String DEFAULT_SCHEMA_MAPPINGS_LOCATION = "META-INF/spring.schemas";
 
 
-	private static final Log logger = LogFactory.getLog(PluggableSchemaResolver.class);
+    private static final Log logger = LogFactory.getLog(PluggableSchemaResolver.class);
 
-	@Nullable
-	private final ClassLoader classLoader;
+    @Nullable
+    private final ClassLoader classLoader;
 
-	private final String schemaMappingsLocation;
+    private final String schemaMappingsLocation;
 
-	/** Stores the mapping of schema URL -> local schema path. */
-	@Nullable
-	private volatile Map<String, String> schemaMappings;
-
-
-	/**
-	 * Loads the schema URL -> schema file location mappings using the default
-	 * mapping file pattern "META-INF/spring.schemas".
-	 * @param classLoader the ClassLoader to use for loading
-	 * (can be {@code null}) to use the default ClassLoader)
-	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
-	 */
-	public PluggableSchemaResolver(@Nullable ClassLoader classLoader) {
-		this.classLoader = classLoader;
-		this.schemaMappingsLocation = DEFAULT_SCHEMA_MAPPINGS_LOCATION;
-	}
-
-	/**
-	 * Loads the schema URL -> schema file location mappings using the given
-	 * mapping file pattern.
-	 * @param classLoader the ClassLoader to use for loading
-	 * (can be {@code null}) to use the default ClassLoader)
-	 * @param schemaMappingsLocation the location of the file that defines schema mappings
-	 * (must not be empty)
-	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
-	 */
-	public PluggableSchemaResolver(@Nullable ClassLoader classLoader, String schemaMappingsLocation) {
-		Assert.hasText(schemaMappingsLocation, "'schemaMappingsLocation' must not be empty");
-		this.classLoader = classLoader;
-		this.schemaMappingsLocation = schemaMappingsLocation;
-	}
+    /**
+     * Stores the mapping of schema URL -> local schema path.
+     */
+    @Nullable
+    private volatile Map<String, String> schemaMappings;
 
 
-	@Override
-	@Nullable
-	public InputSource resolveEntity(@Nullable String publicId, @Nullable String systemId) throws IOException {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Trying to resolve XML entity with public id [" + publicId +
-					"] and system id [" + systemId + "]");
-		}
+    /**
+     * Loads the schema URL -> schema file location mappings using the default
+     * mapping file pattern "META-INF/spring.schemas".
+     *
+     * @param classLoader the ClassLoader to use for loading
+     *                    (can be {@code null}) to use the default ClassLoader)
+     * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
+     */
+    public PluggableSchemaResolver(@Nullable ClassLoader classLoader) {
+        this.classLoader = classLoader;
+        this.schemaMappingsLocation = DEFAULT_SCHEMA_MAPPINGS_LOCATION;
+    }
 
-		if (systemId != null) {
-			String resourceLocation = getSchemaMappings().get(systemId);
-			if (resourceLocation == null && systemId.startsWith("https:")) {
-				// Retrieve canonical http schema mapping even for https declaration
-				resourceLocation = getSchemaMappings().get("http:" + systemId.substring(6));
-			}
-			if (resourceLocation != null) {
-				Resource resource = new ClassPathResource(resourceLocation, this.classLoader);
-				try {
-					InputSource source = new InputSource(resource.getInputStream());
-					source.setPublicId(publicId);
-					source.setSystemId(systemId);
-					if (logger.isTraceEnabled()) {
-						logger.trace("Found XML schema [" + systemId + "] in classpath: " + resourceLocation);
-					}
-					return source;
-				}
-				catch (FileNotFoundException ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Could not find XML schema [" + systemId + "]: " + resource, ex);
-					}
-				}
-			}
-		}
-
-		// Fall back to the parser's default behavior.
-		return null;
-	}
-
-	/**
-	 * Load the specified schema mappings lazily.
-	 */
-	private Map<String, String> getSchemaMappings() {
-		Map<String, String> schemaMappings = this.schemaMappings;
-		if (schemaMappings == null) {
-			synchronized (this) {
-				schemaMappings = this.schemaMappings;
-				if (schemaMappings == null) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Loading schema mappings from [" + this.schemaMappingsLocation + "]");
-					}
-					try {
-						Properties mappings =
-								PropertiesLoaderUtils.loadAllProperties(this.schemaMappingsLocation, this.classLoader);
-						if (logger.isTraceEnabled()) {
-							logger.trace("Loaded schema mappings: " + mappings);
-						}
-						schemaMappings = new ConcurrentHashMap<>(mappings.size());
-						CollectionUtils.mergePropertiesIntoMap(mappings, schemaMappings);
-						this.schemaMappings = schemaMappings;
-					}
-					catch (IOException ex) {
-						throw new IllegalStateException(
-								"Unable to load schema mappings from location [" + this.schemaMappingsLocation + "]", ex);
-					}
-				}
-			}
-		}
-		return schemaMappings;
-	}
+    /**
+     * Loads the schema URL -> schema file location mappings using the given
+     * mapping file pattern.
+     *
+     * @param classLoader            the ClassLoader to use for loading
+     *                               (can be {@code null}) to use the default ClassLoader)
+     * @param schemaMappingsLocation the location of the file that defines schema mappings
+     *                               (must not be empty)
+     * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
+     */
+    public PluggableSchemaResolver(@Nullable ClassLoader classLoader, String schemaMappingsLocation) {
+        Assert.hasText(schemaMappingsLocation, "'schemaMappingsLocation' must not be empty");
+        this.classLoader = classLoader;
+        this.schemaMappingsLocation = schemaMappingsLocation;
+    }
 
 
-	@Override
-	public String toString() {
-		return "EntityResolver using schema mappings " + getSchemaMappings();
-	}
+    @Override
+    @Nullable
+    public InputSource resolveEntity(@Nullable String publicId, @Nullable String systemId) throws IOException {
+        if (logger.isTraceEnabled()) {
+            logger.trace("Trying to resolve XML entity with public id [" + publicId +
+                    "] and system id [" + systemId + "]");
+        }
+
+        if (systemId != null) {
+            // 获取当前 systemId 对应的资源
+            // spring-framework\spring-beans\src\main\resources\org\springframework\beans\factory\xml\spring-beans.xsd
+            String resourceLocation = getSchemaMappings().get(systemId);
+            if (resourceLocation == null && systemId.startsWith("https:")) {
+                // Retrieve canonical http schema mapping even for https declaration
+                resourceLocation = getSchemaMappings().get("http:" + systemId.substring(6));
+            }
+            if (resourceLocation != null) {
+                // 加载 resourceLocation 转换成 Resource
+                Resource resource = new ClassPathResource(resourceLocation, this.classLoader);
+                try {
+                    // 读取
+                    InputSource source = new InputSource(resource.getInputStream());
+                    source.setPublicId(publicId);
+                    source.setSystemId(systemId);
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Found XML schema [" + systemId + "] in classpath: " + resourceLocation);
+                    }
+                    return source;
+                } catch (FileNotFoundException ex) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Could not find XML schema [" + systemId + "]: " + resource, ex);
+                    }
+                }
+            }
+        }
+
+        // Fall back to the parser's default behavior.
+        return null;
+    }
+
+    /**
+     * Load the specified schema mappings lazily.
+     * 加载本地的资源
+     */
+    private Map<String, String> getSchemaMappings() {
+        Map<String, String> schemaMappings = this.schemaMappings;
+        if (schemaMappings == null) {
+            synchronized (this) {
+                schemaMappings = this.schemaMappings;
+                if (schemaMappings == null) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Loading schema mappings from [" + this.schemaMappingsLocation + "]");
+                    }
+                    try {
+                        Properties mappings =
+                                PropertiesLoaderUtils.loadAllProperties(this.schemaMappingsLocation, this.classLoader);
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Loaded schema mappings: " + mappings);
+                        }
+                        schemaMappings = new ConcurrentHashMap<>(mappings.size());
+                        CollectionUtils.mergePropertiesIntoMap(mappings, schemaMappings);
+                        this.schemaMappings = schemaMappings;
+                    } catch (IOException ex) {
+                        throw new IllegalStateException(
+                                "Unable to load schema mappings from location [" + this.schemaMappingsLocation + "]", ex);
+                    }
+                }
+            }
+        }
+        return schemaMappings;
+    }
+
+
+    @Override
+    public String toString() {
+        return "EntityResolver using schema mappings " + getSchemaMappings();
+    }
 
 }

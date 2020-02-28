@@ -31,6 +31,7 @@ package org.springframework.core;
  *
  * <p>Consult the Javadoc for {@link OrderComparator} for details on the
  * sort semantics for non-ordered objects.
+ * {@link org.springframework.core.annotation.Order} 联动
  *
  * @author Juergen Hoeller
  * @author Sam Brannen

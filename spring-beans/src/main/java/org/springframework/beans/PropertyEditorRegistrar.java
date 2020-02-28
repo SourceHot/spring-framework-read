@@ -26,23 +26,25 @@ package org.springframework.beans;
  * registrar and reuse that in each case.
  *
  * @author Juergen Hoeller
- * @since 1.2.6
  * @see PropertyEditorRegistry
  * @see java.beans.PropertyEditor
+ * @since 1.2.6
  */
 public interface PropertyEditorRegistrar {
 
-	/**
-	 * Register custom {@link java.beans.PropertyEditor PropertyEditors} with
-	 * the given {@code PropertyEditorRegistry}.
-	 * <p>The passed-in registry will usually be a {@link BeanWrapper} or a
-	 * {@link org.springframework.validation.DataBinder DataBinder}.
-	 * <p>It is expected that implementations will create brand new
-	 * {@code PropertyEditors} instances for each invocation of this
-	 * method (since {@code PropertyEditors} are not threadsafe).
+    /**
+     * Register custom {@link java.beans.PropertyEditor PropertyEditors} with
+     * the given {@code PropertyEditorRegistry}.
+     * <p>The passed-in registry will usually be a {@link BeanWrapper} or a
+     * {@link org.springframework.validation.DataBinder DataBinder}.
+     * <p>It is expected that implementations will create brand new
+     * {@code PropertyEditors} instances for each invocation of this
+     * method (since {@code PropertyEditors} are not threadsafe).
+     *
+	 * 属性编辑器注册方法
 	 * @param registry the {@code PropertyEditorRegistry} to register the
-	 * custom {@code PropertyEditors} with
-	 */
-	void registerCustomEditors(PropertyEditorRegistry registry);
+     *                 custom {@code PropertyEditors} with
+     */
+    void registerCustomEditors(PropertyEditorRegistry registry);
 
 }

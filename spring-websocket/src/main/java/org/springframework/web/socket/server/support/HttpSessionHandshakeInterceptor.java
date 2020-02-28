@@ -62,6 +62,7 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 	/**
 	 * Default constructor for copying all HTTP session attributes and the HTTP
 	 * session id.
+	 *
 	 * @see #setCopyAllAttributes
 	 * @see #setCopyHttpSessionId
 	 */
@@ -73,6 +74,7 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 	/**
 	 * Constructor for copying specific HTTP session attributes and the HTTP
 	 * session id.
+	 *
 	 * @param attributeNames session attributes to copy
 	 * @see #setCopyAllAttributes
 	 * @see #setCopyHttpSessionId
@@ -91,17 +93,6 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 	}
 
 	/**
-	 * Whether to copy all attributes from the HTTP session. If set to "true",
-	 * any explicitly configured attribute names are ignored.
-	 * <p>By default this is set to either "true" or "false" depending on which
-	 * constructor was used (default or with attribute names respectively).
-	 * @param copyAllAttributes whether to copy all attributes
-	 */
-	public void setCopyAllAttributes(boolean copyAllAttributes) {
-		this.copyAllAttributes = copyAllAttributes;
-	}
-
-	/**
 	 * Whether to copy all HTTP session attributes.
 	 */
 	public boolean isCopyAllAttributes() {
@@ -109,13 +100,15 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 	}
 
 	/**
-	 * Whether the HTTP session id should be copied to the handshake attributes
-	 * under the key {@link #HTTP_SESSION_ID_ATTR_NAME}.
-	 * <p>By default this is "true".
-	 * @param copyHttpSessionId whether to copy the HTTP session id.
+	 * Whether to copy all attributes from the HTTP session. If set to "true",
+	 * any explicitly configured attribute names are ignored.
+	 * <p>By default this is set to either "true" or "false" depending on which
+	 * constructor was used (default or with attribute names respectively).
+	 *
+	 * @param copyAllAttributes whether to copy all attributes
 	 */
-	public void setCopyHttpSessionId(boolean copyHttpSessionId) {
-		this.copyHttpSessionId = copyHttpSessionId;
+	public void setCopyAllAttributes(boolean copyAllAttributes) {
+		this.copyAllAttributes = copyAllAttributes;
 	}
 
 	/**
@@ -126,12 +119,14 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 	}
 
 	/**
-	 * Whether to allow the HTTP session to be created while accessing it.
-	 * <p>By default set to {@code false}.
-	 * @see javax.servlet.http.HttpServletRequest#getSession(boolean)
+	 * Whether the HTTP session id should be copied to the handshake attributes
+	 * under the key {@link #HTTP_SESSION_ID_ATTR_NAME}.
+	 * <p>By default this is "true".
+	 *
+	 * @param copyHttpSessionId whether to copy the HTTP session id.
 	 */
-	public void setCreateSession(boolean createSession) {
-		this.createSession = createSession;
+	public void setCopyHttpSessionId(boolean copyHttpSessionId) {
+		this.copyHttpSessionId = copyHttpSessionId;
 	}
 
 	/**
@@ -141,10 +136,22 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 		return this.createSession;
 	}
 
+	/**
+	 * Whether to allow the HTTP session to be created while accessing it.
+	 * <p>By default set to {@code false}.
+	 *
+	 * @see javax.servlet.http.HttpServletRequest#getSession(boolean)
+	 */
+	public void setCreateSession(boolean createSession) {
+		this.createSession = createSession;
+	}
 
+	/**
+	 * 握手之前做什么
+	 */
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
+								   WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
 
 		HttpSession session = getSession(request);
 		if (session != null) {
@@ -162,6 +169,11 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 		return true;
 	}
 
+	/**
+	 * 获取链接的session
+	 * @param request
+	 * @return
+	 */
 	@Nullable
 	private HttpSession getSession(ServerHttpRequest request) {
 		if (request instanceof ServletServerHttpRequest) {
@@ -171,9 +183,16 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 		return null;
 	}
 
+	/**
+	 * 握手后做什么
+	 * @param request   the current request
+	 * @param response  the current response
+	 * @param wsHandler the target WebSocket handler
+	 * @param ex
+	 */
 	@Override
 	public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler wsHandler, @Nullable Exception ex) {
+							   WebSocketHandler wsHandler, @Nullable Exception ex) {
 	}
 
 }

@@ -70,8 +70,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	/**
 	 * Construct a new handler method with the given bean instance, method name and parameters.
-	 * @param bean the object bean
-	 * @param methodName the method name
+	 *
+	 * @param bean           the object bean
+	 * @param methodName     the method name
 	 * @param parameterTypes the method parameter types
 	 * @throws NoSuchMethodException when the method cannot be found
 	 */
@@ -85,6 +86,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Set the {@link WebDataBinderFactory} to be passed to argument resolvers allowing them to create
 	 * a {@link WebDataBinder} for data binding and type conversion purposes.
+	 *
 	 * @param dataBinderFactory the data binder factory.
 	 */
 	public void setDataBinderFactory(WebDataBinderFactory dataBinderFactory) {
@@ -118,19 +120,21 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * Provided argument values are checked before argument resolvers.
 	 * <p>Delegates to {@link #getMethodArgumentValues} and calls {@link #doInvoke} with the
 	 * resolved arguments.
-	 * @param request the current request
+	 *
+	 * @param request      the current request
 	 * @param mavContainer the ModelAndViewContainer for this request
 	 * @param providedArgs "given" arguments matched by type, not resolved
 	 * @return the raw value returned by the invoked method
 	 * @throws Exception raised if no suitable argument resolver can be found,
-	 * or if the method raised an exception
+	 *                   or if the method raised an exception
 	 * @see #getMethodArgumentValues
 	 * @see #doInvoke
 	 */
 	@Nullable
 	public Object invokeForRequest(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
-			Object... providedArgs) throws Exception {
+								   Object... providedArgs) throws Exception {
 
+		// 获取请求参数
 		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Arguments: " + Arrays.toString(args));
@@ -142,11 +146,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * Get the method argument values for the current request, checking the provided
 	 * argument values and falling back to the configured argument resolvers.
 	 * <p>The resulting array will be passed into {@link #doInvoke}.
+	 *
 	 * @since 5.1.2
 	 */
 	protected Object[] getMethodArgumentValues(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
-			Object... providedArgs) throws Exception {
+											   Object... providedArgs) throws Exception {
 
+		// 获取参数列表
 		MethodParameter[] parameters = getMethodParameters();
 		if (ObjectUtils.isEmpty(parameters)) {
 			return EMPTY_ARGS;
@@ -154,6 +160,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 		Object[] args = new Object[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
+			// 处理参数
+
 			MethodParameter parameter = parameters[i];
 			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
 			args[i] = findProvidedArgument(parameter, providedArgs);
@@ -182,6 +190,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	/**
 	 * Invoke the handler method with the given argument values.
+	 *
+	 * controller return 后的处理方法
 	 */
 	@Nullable
 	protected Object doInvoke(Object... args) throws Exception {

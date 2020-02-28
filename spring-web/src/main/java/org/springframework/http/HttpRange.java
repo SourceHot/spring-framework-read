@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
 /**
  * Represents an HTTP (byte) range for use with the HTTP {@code "Range"} header.
  *
+ * http range 请求头
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 4.2

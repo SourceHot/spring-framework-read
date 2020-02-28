@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 /**
  * A WebSocket pong message.
  *
+ * pong 的消息
  * @author Rossen Stoyanchev
  * @since 4.0
  */

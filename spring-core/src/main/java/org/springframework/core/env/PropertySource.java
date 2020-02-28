@@ -48,6 +48,7 @@ import org.springframework.util.ObjectUtils;
  * annotation provides a convenient and declarative way of adding property sources to the
  * enclosing {@code Environment}.
  *
+ * 配置源
  * @author Chris Beams
  * @since 3.1
  * @param <T> the source type
@@ -59,10 +60,19 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class PropertySource<T> {
 
+	/**
+	 * 日志
+	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 名称
+	 */
 	protected final String name;
 
+	/**
+	 * 元数据
+	 */
 	protected final T source;
 
 
@@ -87,6 +97,27 @@ public abstract class PropertySource<T> {
 		this(name, (T) new Object());
 	}
 
+	/**
+	 * Return a {@code PropertySource} implementation intended for collection comparison purposes only.
+	 * <p>Primarily for internal use, but given a collection of {@code PropertySource} objects, may be
+	 * used as follows:
+	 * <pre class="code">
+	 * {@code List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
+	 * sources.add(new MapPropertySource("sourceA", mapA));
+	 * sources.add(new MapPropertySource("sourceB", mapB));
+	 * assert sources.contains(PropertySource.named("sourceA"));
+	 * assert sources.contains(PropertySource.named("sourceB"));
+	 * assert !sources.contains(PropertySource.named("sourceC"));
+	 * }</pre>
+	 * The returned {@code PropertySource} will throw {@code UnsupportedOperationException}
+	 * if any methods other than {@code equals(Object)}, {@code hashCode()}, and {@code toString()}
+	 * are called.
+	 *
+	 * @param name the name of the comparison {@code PropertySource} to be created and returned.
+	 */
+	public static PropertySource<?> named(String name) {
+		return new ComparisonPropertySource(name);
+	}
 
 	/**
 	 * Return the name of this {@code PropertySource}.
@@ -107,6 +138,7 @@ public abstract class PropertySource<T> {
 	 * <p>This implementation simply checks for a {@code null} return value
 	 * from {@link #getProperty(String)}. Subclasses may wish to implement
 	 * a more efficient algorithm if possible.
+	 *
 	 * @param name the property name to find
 	 */
 	public boolean containsProperty(String name) {
@@ -116,12 +148,12 @@ public abstract class PropertySource<T> {
 	/**
 	 * Return the value associated with the given name,
 	 * or {@code null} if not found.
+	 *
 	 * @param name the property to find
 	 * @see PropertyResolver#getRequiredProperty(String)
 	 */
 	@Nullable
 	public abstract Object getProperty(String name);
-
 
 	/**
 	 * This {@code PropertySource} object is equal to the given object if:
@@ -153,6 +185,7 @@ public abstract class PropertySource<T> {
 	 * <p>This variable verbosity is useful as a property source such as system properties
 	 * or environment variables may contain an arbitrary number of property pairs,
 	 * potentially leading to difficult to read exception and log messages.
+	 *
 	 * @see Log#isDebugEnabled()
 	 */
 	@Override
@@ -166,29 +199,6 @@ public abstract class PropertySource<T> {
 		}
 	}
 
-
-	/**
-	 * Return a {@code PropertySource} implementation intended for collection comparison purposes only.
-	 * <p>Primarily for internal use, but given a collection of {@code PropertySource} objects, may be
-	 * used as follows:
-	 * <pre class="code">
-	 * {@code List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
-	 * sources.add(new MapPropertySource("sourceA", mapA));
-	 * sources.add(new MapPropertySource("sourceB", mapB));
-	 * assert sources.contains(PropertySource.named("sourceA"));
-	 * assert sources.contains(PropertySource.named("sourceB"));
-	 * assert !sources.contains(PropertySource.named("sourceC"));
-	 * }</pre>
-	 * The returned {@code PropertySource} will throw {@code UnsupportedOperationException}
-	 * if any methods other than {@code equals(Object)}, {@code hashCode()}, and {@code toString()}
-	 * are called.
-	 * @param name the name of the comparison {@code PropertySource} to be created and returned.
-	 */
-	public static PropertySource<?> named(String name) {
-		return new ComparisonPropertySource(name);
-	}
-
-
 	/**
 	 * {@code PropertySource} to be used as a placeholder in cases where an actual
 	 * property source cannot be eagerly initialized at application context
@@ -197,6 +207,7 @@ public abstract class PropertySource<T> {
 	 * {@code ApplicationContext}.  In such cases, a stub should be used to hold the
 	 * intended default position/order of the property source, then be replaced
 	 * during context refresh.
+	 *
 	 * @see org.springframework.context.support.AbstractApplicationContext#initPropertySources()
 	 * @see org.springframework.web.context.support.StandardServletEnvironment
 	 * @see org.springframework.web.context.support.ServletContextPropertySource

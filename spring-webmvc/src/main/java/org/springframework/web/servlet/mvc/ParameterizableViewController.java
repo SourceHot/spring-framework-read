@@ -53,23 +53,17 @@ public class ParameterizableViewController extends AbstractController {
 	}
 
 	/**
-	 * Set a view name for the ModelAndView to return, to be resolved by the
-	 * DispatcherServlet via a ViewResolver. Will override any pre-existing
-	 * view name or View.
-	 */
-	public void setViewName(@Nullable String viewName) {
-		this.view = viewName;
-	}
-
-	/**
 	 * Return the name of the view to delegate to, or {@code null} if using a
 	 * View instance.
+	 *
+	 * 获取视图名称
 	 */
 	@Nullable
 	public String getViewName() {
 		if (this.view instanceof String) {
 			String viewName = (String) this.view;
 			if (getStatusCode() != null && getStatusCode().is3xxRedirection()) {
+				// 转发路由组装
 				return viewName.startsWith("redirect:") ? viewName : "redirect:" + viewName;
 			}
 			else {
@@ -80,8 +74,29 @@ public class ParameterizableViewController extends AbstractController {
 	}
 
 	/**
+	 * Set a view name for the ModelAndView to return, to be resolved by the
+	 * DispatcherServlet via a ViewResolver. Will override any pre-existing
+	 * view name or View.
+	 */
+	public void setViewName(@Nullable String viewName) {
+		this.view = viewName;
+	}
+
+	/**
+	 * Return the View object, or {@code null} if we are using a view name
+	 * to be resolved by the DispatcherServlet via a ViewResolver.
+	 *
+	 * @since 4.1
+	 */
+	@Nullable
+	public View getView() {
+		return (this.view instanceof View ? (View) this.view : null);
+	}
+
+	/**
 	 * Set a View object for the ModelAndView to return.
 	 * Will override any pre-existing view name or View.
+	 *
 	 * @since 4.1
 	 */
 	public void setView(View view) {
@@ -89,13 +104,13 @@ public class ParameterizableViewController extends AbstractController {
 	}
 
 	/**
-	 * Return the View object, or {@code null} if we are using a view name
-	 * to be resolved by the DispatcherServlet via a ViewResolver.
+	 * Return the configured HTTP status code or {@code null}.
+	 *
 	 * @since 4.1
 	 */
 	@Nullable
-	public View getView() {
-		return (this.view instanceof View ? (View) this.view : null);
+	public HttpStatus getStatusCode() {
+		return this.statusCode;
 	}
 
 	/**
@@ -107,31 +122,11 @@ public class ParameterizableViewController extends AbstractController {
 	 * For full control over redirecting provide a {@code RedirectView} instance.
 	 * <p>If the status code is 204 and no view is configured, the request is
 	 * fully handled within the controller.
+	 *
 	 * @since 4.1
 	 */
 	public void setStatusCode(@Nullable HttpStatus statusCode) {
 		this.statusCode = statusCode;
-	}
-
-	/**
-	 * Return the configured HTTP status code or {@code null}.
-	 * @since 4.1
-	 */
-	@Nullable
-	public HttpStatus getStatusCode() {
-		return this.statusCode;
-	}
-
-
-	/**
-	 * The property can be used to indicate the request is considered fully
-	 * handled within the controller and that no view should be used for rendering.
-	 * Useful in combination with {@link #setStatusCode}.
-	 * <p>By default this is set to {@code false}.
-	 * @since 4.1
-	 */
-	public void setStatusOnly(boolean statusOnly) {
-		this.statusOnly = statusOnly;
 	}
 
 	/**
@@ -141,24 +136,40 @@ public class ParameterizableViewController extends AbstractController {
 		return this.statusOnly;
 	}
 
+	/**
+	 * The property can be used to indicate the request is considered fully
+	 * handled within the controller and that no view should be used for rendering.
+	 * Useful in combination with {@link #setStatusCode}.
+	 * <p>By default this is set to {@code false}.
+	 *
+	 * @since 4.1
+	 */
+	public void setStatusOnly(boolean statusOnly) {
+		this.statusOnly = statusOnly;
+	}
 
 	/**
 	 * Return a ModelAndView object with the specified view name.
 	 * <p>The content of the {@link RequestContextUtils#getInputFlashMap
 	 * "input" FlashMap} is also added to the model.
+	 *
 	 * @see #getViewName()
 	 */
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
+		// 获取视图名称
 		String viewName = getViewName();
 
+		// 状态码判空
 		if (getStatusCode() != null) {
+			// 是不是3XX
 			if (getStatusCode().is3xxRedirection()) {
 				request.setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, getStatusCode());
 			}
 			else {
+				// 设置状态码
 				response.setStatus(getStatusCode().value());
 				if (getStatusCode().equals(HttpStatus.NO_CONTENT) && viewName == null) {
 					return null;
@@ -166,10 +177,12 @@ public class ParameterizableViewController extends AbstractController {
 			}
 		}
 
+		// 是否独立状态
 		if (isStatusOnly()) {
 			return null;
 		}
 
+		// 模型和视图组装
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.addAllObjects(RequestContextUtils.getInputFlashMap(request));
 		if (viewName != null) {

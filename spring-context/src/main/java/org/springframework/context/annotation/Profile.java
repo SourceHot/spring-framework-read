@@ -16,15 +16,15 @@
 
 package org.springframework.context.annotation;
 
+import org.springframework.core.env.AbstractEnvironment;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Profiles;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.springframework.core.env.AbstractEnvironment;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.Profiles;
 
 /**
  * Indicates that a component is eligible for registration when one or more
@@ -84,17 +84,19 @@ import org.springframework.core.env.Profiles;
  * <p>When defining Spring beans via XML, the {@code "profile"} attribute of the
  * {@code <beans>} element may be used. See the documentation in the
  * {@code spring-beans} XSD (version 3.1 or greater) for details.
+ * <p>
+ * 切面,默认 ${spring.profiles.default} 属性= default
  *
  * @author Chris Beams
  * @author Phillip Webb
  * @author Sam Brannen
- * @since 3.1
  * @see ConfigurableEnvironment#setActiveProfiles
  * @see ConfigurableEnvironment#setDefaultProfiles
  * @see AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
  * @see AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
  * @see Conditional
  * @see org.springframework.test.context.ActiveProfiles
+ * @since 3.1
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -102,9 +104,9 @@ import org.springframework.core.env.Profiles;
 @Conditional(ProfileCondition.class)
 public @interface Profile {
 
-	/**
-	 * The set of profiles for which the annotated component should be registered.
-	 */
-	String[] value();
+    /**
+     * The set of profiles for which the annotated component should be registered.
+     */
+    String[] value();
 
 }

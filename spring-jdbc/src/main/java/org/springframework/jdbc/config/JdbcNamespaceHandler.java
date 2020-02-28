@@ -25,7 +25,9 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * @author Dave Syer
  */
 public class JdbcNamespaceHandler extends NamespaceHandlerSupport {
-
+	/**
+	 * jdbc 标签处理
+	 */
 	@Override
 	public void init() {
 		registerBeanDefinitionParser("embedded-database", new EmbeddedDatabaseBeanDefinitionParser());

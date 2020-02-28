@@ -20,36 +20,39 @@ import java.nio.ByteBuffer;
 
 /**
  * A WebSocket ping message.
+ * <p>
+ * ping 的消息
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public final class PingMessage extends AbstractWebSocketMessage<ByteBuffer> {
 
-	/**
-	 * Create a new ping message with an empty payload.
-	 */
-	public PingMessage() {
-		super(ByteBuffer.allocate(0));
-	}
+    /**
+     * Create a new ping message with an empty payload.
+     */
+    public PingMessage() {
+        super(ByteBuffer.allocate(0));
+    }
 
-	/**
-	 * Create a new ping message with the given ByteBuffer payload.
-	 * @param payload the non-null payload
-	 */
-	public PingMessage(ByteBuffer payload) {
-		super(payload);
-	}
+    /**
+     * Create a new ping message with the given ByteBuffer payload.
+     *
+     * @param payload the non-null payload
+     */
+    public PingMessage(ByteBuffer payload) {
+        super(payload);
+    }
 
 
-	@Override
-	public int getPayloadLength() {
-		return getPayload().remaining();
-	}
+    @Override
+    public int getPayloadLength() {
+        return getPayload().remaining();
+    }
 
-	@Override
-	protected String toStringPayload() {
-		return getPayload().toString();
-	}
+    @Override
+    protected String toStringPayload() {
+        return getPayload().toString();
+    }
 
 }

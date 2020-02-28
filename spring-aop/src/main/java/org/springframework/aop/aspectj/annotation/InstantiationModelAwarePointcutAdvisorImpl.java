@@ -37,6 +37,7 @@ import org.springframework.lang.Nullable;
  * Internal implementation of AspectJPointcutAdvisor.
  * Note that there will be one instance of this advisor for each target method.
  *
+ * AOP 增强器实现
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0
@@ -45,7 +46,8 @@ import org.springframework.lang.Nullable;
 final class InstantiationModelAwarePointcutAdvisorImpl
 		implements InstantiationModelAwarePointcutAdvisor, AspectJPrecedenceInformation, Serializable {
 
-	private static final Advice EMPTY_ADVICE = new Advice() {};
+	private static final Advice EMPTY_ADVICE = new Advice() {
+	};
 
 
 	private final AspectJExpressionPointcut declaredPointcut;
@@ -55,21 +57,13 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 	private final String methodName;
 
 	private final Class<?>[] parameterTypes;
-
-	private transient Method aspectJAdviceMethod;
-
 	private final AspectJAdvisorFactory aspectJAdvisorFactory;
-
 	private final MetadataAwareAspectInstanceFactory aspectInstanceFactory;
-
 	private final int declarationOrder;
-
 	private final String aspectName;
-
 	private final Pointcut pointcut;
-
 	private final boolean lazy;
-
+	private transient Method aspectJAdviceMethod;
 	@Nullable
 	private Advice instantiatedAdvice;
 
@@ -81,17 +75,26 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 
 	public InstantiationModelAwarePointcutAdvisorImpl(AspectJExpressionPointcut declaredPointcut,
-			Method aspectJAdviceMethod, AspectJAdvisorFactory aspectJAdvisorFactory,
-			MetadataAwareAspectInstanceFactory aspectInstanceFactory, int declarationOrder, String aspectName) {
+													  Method aspectJAdviceMethod, AspectJAdvisorFactory aspectJAdvisorFactory,
+													  MetadataAwareAspectInstanceFactory aspectInstanceFactory, int declarationOrder, String aspectName) {
 
+		// 切片方法名称
 		this.declaredPointcut = declaredPointcut;
+		// 切片类
 		this.declaringClass = aspectJAdviceMethod.getDeclaringClass();
+		// 增强方法名称
 		this.methodName = aspectJAdviceMethod.getName();
+		// 参数类型
 		this.parameterTypes = aspectJAdviceMethod.getParameterTypes();
+		// 增强方法
 		this.aspectJAdviceMethod = aspectJAdviceMethod;
+		//
 		this.aspectJAdvisorFactory = aspectJAdvisorFactory;
+		//
 		this.aspectInstanceFactory = aspectInstanceFactory;
+		//
 		this.declarationOrder = declarationOrder;
+		// 切片名称
 		this.aspectName = aspectName;
 
 		if (aspectInstanceFactory.getAspectMetadata().isLazilyInstantiated()) {
@@ -110,6 +113,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 			// A singleton aspect.
 			this.pointcut = this.declaredPointcut;
 			this.lazy = false;
+			// 实例化通知
 			this.instantiatedAdvice = instantiateAdvice(this.declaredPointcut);
 		}
 	}
@@ -273,7 +277,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 		private LazySingletonAspectInstanceFactoryDecorator aspectInstanceFactory;
 
 		public PerTargetInstantiationModelPointcut(AspectJExpressionPointcut declaredPointcut,
-				Pointcut preInstantiationPointcut, MetadataAwareAspectInstanceFactory aspectInstanceFactory) {
+												   Pointcut preInstantiationPointcut, MetadataAwareAspectInstanceFactory aspectInstanceFactory) {
 
 			this.declaredPointcut = declaredPointcut;
 			this.preInstantiationPointcut = preInstantiationPointcut;

@@ -61,6 +61,7 @@ import org.springframework.util.concurrent.SettableListenableFuture;
 /**
  * Reactor Netty based implementation of {@link TcpOperations}.
  *
+ * 使用netty对{@link TcpOperations}进行实现TcpClient
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  * @since 5.0
