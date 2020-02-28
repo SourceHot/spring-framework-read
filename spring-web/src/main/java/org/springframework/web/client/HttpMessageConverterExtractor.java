@@ -45,11 +45,20 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 
 	private final Type responseType;
 
+	/**
+	 * 结果类
+	 */
 	@Nullable
 	private final Class<T> responseClass;
 
+	/**
+	 * 消息转换器
+	 */
 	private final List<HttpMessageConverter<?>> messageConverters;
 
+	/**
+	 * 日志
+	 */
 	private final Log logger;
 
 
@@ -80,16 +89,26 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 	}
 
 
+	/**
+	 * 提取结果
+	 * @param response the HTTP response
+	 * @return
+	 * @throws IOException
+	 */
 	@Override
 	@SuppressWarnings({"unchecked", "rawtypes", "resource"})
 	public T extractData(ClientHttpResponse response) throws IOException {
+		// 装个对象
 		MessageBodyClientHttpResponseWrapper responseWrapper = new MessageBodyClientHttpResponseWrapper(response);
+		// 判断是否由body
 		if (!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
 			return null;
 		}
+		// 媒体类型
 		MediaType contentType = getContentType(responseWrapper);
 
 		try {
+			// 玄幻选择不同的消息转换器
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 				if (messageConverter instanceof GenericHttpMessageConverter) {
 					GenericHttpMessageConverter<?> genericMessageConverter =
@@ -125,6 +144,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 	/**
 	 * Determine the Content-Type of the response based on the "Content-Type"
 	 * header or otherwise default to {@link MediaType#APPLICATION_OCTET_STREAM}.
+	 *
 	 * @param response the response
 	 * @return the MediaType, possibly {@code null}.
 	 */

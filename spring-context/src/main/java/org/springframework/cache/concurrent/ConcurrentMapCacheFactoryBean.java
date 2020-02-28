@@ -33,6 +33,7 @@ import org.springframework.util.StringUtils;
  * with {@link org.springframework.cache.support.SimpleCacheManager} or
  * dynamically through {@link ConcurrentMapCacheManager}.
  *
+ * map缓存工厂bean
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 3.1

@@ -16,9 +16,9 @@
 
 package org.springframework.expression;
 
-import java.util.List;
-
 import org.springframework.lang.Nullable;
+
+import java.util.List;
 
 /**
  * Expressions are executed in an evaluation context. It is in this context that
@@ -34,69 +34,83 @@ import org.springframework.lang.Nullable;
  */
 public interface EvaluationContext {
 
-	/**
-	 * Return the default root context object against which unqualified
-	 * properties/methods/etc should be resolved. This can be overridden
-	 * when evaluating an expression.
-	 */
-	TypedValue getRootObject();
+    /**
+     * Return the default root context object against which unqualified
+     * properties/methods/etc should be resolved. This can be overridden
+     * when evaluating an expression.
+     * <p>
+     * <p>
+     * 获取根对象
+     */
+    TypedValue getRootObject();
 
-	/**
-	 * Return a list of accessors that will be asked in turn to read/write a property.
-	 */
-	List<PropertyAccessor> getPropertyAccessors();
+    /**
+     * Return a list of accessors that will be asked in turn to read/write a property.
+     */
+    List<PropertyAccessor> getPropertyAccessors();
 
-	/**
-	 * Return a list of resolvers that will be asked in turn to locate a constructor.
-	 */
-	List<ConstructorResolver> getConstructorResolvers();
+    /**
+     * Return a list of resolvers that will be asked in turn to locate a constructor.
+     */
+    List<ConstructorResolver> getConstructorResolvers();
 
-	/**
-	 * Return a list of resolvers that will be asked in turn to locate a method.
-	 */
-	List<MethodResolver> getMethodResolvers();
+    /**
+     * Return a list of resolvers that will be asked in turn to locate a method.
+     */
+    List<MethodResolver> getMethodResolvers();
 
-	/**
-	 * Return a bean resolver that can look up beans by name.
-	 */
-	@Nullable
-	BeanResolver getBeanResolver();
+    /**
+     * Return a bean resolver that can look up beans by name.
+     * <p>
+     * 返回bean处理器
+     */
+    @Nullable
+    BeanResolver getBeanResolver();
 
-	/**
-	 * Return a type locator that can be used to find types, either by short or
-	 * fully qualified name.
-	 */
-	TypeLocator getTypeLocator();
+    /**
+     * Return a type locator that can be used to find types, either by short or
+     * fully qualified name.
+     * <p>
+     * 返回类型定位器
+     */
+    TypeLocator getTypeLocator();
 
-	/**
-	 * Return a type converter that can convert (or coerce) a value from one type to another.
-	 */
-	TypeConverter getTypeConverter();
+    /**
+     * Return a type converter that can convert (or coerce) a value from one type to another.
+     */
+    TypeConverter getTypeConverter();
 
-	/**
-	 * Return a type comparator for comparing pairs of objects for equality.
-	 */
-	TypeComparator getTypeComparator();
+    /**
+     * Return a type comparator for comparing pairs of objects for equality.
+     */
+    TypeComparator getTypeComparator();
 
-	/**
-	 * Return an operator overloader that may support mathematical operations
-	 * between more than the standard set of types.
-	 */
-	OperatorOverloader getOperatorOverloader();
+    /**
+     * Return an operator overloader that may support mathematical operations
+     * between more than the standard set of types.
+     * <p>
+     * 重载方法处理
+     */
+    OperatorOverloader getOperatorOverloader();
 
-	/**
-	 * Set a named variable within this evaluation context to a specified value.
-	 * @param name variable to set
-	 * @param value value to be placed in the variable
-	 */
-	void setVariable(String name, @Nullable Object value);
+    /**
+     * Set a named variable within this evaluation context to a specified value.
+     * <p>
+     * <p>
+     * 设置值,对于spring上下文中的对象进行设置
+     *
+     * @param name  variable to set
+     * @param value value to be placed in the variable
+     */
+    void setVariable(String name, @Nullable Object value);
 
-	/**
-	 * Look up a named variable within this evaluation context.
-	 * @param name variable to lookup
-	 * @return the value of the variable, or {@code null} if not found
-	 */
-	@Nullable
-	Object lookupVariable(String name);
+    /**
+     * Look up a named variable within this evaluation context.
+     *
+     * @param name variable to lookup
+     * @return the value of the variable, or {@code null} if not found
+     */
+    @Nullable
+    Object lookupVariable(String name);
 
 }

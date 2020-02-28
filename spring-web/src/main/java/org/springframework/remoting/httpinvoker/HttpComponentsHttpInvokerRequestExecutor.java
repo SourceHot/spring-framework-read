@@ -88,6 +88,7 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	/**
 	 * Create a new instance of the HttpComponentsClientHttpRequestFactory
 	 * with the given {@link HttpClient} instance.
+	 *
 	 * @param httpClient the HttpClient instance to use for this request executor
 	 */
 	public HttpComponentsHttpInvokerRequestExecutor(HttpClient httpClient) {
@@ -101,6 +102,7 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 
 
 	private static HttpClient createDefaultHttpClient() {
+		// httpClient.jar 的处理
 		Registry<ConnectionSocketFactory> schemeRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
 				.register("http", PlainConnectionSocketFactory.getSocketFactory())
 				.register("https", SSLConnectionSocketFactory.getSocketFactory())
@@ -113,6 +115,12 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 		return HttpClientBuilder.create().setConnectionManager(connectionManager).build();
 	}
 
+	/**
+	 * Return the {@link HttpClient} instance that this request executor uses.
+	 */
+	public HttpClient getHttpClient() {
+		return this.httpClient;
+	}
 
 	/**
 	 * Set the {@link HttpClient} instance to use for this request executor.
@@ -122,17 +130,11 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	}
 
 	/**
-	 * Return the {@link HttpClient} instance that this request executor uses.
-	 */
-	public HttpClient getHttpClient() {
-		return this.httpClient;
-	}
-
-	/**
 	 * Set the connection timeout for the underlying HttpClient.
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Additional properties can be configured by specifying a
 	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
+	 *
 	 * @param timeout the timeout value in milliseconds
 	 * @see RequestConfig#getConnectTimeout()
 	 */
@@ -147,6 +149,7 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Additional properties can be configured by specifying a
 	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
+	 *
 	 * @param connectionRequestTimeout the timeout value to request a connection in milliseconds
 	 * @see RequestConfig#getConnectionRequestTimeout()
 	 */
@@ -159,6 +162,7 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Additional properties can be configured by specifying a
 	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
+	 *
 	 * @param timeout the timeout value in milliseconds
 	 * @see #DEFAULT_READ_TIMEOUT_MILLISECONDS
 	 * @see RequestConfig#getSocketTimeout()
@@ -177,6 +181,7 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * Execute the given request through the HttpClient.
 	 * <p>This method implements the basic processing workflow:
 	 * The actual work happens in this class's template methods.
+	 *
 	 * @see #createHttpPost
 	 * @see #setRequestBody
 	 * @see #executeHttpPost
@@ -188,12 +193,17 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 			HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
 			throws IOException, ClassNotFoundException {
 
+		// 创建 httpPost 第三方的库
 		HttpPost postMethod = createHttpPost(config);
 		setRequestBody(config, postMethod, baos);
 		try {
+			// 执行方法
 			HttpResponse response = executeHttpPost(config, getHttpClient(), postMethod);
+			// 校验response
 			validateResponse(config, response);
+			// 获取输入流
 			InputStream responseBody = getResponseBody(config, response);
+			// 提取结果
 			return readRemoteInvocationResult(responseBody, config.getCodebaseUrl());
 		}
 		finally {
@@ -205,14 +215,18 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * Create a HttpPost for the given configuration.
 	 * <p>The default implementation creates a standard HttpPost with
 	 * "application/x-java-serialized-object" as "Content-Type" header.
+	 *
+	 *
+	 * 创建 httpPost
 	 * @param config the HTTP invoker configuration that specifies the
-	 * target service
+	 *               target service
 	 * @return the HttpPost instance
 	 * @throws java.io.IOException if thrown by I/O methods
 	 */
 	protected HttpPost createHttpPost(HttpInvokerClientConfiguration config) throws IOException {
 		HttpPost httpPost = new HttpPost(config.getServiceUrl());
 
+		// 创建请求配置星系
 		RequestConfig requestConfig = createRequestConfig(config);
 		if (requestConfig != null) {
 			httpPost.setConfig(requestConfig);
@@ -239,34 +253,45 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * {@link HttpClient} should be used.
 	 * <p>The default implementation tries to merge the defaults of the client with the
 	 * local customizations of the instance, if any.
+	 *
 	 * @param config the HTTP invoker configuration that specifies the
-	 * target service
+	 *               target service
 	 * @return the RequestConfig to use
 	 */
 	@Nullable
 	protected RequestConfig createRequestConfig(HttpInvokerClientConfiguration config) {
+
 		HttpClient client = getHttpClient();
 		if (client instanceof Configurable) {
+			// 从 HttpClient 中获取
 			RequestConfig clientRequestConfig = ((Configurable) client).getConfig();
 			return mergeRequestConfig(clientRequestConfig);
 		}
 		return this.requestConfig;
 	}
 
+	/***
+	 * 请求配置信息合并
+	 * @param defaultRequestConfig
+	 * @return
+	 */
 	private RequestConfig mergeRequestConfig(RequestConfig defaultRequestConfig) {
 		if (this.requestConfig == null) {  // nothing to merge
 			return defaultRequestConfig;
 		}
 
 		RequestConfig.Builder builder = RequestConfig.copy(defaultRequestConfig);
+		// 指客户端和服务器建立连接的timeout，
 		int connectTimeout = this.requestConfig.getConnectTimeout();
 		if (connectTimeout >= 0) {
 			builder.setConnectTimeout(connectTimeout);
 		}
+		// 指从连接池获取连接的timeout
 		int connectionRequestTimeout = this.requestConfig.getConnectionRequestTimeout();
 		if (connectionRequestTimeout >= 0) {
 			builder.setConnectionRequestTimeout(connectionRequestTimeout);
 		}
+		// 指客户端和服务器建立连接后，客户端从服务器读取数据的timeout，超出后会抛出SocketTimeOutException
 		int socketTimeout = this.requestConfig.getSocketTimeout();
 		if (socketTimeout >= 0) {
 			builder.setSocketTimeout(socketTimeout);
@@ -279,10 +304,11 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * <p>The default implementation simply sets the serialized invocation as the
 	 * HttpPost's request body. This can be overridden, for example, to write a
 	 * specific encoding and to potentially set appropriate HTTP request headers.
-	 * @param config the HTTP invoker configuration that specifies the target service
+	 *
+	 * @param config   the HTTP invoker configuration that specifies the target service
 	 * @param httpPost the HttpPost to set the request body on
-	 * @param baos the ByteArrayOutputStream that contains the serialized
-	 * RemoteInvocation object
+	 * @param baos     the ByteArrayOutputStream that contains the serialized
+	 *                 RemoteInvocation object
 	 * @throws java.io.IOException if thrown by I/O methods
 	 */
 	protected void setRequestBody(
@@ -296,9 +322,10 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 
 	/**
 	 * Execute the given HttpPost instance.
-	 * @param config the HTTP invoker configuration that specifies the target service
+	 *
+	 * @param config     the HTTP invoker configuration that specifies the target service
 	 * @param httpClient the HttpClient to execute on
-	 * @param httpPost the HttpPost to execute
+	 * @param httpPost   the HttpPost to execute
 	 * @return the resulting HttpResponse
 	 * @throws java.io.IOException if thrown by I/O methods
 	 */
@@ -314,7 +341,8 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * throwing an exception if it does not correspond to a successful HTTP response.
 	 * <p>Default implementation rejects any HTTP status code beyond 2xx, to avoid
 	 * parsing the response body and trying to deserialize from a corrupted stream.
-	 * @param config the HTTP invoker configuration that specifies the target service
+	 *
+	 * @param config   the HTTP invoker configuration that specifies the target service
 	 * @param response the resulting HttpResponse to validate
 	 * @throws java.io.IOException if validation failed
 	 */
@@ -322,10 +350,11 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 			throws IOException {
 
 		StatusLine status = response.getStatusLine();
+		// 状态骂
 		if (status.getStatusCode() >= 300) {
 			throw new NoHttpResponseException(
 					"Did not receive successful HTTP response: status code = " + status.getStatusCode() +
-					", status message = [" + status.getReasonPhrase() + "]");
+							", status message = [" + status.getReasonPhrase() + "]");
 		}
 	}
 
@@ -334,7 +363,8 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * <p>The default implementation simply fetches the HttpPost's response body stream.
 	 * If the response is recognized as GZIP response, the InputStream will get wrapped
 	 * in a GZIPInputStream.
-	 * @param config the HTTP invoker configuration that specifies the target service
+	 *
+	 * @param config       the HTTP invoker configuration that specifies the target service
 	 * @param httpResponse the resulting HttpResponse to read the response body from
 	 * @return an InputStream for the response body
 	 * @throws java.io.IOException if thrown by I/O methods
@@ -356,6 +386,9 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	 * Determine whether the given response indicates a GZIP response.
 	 * <p>The default implementation checks whether the HTTP "Content-Encoding"
 	 * header contains "gzip" (in any casing).
+	 *
+	 *
+	 * 是不是 GZIP 的response
 	 * @param httpResponse the resulting HttpResponse to check
 	 * @return whether the given response indicates a GZIP response
 	 */

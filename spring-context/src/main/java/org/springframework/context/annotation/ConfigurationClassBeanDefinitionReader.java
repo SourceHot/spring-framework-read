@@ -134,6 +134,7 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
+		// 是否是import
 		if (configClass.isImported()) {
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
@@ -142,6 +143,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+		// 注册bean
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
 
@@ -358,7 +360,10 @@ class ConfigurationClassBeanDefinitionReader {
 			reader.loadBeanDefinitions(resource);
 		});
 	}
-
+	/**
+	 * 加载bean到注册表中
+	 * @param registrars
+	 */
 	private void loadBeanDefinitionsFromRegistrars(Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> registrars) {
 		registrars.forEach((registrar, metadata) ->
 				registrar.registerBeanDefinitions(metadata, this.registry));

@@ -16,9 +16,9 @@
 
 package org.springframework.cache;
 
-import java.util.Collection;
-
 import org.springframework.lang.Nullable;
+
+import java.util.Collection;
 
 /**
  * Spring's central cache manager SPI.
@@ -31,21 +31,33 @@ import org.springframework.lang.Nullable;
  */
 public interface CacheManager {
 
-	/**
-	 * Get the cache associated with the given name.
-	 * <p>Note that the cache may be lazily created at runtime if the
-	 * native provider supports it.
-	 * @param name the cache identifier (must not be {@code null})
-	 * @return the associated cache, or {@code null} if such a cache
-	 * does not exist or could be not created
-	 */
-	@Nullable
-	Cache getCache(String name);
+    /**
+     * Get the cache associated with the given name.
+     * <p>Note that the cache may be lazily created at runtime if the
+     * native provider supports it.
+     * <p>
+     * 获取缓存名称 对应xml如下
+     * {@code
+     * <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean">
+     * <property name="name" value="demoCache"/>
+     * </bean>
+     * }
+     * 想获取demoCache中的缓存传递参数 name = demoCache
+     *
+     * @param name the cache identifier (must not be {@code null})
+     * @return the associated cache, or {@code null} if such a cache
+     * does not exist or could be not created
+     */
+    @Nullable
+    Cache getCache(String name);
 
-	/**
-	 * Get a collection of the cache names known by this manager.
-	 * @return the names of all caches known by the cache manager
-	 */
-	Collection<String> getCacheNames();
+    /**
+     * Get a collection of the cache names known by this manager.
+     * <p>
+     * 获取所有的缓存名称
+     *
+     * @return the names of all caches known by the cache manager
+     */
+    Collection<String> getCacheNames();
 
 }

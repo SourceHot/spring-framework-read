@@ -24,7 +24,7 @@
     </bean>
 
     <!--我的监听类-->
-    <bean id="myMessageListener" class="org.sourcehot.spring.jms."></bean>
+    <bean id="myMessageListener" class="org.sourcehot.spring.jms.p2p.MyMessageListener"></bean>
     <!--监听容器-->
     <bean  class="org.springframework.jms.listener.DefaultMessageListenerContainer">
         <property name="connectionFactory" ref="targetConnectionFactory"/>

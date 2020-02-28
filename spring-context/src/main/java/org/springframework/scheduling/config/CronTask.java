@@ -23,6 +23,7 @@ import org.springframework.scheduling.support.CronTrigger;
  * to a {@linkplain org.springframework.scheduling.support.CronSequenceGenerator standard
  * cron expression}.
  *
+ * cron定时任务
  * @author Chris Beams
  * @since 3.2
  * @see org.springframework.scheduling.annotation.Scheduled#cron()

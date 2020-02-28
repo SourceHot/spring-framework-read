@@ -47,33 +47,46 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultResourceLoader implements ResourceLoader {
 
+	private final Set<ProtocolResolver> protocolResolvers = new LinkedHashSet<>(4);
+	private final Map<Class<?>, Map<Resource, ?>> resourceCaches = new ConcurrentHashMap<>(4);
 	@Nullable
 	private ClassLoader classLoader;
-
-	private final Set<ProtocolResolver> protocolResolvers = new LinkedHashSet<>(4);
-
-	private final Map<Class<?>, Map<Resource, ?>> resourceCaches = new ConcurrentHashMap<>(4);
 
 
 	/**
 	 * Create a new DefaultResourceLoader.
 	 * <p>ClassLoader access will happen using the thread context class loader
 	 * at the time of this ResourceLoader's initialization.
+	 *
 	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public DefaultResourceLoader() {
+		// 创建类加载器
 		this.classLoader = ClassUtils.getDefaultClassLoader();
 	}
 
 	/**
 	 * Create a new DefaultResourceLoader.
+	 *
 	 * @param classLoader the ClassLoader to load class path resources with, or {@code null}
-	 * for using the thread context class loader at the time of actual resource access
+	 *                    for using the thread context class loader at the time of actual resource access
 	 */
 	public DefaultResourceLoader(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
+	/**
+	 * Return the ClassLoader to load class path resources with.
+	 * <p>Will get passed to ClassPathResource's constructor for all
+	 * ClassPathResource objects created by this resource loader.
+	 *
+	 * @see ClassPathResource
+	 */
+	@Override
+	@Nullable
+	public ClassLoader getClassLoader() {
+		return (this.classLoader != null ? this.classLoader : ClassUtils.getDefaultClassLoader());
+	}
 
 	/**
 	 * Specify the ClassLoader to load class path resources with, or {@code null}
@@ -86,24 +99,13 @@ public class DefaultResourceLoader implements ResourceLoader {
 	}
 
 	/**
-	 * Return the ClassLoader to load class path resources with.
-	 * <p>Will get passed to ClassPathResource's constructor for all
-	 * ClassPathResource objects created by this resource loader.
-	 * @see ClassPathResource
-	 */
-	@Override
-	@Nullable
-	public ClassLoader getClassLoader() {
-		return (this.classLoader != null ? this.classLoader : ClassUtils.getDefaultClassLoader());
-	}
-
-	/**
 	 * Register the given resolver with this resource loader, allowing for
 	 * additional protocols to be handled.
 	 * <p>Any such resolver will be invoked ahead of this loader's standard
 	 * resolution rules. It may therefore also override any default rules.
-	 * @since 4.3
+	 *
 	 * @see #getProtocolResolvers()
+	 * @since 4.3
 	 */
 	public void addProtocolResolver(ProtocolResolver resolver) {
 		Assert.notNull(resolver, "ProtocolResolver must not be null");
@@ -113,6 +115,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	/**
 	 * Return the collection of currently registered protocol resolvers,
 	 * allowing for introspection as well as modification.
+	 *
 	 * @since 4.3
 	 */
 	public Collection<ProtocolResolver> getProtocolResolvers() {
@@ -121,6 +124,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 
 	/**
 	 * Obtain a cache for the given value type, keyed by {@link Resource}.
+	 *
 	 * @param valueType the value type, e.g. an ASM {@code MetadataReader}
 	 * @return the cache {@link Map}, shared at the {@code ResourceLoader} level
 	 * @since 5.0
@@ -132,14 +136,21 @@ public class DefaultResourceLoader implements ResourceLoader {
 
 	/**
 	 * Clear all resource caches in this resource loader.
-	 * @since 5.0
+	 *
 	 * @see #getResourceCache
+	 * @since 5.0
 	 */
 	public void clearResourceCaches() {
 		this.resourceCaches.clear();
 	}
 
 
+	/**
+	 * 获取资源
+	 * @param location the resource location
+	 *                  资源路径
+	 * @return {@link Resource}
+	 */
 	@Override
 	public Resource getResource(String location) {
 		Assert.notNull(location, "Location must not be null");
@@ -151,15 +162,18 @@ public class DefaultResourceLoader implements ResourceLoader {
 			}
 		}
 
+		// location 以/开头
 		if (location.startsWith("/")) {
 			return getResourceByPath(location);
 		}
+		// location以 classpath: 开头
 		else if (location.startsWith(CLASSPATH_URL_PREFIX)) {
 			return new ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()), getClassLoader());
 		}
 		else {
 			try {
 				// Try to parse the location as a URL...
+				// location 是一个url
 				URL url = new URL(location);
 				return (ResourceUtils.isFileURL(url) ? new FileUrlResource(url) : new UrlResource(url));
 			}
@@ -175,6 +189,8 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * <p>The default implementation supports class path locations. This should
 	 * be appropriate for standalone implementations but can be overridden,
 	 * e.g. for implementations targeted at a Servlet container.
+	 *
+	 * 根据路径获取Resource
 	 * @param path the path to the resource
 	 * @return the corresponding Resource handle
 	 * @see ClassPathResource
@@ -192,6 +208,11 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 */
 	protected static class ClassPathContextResource extends ClassPathResource implements ContextResource {
 
+		/**
+		 *
+		 * @param path 资源路径
+		 * @param classLoader 类加载器
+		 */
 		public ClassPathContextResource(String path, @Nullable ClassLoader classLoader) {
 			super(path, classLoader);
 		}

@@ -378,21 +378,25 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	/**
 	 * Find an {@code @ExceptionHandler} method and invoke it to handle the raised exception.
+	 * 寻找{code @ExceptionHandler} 注解方法
 	 */
 	@Override
 	@Nullable
 	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request,
-			HttpServletResponse response, @Nullable HandlerMethod handlerMethod, Exception exception) {
+														   HttpServletResponse response, @Nullable HandlerMethod handlerMethod, Exception exception) {
 
+		// 获取存在异常的controller方法(带有注解的,不是指抛出异常的)
 		ServletInvocableHandlerMethod exceptionHandlerMethod = getExceptionHandlerMethod(handlerMethod, exception);
 		if (exceptionHandlerMethod == null) {
 			return null;
 		}
 
 		if (this.argumentResolvers != null) {
+			// 参数设置
 			exceptionHandlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 		}
 		if (this.returnValueHandlers != null) {
+			// 返回值设置
 			exceptionHandlerMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
 		}
 
@@ -406,6 +410,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			Throwable cause = exception.getCause();
 			if (cause != null) {
 				// Expose cause as provided argument as well
+				// 执行方法:把cause返回出去
 				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, cause, handlerMethod);
 			}
 			else {

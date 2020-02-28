@@ -24,6 +24,7 @@ import org.springframework.util.Assert;
  * includes one or more such qualifiers enables fine-grained matching
  * against annotations on a field or parameter to be autowired.
  *
+ * {@code  <qualifier > } 注解的内容
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5

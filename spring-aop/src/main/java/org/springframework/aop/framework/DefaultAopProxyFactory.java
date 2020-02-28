@@ -46,6 +46,13 @@ import org.springframework.aop.SpringProxy;
 @SuppressWarnings("serial")
 public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
+	/**
+	 * 创建AOP代理
+	 * @param config the AOP configuration in the form of an
+	 *               AdvisedSupport object
+	 * @return
+	 * @throws AopConfigException
+	 */
 	@Override
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
 		if (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config)) {
@@ -55,11 +62,14 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 						"Either an interface or a target is required for proxy creation.");
 			}
 			if (targetClass.isInterface() || Proxy.isProxyClass(targetClass)) {
+				// JDK 动态代理
 				return new JdkDynamicAopProxy(config);
 			}
+			// CGLIB 动态代理
 			return new ObjenesisCglibAopProxy(config);
 		}
 		else {
+			// JDK 动态代理
 			return new JdkDynamicAopProxy(config);
 		}
 	}

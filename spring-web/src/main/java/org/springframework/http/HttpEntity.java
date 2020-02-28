@@ -47,6 +47,13 @@ import org.springframework.util.ObjectUtils;
  * }
  * </pre>
  *
+ *
+ * http实体,主要存放数据:
+ * <ol>
+ *     <li>头信息,headers{@link HttpHeaders}</li>
+ *     <li>数据信息,Body</li>
+ * </ol>
+ * 该类主要应用与 web 项目做返回值
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0.2

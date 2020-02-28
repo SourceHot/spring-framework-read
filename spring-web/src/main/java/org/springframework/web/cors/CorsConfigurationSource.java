@@ -16,9 +16,9 @@
 
 package org.springframework.web.cors;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.lang.Nullable;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Interface to be implemented by classes (usually HTTP request handlers) that
@@ -29,11 +29,13 @@ import org.springframework.lang.Nullable;
  */
 public interface CorsConfigurationSource {
 
-	/**
-	 * Return a {@link CorsConfiguration} based on the incoming request.
-	 * @return the associated {@link CorsConfiguration}, or {@code null} if none
-	 */
-	@Nullable
-	CorsConfiguration getCorsConfiguration(HttpServletRequest request);
+    /**
+     * Return a {@link CorsConfiguration} based on the incoming request.
+     * 从请求中获取跨域信息
+     *
+     * @return the associated {@link CorsConfiguration}, or {@code null} if none
+     */
+    @Nullable
+    CorsConfiguration getCorsConfiguration(HttpServletRequest request);
 
 }

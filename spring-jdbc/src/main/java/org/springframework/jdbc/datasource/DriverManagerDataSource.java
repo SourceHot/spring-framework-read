@@ -151,6 +151,7 @@ public class DriverManagerDataSource extends AbstractDriverBasedDataSource {
 	 * @see java.sql.DriverManager#getConnection(String, java.util.Properties)
 	 */
 	protected Connection getConnectionFromDriverManager(String url, Properties props) throws SQLException {
+		// 获取数据库链接对象
 		return DriverManager.getConnection(url, props);
 	}
 

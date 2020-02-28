@@ -55,7 +55,7 @@ import org.springframework.context.annotation.Import;
  *     }
  * }
  * </pre>
- *
+ * 启动 WebSocket
  * @author Rossen Stoyanchev
  * @since 4.0
  */

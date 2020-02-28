@@ -16,13 +16,12 @@
 
 package org.springframework.cache.interceptor;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.lang.Nullable;
+
+import java.io.Serializable;
+import java.lang.reflect.Method;
 
 /**
  * AOP Alliance MethodInterceptor for declarative cache
@@ -35,6 +34,8 @@ import org.springframework.lang.Nullable;
  * in the correct order.
  *
  * <p>CacheInterceptors are thread-safe.
+ * <p>
+ * 拦截方法
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -43,26 +44,24 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class CacheInterceptor extends CacheAspectSupport implements MethodInterceptor, Serializable {
 
-	@Override
-	@Nullable
-	public Object invoke(final MethodInvocation invocation) throws Throwable {
-		Method method = invocation.getMethod();
+    @Override
+    @Nullable
+    public Object invoke(final MethodInvocation invocation) throws Throwable {
+        Method method = invocation.getMethod();
 
-		CacheOperationInvoker aopAllianceInvoker = () -> {
-			try {
-				return invocation.proceed();
-			}
-			catch (Throwable ex) {
-				throw new CacheOperationInvoker.ThrowableWrapper(ex);
-			}
-		};
+        CacheOperationInvoker aopAllianceInvoker = () -> {
+            try {
+                return invocation.proceed();
+            } catch (Throwable ex) {
+                throw new CacheOperationInvoker.ThrowableWrapper(ex);
+            }
+        };
 
-		try {
-			return execute(aopAllianceInvoker, invocation.getThis(), method, invocation.getArguments());
-		}
-		catch (CacheOperationInvoker.ThrowableWrapper th) {
-			throw th.getOriginal();
-		}
-	}
+        try {
+            return execute(aopAllianceInvoker, invocation.getThis(), method, invocation.getArguments());
+        } catch (CacheOperationInvoker.ThrowableWrapper th) {
+            throw th.getOriginal();
+        }
+    }
 
 }

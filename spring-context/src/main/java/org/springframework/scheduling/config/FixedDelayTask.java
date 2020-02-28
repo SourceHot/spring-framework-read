@@ -18,7 +18,7 @@ package org.springframework.scheduling.config;
 
 /**
  * Specialization of {@link IntervalTask} for fixed-delay semantics.
- *
+ * 间隔时间的定时任务
  * @author Juergen Hoeller
  * @since 5.0.2
  * @see org.springframework.scheduling.annotation.Scheduled#fixedDelay()

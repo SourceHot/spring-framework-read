@@ -63,11 +63,13 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	public boolean processRequest(@Nullable CorsConfiguration config, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 
+		// 判断是否跨域请求
 		if (!CorsUtils.isCorsRequest(request)) {
 			return true;
 		}
 
 		ServletServerHttpResponse serverResponse = new ServletServerHttpResponse(response);
+		// 判断是否有 Access-Control-Allow-Origin
 		if (responseHasCors(serverResponse)) {
 			logger.trace("Skip: response already contains \"Access-Control-Allow-Origin\"");
 			return true;
@@ -93,6 +95,11 @@ public class DefaultCorsProcessor implements CorsProcessor {
 		return handleInternal(serverRequest, serverResponse, config, preFlightRequest);
 	}
 
+	/**
+	 * 请求头是否存在 Access-Control-Allow-Origin {@link HttpHeaders#ACCESS_CONTROL_ALLOW_ORIGIN}
+	 * @param response
+	 * @return
+	 */
 	private boolean responseHasCors(ServerHttpResponse response) {
 		try {
 			return (response.getHeaders().getAccessControlAllowOrigin() != null);

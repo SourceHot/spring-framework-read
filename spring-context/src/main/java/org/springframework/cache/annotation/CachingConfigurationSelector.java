@@ -65,11 +65,15 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 	 * Returns {@link ProxyCachingConfiguration} or {@code AspectJCachingConfiguration}
 	 * for {@code PROXY} and {@code ASPECTJ} values of {@link EnableCaching#mode()},
 	 * respectively. Potentially includes corresponding JCache configuration as well.
+	 *
+	 * 代理类型 默认jdk代理 {@link EnableCaching#mode()}
 	 */
 	@Override
 	public String[] selectImports(AdviceMode adviceMode) {
+		// 代理类型
 		switch (adviceMode) {
 			case PROXY:
+				// 默认
 				return getProxyImports();
 			case ASPECTJ:
 				return getAspectJImports();
@@ -84,6 +88,7 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 	 */
 	private String[] getProxyImports() {
 		List<String> result = new ArrayList<>(3);
+		// 添加两个类
 		result.add(AutoProxyRegistrar.class.getName());
 		result.add(ProxyCachingConfiguration.class.getName());
 		if (jsr107Present && jcacheImplPresent) {

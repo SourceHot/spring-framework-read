@@ -88,7 +88,11 @@ public final class CandidateComponentsIndexLoader {
 		}
 		return cache.computeIfAbsent(classLoaderToUse, CandidateComponentsIndexLoader::doLoadIndex);
 	}
-
+	/**
+	 * 解析  META-INF/spring.components 文件
+	 * @param classLoader
+	 * @return
+	 */
 	@Nullable
 	private static CandidateComponentsIndex doLoadIndex(ClassLoader classLoader) {
 		if (shouldIgnoreIndex) {
@@ -103,6 +107,7 @@ public final class CandidateComponentsIndexLoader {
 			List<Properties> result = new ArrayList<>();
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
+				// 读取META-INF/spring.components文件转换成map对象
 				Properties properties = PropertiesLoaderUtils.loadProperties(new UrlResource(url));
 				result.add(properties);
 			}
@@ -110,6 +115,7 @@ public final class CandidateComponentsIndexLoader {
 				logger.debug("Loaded " + result.size() + "] index(es)");
 			}
 			int totalCount = result.stream().mapToInt(Properties::size).sum();
+			// 查看CandidateComponentsIndex方法
 			return (totalCount > 0 ? new CandidateComponentsIndex(result) : null);
 		}
 		catch (IOException ex) {

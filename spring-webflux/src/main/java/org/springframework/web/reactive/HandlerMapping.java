@@ -33,12 +33,16 @@ public interface HandlerMapping {
 	/**
 	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that
 	 * contains the mapped handler for the best matching pattern.
+	 *
+	 * 包含最佳匹配模式的映射处理程序的属性名称。
 	 */
 	String BEST_MATCHING_HANDLER_ATTRIBUTE = HandlerMapping.class.getName() + ".bestMatchingHandler";
 
 	/**
 	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that
 	 * contains the best matching pattern within the handler mapping.
+	 *
+	 * 在处理程序映射中包含最佳匹配模式的属性的名称。
 	 */
 	String BEST_MATCHING_PATTERN_ATTRIBUTE = HandlerMapping.class.getName() + ".bestMatchingPattern";
 
@@ -50,6 +54,8 @@ public interface HandlerMapping {
 	 * HandlerMapping implementations. URL-based HandlerMappings will
 	 * typically support it but handlers should not necessarily expect
 	 * this request attribute to be present in all scenarios.
+	 *
+	 * 包含处理程序映射中的路径的属性的名称，在匹配的情况下，例如“/ static / **”或完全相关的URI。。
 	 */
 	String PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE = HandlerMapping.class.getName() + ".pathWithinHandlerMapping";
 
@@ -60,6 +66,8 @@ public interface HandlerMapping {
 	 * HandlerMapping implementations. URL-based HandlerMappings will
 	 * typically support it, but handlers should not necessarily expect
 	 * this request attribute to be present in all scenarios.
+	 *
+	 * 包含URI模板的属性的名称将变量名称映射到值。
 	 */
 	String URI_TEMPLATE_VARIABLES_ATTRIBUTE = HandlerMapping.class.getName() + ".uriTemplateVariables";
 
@@ -71,6 +79,8 @@ public interface HandlerMapping {
 	 * HandlerMapping implementations and may also not be present depending on
 	 * whether the HandlerMapping is configured to keep matrix variable content
 	 * in the request URI.
+	 *
+	 * 包含具有URI变量名称的映射的属性的名称以及每个URI变量的相应MultiValueMap。
 	 */
 	String MATRIX_VARIABLES_ATTRIBUTE = HandlerMapping.class.getName() + ".matrixVariables";
 
@@ -80,15 +90,20 @@ public interface HandlerMapping {
 	 * <p>Note: This attribute is not required to be supported by all
 	 * HandlerMapping implementations. Handlers should not necessarily expect
 	 * this request attribute to be present in all scenarios.
+	 *
+	 * 包含适用于映射处理程序的可生产的MediaType集合的属性的名称。
 	 */
 	String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
 
 
 	/**
 	 * Return a handler for this request.
+	 *
 	 * @param exchange current server exchange
 	 * @return a {@link Mono} that emits one value or none in case the request
 	 * cannot be resolved to a handler
+	 *
+	 * 返回此请求的处理程序(handler)。
 	 */
 	Mono<Object> getHandler(ServerWebExchange exchange);
 

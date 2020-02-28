@@ -64,9 +64,11 @@ public abstract class AdviceModeImportSelector<A extends Annotation> implements 
 	 */
 	@Override
 	public final String[] selectImports(AnnotationMetadata importingClassMetadata) {
+		// 获取注解
 		Class<?> annType = GenericTypeResolver.resolveTypeArgument(getClass(), AdviceModeImportSelector.class);
 		Assert.state(annType != null, "Unresolvable type argument for AdviceModeImportSelector");
 
+		// 注解信息获取
 		AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(importingClassMetadata, annType);
 		if (attributes == null) {
 			throw new IllegalArgumentException(String.format(
@@ -74,7 +76,9 @@ public abstract class AdviceModeImportSelector<A extends Annotation> implements 
 					annType.getSimpleName(), importingClassMetadata.getClassName()));
 		}
 
+		// 获取mode jdk 或者 aspectj
 		AdviceMode adviceMode = attributes.getEnum(getAdviceModeAttributeName());
+		//
 		String[] imports = selectImports(adviceMode);
 		if (imports == null) {
 			throw new IllegalArgumentException("Unknown AdviceMode: " + adviceMode);

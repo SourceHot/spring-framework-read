@@ -35,7 +35,8 @@ import org.springframework.util.StringUtils;
  * <p>Provides 'pseudo-reification' to avoid noisy Map generics in the calling
  * code as well as convenience methods for looking up annotation attributes
  * in a type-safe fashion.
- *
+ * 注解的属性
+
  * @author Chris Beams
  * @author Sam Brannen
  * @author Juergen Hoeller

@@ -18,7 +18,7 @@
     </bean>
 
     <!--我的监听类-->
-    <bean id="myMessageListener" class="com.huifer.source.spring.jms"></bean>
+    <bean id="myMessageListener" class="org.sourcehot.springmvc.spring.jms"></bean>
     <!--监听容器-->
     <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer">
         <property name="connectionFactory" ref="targetConnectionFactory"/>

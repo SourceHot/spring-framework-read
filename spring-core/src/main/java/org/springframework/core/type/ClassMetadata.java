@@ -32,33 +32,43 @@ public interface ClassMetadata {
 
 	/**
 	 * Return the name of the underlying class.
+	 *
+	 * 获取类名
 	 */
 	String getClassName();
 
 	/**
 	 * Return whether the underlying class represents an interface.
+	 * 是否为接口
 	 */
 	boolean isInterface();
 
 	/**
 	 * Return whether the underlying class represents an annotation.
+	 *是否为注解
 	 * @since 4.1
 	 */
 	boolean isAnnotation();
 
 	/**
 	 * Return whether the underlying class is marked as abstract.
+	 *
+	 * 是否 abstract
 	 */
 	boolean isAbstract();
 
 	/**
 	 * Return whether the underlying class represents a concrete class,
 	 * i.e. neither an interface nor an abstract class.
+	 *
+	 * 是否可以创建
 	 */
 	boolean isConcrete();
 
 	/**
 	 * Return whether the underlying class is marked as 'final'.
+	 *
+	 * 是否 final
 	 */
 	boolean isFinal();
 
@@ -66,6 +76,8 @@ public interface ClassMetadata {
 	 * Determine whether the underlying class is independent, i.e. whether
 	 * it is a top-level class or a nested class (static inner class) that
 	 * can be constructed independently from an enclosing class.
+	 *
+	 * 是否内部类
 	 */
 	boolean isIndependent();
 
@@ -87,12 +99,15 @@ public interface ClassMetadata {
 
 	/**
 	 * Return whether the underlying class has a super class.
+	 * 是否有父类
 	 */
 	boolean hasSuperClass();
 
 	/**
 	 * Return the name of the super class of the underlying class,
 	 * or {@code null} if there is no super class defined.
+	 *
+	 * 获取父类名字
 	 */
 	@Nullable
 	String getSuperClassName();
@@ -100,6 +115,8 @@ public interface ClassMetadata {
 	/**
 	 * Return the names of all interfaces that the underlying class
 	 * implements, or an empty array if there are none.
+	 *
+	 * 获取实现接口
 	 */
 	String[] getInterfaceNames();
 
@@ -109,6 +126,8 @@ public interface ClassMetadata {
 	 * access, and private classes and interfaces declared by the class, but excludes
 	 * inherited classes and interfaces. An empty array is returned if no member classes
 	 * or interfaces exist.
+	 *
+	 * 获取成员类
 	 * @since 3.1
 	 */
 	String[] getMemberClassNames();

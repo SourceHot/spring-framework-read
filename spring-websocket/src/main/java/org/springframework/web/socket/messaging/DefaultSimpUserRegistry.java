@@ -41,7 +41,8 @@ import org.springframework.util.Assert;
  * A default implementation of {@link SimpUserRegistry} that relies on
  * {@link AbstractSubProtocolEvent} application context events to keep
  * track of connected users and their subscriptions.
- *
+ * 用户注册
+
  * @author Rossen Stoyanchev
  * @since 4.2
  */

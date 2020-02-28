@@ -74,6 +74,7 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	public static HttpClientErrorException create(
 			HttpStatus statusCode, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 
+		// 请求失败的处理信息
 		switch (statusCode) {
 			case BAD_REQUEST:
 				return new HttpClientErrorException.BadRequest(statusText, headers, body, charset);

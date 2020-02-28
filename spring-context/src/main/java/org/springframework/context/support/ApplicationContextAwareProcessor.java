@@ -73,7 +73,14 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		this.embeddedValueResolver = new EmbeddedValueResolver(applicationContext.getBeanFactory());
 	}
 
-
+	/**
+	 * 后置处理器初始化方法
+	 *
+	 * @param bean     the new bean instance
+	 * @param beanName the name of the bean
+	 * @return
+	 * @throws BeansException
+	 */
 	@Override
 	@Nullable
 	public Object postProcessBeforeInitialization(final Object bean, String beanName) throws BeansException {
@@ -88,6 +95,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 		if (acc != null) {
 			AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+				// 调用接口
 				invokeAwareInterfaces(bean);
 				return null;
 			}, acc);
@@ -98,7 +106,19 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 		return bean;
 	}
-
+	/**
+	 * 调用接口{@link Aware},
+	 * 设置
+	 * <li>
+	 *     <ol>Environment</ol>
+	 *     <ol>EmbeddedValueResolver</ol>
+	 *     <ol>ResourceLoader</ol>
+	 *     <ol>ApplicationEventPublisher</ol>
+	 *     <ol>MessageSource</ol>
+	 *     <ol>ApplicationContext</ol>
+	 * </li>
+	 * @param bean
+	 */
 	private void invokeAwareInterfaces(Object bean) {
 		if (bean instanceof Aware) {
 			if (bean instanceof EnvironmentAware) {

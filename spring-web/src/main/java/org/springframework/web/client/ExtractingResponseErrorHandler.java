@@ -57,11 +57,12 @@ import org.springframework.util.CollectionUtils;
  */
 public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler {
 
-	private List<HttpMessageConverter<?>> messageConverters = Collections.emptyList();
-
+	/**
+	 * 响应码map
+	 */
 	private final Map<HttpStatus, Class<? extends RestClientException>> statusMapping = new LinkedHashMap<>();
-
 	private final Map<HttpStatus.Series, Class<? extends RestClientException>> seriesMapping = new LinkedHashMap<>();
+	private List<HttpMessageConverter<?>> messageConverters = Collections.emptyList();
 
 
 	/**
@@ -74,6 +75,7 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler 
 	/**
 	 * Create a new {@code ExtractingResponseErrorHandler} with the given
 	 * {@link HttpMessageConverter} instances.
+	 *
 	 * @param messageConverters the message converters to use
 	 */
 	public ExtractingResponseErrorHandler(List<HttpMessageConverter<?>> messageConverters) {
@@ -134,27 +136,32 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler 
 
 	@Override
 	public void handleError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
+		// 缓存中是否存在当前当前的code
 		if (this.statusMapping.containsKey(statusCode)) {
 			extract(this.statusMapping.get(statusCode), response);
 		}
+		// 缓存中是否存在当前当前的code
 		else if (this.seriesMapping.containsKey(statusCode.series())) {
 			extract(this.seriesMapping.get(statusCode.series()), response);
 		}
 		else {
+			// 父类异常处理
 			super.handleError(response, statusCode);
 		}
 	}
 
 	private void extract(@Nullable Class<? extends RestClientException> exceptionClass,
-			ClientHttpResponse response) throws IOException {
+						 ClientHttpResponse response) throws IOException {
 
 		if (exceptionClass == null) {
 			return;
 		}
 
+		// 获取 HttpMessageConverterExtractor 的异常信息
 		HttpMessageConverterExtractor<? extends RestClientException> extractor =
 				new HttpMessageConverterExtractor<>(exceptionClass, this.messageConverters);
 		RestClientException exception = extractor.extractData(response);
+		// 异常存在抛出
 		if (exception != null) {
 			throw exception;
 		}

@@ -34,13 +34,25 @@ import org.springframework.util.Assert;
  */
 public class HandlerResult {
 
+	/**
+	 * 处理器
+	 */
 	private final Object handler;
 
+	/**
+	 * 返回值
+	 */
 	@Nullable
 	private final Object returnValue;
 
+	/**
+	 * 返回值类型
+	 */
 	private final ResolvableType returnType;
 
+	/**
+	 * 绑定上下文
+	 */
 	private final BindingContext bindingContext;
 
 	@Nullable
@@ -49,9 +61,10 @@ public class HandlerResult {
 
 	/**
 	 * Create a new {@code HandlerResult}.
-	 * @param handler the handler that handled the request
+	 *
+	 * @param handler     the handler that handled the request
 	 * @param returnValue the return value from the handler possibly {@code null}
-	 * @param returnType the return value type
+	 * @param returnType  the return value type
 	 */
 	public HandlerResult(Object handler, @Nullable Object returnValue, MethodParameter returnType) {
 		this(handler, returnValue, returnType, null);
@@ -59,13 +72,14 @@ public class HandlerResult {
 
 	/**
 	 * Create a new {@code HandlerResult}.
-	 * @param handler the handler that handled the request
+	 *
+	 * @param handler     the handler that handled the request
 	 * @param returnValue the return value from the handler possibly {@code null}
-	 * @param returnType the return value type
-	 * @param context the binding context used for request handling
+	 * @param returnType  the return value type
+	 * @param context     the binding context used for request handling
 	 */
 	public HandlerResult(Object handler, @Nullable Object returnValue, MethodParameter returnType,
-			@Nullable BindingContext context) {
+						 @Nullable BindingContext context) {
 
 		Assert.notNull(handler, "'handler' is required");
 		Assert.notNull(returnType, "'returnType' is required");
@@ -85,6 +99,7 @@ public class HandlerResult {
 
 	/**
 	 * Return the value returned from the handler, if any.
+	 * 获取返回值
 	 */
 	@Nullable
 	public Object getReturnValue() {
@@ -96,6 +111,7 @@ public class HandlerResult {
 	 * type declared on a controller method's signature. Also see
 	 * {@link #getReturnTypeSource()} to obtain the underlying
 	 * {@link MethodParameter} for the return type.
+	 * 获取返回值类型
 	 */
 	public ResolvableType getReturnType() {
 		return this.returnType;
@@ -104,6 +120,7 @@ public class HandlerResult {
 	/**
 	 * Return the {@link MethodParameter} from which {@link #getReturnType()
 	 * returnType} was created.
+	 *
 	 */
 	public MethodParameter getReturnTypeSource() {
 		return (MethodParameter) this.returnType.getSource();
@@ -111,6 +128,8 @@ public class HandlerResult {
 
 	/**
 	 * Return the BindingContext used for request handling.
+	 * 获取绑定的{@link BindingContext}
+	 *
 	 */
 	public BindingContext getBindingContext() {
 		return this.bindingContext;
@@ -128,6 +147,7 @@ public class HandlerResult {
 	 * Configure an exception handler that may be used to produce an alternative
 	 * result when result handling fails. Especially for an async return value
 	 * errors may occur after the invocation of the handler.
+	 *
 	 * @param function the error handler
 	 * @return the current instance
 	 */
@@ -145,6 +165,7 @@ public class HandlerResult {
 
 	/**
 	 * Apply the exception handler and return the alternative result.
+	 *
 	 * @param failure the exception
 	 * @return the new result or the same error if there is no exception handler
 	 */

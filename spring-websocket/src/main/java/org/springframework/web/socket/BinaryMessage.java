@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 /**
  * A binary WebSocket message.
  *
+ * 二进制消息
  * @author Rossen Stoyanchev
  * @since 4.0
  */

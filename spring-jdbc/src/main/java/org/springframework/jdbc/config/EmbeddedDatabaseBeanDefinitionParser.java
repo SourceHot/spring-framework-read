@@ -45,6 +45,7 @@ class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser 
 
 	/**
 	 * Constant for the "database-name" attribute.
+	 * 数据库名称
 	 */
 	static final String DB_NAME_ATTRIBUTE = "database-name";
 
@@ -77,12 +78,19 @@ class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser 
 		}
 	}
 
+	/**
+	 * 设置数据库名称
+	 * @param element
+	 * @param builder
+	 */
 	private void setDatabaseName(Element element, BeanDefinitionBuilder builder) {
 		// 1) Check for an explicit database name
+		// 获取 database-name 属性值
 		String name = element.getAttribute(DB_NAME_ATTRIBUTE);
 
 		// 2) Fall back to an implicit database name based on the ID
 		if (!StringUtils.hasText(name)) {
+			// 设置属性值
 			name = element.getAttribute(ID_ATTRIBUTE);
 		}
 
@@ -92,9 +100,16 @@ class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser 
 		// else, let EmbeddedDatabaseFactory use the default "testdb" name
 	}
 
+	/**
+	 * 设置数据库类型
+	 * @param element
+	 * @param builder
+	 */
 	private void setDatabaseType(Element element, BeanDefinitionBuilder builder) {
+		// 获取 type 属性值
 		String type = element.getAttribute("type");
 		if (StringUtils.hasText(type)) {
+			// 设置
 			builder.addPropertyValue("databaseType", type);
 		}
 	}

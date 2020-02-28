@@ -38,15 +38,14 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 链接地址
+	 */
 	private final URI uri;
-
-	private boolean autoStartup = false;
-
-	private int phase = DEFAULT_PHASE;
-
-	private volatile boolean running = false;
-
 	private final Object lifecycleMonitor = new Object();
+	private boolean autoStartup = false;
+	private int phase = DEFAULT_PHASE;
+	private volatile boolean running = false;
 
 
 	public ConnectionManagerSupport(String uriTemplate, Object... uriVariables) {
@@ -60,6 +59,16 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	}
 
 	/**
+	 * Return the value for the 'autoStartup' property. If "true", this endpoint
+	 * connection manager will connect to the remote endpoint upon a
+	 * ContextRefreshedEvent.
+	 */
+	@Override
+	public boolean isAutoStartup() {
+		return this.autoStartup;
+	}
+
+	/**
 	 * Set whether to auto-connect to the remote endpoint after this connection manager
 	 * has been initialized and the Spring context has been refreshed.
 	 * <p>Default is "false".
@@ -69,13 +78,12 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	}
 
 	/**
-	 * Return the value for the 'autoStartup' property. If "true", this endpoint
-	 * connection manager will connect to the remote endpoint upon a
-	 * ContextRefreshedEvent.
+	 * Return the phase in which this endpoint connection factory will be auto-connected
+	 * and stopped.
 	 */
 	@Override
-	public boolean isAutoStartup() {
-		return this.autoStartup;
+	public int getPhase() {
+		return this.phase;
 	}
 
 	/**
@@ -90,17 +98,8 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	}
 
 	/**
-	 * Return the phase in which this endpoint connection factory will be auto-connected
-	 * and stopped.
-	 */
-	@Override
-	public int getPhase() {
-		return this.phase;
-	}
-
-
-	/**
 	 * Start the WebSocket connection. If already connected, the method has no impact.
+	 * 启动 webSocket 链接
 	 */
 	@Override
 	public final void start() {
@@ -111,16 +110,24 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 		}
 	}
 
+	/**
+	 * 开始链接
+	 */
 	protected void startInternal() {
+		// 锁住
 		synchronized (this.lifecycleMonitor) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Starting " + getClass().getSimpleName());
 			}
 			this.running = true;
+			// 打开链接
 			openConnection();
 		}
 	}
 
+	/**
+	 * 停止链接
+	 */
 	@Override
 	public final void stop() {
 		synchronized (this.lifecycleMonitor) {
@@ -149,6 +156,10 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 		}
 	}
 
+	/**
+	 * 停止websocket链接
+	 * @throws Exception
+	 */
 	protected void stopInternal() throws Exception {
 		if (isConnected()) {
 			closeConnection();
@@ -157,6 +168,8 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 
 	/**
 	 * Return whether this ConnectionManager has been started.
+	 *
+	 * 判断是否正常运行
 	 */
 	@Override
 	public boolean isRunning() {
@@ -164,10 +177,21 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	}
 
 
+	/**
+	 * 打开链接
+	 */
 	protected abstract void openConnection();
 
+	/**
+	 * 关闭链接
+	 * @throws Exception
+	 */
 	protected abstract void closeConnection() throws Exception;
 
+	/**
+	 * 判断是否关闭了链接
+	 * @return
+	 */
 	protected abstract boolean isConnected();
 
 }

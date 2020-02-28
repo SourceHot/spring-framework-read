@@ -16,14 +16,16 @@
 
 package org.springframework.http.client;
 
+import org.springframework.http.HttpMethod;
+
 import java.io.IOException;
 import java.net.URI;
-
-import org.springframework.http.HttpMethod;
 
 /**
  * Factory for {@link ClientHttpRequest} objects.
  * Requests are created by the {@link #createRequest(URI, HttpMethod)} method.
+ * <p>
+ * 函数接口{@link FunctionalInterface}
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -31,15 +33,17 @@ import org.springframework.http.HttpMethod;
 @FunctionalInterface
 public interface ClientHttpRequestFactory {
 
-	/**
-	 * Create a new {@link ClientHttpRequest} for the specified URI and HTTP method.
-	 * <p>The returned request can be written to, and then executed by calling
-	 * {@link ClientHttpRequest#execute()}.
-	 * @param uri the URI to create a request for
-	 * @param httpMethod the HTTP method to execute
-	 * @return the created request
-	 * @throws IOException in case of I/O errors
-	 */
-	ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException;
+    /**
+     * Create a new {@link ClientHttpRequest} for the specified URI and HTTP method.
+     * <p>The returned request can be written to, and then executed by calling
+     * {@link ClientHttpRequest#execute()}.
+     * 创建{@link ClientHttpRequest}
+     *
+     * @param uri        the URI to create a request for
+     * @param httpMethod the HTTP method to execute
+     * @return the created request
+     * @throws IOException in case of I/O errors
+     */
+    ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException;
 
 }

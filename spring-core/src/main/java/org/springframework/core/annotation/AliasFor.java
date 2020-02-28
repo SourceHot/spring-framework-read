@@ -174,6 +174,7 @@ import java.lang.annotation.Target;
  * attribute aliases. Consult the Javadoc for individual annotations as well
  * as the reference manual for details.
  *
+ * 别名注解
  * @author Sam Brannen
  * @since 4.2
  * @see AnnotatedElementUtils
@@ -206,6 +207,7 @@ public @interface AliasFor {
 	 * The type of annotation in which the aliased {@link #attribute} is declared.
 	 * <p>Defaults to {@link Annotation}, implying that the aliased attribute is
 	 * declared in the same annotation as <em>this</em> attribute.
+	 * 其他注解
 	 */
 	Class<? extends Annotation> annotation() default Annotation.class;
 

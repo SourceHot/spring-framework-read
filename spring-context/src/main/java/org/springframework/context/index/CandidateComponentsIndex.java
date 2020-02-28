@@ -50,6 +50,9 @@ public class CandidateComponentsIndex {
 
 	private static final AntPathMatcher pathMatcher = new AntPathMatcher(".");
 
+	/**
+	 * MATE-INF\spring.components,文件的信息
+	 */
 	private final MultiValueMap<String, Entry> index;
 
 
@@ -68,6 +71,7 @@ public class CandidateComponentsIndex {
 	public Set<String> getCandidateTypes(String basePackage, String stereotype) {
 		List<Entry> candidates = this.index.get(stereotype);
 		if (candidates != null) {
+			// 校验是否符合
 			return candidates.parallelStream()
 					.filter(t -> t.match(basePackage))
 					.map(t -> t.type)
@@ -75,7 +79,12 @@ public class CandidateComponentsIndex {
 		}
 		return Collections.emptySet();
 	}
-
+	/**
+	 * 解析  MATE-INF\spring.components 转换成 map
+	 *
+	 * @param content
+	 * @return
+	 */
 	private static MultiValueMap<String, Entry> parseIndex(List<Properties> content) {
 		MultiValueMap<String, Entry> index = new LinkedMultiValueMap<>();
 		for (Properties entry : content) {

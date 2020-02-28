@@ -40,11 +40,15 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 
 	private final ScopedProxyMode defaultProxyMode;
 
+	/**
+	 * {@link Scope} 注解类
+	 */
 	protected Class<? extends Annotation> scopeAnnotationType = Scope.class;
 
 
 	/**
 	 * Construct a new {@code AnnotationScopeMetadataResolver}.
+	 *
 	 * @see #AnnotationScopeMetadataResolver(ScopedProxyMode)
 	 * @see ScopedProxyMode#NO
 	 */
@@ -55,6 +59,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 	/**
 	 * Construct a new {@code AnnotationScopeMetadataResolver} using the
 	 * supplied default {@link ScopedProxyMode}.
+	 *
 	 * @param defaultProxyMode the default scoped-proxy mode
 	 */
 	public AnnotationScopeMetadataResolver(ScopedProxyMode defaultProxyMode) {
@@ -66,6 +71,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 	/**
 	 * Set the type of annotation that is checked for by this
 	 * {@code AnnotationScopeMetadataResolver}.
+	 *
 	 * @param scopeAnnotationType the target annotation type
 	 */
 	public void setScopeAnnotationType(Class<? extends Annotation> scopeAnnotationType) {
@@ -74,15 +80,24 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 	}
 
 
+	/**
+	 * 生命周期设置
+	 *
+	 * @param definition the target bean definition
+	 * @return
+	 */
 	@Override
 	public ScopeMetadata resolveScopeMetadata(BeanDefinition definition) {
 		ScopeMetadata metadata = new ScopeMetadata();
+		// 判断是否属于 AnnotatedBeanDefinition
 		if (definition instanceof AnnotatedBeanDefinition) {
 			AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
 			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(
 					annDef.getMetadata(), this.scopeAnnotationType);
 			if (attributes != null) {
+				// 获取 value 属性值并且设置
 				metadata.setScopeName(attributes.getString("value"));
+				// 获取 proxyMode 属性值并且设置
 				ScopedProxyMode proxyMode = attributes.getEnum("proxyMode");
 				if (proxyMode == ScopedProxyMode.DEFAULT) {
 					proxyMode = this.defaultProxyMode;

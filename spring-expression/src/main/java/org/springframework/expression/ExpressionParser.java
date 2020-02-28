@@ -20,6 +20,7 @@ package org.springframework.expression;
  * Parses expression strings into compiled expressions that can be evaluated.
  * Supports parsing templates as well as standard expression strings.
  *
+ * SpEL 解析器,分析器
  * @author Keith Donald
  * @author Andy Clement
  * @since 3.0
@@ -33,6 +34,7 @@ public interface ExpressionParser {
 	 *     3 + 4
 	 *     name.firstName
 	 * </pre>
+	 * 字符串转换成 {@link Expression} 对象
 	 * @param expressionString the raw expression string to parse
 	 * @return an evaluator for the parsed expression
 	 * @throws ParseException an exception occurred during parsing

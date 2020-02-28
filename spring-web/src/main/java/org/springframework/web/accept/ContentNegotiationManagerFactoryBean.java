@@ -316,9 +316,11 @@ public class ContentNegotiationManagerFactoryBean
 			if (this.favorPathExtension) {
 				PathExtensionContentNegotiationStrategy strategy;
 				if (this.servletContext != null && !useRegisteredExtensionsOnly()) {
+					// servlet 地址解析器
 					strategy = new ServletPathExtensionContentNegotiationStrategy(this.servletContext, this.mediaTypes);
 				}
 				else {
+					// 地址解析器
 					strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
 				}
 				strategy.setIgnoreUnknownExtensions(this.ignoreUnknownPathExtensions);

@@ -24,6 +24,7 @@ import org.springframework.util.Assert;
  * Default implementation of the {@link RemoteInvocationExecutor} interface.
  * Simply delegates to {@link RemoteInvocation}'s invoke method.
  *
+ * 默认的远程调用执行器
  * @author Juergen Hoeller
  * @since 1.1
  * @see RemoteInvocation#invoke

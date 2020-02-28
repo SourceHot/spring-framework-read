@@ -22,12 +22,15 @@ import org.springframework.core.type.MethodMetadata;
 
 /**
  * Base class for a {@link Configuration @Configuration} class method.
- *
+ * {@link Configuration} 注解方法
  * @author Chris Beams
  * @since 3.1
  */
 abstract class ConfigurationMethod {
 
+	/**
+	 * 方法元信息
+	 */
 	protected final MethodMetadata metadata;
 
 	protected final ConfigurationClass configurationClass;

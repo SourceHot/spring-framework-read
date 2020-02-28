@@ -108,15 +108,22 @@ public abstract class AbstractController extends WebContentGenerator implements 
 
 	/**
 	 * Create a new AbstractController.
+	 *
 	 * @param restrictDefaultSupportedMethods {@code true} if this
-	 * controller should support HTTP methods GET, HEAD and POST by default,
-	 * or {@code false} if it should be unrestricted
+	 *                                        controller should support HTTP methods GET, HEAD and POST by default,
+	 *                                        or {@code false} if it should be unrestricted
 	 * @since 4.3
 	 */
 	public AbstractController(boolean restrictDefaultSupportedMethods) {
 		super(restrictDefaultSupportedMethods);
 	}
 
+	/**
+	 * Return whether controller execution should be synchronized on the session.
+	 */
+	public final boolean isSynchronizeOnSession() {
+		return this.synchronizeOnSession;
+	}
 
 	/**
 	 * Set if controller execution should be synchronized on the session,
@@ -133,6 +140,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	 * as well, since it will always be the same object reference for the
 	 * same active logical session. However, this is not guaranteed across
 	 * different servlet containers; the only 100% safe way is a session mutex.
+	 *
 	 * @see AbstractController#handleRequestInternal
 	 * @see org.springframework.web.util.HttpSessionMutexListener
 	 * @see org.springframework.web.util.WebUtils#getSessionMutex(javax.servlet.http.HttpSession)
@@ -142,29 +150,32 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	}
 
 	/**
-	 * Return whether controller execution should be synchronized on the session.
+	 * 处理请求
+	 * @param request  current HTTP request 请求
+	 * @param response current HTTP response 返回
+	 * @return
+	 * @throws Exception
 	 */
-	public final boolean isSynchronizeOnSession() {
-		return this.synchronizeOnSession;
-	}
-
-
 	@Override
 	@Nullable
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
+		// 请求方法判断是否匹配,options
 		if (HttpMethod.OPTIONS.matches(request.getMethod())) {
 			response.setHeader("Allow", getAllowHeader());
 			return null;
 		}
 
 		// Delegate to WebContentGenerator for checking and preparing.
+		// 校验请求
 		checkRequest(request);
+		// 设置response
 		prepareResponse(response);
 
 		// Execute handleRequestInternal in synchronized block if required.
 		if (this.synchronizeOnSession) {
+			// 获取session
 			HttpSession session = request.getSession(false);
 			if (session != null) {
 				Object mutex = WebUtils.getSessionMutex(session);
@@ -180,6 +191,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	/**
 	 * Template method. Subclasses must implement this.
 	 * The contract is the same as for {@code handleRequest}.
+	 *
 	 * @see #handleRequest
 	 */
 	@Nullable

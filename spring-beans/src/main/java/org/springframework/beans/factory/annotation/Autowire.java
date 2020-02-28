@@ -25,49 +25,54 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  *
  * <p>Available for use in annotation-based configurations, such as for the
  * AspectJ AnnotationBeanConfigurer aspect.
+ * <p>
+ * 自动装配类型枚举
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 2.0
  * @see org.springframework.beans.factory.annotation.Configurable
  * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
+ * @since 2.0
  */
 public enum Autowire {
 
-	/**
-	 * Constant that indicates no autowiring at all.
+    /**
+     * Constant that indicates no autowiring at all.
+     */
+    NO(AutowireCapableBeanFactory.AUTOWIRE_NO),
+
+    /**
+     * Constant that indicates autowiring bean properties by name.
+	 * 根据名称自动装配
 	 */
-	NO(AutowireCapableBeanFactory.AUTOWIRE_NO),
+    BY_NAME(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME),
 
-	/**
-	 * Constant that indicates autowiring bean properties by name.
+    /**
+     * Constant that indicates autowiring bean properties by type.
+	 * 根据类型自动装配
 	 */
-	BY_NAME(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME),
-
-	/**
-	 * Constant that indicates autowiring bean properties by type.
-	 */
-	BY_TYPE(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+    BY_TYPE(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
 
 
-	private final int value;
+    private final int value;
 
 
-	Autowire(int value) {
-		this.value = value;
-	}
+    Autowire(int value) {
+        this.value = value;
+    }
 
-	public int value() {
-		return this.value;
-	}
+    public int value() {
+        return this.value;
+    }
 
-	/**
-	 * Return whether this represents an actual autowiring value.
-	 * @return whether actual autowiring was specified
-	 * (either BY_NAME or BY_TYPE)
-	 */
-	public boolean isAutowire() {
-		return (this == BY_NAME || this == BY_TYPE);
-	}
+    /**
+     * Return whether this represents an actual autowiring value.
+     *
+     * @return whether actual autowiring was specified
+     * (either BY_NAME or BY_TYPE)
+     */
+    public boolean isAutowire() {
+        return (this == BY_NAME || this == BY_TYPE);
+    }
 
 }

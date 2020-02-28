@@ -64,6 +64,7 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 	/**
 	 * Reads a remote invocation from the request, executes it,
 	 * and writes the remote invocation result to the response.
+	 *
 	 * @see #readRemoteInvocation(HttpServletRequest)
 	 * @see #invokeAndCreateResult(org.springframework.remoting.support.RemoteInvocation, Object)
 	 * @see #writeRemoteInvocationResult(HttpServletRequest, HttpServletResponse, RemoteInvocationResult)
@@ -73,8 +74,11 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 			throws ServletException, IOException {
 
 		try {
+			// 从request中获取序列化对象 RemoteInvocation
 			RemoteInvocation invocation = readRemoteInvocation(request);
+			// 执行并且创建结果
 			RemoteInvocationResult result = invokeAndCreateResult(invocation, getProxy());
+			// 写出远程调用结果到response
 			writeRemoteInvocationResult(request, response, result);
 		}
 		catch (ClassNotFoundException ex) {
@@ -86,14 +90,17 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 	 * Read a RemoteInvocation from the given HTTP request.
 	 * <p>Delegates to {@link #readRemoteInvocation(HttpServletRequest, InputStream)} with
 	 * the {@link HttpServletRequest#getInputStream() servlet request's input stream}.
+	 *
+	 * 从request中获取序列化对象 RemoteInvocation
 	 * @param request current HTTP request
 	 * @return the RemoteInvocation object
-	 * @throws IOException in case of I/O failure
+	 * @throws IOException            in case of I/O failure
 	 * @throws ClassNotFoundException if thrown by deserialization
 	 */
 	protected RemoteInvocation readRemoteInvocation(HttpServletRequest request)
 			throws IOException, ClassNotFoundException {
 
+		// 读取远程对象
 		return readRemoteInvocation(request, request.getInputStream());
 	}
 
@@ -104,17 +111,21 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 	 * {@link org.springframework.remoting.rmi.CodebaseAwareObjectInputStream}
 	 * and calls {@link #doReadRemoteInvocation} to actually read the object.
 	 * <p>Can be overridden for custom serialization of the invocation.
+	 *
+	 * 读取远程对象
 	 * @param request current HTTP request
-	 * @param is the InputStream to read from
+	 * @param is      the InputStream to read from
 	 * @return the RemoteInvocation object
-	 * @throws IOException in case of I/O failure
+	 * @throws IOException            in case of I/O failure
 	 * @throws ClassNotFoundException if thrown during deserialization
 	 */
 	protected RemoteInvocation readRemoteInvocation(HttpServletRequest request, InputStream is)
 			throws IOException, ClassNotFoundException {
 
+		// 获取输入流
 		ObjectInputStream ois = createObjectInputStream(decorateInputStream(request, is));
 		try {
+			// 返回 RemoteInvocation 对象, 类型判断后强制转换
 			return doReadRemoteInvocation(ois);
 		}
 		finally {
@@ -127,8 +138,9 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 	 * potentially decorating the given original InputStream.
 	 * <p>The default implementation returns the given stream as-is.
 	 * Can be overridden, for example, for custom encryption or compression.
+	 *
 	 * @param request current HTTP request
-	 * @param is the original InputStream
+	 * @param is      the original InputStream
 	 * @return the potentially decorated InputStream
 	 * @throws IOException in case of I/O failure
 	 */
@@ -138,16 +150,20 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 
 	/**
 	 * Write the given RemoteInvocationResult to the given HTTP response.
-	 * @param request current HTTP request
+	 *
+	 * 写出远程调用结果到response
+	 * @param request  current HTTP request
 	 * @param response current HTTP response
-	 * @param result the RemoteInvocationResult object
+	 * @param result   the RemoteInvocationResult object
 	 * @throws IOException in case of I/O failure
 	 */
 	protected void writeRemoteInvocationResult(
 			HttpServletRequest request, HttpServletResponse response, RemoteInvocationResult result)
 			throws IOException {
 
+		// 设置类型
 		response.setContentType(getContentType());
+		// 写出response
 		writeRemoteInvocationResult(request, response, result, response.getOutputStream());
 	}
 
@@ -158,10 +174,11 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 	 * Creates an {@link java.io.ObjectOutputStream} for the final stream and calls
 	 * {@link #doWriteRemoteInvocationResult} to actually write the object.
 	 * <p>Can be overridden for custom serialization of the invocation.
-	 * @param request current HTTP request
+	 *
+	 * @param request  current HTTP request
 	 * @param response current HTTP response
-	 * @param result the RemoteInvocationResult object
-	 * @param os the OutputStream to write to
+	 * @param result   the RemoteInvocationResult object
+	 * @param os       the OutputStream to write to
 	 * @throws IOException in case of I/O failure
 	 * @see #decorateOutputStream
 	 * @see #doWriteRemoteInvocationResult
@@ -170,9 +187,11 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 			HttpServletRequest request, HttpServletResponse response, RemoteInvocationResult result, OutputStream os)
 			throws IOException {
 
+		// 输出流
 		ObjectOutputStream oos =
 				createObjectOutputStream(new FlushGuardedOutputStream(decorateOutputStream(request, response, os)));
 		try {
+			// 写出
 			doWriteRemoteInvocationResult(result, oos);
 		}
 		finally {
@@ -185,9 +204,10 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 	 * potentially decorating the given original OutputStream.
 	 * <p>The default implementation returns the given stream as-is.
 	 * Can be overridden, for example, for custom encryption or compression.
-	 * @param request current HTTP request
+	 *
+	 * @param request  current HTTP request
 	 * @param response current HTTP response
-	 * @param os the original OutputStream
+	 * @param os       the original OutputStream
 	 * @return the potentially decorated OutputStream
 	 * @throws IOException in case of I/O failure
 	 */
@@ -205,6 +225,7 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 	 * the underlying stream twice, this {@link FilterOutputStream} will
 	 * guard against individual flush calls. Multiple flush calls can lead
 	 * to performance issues, since writes aren't gathered as they should be.
+	 *
 	 * @see <a href="https://jira.spring.io/browse/SPR-14040">SPR-14040</a>
 	 */
 	private static class FlushGuardedOutputStream extends FilterOutputStream {

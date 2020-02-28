@@ -48,6 +48,7 @@ public class DelegatingWebSocketConfiguration extends WebSocketConfigurationSupp
 	@Override
 	protected void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 		for (WebSocketConfigurer configurer : this.configurers) {
+			// 注册webSocket 处理器
 			configurer.registerWebSocketHandlers(registry);
 		}
 	}

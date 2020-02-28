@@ -36,6 +36,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>Mainly for use within the framework, but also useful for application code.
  *
+ * 文件工具类
  * @author Juergen Hoeller
  * @since 06.10.2003
  * @see StreamUtils

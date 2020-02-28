@@ -36,7 +36,12 @@ public abstract class AbstractWebSocketHandler implements WebSocketHandler {
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 	}
-
+	/**
+	 * 消息处理
+	 * @param session
+	 * @param message
+	 * @throws Exception
+	 */
 	@Override
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
 		if (message instanceof TextMessage) {

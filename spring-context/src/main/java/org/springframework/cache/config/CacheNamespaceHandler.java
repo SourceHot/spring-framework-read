@@ -16,12 +16,11 @@
 
 package org.springframework.cache.config;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Element;
 
 /**
  * {@code NamespaceHandler} allowing for the configuration of declarative
@@ -29,36 +28,42 @@ import org.springframework.util.StringUtils;
  *
  * <p>This namespace handler is the central piece of functionality in the
  * Spring cache management facilities.
+ * <p>
+ * {@code <cache:annotation-driven/>} xml解析
  *
  * @author Costin Leau
  * @since 3.1
  */
 public class CacheNamespaceHandler extends NamespaceHandlerSupport {
 
-	static final String CACHE_MANAGER_ATTRIBUTE = "cache-manager";
+    static final String CACHE_MANAGER_ATTRIBUTE = "cache-manager";
 
-	static final String DEFAULT_CACHE_MANAGER_BEAN_NAME = "cacheManager";
-
-
-	static String extractCacheManager(Element element) {
-		return (element.hasAttribute(CacheNamespaceHandler.CACHE_MANAGER_ATTRIBUTE) ?
-				element.getAttribute(CacheNamespaceHandler.CACHE_MANAGER_ATTRIBUTE) :
-				CacheNamespaceHandler.DEFAULT_CACHE_MANAGER_BEAN_NAME);
-	}
-
-	static BeanDefinition parseKeyGenerator(Element element, BeanDefinition def) {
-		String name = element.getAttribute("key-generator");
-		if (StringUtils.hasText(name)) {
-			def.getPropertyValues().add("keyGenerator", new RuntimeBeanReference(name.trim()));
-		}
-		return def;
-	}
+    static final String DEFAULT_CACHE_MANAGER_BEAN_NAME = "cacheManager";
 
 
-	@Override
-	public void init() {
-		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenCacheBeanDefinitionParser());
-		registerBeanDefinitionParser("advice", new CacheAdviceParser());
-	}
+    static String extractCacheManager(Element element) {
+        return (element.hasAttribute(CacheNamespaceHandler.CACHE_MANAGER_ATTRIBUTE) ?
+                element.getAttribute(CacheNamespaceHandler.CACHE_MANAGER_ATTRIBUTE) :
+                CacheNamespaceHandler.DEFAULT_CACHE_MANAGER_BEAN_NAME);
+    }
+
+    static BeanDefinition parseKeyGenerator(Element element, BeanDefinition def) {
+        String name = element.getAttribute("key-generator");
+        if (StringUtils.hasText(name)) {
+            def.getPropertyValues().add("keyGenerator", new RuntimeBeanReference(name.trim()));
+        }
+        return def;
+    }
+
+
+    @Override
+    public void init() {
+        // 注册bean
+        /**
+         * {@link AnnotationDrivenCacheBeanDefinitionParser#parse(org.w3c.dom.Element, org.springframework.beans.factory.xml.ParserContext)}
+         */
+        registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenCacheBeanDefinitionParser());
+        registerBeanDefinitionParser("advice", new CacheAdviceParser());
+    }
 
 }

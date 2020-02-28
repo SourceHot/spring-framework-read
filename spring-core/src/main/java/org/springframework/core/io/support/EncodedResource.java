@@ -16,17 +16,17 @@
 
 package org.springframework.core.io.support;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.Charset;
-
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
 
 /**
  * Holder that combines a {@link Resource} descriptor with a specific encoding
@@ -37,151 +37,161 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
- * @since 1.2.6
  * @see Resource#getInputStream()
  * @see java.io.Reader
  * @see java.nio.charset.Charset
+ * @since 1.2.6
  */
 public class EncodedResource implements InputStreamSource {
 
-	private final Resource resource;
+    private final Resource resource;
 
-	@Nullable
-	private final String encoding;
+    @Nullable
+    private final String encoding;
 
-	@Nullable
-	private final Charset charset;
-
-
-	/**
-	 * Create a new {@code EncodedResource} for the given {@code Resource},
-	 * not specifying an explicit encoding or {@code Charset}.
-	 * @param resource the {@code Resource} to hold (never {@code null})
-	 */
-	public EncodedResource(Resource resource) {
-		this(resource, null, null);
-	}
-
-	/**
-	 * Create a new {@code EncodedResource} for the given {@code Resource},
-	 * using the specified {@code encoding}.
-	 * @param resource the {@code Resource} to hold (never {@code null})
-	 * @param encoding the encoding to use for reading from the resource
-	 */
-	public EncodedResource(Resource resource, @Nullable String encoding) {
-		this(resource, encoding, null);
-	}
-
-	/**
-	 * Create a new {@code EncodedResource} for the given {@code Resource},
-	 * using the specified {@code Charset}.
-	 * @param resource the {@code Resource} to hold (never {@code null})
-	 * @param charset the {@code Charset} to use for reading from the resource
-	 */
-	public EncodedResource(Resource resource, @Nullable Charset charset) {
-		this(resource, null, charset);
-	}
-
-	private EncodedResource(Resource resource, @Nullable String encoding, @Nullable Charset charset) {
-		super();
-		Assert.notNull(resource, "Resource must not be null");
-		this.resource = resource;
-		this.encoding = encoding;
-		this.charset = charset;
-	}
+    @Nullable
+    private final Charset charset;
 
 
-	/**
-	 * Return the {@code Resource} held by this {@code EncodedResource}.
-	 */
-	public final Resource getResource() {
-		return this.resource;
-	}
+    /**
+     * Create a new {@code EncodedResource} for the given {@code Resource},
+     * not specifying an explicit encoding or {@code Charset}.
+     *
+     * @param resource the {@code Resource} to hold (never {@code null})
+     */
+    public EncodedResource(Resource resource) {
+        this(resource, null, null);
+    }
 
-	/**
-	 * Return the encoding to use for reading from the {@linkplain #getResource() resource},
-	 * or {@code null} if none specified.
-	 */
-	@Nullable
-	public final String getEncoding() {
-		return this.encoding;
-	}
+    /**
+     * Create a new {@code EncodedResource} for the given {@code Resource},
+     * using the specified {@code encoding}.
+     *
+     * @param resource the {@code Resource} to hold (never {@code null})
+     * @param encoding the encoding to use for reading from the resource
+     */
+    public EncodedResource(Resource resource, @Nullable String encoding) {
+        this(resource, encoding, null);
+    }
 
-	/**
-	 * Return the {@code Charset} to use for reading from the {@linkplain #getResource() resource},
-	 * or {@code null} if none specified.
-	 */
-	@Nullable
-	public final Charset getCharset() {
-		return this.charset;
-	}
+    /**
+     * Create a new {@code EncodedResource} for the given {@code Resource},
+     * using the specified {@code Charset}.
+     *
+     * @param resource the {@code Resource} to hold (never {@code null})
+     * @param charset  the {@code Charset} to use for reading from the resource
+     */
+    public EncodedResource(Resource resource, @Nullable Charset charset) {
+        this(resource, null, charset);
+    }
 
-	/**
-	 * Determine whether a {@link Reader} is required as opposed to an {@link InputStream},
-	 * i.e. whether an {@linkplain #getEncoding() encoding} or a {@link #getCharset() Charset}
-	 * has been specified.
-	 * @see #getReader()
-	 * @see #getInputStream()
-	 */
-	public boolean requiresReader() {
-		return (this.encoding != null || this.charset != null);
-	}
-
-	/**
-	 * Open a {@code java.io.Reader} for the specified resource, using the specified
-	 * {@link #getCharset() Charset} or {@linkplain #getEncoding() encoding}
-	 * (if any).
-	 * @throws IOException if opening the Reader failed
-	 * @see #requiresReader()
-	 * @see #getInputStream()
-	 */
-	public Reader getReader() throws IOException {
-		if (this.charset != null) {
-			return new InputStreamReader(this.resource.getInputStream(), this.charset);
-		}
-		else if (this.encoding != null) {
-			return new InputStreamReader(this.resource.getInputStream(), this.encoding);
-		}
-		else {
-			return new InputStreamReader(this.resource.getInputStream());
-		}
-	}
-
-	/**
-	 * Open an {@code InputStream} for the specified resource, ignoring any specified
-	 * {@link #getCharset() Charset} or {@linkplain #getEncoding() encoding}.
-	 * @throws IOException if opening the InputStream failed
-	 * @see #requiresReader()
-	 * @see #getReader()
-	 */
-	@Override
-	public InputStream getInputStream() throws IOException {
-		return this.resource.getInputStream();
-	}
+    /**
+     * @param resource 资源
+     * @param encoding 编码
+     * @param charset  编码
+     */
+    private EncodedResource(Resource resource, @Nullable String encoding, @Nullable Charset charset) {
+        super();
+        Assert.notNull(resource, "Resource must not be null");
+        this.resource = resource;
+        this.encoding = encoding;
+        this.charset = charset;
+    }
 
 
-	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof EncodedResource)) {
-			return false;
-		}
-		EncodedResource otherResource = (EncodedResource) other;
-		return (this.resource.equals(otherResource.resource) &&
-				ObjectUtils.nullSafeEquals(this.charset, otherResource.charset) &&
-				ObjectUtils.nullSafeEquals(this.encoding, otherResource.encoding));
-	}
+    /**
+     * Return the {@code Resource} held by this {@code EncodedResource}.
+     */
+    public final Resource getResource() {
+        return this.resource;
+    }
 
-	@Override
-	public int hashCode() {
-		return this.resource.hashCode();
-	}
+    /**
+     * Return the encoding to use for reading from the {@linkplain #getResource() resource},
+     * or {@code null} if none specified.
+     */
+    @Nullable
+    public final String getEncoding() {
+        return this.encoding;
+    }
 
-	@Override
-	public String toString() {
-		return this.resource.toString();
-	}
+    /**
+     * Return the {@code Charset} to use for reading from the {@linkplain #getResource() resource},
+     * or {@code null} if none specified.
+     */
+    @Nullable
+    public final Charset getCharset() {
+        return this.charset;
+    }
+
+    /**
+     * Determine whether a {@link Reader} is required as opposed to an {@link InputStream},
+     * i.e. whether an {@linkplain #getEncoding() encoding} or a {@link #getCharset() Charset}
+     * has been specified.
+     *
+     * @see #getReader()
+     * @see #getInputStream()
+     */
+    public boolean requiresReader() {
+        return (this.encoding != null || this.charset != null);
+    }
+
+    /**
+     * Open a {@code java.io.Reader} for the specified resource, using the specified
+     * {@link #getCharset() Charset} or {@linkplain #getEncoding() encoding}
+     * (if any).
+     * 获取reader返回不同编码的解析
+     *
+     * @throws IOException if opening the Reader failed
+     * @see #requiresReader()
+     * @see #getInputStream()
+     */
+    public Reader getReader() throws IOException {
+        if (this.charset != null) {
+            return new InputStreamReader(this.resource.getInputStream(), this.charset);
+        } else if (this.encoding != null) {
+            return new InputStreamReader(this.resource.getInputStream(), this.encoding);
+        } else {
+            return new InputStreamReader(this.resource.getInputStream());
+        }
+    }
+
+    /**
+     * Open an {@code InputStream} for the specified resource, ignoring any specified
+     * {@link #getCharset() Charset} or {@linkplain #getEncoding() encoding}.
+     *
+     * @throws IOException if opening the InputStream failed
+     * @see #requiresReader()
+     * @see #getReader()
+     */
+    @Override
+    public InputStream getInputStream() throws IOException {
+        return this.resource.getInputStream();
+    }
+
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof EncodedResource)) {
+            return false;
+        }
+        EncodedResource otherResource = (EncodedResource) other;
+        return (this.resource.equals(otherResource.resource) &&
+                ObjectUtils.nullSafeEquals(this.charset, otherResource.charset) &&
+                ObjectUtils.nullSafeEquals(this.encoding, otherResource.encoding));
+    }
+
+    @Override
+    public int hashCode() {
+        return this.resource.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return this.resource.toString();
+    }
 
 }

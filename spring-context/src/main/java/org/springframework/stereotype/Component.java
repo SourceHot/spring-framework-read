@@ -31,13 +31,15 @@ import java.lang.annotation.Target;
  * a component as well, typically a special kind of component:
  * e.g. the {@link Repository @Repository} annotation or AspectJ's
  * {@link org.aspectj.lang.annotation.Aspect @Aspect} annotation.
+ * <p>
+ * 组件注解 拓展->{@link Controller} {@link Service} {@link Repository}
  *
  * @author Mark Fisher
- * @since 2.5
  * @see Repository
  * @see Service
  * @see Controller
  * @see org.springframework.context.annotation.ClassPathBeanDefinitionScanner
+ * @since 2.5
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -45,11 +47,12 @@ import java.lang.annotation.Target;
 @Indexed
 public @interface Component {
 
-	/**
-	 * The value may indicate a suggestion for a logical component name,
-	 * to be turned into a Spring bean in case of an autodetected component.
-	 * @return the suggested component name, if any (or empty String otherwise)
-	 */
-	String value() default "";
+    /**
+     * The value may indicate a suggestion for a logical component name,
+     * to be turned into a Spring bean in case of an autodetected component.
+     *
+     * @return the suggested component name, if any (or empty String otherwise)
+     */
+    String value() default "";
 
 }
