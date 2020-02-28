@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+}
+
+group 'org.springframework'
+version '5.1.15.BUILD-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    compile(project(":spring-core"))
+    compile(project(":spring-beans"))
+    compile(project(":spring-aop"))
+    compile(project(":spring-context"))
+    compile(project(":spring-jdbc"))
+    compile(project(":spring-web"))
+    compile(project(":spring-webmvc"))
+    compile(project(":spring-jms"))
+    compile(project(":spring-test"))
+    compile group: 'com.alibaba', name: 'druid', version: '1.1.21'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.47'
+    compile 'org.apache.activemq:activemq-client:5.13.4'
+    compile("org.aspectj:aspectjweaver:${aspectjVersion}")
+
+}
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+}

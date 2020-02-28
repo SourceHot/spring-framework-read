@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder/>
+
+    <bean id="eaBean" class="org.sourcehot.spring.el.EaBean">
+
+        <property name="ints">
+            <list>
+                <array value-type="java.lang.Integer">
+                    <value>1</value>
+                </array>
+                <array value-type="java.lang.Integer">
+                    <value>2</value>
+                </array>
+            </list>
+        </property>
+
+
+        <property name="integerList">
+            <list>
+                <value>1</value>
+            </list>
+        </property>
+
+        <property name="map">
+            <map>
+                <entry key="0" value="0"/>
+                <entry key="1" value="0"/>
+                <entry key="2" value="0"/>
+            </map>
+        </property>
+        <property name="ebBean" value="#{ebBean}"></property>
+    </bean>
+    <bean id="ebBean" class="org.sourcehot.spring.el.EbBean">
+        <property name="name" value="gg"/>
+    </bean>
+    <bean class="org.springframework.expression.spel.support.StandardEvaluationContext"/>
+
+    <bean class="org.springframework.expression.spel.standard.SpelExpressionParser">
+        <constructor-arg name="configuration">
+            <!--设置解析配置选项,SpelParserConfiguration -->
+            <!--注:不启用spel的编译模式. -->
+            <bean class="org.springframework.expression.spel.SpelParserConfiguration">
+                <constructor-arg name="compilerMode">
+                    <null/>
+                </constructor-arg>
+                <constructor-arg name="compilerClassLoader">
+                    <null/>
+                </constructor-arg>
+                <constructor-arg name="autoGrowNullReferences" value="true"/>
+                <constructor-arg name="autoGrowCollections" value="true"/>
+                <constructor-arg name="maximumAutoGrowSize" value="120"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+</beans>

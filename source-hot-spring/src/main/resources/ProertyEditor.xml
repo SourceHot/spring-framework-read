@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+        <property name="propertyEditorRegistrars">
+            <list>
+                <bean class="org.sourcehot.spring.bean.DatePropertyRegister"/>
+            </list>
+        </property>
+
+        <property name="customEditors">
+            <map>
+                <entry key="java.util.Date" value="org.sourcehot.spring.bean.DatePropertyEditor">
+                </entry>
+            </map>
+        </property>
+    </bean>
+    <bean id="apple" class="org.sourcehot.spring.bean.Apple">
+        <property name="date" value="2020-01-01 01:01:01"/>
+    </bean>
+</beans>

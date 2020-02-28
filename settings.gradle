@@ -29,3 +29,6 @@ rootProject.name = "spring"
 rootProject.children.each {project ->
 	project.buildFileName = "${project.name}.gradle"
 }
+include 'source-hot-spring'
+include 'source-hot-springmvc'
+

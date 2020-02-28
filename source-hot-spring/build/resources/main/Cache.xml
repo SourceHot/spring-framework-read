@@ -1,0 +1,28 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:cache="http://www.springframework.org/schema/cache"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/cache
+           http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+
+	<context:component-scan base-package="org.sourcehot.spring.cache"/>
+	<context:annotation-config/>
+	<cache:annotation-driven/>
+	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
+		<property name="caches">
+			<set>
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean">
+					<property name="name" value="default"/>
+				</bean>
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean">
+					<property name="name" value="demoCache"/>
+				</bean>
+			</set>
+		</property>
+	</bean>
+</beans>

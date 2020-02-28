@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd 
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- 扫描controller（controller层注入） -->
+    <context:component-scan base-package="org.sourcehot.springmvc.controller"/>
+
+
+    <mvc:interceptors>
+        <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
+    </mvc:interceptors>
+
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+        <property name="defaultLocale" value="zh_CN"/>
+    </bean>
+
+
+
+    <!-- 对模型视图添加前后缀 -->
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+          p:prefix="/WEB-INF/views/" p:suffix=".jsp"/>
+
+    <mvc:annotation-driven>
+        <mvc:message-converters register-defaults="false">
+            <!-- 避免IE执行AJAX时,返回JSON出现下载文件 -->
+            <bean id="fastJsonHttpMessageConverter" class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <!-- 这里顺序不能反，一定先写text/html,不然ie下出现下载提示 -->
+                        <value>text/html;charset=UTF-8</value>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+<!--    <mvc:cors>-->
+<!--        <mvc:mapping path="/**"-->
+<!--                     allowed-origins="http://domain1.com, http://domain2.com"-->
+<!--                     allowed-methods="GET, PUT"-->
+<!--                     allowed-headers="header1, header2, header3"-->
+<!--                     exposed-headers="header1, header2" allow-credentials="false"-->
+<!--                     max-age="3600" />-->
+
+<!--    </mvc:cors>-->
+
+    <bean name="helloExporter"
+          class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
+        <property name="service" ref="helloService"></property>
+        <property name="serviceInterface" value="org.sourcehot.springmvc.httpinvoker.IHttpInvokerService">
+        </property>
+    </bean>
+    <bean id="helloService" class="org.sourcehot.springmvc.httpinvoker.IHttpInvokerServiceImpl"/>
+</beans>

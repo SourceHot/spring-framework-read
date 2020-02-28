@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+">
+    <bean name="obj" class="org.sourcehot.spring.bean.JavaObjectTest">
+        <constructor-arg>
+            <list value-type="java.lang.String">
+                <value>jasl</value>
+                <value>acg</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean name="obj2" class="org.sourcehot.spring.bean.JavaObjectTest">
+        <constructor-arg>
+            <map>
+                <entry value-type="java.lang.String" key="h" value="k"/>
+            </map>
+        </constructor-arg>
+    </bean>
+
+
+</beans>
