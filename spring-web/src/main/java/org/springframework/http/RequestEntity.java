@@ -59,6 +59,7 @@ import org.springframework.util.ObjectUtils;
  * }
  * </pre>
  *
+ * 请求对象
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @since 4.1
