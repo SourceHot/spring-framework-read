@@ -39,6 +39,7 @@ import org.springframework.lang.Nullable;
  * where JVM system properties are locked on the target platform (e.g. WebSphere).
  * See {@link #setFlag} for a convenient way to locally set such flags to "true".
  *
+ * 加载 spring.properties 文件
  * @author Juergen Hoeller
  * @since 3.2.7
  * @see org.springframework.core.env.AbstractEnvironment#IGNORE_GETENV_PROPERTY_NAME

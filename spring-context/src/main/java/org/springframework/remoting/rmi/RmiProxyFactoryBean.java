@@ -63,13 +63,16 @@ public class RmiProxyFactoryBean extends RmiClientInterceptor implements Factory
 	private Object serviceProxy;
 
 
-	@Override
-	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
-		Class<?> ifc = getServiceInterface();
-		Assert.notNull(ifc, "Property 'serviceInterface' is required");
-		this.serviceProxy = new ProxyFactory(ifc, this).getProxy(getBeanClassLoader());
-	}
+    @Override
+    public void afterPropertiesSet() {
+        super.afterPropertiesSet();
+        // 获取 服务提供的接口
+        Class<?> ifc = getServiceInterface();
+        // 如果服务接口不为空
+        Assert.notNull(ifc, "Property 'serviceInterface' is required");
+        // 创建服务代理
+        this.serviceProxy = new ProxyFactory(ifc, this).getProxy(getBeanClassLoader());
+    }
 
 
 	@Override

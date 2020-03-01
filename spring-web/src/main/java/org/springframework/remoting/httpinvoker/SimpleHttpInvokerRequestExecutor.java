@@ -44,188 +44,217 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  */
 public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequestExecutor {
 
-	private int connectTimeout = -1;
+    private int connectTimeout = -1;
 
-	private int readTimeout = -1;
-
-
-	/**
-	 * Set the underlying URLConnection's connect timeout (in milliseconds).
-	 * A timeout value of 0 specifies an infinite timeout.
-	 * <p>Default is the system's default timeout.
-	 * @see URLConnection#setConnectTimeout(int)
-	 */
-	public void setConnectTimeout(int connectTimeout) {
-		this.connectTimeout = connectTimeout;
-	}
-
-	/**
-	 * Set the underlying URLConnection's read timeout (in milliseconds).
-	 * A timeout value of 0 specifies an infinite timeout.
-	 * <p>Default is the system's default timeout.
-	 * @see URLConnection#setReadTimeout(int)
-	 */
-	public void setReadTimeout(int readTimeout) {
-		this.readTimeout = readTimeout;
-	}
+    private int readTimeout = -1;
 
 
-	/**
-	 * Execute the given request through a standard {@link HttpURLConnection}.
-	 * <p>This method implements the basic processing workflow:
-	 * The actual work happens in this class's template methods.
-	 * @see #openConnection
-	 * @see #prepareConnection
-	 * @see #writeRequestBody
-	 * @see #validateResponse
-	 * @see #readResponseBody
-	 */
-	@Override
-	protected RemoteInvocationResult doExecuteRequest(
-			HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
-			throws IOException, ClassNotFoundException {
+    /**
+     * Set the underlying URLConnection's connect timeout (in milliseconds).
+     * A timeout value of 0 specifies an infinite timeout.
+     * <p>Default is the system's default timeout.
+     *
+     * @see URLConnection#setConnectTimeout(int)
+     */
+    public void setConnectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout;
+    }
 
-		HttpURLConnection con = openConnection(config);
-		prepareConnection(con, baos.size());
-		writeRequestBody(config, con, baos);
-		validateResponse(config, con);
-		InputStream responseBody = readResponseBody(config, con);
+    /**
+     * Set the underlying URLConnection's read timeout (in milliseconds).
+     * A timeout value of 0 specifies an infinite timeout.
+     * <p>Default is the system's default timeout.
+     *
+     * @see URLConnection#setReadTimeout(int)
+     */
+    public void setReadTimeout(int readTimeout) {
+        this.readTimeout = readTimeout;
+    }
 
-		return readRemoteInvocationResult(responseBody, config.getCodebaseUrl());
-	}
 
-	/**
-	 * Open an {@link HttpURLConnection} for the given remote invocation request.
-	 * @param config the HTTP invoker configuration that specifies the
-	 * target service
-	 * @return the HttpURLConnection for the given request
-	 * @throws IOException if thrown by I/O methods
-	 * @see java.net.URL#openConnection()
-	 */
-	protected HttpURLConnection openConnection(HttpInvokerClientConfiguration config) throws IOException {
-		URLConnection con = new URL(config.getServiceUrl()).openConnection();
-		if (!(con instanceof HttpURLConnection)) {
-			throw new IOException(
-					"Service URL [" + config.getServiceUrl() + "] does not resolve to an HTTP connection");
-		}
-		return (HttpURLConnection) con;
-	}
+    /**
+     * Execute the given request through a standard {@link HttpURLConnection}.
+     * <p>This method implements the basic processing workflow:
+     * The actual work happens in this class's template methods.
+     *
+     * @see #openConnection
+     * @see #prepareConnection
+     * @see #writeRequestBody
+     * @see #validateResponse
+     * @see #readResponseBody
+     */
+    @Override
+    protected RemoteInvocationResult doExecuteRequest(
+            HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
+            throws IOException, ClassNotFoundException {
+        // 建立 http url 链接
+        HttpURLConnection con = openConnection(config);
+        // 准备连接
+        prepareConnection(con, baos.size());
+        // 写请求体
+        writeRequestBody(config, con, baos);
+        // 验证请求结果
+        validateResponse(config, con);
+        // 获取结果
+        InputStream responseBody = readResponseBody(config, con);
+        // 结果对象封装
+        return readRemoteInvocationResult(responseBody, config.getCodebaseUrl());
+    }
 
-	/**
-	 * Prepare the given HTTP connection.
-	 * <p>The default implementation specifies POST as method,
-	 * "application/x-java-serialized-object" as "Content-Type" header,
-	 * and the given content length as "Content-Length" header.
-	 * @param connection the HTTP connection to prepare
-	 * @param contentLength the length of the content to send
-	 * @throws IOException if thrown by HttpURLConnection methods
-	 * @see java.net.HttpURLConnection#setRequestMethod
-	 * @see java.net.HttpURLConnection#setRequestProperty
-	 */
-	protected void prepareConnection(HttpURLConnection connection, int contentLength) throws IOException {
-		if (this.connectTimeout >= 0) {
-			connection.setConnectTimeout(this.connectTimeout);
-		}
-		if (this.readTimeout >= 0) {
-			connection.setReadTimeout(this.readTimeout);
-		}
+    /**
+     * Open an {@link HttpURLConnection} for the given remote invocation request.
+     * <p>
+     * <p>
+     * 开启一个 {@link HttpURLConnection} 为了远程服务使用
+     *
+     * @param config the HTTP invoker configuration that specifies the
+     *               target service
+     * @return the HttpURLConnection for the given request
+     * @throws IOException if thrown by I/O methods
+     * @see java.net.URL#openConnection()
+     */
+    protected HttpURLConnection openConnection(HttpInvokerClientConfiguration config) throws IOException {
+        URLConnection con = new URL(config.getServiceUrl()).openConnection();
+        if (!(con instanceof HttpURLConnection)) {
+            throw new IOException(
+                    "Service URL [" + config.getServiceUrl() + "] does not resolve to an HTTP connection");
+        }
+        return (HttpURLConnection) con;
+    }
 
-		connection.setDoOutput(true);
-		connection.setRequestMethod(HTTP_METHOD_POST);
-		connection.setRequestProperty(HTTP_HEADER_CONTENT_TYPE, getContentType());
-		connection.setRequestProperty(HTTP_HEADER_CONTENT_LENGTH, Integer.toString(contentLength));
+    /**
+     * Prepare the given HTTP connection.
+     * <p>The default implementation specifies POST as method,
+     * "application/x-java-serialized-object" as "Content-Type" header,
+     * and the given content length as "Content-Length" header.
+     * 准备连接
+     *
+     * @param connection    the HTTP connection to prepare
+     * @param contentLength the length of the content to send
+     * @throws IOException if thrown by HttpURLConnection methods
+     * @see java.net.HttpURLConnection#setRequestMethod
+     * @see java.net.HttpURLConnection#setRequestProperty
+     */
+    protected void prepareConnection(HttpURLConnection connection, int contentLength) throws IOException {
+        if (this.connectTimeout >= 0) {
+            connection.setConnectTimeout(this.connectTimeout);
+        }
+        if (this.readTimeout >= 0) {
+            connection.setReadTimeout(this.readTimeout);
+        }
 
-		LocaleContext localeContext = LocaleContextHolder.getLocaleContext();
-		if (localeContext != null) {
-			Locale locale = localeContext.getLocale();
-			if (locale != null) {
-				connection.setRequestProperty(HTTP_HEADER_ACCEPT_LANGUAGE, locale.toLanguageTag());
-			}
-		}
+        connection.setDoOutput(true);
+        // 设置请求方式 POST
+        connection.setRequestMethod(HTTP_METHOD_POST);
+        // 设置类型
+        connection.setRequestProperty(HTTP_HEADER_CONTENT_TYPE, getContentType());
+        // 设置长度
+        connection.setRequestProperty(HTTP_HEADER_CONTENT_LENGTH, Integer.toString(contentLength));
 
-		if (isAcceptGzipEncoding()) {
-			connection.setRequestProperty(HTTP_HEADER_ACCEPT_ENCODING, ENCODING_GZIP);
-		}
-	}
+        LocaleContext localeContext = LocaleContextHolder.getLocaleContext();
+        if (localeContext != null) {
+            // 设置 locale
+            Locale locale = localeContext.getLocale();
+            if (locale != null) {
+                connection.setRequestProperty(HTTP_HEADER_ACCEPT_LANGUAGE, locale.toLanguageTag());
+            }
+        }
 
-	/**
-	 * Set the given serialized remote invocation as request body.
-	 * <p>The default implementation simply write the serialized invocation to the
-	 * HttpURLConnection's OutputStream. This can be overridden, for example, to write
-	 * a specific encoding and potentially set appropriate HTTP request headers.
-	 * @param config the HTTP invoker configuration that specifies the target service
-	 * @param con the HttpURLConnection to write the request body to
-	 * @param baos the ByteArrayOutputStream that contains the serialized
-	 * RemoteInvocation object
-	 * @throws IOException if thrown by I/O methods
-	 * @see java.net.HttpURLConnection#getOutputStream()
-	 * @see java.net.HttpURLConnection#setRequestProperty
-	 */
-	protected void writeRequestBody(
-			HttpInvokerClientConfiguration config, HttpURLConnection con, ByteArrayOutputStream baos)
-			throws IOException {
+        if (isAcceptGzipEncoding()) {
+            // 设置压缩方式
+            connection.setRequestProperty(HTTP_HEADER_ACCEPT_ENCODING, ENCODING_GZIP);
+        }
+    }
 
-		baos.writeTo(con.getOutputStream());
-	}
+    /**
+     * Set the given serialized remote invocation as request body.
+     * <p>The default implementation simply write the serialized invocation to the
+     * HttpURLConnection's OutputStream. This can be overridden, for example, to write
+     * a specific encoding and potentially set appropriate HTTP request headers.
+     *
+     *
+     * 写请求体
+     * @param config the HTTP invoker configuration that specifies the target service
+     * @param con    the HttpURLConnection to write the request body to
+     * @param baos   the ByteArrayOutputStream that contains the serialized
+     *               RemoteInvocation object
+     * @throws IOException if thrown by I/O methods
+     * @see java.net.HttpURLConnection#getOutputStream()
+     * @see java.net.HttpURLConnection#setRequestProperty
+     */
+    protected void writeRequestBody(
+            HttpInvokerClientConfiguration config, HttpURLConnection con, ByteArrayOutputStream baos)
+            throws IOException {
 
-	/**
-	 * Validate the given response as contained in the {@link HttpURLConnection} object,
-	 * throwing an exception if it does not correspond to a successful HTTP response.
-	 * <p>Default implementation rejects any HTTP status code beyond 2xx, to avoid
-	 * parsing the response body and trying to deserialize from a corrupted stream.
-	 * @param config the HTTP invoker configuration that specifies the target service
-	 * @param con the HttpURLConnection to validate
-	 * @throws IOException if validation failed
-	 * @see java.net.HttpURLConnection#getResponseCode()
-	 */
-	protected void validateResponse(HttpInvokerClientConfiguration config, HttpURLConnection con)
-			throws IOException {
+        baos.writeTo(con.getOutputStream());
+    }
 
-		if (con.getResponseCode() >= 300) {
-			throw new IOException(
-					"Did not receive successful HTTP response: status code = " + con.getResponseCode() +
-					", status message = [" + con.getResponseMessage() + "]");
-		}
-	}
+    /**
+     * Validate the given response as contained in the {@link HttpURLConnection} object,
+     * throwing an exception if it does not correspond to a successful HTTP response.
+     * <p>Default implementation rejects any HTTP status code beyond 2xx, to avoid
+     * parsing the response body and trying to deserialize from a corrupted stream.
+     *
+     * 验证请求结果
+     * @param config the HTTP invoker configuration that specifies the target service
+     * @param con    the HttpURLConnection to validate
+     * @throws IOException if validation failed
+     * @see java.net.HttpURLConnection#getResponseCode()
+     */
+    protected void validateResponse(HttpInvokerClientConfiguration config, HttpURLConnection con)
+            throws IOException {
+        // 响应状态码大于等于300 认为错误
+        if (con.getResponseCode() >= 300) {
+            throw new IOException(
+                    "Did not receive successful HTTP response: status code = " + con.getResponseCode() +
+                            ", status message = [" + con.getResponseMessage() + "]");
+        }
+    }
 
-	/**
-	 * Extract the response body from the given executed remote invocation
-	 * request.
-	 * <p>The default implementation simply reads the serialized invocation
-	 * from the HttpURLConnection's InputStream. If the response is recognized
-	 * as GZIP response, the InputStream will get wrapped in a GZIPInputStream.
-	 * @param config the HTTP invoker configuration that specifies the target service
-	 * @param con the HttpURLConnection to read the response body from
-	 * @return an InputStream for the response body
-	 * @throws IOException if thrown by I/O methods
-	 * @see #isGzipResponse
-	 * @see java.util.zip.GZIPInputStream
-	 * @see java.net.HttpURLConnection#getInputStream()
-	 * @see java.net.HttpURLConnection#getHeaderField(int)
-	 * @see java.net.HttpURLConnection#getHeaderFieldKey(int)
-	 */
-	protected InputStream readResponseBody(HttpInvokerClientConfiguration config, HttpURLConnection con)
-			throws IOException {
+    /**
+     * Extract the response body from the given executed remote invocation
+     * request.
+     * <p>The default implementation simply reads the serialized invocation
+     * from the HttpURLConnection's InputStream. If the response is recognized
+     * as GZIP response, the InputStream will get wrapped in a GZIPInputStream.
+     *
+     * 获取结果
+     *
+     * @param config the HTTP invoker configuration that specifies the target service
+     * @param con    the HttpURLConnection to read the response body from
+     * @return an InputStream for the response body
+     * @throws IOException if thrown by I/O methods
+     * @see #isGzipResponse
+     * @see java.util.zip.GZIPInputStream
+     * @see java.net.HttpURLConnection#getInputStream()
+     * @see java.net.HttpURLConnection#getHeaderField(int)
+     * @see java.net.HttpURLConnection#getHeaderFieldKey(int)
+     */
+    protected InputStream readResponseBody(HttpInvokerClientConfiguration config, HttpURLConnection con)
+            throws IOException {
 
-		if (isGzipResponse(con)) {
-			// GZIP response found - need to unzip.
-			return new GZIPInputStream(con.getInputStream());
-		}
-		else {
-			// Plain response found.
-			return con.getInputStream();
-		}
-	}
+        // Content-Encoding 是否为GZIP
+        if (isGzipResponse(con)) {
+            // GZIP response found - need to unzip.
+            return new GZIPInputStream(con.getInputStream());
+        }
+        else {
+            // Plain response found.
+            return con.getInputStream();
+        }
+    }
 
-	/**
-	 * Determine whether the given response is a GZIP response.
-	 * <p>Default implementation checks whether the HTTP "Content-Encoding"
-	 * header contains "gzip" (in any casing).
-	 * @param con the HttpURLConnection to check
-	 */
-	protected boolean isGzipResponse(HttpURLConnection con) {
-		String encodingHeader = con.getHeaderField(HTTP_HEADER_CONTENT_ENCODING);
-		return (encodingHeader != null && encodingHeader.toLowerCase().contains(ENCODING_GZIP));
-	}
+    /**
+     * Determine whether the given response is a GZIP response.
+     * <p>Default implementation checks whether the HTTP "Content-Encoding"
+     * header contains "gzip" (in any casing).
+     *
+     * Content-Encoding 是否为GZIP
+     * @param con the HttpURLConnection to check
+     */
+    protected boolean isGzipResponse(HttpURLConnection con) {
+        String encodingHeader = con.getHeaderField(HTTP_HEADER_CONTENT_ENCODING);
+        return (encodingHeader != null && encodingHeader.toLowerCase().contains(ENCODING_GZIP));
+    }
 
 }

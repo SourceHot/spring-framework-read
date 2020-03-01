@@ -31,36 +31,38 @@ import org.springframework.http.client.ClientHttpResponse;
  */
 public interface ResponseErrorHandler {
 
-	/**
-	 * Indicate whether the given response has any errors.
-	 * <p>Implementations will typically inspect the
-	 * {@link ClientHttpResponse#getStatusCode() HttpStatus} of the response.
-	 * @param response the response to inspect
-	 * @return {@code true} if the response indicates an error; {@code false} otherwise
-	 * @throws IOException in case of I/O errors
-	 */
-	boolean hasError(ClientHttpResponse response) throws IOException;
+    /**
+     * Indicate whether the given response has any errors.
+     * <p>Implementations will typically inspect the
+     * {@link ClientHttpResponse#getStatusCode() HttpStatus} of the response.
+     * response 是否有错误
+     * @param response the response to inspect
+     * @return {@code true} if the response indicates an error; {@code false} otherwise
+     * @throws IOException in case of I/O errors
+     */
+    boolean hasError(ClientHttpResponse response) throws IOException;
 
-	/**
-	 * Handle the error in the given response.
-	 * <p>This method is only called when {@link #hasError(ClientHttpResponse)}
-	 * has returned {@code true}.
-	 * @param response the response with the error
-	 * @throws IOException in case of I/O errors
-	 */
-	void handleError(ClientHttpResponse response) throws IOException;
+    /**
+     * Handle the error in the given response.
+     * <p>This method is only called when {@link #hasError(ClientHttpResponse)}
+     * has returned {@code true}.
+     * 存在 {@link #hasError(ClientHttpResponse)} 时候调用
+     * @param response the response with the error
+     * @throws IOException in case of I/O errors
+     */
+    void handleError(ClientHttpResponse response) throws IOException;
 
-	/**
-	 * Alternative to {@link #handleError(ClientHttpResponse)} with extra
-	 * information providing access to the request URL and HTTP method.
-	 * @param url the request URL
-	 * @param method the HTTP method
-	 * @param response the response with the error
-	 * @throws IOException in case of I/O errors
-	 * @since 5.0
-	 */
-	default void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
-		handleError(response);
-	}
+    /**
+     * Alternative to {@link #handleError(ClientHttpResponse)} with extra
+     * information providing access to the request URL and HTTP method.
+     * @param url the request URL
+     * @param method the HTTP method
+     * @param response the response with the error
+     * @throws IOException in case of I/O errors
+     * @since 5.0
+     */
+    default void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
+        handleError(response);
+    }
 
 }

@@ -35,6 +35,7 @@ public class SimpleCacheManager extends AbstractCacheManager {
 
 	/**
 	 * Specify the collection of Cache instances to use for this CacheManager.
+     * 设置缓存
 	 */
 	public void setCaches(Collection<? extends Cache> caches) {
 		this.caches = caches;

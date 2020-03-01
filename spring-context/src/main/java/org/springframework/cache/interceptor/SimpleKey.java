@@ -34,6 +34,7 @@ public class SimpleKey implements Serializable {
 
 	/**
 	 * An empty key.
+     * 空key
 	 */
 	public static final SimpleKey EMPTY = new SimpleKey();
 

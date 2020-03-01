@@ -86,10 +86,12 @@ public abstract class SqlCall extends RdbmsOperation {
 	 * @param ds the DataSource to obtain connections from
 	 * @param sql the SQL to execute
 	 */
-	public SqlCall(DataSource ds, String sql) {
-		setDataSource(ds);
-		setSql(sql);
-	}
+    public SqlCall(DataSource ds, String sql) {
+        // 设置数据源,jdbcTemplate 设置
+        setDataSource(ds);
+        // 设置sql
+        setSql(sql);
+    }
 
 
 	/**

@@ -133,7 +133,8 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		Executor executor = getTaskExecutor();
 		for (ApplicationListener<?> listener : getApplicationListeners(event, type)) {
 			if (executor != null) {
-				executor.execute(() -> invokeListener(listener, event));
+                // 执行ApplicationListener
+                executor.execute(() -> invokeListener(listener, event));
 			}
 			else {
 				invokeListener(listener, event);
@@ -147,6 +148,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 	/**
 	 * Invoke the given listener with the given event.
+     * 执行监听方法
 	 * @param listener the ApplicationListener to invoke
 	 * @param event the current event to propagate
 	 * @since 4.1
@@ -166,26 +168,27 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		}
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	private void doInvokeListener(ApplicationListener listener, ApplicationEvent event) {
-		try {
-			listener.onApplicationEvent(event);
-		}
-		catch (ClassCastException ex) {
-			String msg = ex.getMessage();
-			if (msg == null || matchesClassCastMessage(msg, event.getClass())) {
-				// Possibly a lambda-defined listener which we could not resolve the generic event type for
-				// -> let's suppress the exception and just log a debug message.
-				Log logger = LogFactory.getLog(getClass());
-				if (logger.isTraceEnabled()) {
-					logger.trace("Non-matching event type for listener: " + listener, ex);
-				}
-			}
-			else {
-				throw ex;
-			}
-		}
-	}
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private void doInvokeListener(ApplicationListener listener, ApplicationEvent event) {
+        try {
+            // 最后调用方法
+            listener.onApplicationEvent(event);
+        }
+        catch (ClassCastException ex) {
+            String msg = ex.getMessage();
+            if (msg == null || matchesClassCastMessage(msg, event.getClass())) {
+                // Possibly a lambda-defined listener which we could not resolve the generic event type for
+                // -> let's suppress the exception and just log a debug message.
+                Log logger = LogFactory.getLog(getClass());
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Non-matching event type for listener: " + listener, ex);
+                }
+            }
+            else {
+                throw ex;
+            }
+        }
+    }
 
 	private boolean matchesClassCastMessage(String classCastMessage, Class<?> eventClass) {
 		// On Java 8, the message starts with the class name: "java.lang.String cannot be cast..."

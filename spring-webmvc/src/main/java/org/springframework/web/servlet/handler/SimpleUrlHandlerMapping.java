@@ -56,6 +56,10 @@ import org.springframework.util.CollectionUtils;
  */
 public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 
+    /**
+     * key: url地址
+     * value: controller?
+     */
 	private final Map<String, Object> urlMap = new LinkedHashMap<>();
 
 
@@ -102,7 +106,8 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	@Override
 	public void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
-		registerHandlers(this.urlMap);
+        // 注册处理器
+        registerHandlers(this.urlMap);
 	}
 
 	/**

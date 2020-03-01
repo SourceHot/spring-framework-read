@@ -69,353 +69,391 @@ import org.springframework.remoting.support.RemoteInvocationUtils;
  * @see java.rmi.Remote
  */
 public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
-		implements MethodInterceptor {
+        implements MethodInterceptor {
 
-	private boolean lookupStubOnStartup = true;
+    private final Object stubMonitor = new Object();
+    /**
+     * spring ioc 容器初始化阶段是否需要远程查找
+     */
+    private boolean lookupStubOnStartup = true;
+    /**
+     * 是否还存
+     */
+    private boolean cacheStub = true;
+    /**
+     * 断线重连
+     */
+    private boolean refreshStubOnConnectFailure = false;
+    private RMIClientSocketFactory registryClientSocketFactory;
+    /**
+     * 远程对象
+     */
+    private Remote cachedStub;
 
-	private boolean cacheStub = true;
+    /**
+     * Set whether to look up the RMI stub on startup. Default is "true".
+     * <p>Can be turned off to allow for late start of the RMI server.
+     * In this case, the RMI stub will be fetched on first access.
+     *
+     * @see #setCacheStub
+     */
+    public void setLookupStubOnStartup(boolean lookupStubOnStartup) {
+        this.lookupStubOnStartup = lookupStubOnStartup;
+    }
 
-	private boolean refreshStubOnConnectFailure = false;
+    /**
+     * Set whether to cache the RMI stub once it has been located.
+     * Default is "true".
+     * <p>Can be turned off to allow for hot restart of the RMI server.
+     * In this case, the RMI stub will be fetched for each invocation.
+     *
+     * @see #setLookupStubOnStartup
+     */
+    public void setCacheStub(boolean cacheStub) {
+        this.cacheStub = cacheStub;
+    }
 
-	private RMIClientSocketFactory registryClientSocketFactory;
+    /**
+     * Set whether to refresh the RMI stub on connect failure.
+     * Default is "false".
+     * <p>Can be turned on to allow for hot restart of the RMI server.
+     * If a cached RMI stub throws an RMI exception that indicates a
+     * remote connect failure, a fresh proxy will be fetched and the
+     * invocation will be retried.
+     *
+     * @see java.rmi.ConnectException
+     * @see java.rmi.ConnectIOException
+     * @see java.rmi.NoSuchObjectException
+     */
+    public void setRefreshStubOnConnectFailure(boolean refreshStubOnConnectFailure) {
+        this.refreshStubOnConnectFailure = refreshStubOnConnectFailure;
+    }
 
-	private Remote cachedStub;
-
-	private final Object stubMonitor = new Object();
-
-
-	/**
-	 * Set whether to look up the RMI stub on startup. Default is "true".
-	 * <p>Can be turned off to allow for late start of the RMI server.
-	 * In this case, the RMI stub will be fetched on first access.
-	 * @see #setCacheStub
-	 */
-	public void setLookupStubOnStartup(boolean lookupStubOnStartup) {
-		this.lookupStubOnStartup = lookupStubOnStartup;
-	}
-
-	/**
-	 * Set whether to cache the RMI stub once it has been located.
-	 * Default is "true".
-	 * <p>Can be turned off to allow for hot restart of the RMI server.
-	 * In this case, the RMI stub will be fetched for each invocation.
-	 * @see #setLookupStubOnStartup
-	 */
-	public void setCacheStub(boolean cacheStub) {
-		this.cacheStub = cacheStub;
-	}
-
-	/**
-	 * Set whether to refresh the RMI stub on connect failure.
-	 * Default is "false".
-	 * <p>Can be turned on to allow for hot restart of the RMI server.
-	 * If a cached RMI stub throws an RMI exception that indicates a
-	 * remote connect failure, a fresh proxy will be fetched and the
-	 * invocation will be retried.
-	 * @see java.rmi.ConnectException
-	 * @see java.rmi.ConnectIOException
-	 * @see java.rmi.NoSuchObjectException
-	 */
-	public void setRefreshStubOnConnectFailure(boolean refreshStubOnConnectFailure) {
-		this.refreshStubOnConnectFailure = refreshStubOnConnectFailure;
-	}
-
-	/**
-	 * Set a custom RMI client socket factory to use for accessing the RMI registry.
-	 * @see java.rmi.server.RMIClientSocketFactory
-	 * @see java.rmi.registry.LocateRegistry#getRegistry(String, int, RMIClientSocketFactory)
-	 */
-	public void setRegistryClientSocketFactory(RMIClientSocketFactory registryClientSocketFactory) {
-		this.registryClientSocketFactory = registryClientSocketFactory;
-	}
-
-
-	@Override
-	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
-		prepare();
-	}
-
-	/**
-	 * Fetches RMI stub on startup, if necessary.
-	 * @throws RemoteLookupFailureException if RMI stub creation failed
-	 * @see #setLookupStubOnStartup
-	 * @see #lookupStub
-	 */
-	public void prepare() throws RemoteLookupFailureException {
-		// Cache RMI stub on initialization?
-		if (this.lookupStubOnStartup) {
-			Remote remoteObj = lookupStub();
-			if (logger.isDebugEnabled()) {
-				if (remoteObj instanceof RmiInvocationHandler) {
-					logger.debug("RMI stub [" + getServiceUrl() + "] is an RMI invoker");
-				}
-				else if (getServiceInterface() != null) {
-					boolean isImpl = getServiceInterface().isInstance(remoteObj);
-					logger.debug("Using service interface [" + getServiceInterface().getName() +
-						"] for RMI stub [" + getServiceUrl() + "] - " +
-						(!isImpl ? "not " : "") + "directly implemented");
-				}
-			}
-			if (this.cacheStub) {
-				this.cachedStub = remoteObj;
-			}
-		}
-	}
-
-	/**
-	 * Create the RMI stub, typically by looking it up.
-	 * <p>Called on interceptor initialization if "cacheStub" is "true";
-	 * else called for each invocation by {@link #getStub()}.
-	 * <p>The default implementation looks up the service URL via
-	 * {@code java.rmi.Naming}. This can be overridden in subclasses.
-	 * @return the RMI stub to store in this interceptor
-	 * @throws RemoteLookupFailureException if RMI stub creation failed
-	 * @see #setCacheStub
-	 * @see java.rmi.Naming#lookup
-	 */
-	protected Remote lookupStub() throws RemoteLookupFailureException {
-		try {
-			Remote stub = null;
-			if (this.registryClientSocketFactory != null) {
-				// RMIClientSocketFactory specified for registry access.
-				// Unfortunately, due to RMI API limitations, this means
-				// that we need to parse the RMI URL ourselves and perform
-				// straight LocateRegistry.getRegistry/Registry.lookup calls.
-				URL url = new URL(null, getServiceUrl(), new DummyURLStreamHandler());
-				String protocol = url.getProtocol();
-				if (protocol != null && !"rmi".equals(protocol)) {
-					throw new MalformedURLException("Invalid URL scheme '" + protocol + "'");
-				}
-				String host = url.getHost();
-				int port = url.getPort();
-				String name = url.getPath();
-				if (name != null && name.startsWith("/")) {
-					name = name.substring(1);
-				}
-				Registry registry = LocateRegistry.getRegistry(host, port, this.registryClientSocketFactory);
-				stub = registry.lookup(name);
-			}
-			else {
-				// Can proceed with standard RMI lookup API...
-				stub = Naming.lookup(getServiceUrl());
-			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Located RMI stub with URL [" + getServiceUrl() + "]");
-			}
-			return stub;
-		}
-		catch (MalformedURLException ex) {
-			throw new RemoteLookupFailureException("Service URL [" + getServiceUrl() + "] is invalid", ex);
-		}
-		catch (NotBoundException ex) {
-			throw new RemoteLookupFailureException(
-					"Could not find RMI service [" + getServiceUrl() + "] in RMI registry", ex);
-		}
-		catch (RemoteException ex) {
-			throw new RemoteLookupFailureException("Lookup of RMI stub failed", ex);
-		}
-	}
-
-	/**
-	 * Return the RMI stub to use. Called for each invocation.
-	 * <p>The default implementation returns the stub created on initialization,
-	 * if any. Else, it invokes {@link #lookupStub} to get a new stub for
-	 * each invocation. This can be overridden in subclasses, for example in
-	 * order to cache a stub for a given amount of time before recreating it,
-	 * or to test the stub whether it is still alive.
-	 * @return the RMI stub to use for an invocation
-	 * @throws RemoteLookupFailureException if RMI stub creation failed
-	 * @see #lookupStub
-	 */
-	protected Remote getStub() throws RemoteLookupFailureException {
-		if (!this.cacheStub || (this.lookupStubOnStartup && !this.refreshStubOnConnectFailure)) {
-			return (this.cachedStub != null ? this.cachedStub : lookupStub());
-		}
-		else {
-			synchronized (this.stubMonitor) {
-				if (this.cachedStub == null) {
-					this.cachedStub = lookupStub();
-				}
-				return this.cachedStub;
-			}
-		}
-	}
+    /**
+     * Set a custom RMI client socket factory to use for accessing the RMI registry.
+     *
+     * @see java.rmi.server.RMIClientSocketFactory
+     * @see java.rmi.registry.LocateRegistry#getRegistry(String, int, RMIClientSocketFactory)
+     */
+    public void setRegistryClientSocketFactory(RMIClientSocketFactory registryClientSocketFactory) {
+        this.registryClientSocketFactory = registryClientSocketFactory;
+    }
 
 
-	/**
-	 * Fetches an RMI stub and delegates to {@code doInvoke}.
-	 * If configured to refresh on connect failure, it will call
-	 * {@link #refreshAndRetry} on corresponding RMI exceptions.
-	 * @see #getStub
-	 * @see #doInvoke(MethodInvocation, Remote)
-	 * @see #refreshAndRetry
-	 * @see java.rmi.ConnectException
-	 * @see java.rmi.ConnectIOException
-	 * @see java.rmi.NoSuchObjectException
-	 */
-	@Override
-	public Object invoke(MethodInvocation invocation) throws Throwable {
-		Remote stub = getStub();
-		try {
-			return doInvoke(invocation, stub);
-		}
-		catch (RemoteConnectFailureException ex) {
-			return handleRemoteConnectFailure(invocation, ex);
-		}
-		catch (RemoteException ex) {
-			if (isConnectFailure(ex)) {
-				return handleRemoteConnectFailure(invocation, ex);
-			}
-			else {
-				throw ex;
-			}
-		}
-	}
+    @Override
+    public void afterPropertiesSet() {
+        super.afterPropertiesSet();
+        prepare();
+    }
 
-	/**
-	 * Determine whether the given RMI exception indicates a connect failure.
-	 * <p>The default implementation delegates to
-	 * {@link RmiClientInterceptorUtils#isConnectFailure}.
-	 * @param ex the RMI exception to check
-	 * @return whether the exception should be treated as connect failure
-	 */
-	protected boolean isConnectFailure(RemoteException ex) {
-		return RmiClientInterceptorUtils.isConnectFailure(ex);
-	}
+    /**
+     * Fetches RMI stub on startup, if necessary.
+     *
+     * @throws RemoteLookupFailureException if RMI stub creation failed
+     * @see #setLookupStubOnStartup
+     * @see #lookupStub
+     */
+    public void prepare() throws RemoteLookupFailureException {
+        // Cache RMI stub on initialization?
 
-	/**
-	 * Refresh the stub and retry the remote invocation if necessary.
-	 * <p>If not configured to refresh on connect failure, this method
-	 * simply rethrows the original exception.
-	 * @param invocation the invocation that failed
-	 * @param ex the exception raised on remote invocation
-	 * @return the result value of the new invocation, if succeeded
-	 * @throws Throwable an exception raised by the new invocation,
-	 * if it failed as well
-	 * @see #setRefreshStubOnConnectFailure
-	 * @see #doInvoke
-	 */
-	@Nullable
-	private Object handleRemoteConnectFailure(MethodInvocation invocation, Exception ex) throws Throwable {
-		if (this.refreshStubOnConnectFailure) {
-			String msg = "Could not connect to RMI service [" + getServiceUrl() + "] - retrying";
-			if (logger.isDebugEnabled()) {
-				logger.warn(msg, ex);
-			}
-			else if (logger.isWarnEnabled()) {
-				logger.warn(msg);
-			}
-			return refreshAndRetry(invocation);
-		}
-		else {
-			throw ex;
-		}
-	}
+        if (this.lookupStubOnStartup) {
+            // 获取remote对象
+            Remote remoteObj = lookupStub();
+            if (logger.isDebugEnabled()) {
+                if (remoteObj instanceof RmiInvocationHandler) {
+                    logger.debug("RMI stub [" + getServiceUrl() + "] is an RMI invoker");
+                }
+                else if (getServiceInterface() != null) {
+                    // 是否接口
+                    boolean isImpl = getServiceInterface().isInstance(remoteObj);
+                    logger.debug("Using service interface [" + getServiceInterface().getName() +
+                            "] for RMI stub [" + getServiceUrl() + "] - " +
+                            (!isImpl ? "not " : "") + "directly implemented");
+                }
+            }
+            if (this.cacheStub) {
+                // 缓存 remote 对象
+                this.cachedStub = remoteObj;
+            }
+        }
+    }
 
-	/**
-	 * Refresh the RMI stub and retry the given invocation.
-	 * Called by invoke on connect failure.
-	 * @param invocation the AOP method invocation
-	 * @return the invocation result, if any
-	 * @throws Throwable in case of invocation failure
-	 * @see #invoke
-	 */
-	@Nullable
-	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
-		Remote freshStub = null;
-		synchronized (this.stubMonitor) {
-			this.cachedStub = null;
-			freshStub = lookupStub();
-			if (this.cacheStub) {
-				this.cachedStub = freshStub;
-			}
-		}
-		return doInvoke(invocation, freshStub);
-	}
+    /**
+     * Create the RMI stub, typically by looking it up.
+     * <p>Called on interceptor initialization if "cacheStub" is "true";
+     * else called for each invocation by {@link #getStub()}.
+     * <p>The default implementation looks up the service URL via
+     * {@code java.rmi.Naming}. This can be overridden in subclasses.
+     *
+     * @return the RMI stub to store in this interceptor
+     * @throws RemoteLookupFailureException if RMI stub creation failed
+     * @see #setCacheStub
+     * @see java.rmi.Naming#lookup
+     */
+    protected Remote lookupStub() throws RemoteLookupFailureException {
+        try {
+            Remote stub = null;
+            if (this.registryClientSocketFactory != null) {
+                // RMIClientSocketFactory specified for registry access.
+                // Unfortunately, due to RMI API limitations, this means
+                // that we need to parse the RMI URL ourselves and perform
+                // straight LocateRegistry.getRegistry/Registry.lookup calls.
+                // 通过 serviceUrl 创建 URL
+                URL url = new URL(null, getServiceUrl(), new DummyURLStreamHandler());
+                // url 的协议
+                String protocol = url.getProtocol();
+                if (protocol != null && !"rmi".equals(protocol)) {
+                    throw new MalformedURLException("Invalid URL scheme '" + protocol + "'");
+                }
+                // 获取host
+                String host = url.getHost();
+                // 获取port
+                int port = url.getPort();
+                // 获取serviceName
+                String name = url.getPath();
+                if (name != null && name.startsWith("/")) {
+                    name = name.substring(1);
+                }
+                // 创建 Registry
+                Registry registry = LocateRegistry.getRegistry(host, port, this.registryClientSocketFactory);
+                // 获取Remote
+                stub = registry.lookup(name);
+            }
+            else {
+                // Can proceed with standard RMI lookup API...
+                stub = Naming.lookup(getServiceUrl());
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Located RMI stub with URL [" + getServiceUrl() + "]");
+            }
+            return stub;
+        }
+        catch (MalformedURLException ex) {
+            throw new RemoteLookupFailureException("Service URL [" + getServiceUrl() + "] is invalid", ex);
+        }
+        catch (NotBoundException ex) {
+            throw new RemoteLookupFailureException(
+                    "Could not find RMI service [" + getServiceUrl() + "] in RMI registry", ex);
+        }
+        catch (RemoteException ex) {
+            throw new RemoteLookupFailureException("Lookup of RMI stub failed", ex);
+        }
+    }
 
-	/**
-	 * Perform the given invocation on the given RMI stub.
-	 * @param invocation the AOP method invocation
-	 * @param stub the RMI stub to invoke
-	 * @return the invocation result, if any
-	 * @throws Throwable in case of invocation failure
-	 */
-	@Nullable
-	protected Object doInvoke(MethodInvocation invocation, Remote stub) throws Throwable {
-		if (stub instanceof RmiInvocationHandler) {
-			// RMI invoker
-			try {
-				return doInvoke(invocation, (RmiInvocationHandler) stub);
-			}
-			catch (RemoteException ex) {
-				throw RmiClientInterceptorUtils.convertRmiAccessException(
-					invocation.getMethod(), ex, isConnectFailure(ex), getServiceUrl());
-			}
-			catch (InvocationTargetException ex) {
-				Throwable exToThrow = ex.getTargetException();
-				RemoteInvocationUtils.fillInClientStackTraceIfPossible(exToThrow);
-				throw exToThrow;
-			}
-			catch (Throwable ex) {
-				throw new RemoteInvocationFailureException("Invocation of method [" + invocation.getMethod() +
-						"] failed in RMI service [" + getServiceUrl() + "]", ex);
-			}
-		}
-		else {
-			// traditional RMI stub
-			try {
-				return RmiClientInterceptorUtils.invokeRemoteMethod(invocation, stub);
-			}
-			catch (InvocationTargetException ex) {
-				Throwable targetEx = ex.getTargetException();
-				if (targetEx instanceof RemoteException) {
-					RemoteException rex = (RemoteException) targetEx;
-					throw RmiClientInterceptorUtils.convertRmiAccessException(
-							invocation.getMethod(), rex, isConnectFailure(rex), getServiceUrl());
-				}
-				else {
-					throw targetEx;
-				}
-			}
-		}
-	}
-
-	/**
-	 * Apply the given AOP method invocation to the given {@link RmiInvocationHandler}.
-	 * <p>The default implementation delegates to {@link #createRemoteInvocation}.
-	 * @param methodInvocation the current AOP method invocation
-	 * @param invocationHandler the RmiInvocationHandler to apply the invocation to
-	 * @return the invocation result
-	 * @throws RemoteException in case of communication errors
-	 * @throws NoSuchMethodException if the method name could not be resolved
-	 * @throws IllegalAccessException if the method could not be accessed
-	 * @throws InvocationTargetException if the method invocation resulted in an exception
-	 * @see org.springframework.remoting.support.RemoteInvocation
-	 */
-	@Nullable
-	protected Object doInvoke(MethodInvocation methodInvocation, RmiInvocationHandler invocationHandler)
-		throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-
-		if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {
-			return "RMI invoker proxy for service URL [" + getServiceUrl() + "]";
-		}
-
-		return invocationHandler.invoke(createRemoteInvocation(methodInvocation));
-	}
+    /**
+     * Return the RMI stub to use. Called for each invocation.
+     * <p>The default implementation returns the stub created on initialization,
+     * if any. Else, it invokes {@link #lookupStub} to get a new stub for
+     * each invocation. This can be overridden in subclasses, for example in
+     * order to cache a stub for a given amount of time before recreating it,
+     * or to test the stub whether it is still alive.
+     *
+     * @return the RMI stub to use for an invocation
+     * @throws RemoteLookupFailureException if RMI stub creation failed
+     * @see #lookupStub
+     */
+    protected Remote getStub() throws RemoteLookupFailureException {
+        if (!this.cacheStub || (this.lookupStubOnStartup && !this.refreshStubOnConnectFailure)) {
+            // 如果缓存stub存在直接获取,否则创建
+            return (this.cachedStub != null ? this.cachedStub : lookupStub());
+        }
+        else {
+            synchronized (this.stubMonitor) {
+                if (this.cachedStub == null) {
+                    this.cachedStub = lookupStub();
+                }
+                return this.cachedStub;
+            }
+        }
+    }
 
 
-	/**
-	 * Dummy URLStreamHandler that's just specified to suppress the standard
-	 * {@code java.net.URL} URLStreamHandler lookup, to be able to
-	 * use the standard URL class for parsing "rmi:..." URLs.
-	 */
-	private static class DummyURLStreamHandler extends URLStreamHandler {
+    /**
+     * Fetches an RMI stub and delegates to {@code doInvoke}.
+     * If configured to refresh on connect failure, it will call
+     * {@link #refreshAndRetry} on corresponding RMI exceptions.
+     *
+     * @see #getStub
+     * @see #doInvoke(MethodInvocation, Remote)
+     * @see #refreshAndRetry
+     * @see java.rmi.ConnectException
+     * @see java.rmi.ConnectIOException
+     * @see java.rmi.NoSuchObjectException
+     */
+    @Override
+    public Object invoke(MethodInvocation invocation) throws Throwable {
+        // 获取remote
+        Remote stub = getStub();
+        try {
+            // 真正的invoke调用
+            return doInvoke(invocation, stub);
+        }
+        catch (RemoteConnectFailureException ex) {
+            return handleRemoteConnectFailure(invocation, ex);
+        }
+        catch (RemoteException ex) {
+            if (isConnectFailure(ex)) {
+                return handleRemoteConnectFailure(invocation, ex);
+            }
+            else {
+                throw ex;
+            }
+        }
+    }
 
-		@Override
-		protected URLConnection openConnection(URL url) throws IOException {
-			throw new UnsupportedOperationException();
-		}
-	}
+    /**
+     * Determine whether the given RMI exception indicates a connect failure.
+     * <p>The default implementation delegates to
+     * {@link RmiClientInterceptorUtils#isConnectFailure}.
+     *
+     * @param ex the RMI exception to check
+     * @return whether the exception should be treated as connect failure
+     */
+    protected boolean isConnectFailure(RemoteException ex) {
+        return RmiClientInterceptorUtils.isConnectFailure(ex);
+    }
+
+    /**
+     * Refresh the stub and retry the remote invocation if necessary.
+     * <p>If not configured to refresh on connect failure, this method
+     * simply rethrows the original exception.
+     *
+     * @param invocation the invocation that failed
+     * @param ex         the exception raised on remote invocation
+     * @return the result value of the new invocation, if succeeded
+     * @throws Throwable an exception raised by the new invocation,
+     *                   if it failed as well
+     * @see #setRefreshStubOnConnectFailure
+     * @see #doInvoke
+     */
+    @Nullable
+    private Object handleRemoteConnectFailure(MethodInvocation invocation, Exception ex) throws Throwable {
+        if (this.refreshStubOnConnectFailure) {
+            String msg = "Could not connect to RMI service [" + getServiceUrl() + "] - retrying";
+            if (logger.isDebugEnabled()) {
+                logger.warn(msg, ex);
+            }
+            else if (logger.isWarnEnabled()) {
+                logger.warn(msg);
+            }
+            return refreshAndRetry(invocation);
+        }
+        else {
+            throw ex;
+        }
+    }
+
+    /**
+     * Refresh the RMI stub and retry the given invocation.
+     * Called by invoke on connect failure.
+     *
+     * @param invocation the AOP method invocation
+     * @return the invocation result, if any
+     * @throws Throwable in case of invocation failure
+     * @see #invoke
+     */
+    @Nullable
+    protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
+        Remote freshStub = null;
+        synchronized (this.stubMonitor) {
+            this.cachedStub = null;
+            freshStub = lookupStub();
+            if (this.cacheStub) {
+                this.cachedStub = freshStub;
+            }
+        }
+        return doInvoke(invocation, freshStub);
+    }
+
+    /**
+     * Perform the given invocation on the given RMI stub.
+     *
+     * @param invocation the AOP method invocation
+     * @param stub       the RMI stub to invoke
+     * @return the invocation result, if any
+     * @throws Throwable in case of invocation failure
+     */
+    @Nullable
+    protected Object doInvoke(MethodInvocation invocation, Remote stub) throws Throwable {
+        if (stub instanceof RmiInvocationHandler) {
+            // RMI invoker
+            try {
+                return doInvoke(invocation, (RmiInvocationHandler) stub);
+            }
+            catch (RemoteException ex) {
+                throw RmiClientInterceptorUtils.convertRmiAccessException(
+                        invocation.getMethod(), ex, isConnectFailure(ex), getServiceUrl());
+            }
+            catch (InvocationTargetException ex) {
+                Throwable exToThrow = ex.getTargetException();
+                RemoteInvocationUtils.fillInClientStackTraceIfPossible(exToThrow);
+                throw exToThrow;
+            }
+            catch (Throwable ex) {
+                throw new RemoteInvocationFailureException("Invocation of method [" + invocation.getMethod() +
+                        "] failed in RMI service [" + getServiceUrl() + "]", ex);
+            }
+        }
+        else {
+            // traditional RMI stub
+            try {
+                // RMI客户端工具类执行
+                return RmiClientInterceptorUtils.invokeRemoteMethod(invocation, stub);
+            }
+            catch (InvocationTargetException ex) {
+                Throwable targetEx = ex.getTargetException();
+                if (targetEx instanceof RemoteException) {
+                    RemoteException rex = (RemoteException) targetEx;
+                    throw RmiClientInterceptorUtils.convertRmiAccessException(
+                            invocation.getMethod(), rex, isConnectFailure(rex), getServiceUrl());
+                }
+                else {
+                    throw targetEx;
+                }
+            }
+        }
+    }
+
+    /**
+     * Apply the given AOP method invocation to the given {@link RmiInvocationHandler}.
+     * <p>The default implementation delegates to {@link #createRemoteInvocation}.
+     *
+     * @param methodInvocation  the current AOP method invocation
+     * @param invocationHandler the RmiInvocationHandler to apply the invocation to
+     * @return the invocation result
+     * @throws RemoteException           in case of communication errors
+     * @throws NoSuchMethodException     if the method name could not be resolved
+     * @throws IllegalAccessException    if the method could not be accessed
+     * @throws InvocationTargetException if the method invocation resulted in an exception
+     * @see org.springframework.remoting.support.RemoteInvocation
+     */
+    @Nullable
+    protected Object doInvoke(MethodInvocation methodInvocation, RmiInvocationHandler invocationHandler)
+            throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
+        if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {
+            return "RMI invoker proxy for service URL [" + getServiceUrl() + "]";
+        }
+
+        /**
+         * 1. 参数组装成对象{@link RemoteInvocationBasedAccessor#createRemoteInvocation(org.aopalliance.intercept.MethodInvocation)}
+         * 2. invoke 执行 简单来说就是调用{@link RmiInvocationHandler#invoke(RemoteInvocation)}方法
+         */
+        return invocationHandler.invoke(createRemoteInvocation(methodInvocation));
+    }
+
+
+    /**
+     * Dummy URLStreamHandler that's just specified to suppress the standard
+     * {@code java.net.URL} URLStreamHandler lookup, to be able to
+     * use the standard URL class for parsing "rmi:..." URLs.
+     */
+    private static class DummyURLStreamHandler extends URLStreamHandler {
+
+        @Override
+        protected URLConnection openConnection(URL url) throws IOException {
+            throw new UnsupportedOperationException();
+        }
+    }
 
 }
