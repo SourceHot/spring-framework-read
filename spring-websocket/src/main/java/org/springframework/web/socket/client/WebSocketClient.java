@@ -35,10 +35,15 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public interface WebSocketClient {
 
-	ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
-			String uriTemplate, Object... uriVariables);
-
-	ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
-			@Nullable WebSocketHttpHeaders headers, URI uri);
+    /**
+     * 握手
+     */
+    ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
+            String uriTemplate, Object... uriVariables);
+    /**
+     * 握手
+     */
+    ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
+            @Nullable WebSocketHttpHeaders headers, URI uri);
 
 }

@@ -30,32 +30,38 @@ import org.springframework.util.concurrent.ListenableFuture;
  */
 public interface TcpConnection<P> extends Closeable {
 
-	/**
-	 * Send the given message.
-	 * @param message the message
-	 * @return a ListenableFuture that can be used to determine when and if the
-	 * message was successfully sent
-	 */
-	ListenableFuture<Void> send(Message<P> message);
+    /**
+     * Send the given message.
+     *
+     * 发送消息
+     * @param message the message
+     * @return a ListenableFuture that can be used to determine when and if the
+     * message was successfully sent
+     */
+    ListenableFuture<Void> send(Message<P> message);
 
-	/**
-	 * Register a task to invoke after a period of read inactivity.
-	 * @param runnable the task to invoke
-	 * @param duration the amount of inactive time in milliseconds
-	 */
-	void onReadInactivity(Runnable runnable, long duration);
+    /**
+     * Register a task to invoke after a period of read inactivity.
+     *
+     * @param runnable the task to invoke
+     * @param duration the amount of inactive time in milliseconds
+     */
+    void onReadInactivity(Runnable runnable, long duration);
 
-	/**
-	 * Register a task to invoke after a period of write inactivity.
-	 * @param runnable the task to invoke
-	 * @param duration the amount of inactive time in milliseconds
-	 */
-	void onWriteInactivity(Runnable runnable, long duration);
+    /**
+     * Register a task to invoke after a period of write inactivity.
+     *
+     * @param runnable the task to invoke
+     * @param duration the amount of inactive time in milliseconds
+     */
+    void onWriteInactivity(Runnable runnable, long duration);
 
-	/**
-	 * Close the connection.
-	 */
-	@Override
-	void close();
+    /**
+     * Close the connection.
+     *
+     * 关闭连接
+     */
+    @Override
+    void close();
 
 }

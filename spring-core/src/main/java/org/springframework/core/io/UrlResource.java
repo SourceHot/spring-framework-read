@@ -36,6 +36,7 @@ import org.springframework.util.StringUtils;
  * Supports resolution as a {@code URL} and also as a {@code File} in
  * case of the {@code "file:"} protocol.
  *
+ * url 资源
  * @author Juergen Hoeller
  * @since 28.12.2003
  * @see java.net.URL

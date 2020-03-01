@@ -27,30 +27,35 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public abstract class UrlBasedRemoteAccessor extends RemoteAccessor implements InitializingBean {
 
-	private String serviceUrl;
+    /**
+     * 服务的url地址
+     * rmi://host:port/${rmi_service_name}
+     */
+    private String serviceUrl;
 
+    /**
+     * Return the URL of this remote accessor's target service.
+     */
+    public String getServiceUrl() {
+        return this.serviceUrl;
+    }
 
-	/**
-	 * Set the URL of this remote accessor's target service.
-	 * The URL must be compatible with the rules of the particular remoting provider.
-	 */
-	public void setServiceUrl(String serviceUrl) {
-		this.serviceUrl = serviceUrl;
-	}
+    /**
+     * Set the URL of this remote accessor's target service.
+     * The URL must be compatible with the rules of the particular remoting provider.
+     */
+    public void setServiceUrl(String serviceUrl) {
+        this.serviceUrl = serviceUrl;
+    }
 
-	/**
-	 * Return the URL of this remote accessor's target service.
-	 */
-	public String getServiceUrl() {
-		return this.serviceUrl;
-	}
-
-
-	@Override
-	public void afterPropertiesSet() {
-		if (getServiceUrl() == null) {
-			throw new IllegalArgumentException("Property 'serviceUrl' is required");
-		}
-	}
+    /**
+     * 判断服务地址是否为空
+     */
+    @Override
+    public void afterPropertiesSet() {
+        if (getServiceUrl() == null) {
+            throw new IllegalArgumentException("Property 'serviceUrl' is required");
+        }
+    }
 
 }

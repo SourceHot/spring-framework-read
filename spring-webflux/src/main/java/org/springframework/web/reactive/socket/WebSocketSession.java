@@ -37,89 +37,112 @@ import org.springframework.core.io.buffer.DataBufferFactory;
  */
 public interface WebSocketSession {
 
-	/**
-	 * Return the id for the session.
-	 */
-	String getId();
+    /**
+     * Return the id for the session.
+     * 获取会话id sessionId
+     */
+    String getId();
 
-	/**
-	 * Return information from the handshake request.
-	 */
-	HandshakeInfo getHandshakeInfo();
+    /**
+     * Return information from the handshake request.
+     * 获取握手后的信息
+     */
+    HandshakeInfo getHandshakeInfo();
 
-	/**
-	 * Return a {@code DataBuffer} Factory to create message payloads.
-	 * @return the buffer factory for the session
-	 */
-	DataBufferFactory bufferFactory();
+    /**
+     * Return a {@code DataBuffer} Factory to create message payloads.
+     *
+     * 返回{@link DataBufferFactory} 数据工厂
+     * @return the buffer factory for the session
+     */
+    DataBufferFactory bufferFactory();
 
-	/**
-	 * Return the map with attributes associated with the WebSocket session.
-	 * @return a Map with the session attributes (never {@code null})
-	 * @since 5.1
-	 */
-	Map<String, Object> getAttributes();
+    /**
+     * Return the map with attributes associated with the WebSocket session.
+     *
+     *
+     * 获取属性
+     * @return a Map with the session attributes (never {@code null})
+     * @since 5.1
+     */
+    Map<String, Object> getAttributes();
 
-	/**
-	 * Provides access to the stream of inbound messages.
-	 * <p>This stream receives a completion or error signal when the connection
-	 * is closed. In a typical {@link WebSocketHandler} implementation this
-	 * stream is composed into the overall processing flow, so that when the
-	 * connection is closed, handling will end.
-	 *
-	 * <p>See the class-level doc of {@link WebSocketHandler} and the reference
-	 * for more details and examples of how to handle the session.
-	 */
-	Flux<WebSocketMessage> receive();
+    /**
+     * Provides access to the stream of inbound messages.
+     * <p>This stream receives a completion or error signal when the connection
+     * is closed. In a typical {@link WebSocketHandler} implementation this
+     * stream is composed into the overall processing flow, so that when the
+     * connection is closed, handling will end.
+     *
+     * <p>See the class-level doc of {@link WebSocketHandler} and the reference
+     * for more details and examples of how to handle the session.
+     *
+     * 获取传入的信息流
+     */
+    Flux<WebSocketMessage> receive();
 
-	/**
-	 * Give a source of outgoing messages, write the messages and return a
-	 * {@code Mono<Void>} that completes when the source completes and writing
-	 * is done.
-	 *
-	 * <p>See the class-level doc of {@link WebSocketHandler} and the reference
-	 * for more details and examples of how to handle the session.
-	 */
-	Mono<Void> send(Publisher<WebSocketMessage> messages);
+    /**
+     * Give a source of outgoing messages, write the messages and return a
+     * {@code Mono<Void>} that completes when the source completes and writing
+     * is done.
+     *
+     * <p>See the class-level doc of {@link WebSocketHandler} and the reference
+     * for more details and examples of how to handle the session.
+     *
+     *
+     * 发送消息
+     */
+    Mono<Void> send(Publisher<WebSocketMessage> messages);
 
-	/**
-	 * Close the WebSocket session with {@link CloseStatus#NORMAL}.
-	 */
-	default Mono<Void> close() {
-		return close(CloseStatus.NORMAL);
-	}
+    /**
+     * Close the WebSocket session with {@link CloseStatus#NORMAL}.
+     *
+     * 关闭链接 webSocket链接
+     */
+    default Mono<Void> close() {
+        return close(CloseStatus.NORMAL);
+    }
 
-	/**
-	 * Close the WebSocket session with the given status.
-	 * @param status the close status
-	 */
-	Mono<Void> close(CloseStatus status);
+    /**
+     * Close the WebSocket session with the given status.
+     * 关闭链接 webSocket链接
+     *
+     * @param status the close status
+     */
+    Mono<Void> close(CloseStatus status);
 
 
-	// WebSocketMessage factory methods
+    // WebSocketMessage factory methods
 
-	/**
-	 * Factory method to create a text {@link WebSocketMessage} using the
-	 * {@link #bufferFactory()} for the session.
-	 */
-	WebSocketMessage textMessage(String payload);
+    /**
+     * Factory method to create a text {@link WebSocketMessage} using the
+     * {@link #bufferFactory()} for the session.
+     *
+     * 创建文本信息
+     */
+    WebSocketMessage textMessage(String payload);
 
-	/**
-	 * Factory method to create a binary WebSocketMessage using the
-	 * {@link #bufferFactory()} for the session.
-	 */
-	WebSocketMessage binaryMessage(Function<DataBufferFactory, DataBuffer> payloadFactory);
+    /**
+     * Factory method to create a binary WebSocketMessage using the
+     * {@link #bufferFactory()} for the session.
+     *
+     * 创建二进制信息
+     */
+    WebSocketMessage binaryMessage(Function<DataBufferFactory, DataBuffer> payloadFactory);
 
-	/**
-	 * Factory method to create a ping WebSocketMessage using the
-	 * {@link #bufferFactory()} for the session.
-	 */
-	WebSocketMessage pingMessage(Function<DataBufferFactory, DataBuffer> payloadFactory);
+    /**
+     * Factory method to create a ping WebSocketMessage using the
+     * {@link #bufferFactory()} for the session.
+     *
+     * 创建ping-message
+     */
+    WebSocketMessage pingMessage(Function<DataBufferFactory, DataBuffer> payloadFactory);
 
-	/**
-	 * Factory method to create a pong WebSocketMessage using the
-	 * {@link #bufferFactory()} for the session.
-	 */
-	WebSocketMessage pongMessage(Function<DataBufferFactory, DataBuffer> payloadFactory);
+    /**
+     * Factory method to create a pong WebSocketMessage using the
+     * {@link #bufferFactory()} for the session.
+     * 创建 pong-message
+     */
+    WebSocketMessage pongMessage(Function<DataBufferFactory, DataBuffer> payloadFactory);
 
 }

@@ -23,6 +23,7 @@ import org.springframework.util.ClassUtils;
  * {@link org.springframework.beans.factory.xml.NamespaceHandler} for Spring WebSocket
  * configuration namespace.
  *
+ * spring websocket 命名空间处理器
  * @author Brian Clozel
  * @since 4.0
  */
@@ -32,6 +33,9 @@ public class WebSocketNamespaceHandler extends NamespaceHandlerSupport {
 			"org.springframework.messaging.Message", WebSocketNamespaceHandler.class.getClassLoader());
 
 
+    /**
+     * 初始化,解析xml标签注册bean
+     */
 	@Override
 	public void init() {
 		registerBeanDefinitionParser("handlers", new HandlersBeanDefinitionParser());

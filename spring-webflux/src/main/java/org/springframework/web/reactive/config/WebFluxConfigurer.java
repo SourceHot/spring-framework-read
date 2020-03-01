@@ -57,7 +57,8 @@ public interface WebFluxConfigurer {
 	 * annotated controllers and functional endpoints. Annotated controllers can
 	 * further declare more fine-grained configuration via
 	 * {@link org.springframework.web.bind.annotation.CrossOrigin @CrossOrigin}.
-	 * @see CorsRegistry
+     * 添加跨域信息
+     * @see CorsRegistry
 	 */
 	default void addCorsMappings(CorsRegistry registry) {
 	}

@@ -42,7 +42,8 @@ public interface TcpConnectionHandler<P> {
 
 	/**
 	 * Handle a message received from the remote host.
-	 * @param message the message
+     * 处理消息
+     * @param message the message
 	 */
 	void handleMessage(Message<P> message);
 

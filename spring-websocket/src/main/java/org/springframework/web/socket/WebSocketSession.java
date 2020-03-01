@@ -36,117 +36,127 @@ import org.springframework.lang.Nullable;
  */
 public interface WebSocketSession extends Closeable {
 
-	/**
-	 * Return a unique session identifier.
-	 */
-	String getId();
+    /**
+     * Return a unique session identifier.
+     *
+     * 获取会话id sessionId
+     */
+    String getId();
 
-	/**
-	 * Return the URI used to open the WebSocket connection.
-	 */
-	@Nullable
-	URI getUri();
+    /**
+     * Return the URI used to open the WebSocket connection.
+     *
+     * 获取uri
+     */
+    @Nullable
+    URI getUri();
 
-	/**
-	 * Return the headers used in the handshake request (never {@code null}).
-	 */
-	HttpHeaders getHandshakeHeaders();
+    /**
+     * Return the headers used in the handshake request (never {@code null}).
+     *
+     * 获取握手后的信息
+     */
+    HttpHeaders getHandshakeHeaders();
 
-	/**
-	 * Return the map with attributes associated with the WebSocket session.
-	 * <p>On the server side the map can be populated initially through a
-	 * {@link org.springframework.web.socket.server.HandshakeInterceptor
-	 * HandshakeInterceptor}. On the client side the map can be populated via
-	 * {@link org.springframework.web.socket.client.WebSocketClient
-	 * WebSocketClient} handshake methods.
-	 * @return a Map with the session attributes (never {@code null})
-	 */
-	Map<String, Object> getAttributes();
+    /**
+     * Return the map with attributes associated with the WebSocket session.
+     * <p>On the server side the map can be populated initially through a
+     * {@link org.springframework.web.socket.server.HandshakeInterceptor
+     * HandshakeInterceptor}. On the client side the map can be populated via
+     * {@link org.springframework.web.socket.client.WebSocketClient
+     * WebSocketClient} handshake methods.
+     *
+     * @return a Map with the session attributes (never {@code null})
+     */
+    Map<String, Object> getAttributes();
 
-	/**
-	 * Return a {@link java.security.Principal} instance containing the name
-	 * of the authenticated user.
-	 * <p>If the user has not been authenticated, the method returns <code>null</code>.
-	 */
-	@Nullable
-	Principal getPrincipal();
+    /**
+     * Return a {@link java.security.Principal} instance containing the name
+     * of the authenticated user.
+     * <p>If the user has not been authenticated, the method returns <code>null</code>.
+     */
+    @Nullable
+    Principal getPrincipal();
 
-	/**
-	 * Return the address on which the request was received.
-	 */
-	@Nullable
-	InetSocketAddress getLocalAddress();
+    /**
+     * Return the address on which the request was received.
+     */
+    @Nullable
+    InetSocketAddress getLocalAddress();
 
-	/**
-	 * Return the address of the remote client.
-	 */
-	@Nullable
-	InetSocketAddress getRemoteAddress();
+    /**
+     * Return the address of the remote client.
+     */
+    @Nullable
+    InetSocketAddress getRemoteAddress();
 
-	/**
-	 * Return the negotiated sub-protocol.
-	 * @return the protocol identifier, or {@code null} if no protocol
-	 * was specified or negotiated successfully
-	 */
-	@Nullable
-	String getAcceptedProtocol();
+    /**
+     * Return the negotiated sub-protocol.
+     *
+     * @return the protocol identifier, or {@code null} if no protocol
+     * was specified or negotiated successfully
+     */
+    @Nullable
+    String getAcceptedProtocol();
 
-	/**
-	 * Configure the maximum size for an incoming text message.
-	 */
-	void setTextMessageSizeLimit(int messageSizeLimit);
+    /**
+     * Get the configured maximum size for an incoming text message.
+     */
+    int getTextMessageSizeLimit();
 
-	/**
-	 * Get the configured maximum size for an incoming text message.
-	 */
-	int getTextMessageSizeLimit();
+    /**
+     * Configure the maximum size for an incoming text message.
+     */
+    void setTextMessageSizeLimit(int messageSizeLimit);
 
-	/**
-	 * Configure the maximum size for an incoming binary message.
-	 */
-	void setBinaryMessageSizeLimit(int messageSizeLimit);
+    /**
+     * Get the configured maximum size for an incoming binary message.
+     */
+    int getBinaryMessageSizeLimit();
 
-	/**
-	 * Get the configured maximum size for an incoming binary message.
-	 */
-	int getBinaryMessageSizeLimit();
+    /**
+     * Configure the maximum size for an incoming binary message.
+     */
+    void setBinaryMessageSizeLimit(int messageSizeLimit);
 
-	/**
-	 * Determine the negotiated extensions.
-	 * @return the list of extensions, or an empty list if no extension
-	 * was specified or negotiated successfully
-	 */
-	List<WebSocketExtension> getExtensions();
+    /**
+     * Determine the negotiated extensions.
+     *
+     * @return the list of extensions, or an empty list if no extension
+     * was specified or negotiated successfully
+     */
+    List<WebSocketExtension> getExtensions();
 
-	/**
-	 * Send a WebSocket message: either {@link TextMessage} or {@link BinaryMessage}.
-	 *
-	 * <p><strong>Note:</strong> The underlying standard WebSocket session (JSR-356) does
-	 * not allow concurrent sending. Therefore sending must be synchronized. To ensure
-	 * that, one option is to wrap the {@code WebSocketSession} with the
-	 * {@link org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator
-	 * ConcurrentWebSocketSessionDecorator}.
-	 * @see org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator
-	 */
-	void sendMessage(WebSocketMessage<?> message) throws IOException;
+    /**
+     * Send a WebSocket message: either {@link TextMessage} or {@link BinaryMessage}.
+     *
+     * <p><strong>Note:</strong> The underlying standard WebSocket session (JSR-356) does
+     * not allow concurrent sending. Therefore sending must be synchronized. To ensure
+     * that, one option is to wrap the {@code WebSocketSession} with the
+     * {@link org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator
+     * ConcurrentWebSocketSessionDecorator}.
+     *
+     * @see org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator
+     */
+    void sendMessage(WebSocketMessage<?> message) throws IOException;
 
-	/**
-	 * Return whether the connection is still open.
-	 */
-	boolean isOpen();
+    /**
+     * Return whether the connection is still open.
+     */
+    boolean isOpen();
 
-	/**
-	 * Close the WebSocket connection with status 1000, i.e. equivalent to:
-	 * <pre class="code">
-	 * session.close(CloseStatus.NORMAL);
-	 * </pre>
-	 */
-	@Override
-	void close() throws IOException;
+    /**
+     * Close the WebSocket connection with status 1000, i.e. equivalent to:
+     * <pre class="code">
+     * session.close(CloseStatus.NORMAL);
+     * </pre>
+     */
+    @Override
+    void close() throws IOException;
 
-	/**
-	 * Close the WebSocket connection with the given close status.
-	 */
-	void close(CloseStatus status) throws IOException;
+    /**
+     * Close the WebSocket connection with the given close status.
+     */
+    void close(CloseStatus status) throws IOException;
 
 }

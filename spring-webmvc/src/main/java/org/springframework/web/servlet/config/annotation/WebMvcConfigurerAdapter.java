@@ -107,6 +107,7 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	/**
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
+     * 添加{@link ViewControllerRegistry}
 	 */
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {

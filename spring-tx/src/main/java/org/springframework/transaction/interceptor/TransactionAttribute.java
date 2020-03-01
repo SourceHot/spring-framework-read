@@ -24,6 +24,7 @@ import org.springframework.transaction.TransactionDefinition;
  * As custom {@code rollbackOn} is only possible with AOP, it resides in the AOP-related
  * transaction subpackage.
  *
+ * 对那些异常进行回滚操作
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16.03.2003
@@ -32,20 +33,24 @@ import org.springframework.transaction.TransactionDefinition;
  */
 public interface TransactionAttribute extends TransactionDefinition {
 
-	/**
-	 * Return a qualifier value associated with this transaction attribute.
-	 * <p>This may be used for choosing a corresponding transaction manager
-	 * to process this specific transaction.
-	 * @since 3.0
-	 */
-	@Nullable
-	String getQualifier();
+    /**
+     * Return a qualifier value associated with this transaction attribute.
+     * <p>This may be used for choosing a corresponding transaction manager
+     * to process this specific transaction.
+     *
+     * 异常名称
+     * @since 3.0
+     */
+    @Nullable
+    String getQualifier();
 
-	/**
-	 * Should we roll back on the given exception?
-	 * @param ex the exception to evaluate
-	 * @return whether to perform a rollback or not
-	 */
-	boolean rollbackOn(Throwable ex);
+    /**
+     * Should we roll back on the given exception?
+     *
+     * 是否回滚
+     * @param ex the exception to evaluate
+     * @return whether to perform a rollback or not
+     */
+    boolean rollbackOn(Throwable ex);
 
 }

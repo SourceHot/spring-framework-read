@@ -39,129 +39,152 @@ import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
  */
 public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
-	private final WebSocketClient client;
+    private final WebSocketClient client;
 
-	private final WebSocketHandler webSocketHandler;
+    private final WebSocketHandler webSocketHandler;
 
-	@Nullable
-	private WebSocketSession webSocketSession;
+    @Nullable
+    private WebSocketSession webSocketSession;
 
-	private WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
-
-
-	public WebSocketConnectionManager(WebSocketClient client,
-			WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables) {
-
-		super(uriTemplate, uriVariables);
-		this.client = client;
-		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
-	}
+    private WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
 
-	/**
-	 * Decorate the WebSocketHandler provided to the class constructor.
-	 * <p>By default {@link LoggingWebSocketHandlerDecorator} is added.
-	 */
-	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {
-		return new LoggingWebSocketHandlerDecorator(handler);
-	}
+    public WebSocketConnectionManager(WebSocketClient client,
+            WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables) {
 
-	/**
-	 * Set the sub-protocols to use. If configured, specified sub-protocols will be
-	 * requested in the handshake through the {@code Sec-WebSocket-Protocol} header. The
-	 * resulting WebSocket session will contain the protocol accepted by the server, if
-	 * any.
-	 */
-	public void setSubProtocols(List<String> protocols) {
-		this.headers.setSecWebSocketProtocol(protocols);
-	}
-
-	/**
-	 * Return the configured sub-protocols to use.
-	 */
-	public List<String> getSubProtocols() {
-		return this.headers.getSecWebSocketProtocol();
-	}
-
-	/**
-	 * Set the origin to use.
-	 */
-	public void setOrigin(@Nullable String origin) {
-		this.headers.setOrigin(origin);
-	}
-
-	/**
-	 * Return the configured origin.
-	 */
-	@Nullable
-	public String getOrigin() {
-		return this.headers.getOrigin();
-	}
-
-	/**
-	 * Provide default headers to add to the WebSocket handshake request.
-	 */
-	public void setHeaders(HttpHeaders headers) {
-		this.headers.clear();
-		this.headers.putAll(headers);
-	}
-
-	/**
-	 * Return the default headers for the WebSocket handshake request.
-	 */
-	public HttpHeaders getHeaders() {
-		return this.headers;
-	}
+        super(uriTemplate, uriVariables);
+        this.client = client;
+        this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
+    }
 
 
-	@Override
-	public void startInternal() {
-		if (this.client instanceof Lifecycle && !((Lifecycle) this.client).isRunning()) {
-			((Lifecycle) this.client).start();
-		}
-		super.startInternal();
-	}
+    /**
+     * Decorate the WebSocketHandler provided to the class constructor.
+     * <p>By default {@link LoggingWebSocketHandlerDecorator} is added.
+     */
+    protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {
+        return new LoggingWebSocketHandlerDecorator(handler);
+    }
 
-	@Override
-	public void stopInternal() throws Exception {
-		if (this.client instanceof Lifecycle && ((Lifecycle) this.client).isRunning()) {
-			((Lifecycle) this.client).stop();
-		}
-		super.stopInternal();
-	}
+    /**
+     * Return the configured sub-protocols to use.
+     */
+    public List<String> getSubProtocols() {
+        return this.headers.getSecWebSocketProtocol();
+    }
 
-	@Override
-	protected void openConnection() {
-		if (logger.isInfoEnabled()) {
-			logger.info("Connecting to WebSocket at " + getUri());
-		}
+    /**
+     * Set the sub-protocols to use. If configured, specified sub-protocols will be
+     * requested in the handshake through the {@code Sec-WebSocket-Protocol} header. The
+     * resulting WebSocket session will contain the protocol accepted by the server, if
+     * any.
+     */
+    public void setSubProtocols(List<String> protocols) {
+        this.headers.setSecWebSocketProtocol(protocols);
+    }
 
-		ListenableFuture<WebSocketSession> future =
-				this.client.doHandshake(this.webSocketHandler, this.headers, getUri());
+    /**
+     * Return the configured origin.
+     *
+     * 获取远端配置
+     */
+    @Nullable
+    public String getOrigin() {
+        return this.headers.getOrigin();
+    }
 
-		future.addCallback(new ListenableFutureCallback<WebSocketSession>() {
-			@Override
-			public void onSuccess(@Nullable WebSocketSession result) {
-				webSocketSession = result;
-				logger.info("Successfully connected");
-			}
-			@Override
-			public void onFailure(Throwable ex) {
-				logger.error("Failed to connect", ex);
-			}
-		});
-	}
+    /**
+     * Set the origin to use.
+     * 设置远端
+     */
+    public void setOrigin(@Nullable String origin) {
+        this.headers.setOrigin(origin);
+    }
 
-	@Override
-	protected void closeConnection() throws Exception {
-		if (this.webSocketSession != null) {
-			this.webSocketSession.close();
-		}
-	}
+    /**
+     * Return the default headers for the WebSocket handshake request.
+     */
+    public HttpHeaders getHeaders() {
+        return this.headers;
+    }
 
-	@Override
-	protected boolean isConnected() {
-		return (this.webSocketSession != null && this.webSocketSession.isOpen());
-	}
+    /**
+     * Provide default headers to add to the WebSocket handshake request.
+     */
+    public void setHeaders(HttpHeaders headers) {
+        this.headers.clear();
+        this.headers.putAll(headers);
+    }
+
+    /**
+     * 开始链接
+     */
+    @Override
+    public void startInternal() {
+        if (this.client instanceof Lifecycle && !((Lifecycle) this.client).isRunning()) {
+            ((Lifecycle) this.client).start();
+        }
+        super.startInternal();
+    }
+
+    /**
+     * 关闭暂停链接
+     * @throws Exception
+     */
+    @Override
+    public void stopInternal() throws Exception {
+        if (this.client instanceof Lifecycle && ((Lifecycle) this.client).isRunning()) {
+            ((Lifecycle) this.client).stop();
+        }
+        super.stopInternal();
+    }
+
+    /**
+     * 开启链接
+     */
+    @Override
+    protected void openConnection() {
+        if (logger.isInfoEnabled()) {
+            logger.info("Connecting to WebSocket at " + getUri());
+        }
+
+        // 执行握手方法
+        ListenableFuture<WebSocketSession> future =
+                this.client.doHandshake(this.webSocketHandler, this.headers, getUri());
+
+        // 执行成功失败的对应调用
+        future.addCallback(new ListenableFutureCallback<WebSocketSession>() {
+            /**
+             * 成功开启
+             * @param result the result
+             */
+            @Override
+            public void onSuccess(@Nullable WebSocketSession result) {
+                webSocketSession = result;
+                logger.info("Successfully connected");
+            }
+
+            /**
+             * 开启失败
+             * @param ex the failure
+             */
+            @Override
+            public void onFailure(Throwable ex) {
+                logger.error("Failed to connect", ex);
+            }
+        });
+    }
+
+    @Override
+    protected void closeConnection() throws Exception {
+        if (this.webSocketSession != null) {
+            this.webSocketSession.close();
+        }
+    }
+
+    @Override
+    protected boolean isConnected() {
+        return (this.webSocketSession != null && this.webSocketSession.isOpen());
+    }
 
 }

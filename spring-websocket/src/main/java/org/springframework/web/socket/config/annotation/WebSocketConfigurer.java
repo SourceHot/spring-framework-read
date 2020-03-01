@@ -29,7 +29,8 @@ public interface WebSocketConfigurer {
 
 	/**
 	 * Register {@link WebSocketHandler WebSocketHandlers} including SockJS fallback options if desired.
-	 */
+     * 注册WebSocket处理器
+     */
 	void registerWebSocketHandlers(WebSocketHandlerRegistry registry);
 
 }

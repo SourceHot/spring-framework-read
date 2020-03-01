@@ -152,7 +152,8 @@ class TypeConverterDelegate {
 			if (editor == null) {
 				editor = findDefaultEditor(requiredType);
 			}
-			convertedValue = doConvertValue(oldValue, convertedValue, requiredType, editor);
+            // 执行转换方法
+            convertedValue = doConvertValue(oldValue, convertedValue, requiredType, editor);
 		}
 
 		boolean standardConversion = false;
@@ -426,7 +427,8 @@ class TypeConverterDelegate {
 			}
 			// Swallow and proceed.
 		}
-		editor.setAsText(newTextValue);
+        // 调用子类实现方法
+        editor.setAsText(newTextValue);
 		return editor.getValue();
 	}
 

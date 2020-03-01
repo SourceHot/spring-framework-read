@@ -40,12 +40,15 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
 /**
  * Provides utility methods for parsing common WebSocket XML namespace elements.
  *
+ * spring webSocket命名空间工具类
  * @author Brian Clozel
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 abstract class WebSocketNamespaceUtils {
-
+    /**
+     *注册 握手处理器
+     */
 	public static RuntimeBeanReference registerHandshakeHandler(
 			Element element, ParserContext context, @Nullable Object source) {
 

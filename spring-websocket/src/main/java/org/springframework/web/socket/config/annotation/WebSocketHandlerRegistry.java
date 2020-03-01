@@ -28,7 +28,8 @@ public interface WebSocketHandlerRegistry {
 
 	/**
 	 * Configure a WebSocketHandler at the specified URL paths.
-	 */
+     * 添加处理器
+     */
 	WebSocketHandlerRegistration addHandler(WebSocketHandler webSocketHandler, String... paths);
 
 }
