@@ -77,6 +77,7 @@ public class ServletRequestParameterPropertyValues extends MutablePropertyValues
 	public ServletRequestParameterPropertyValues(
 			ServletRequest request, @Nullable String prefix, @Nullable String prefixSeparator) {
 
+		// 初始化
 		super(WebUtils.getParametersStartingWith(
 				request, (prefix != null ? prefix + prefixSeparator : null)));
 	}

@@ -237,6 +237,11 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	}
 
 
+	/**
+	 * 创建JMS 连接对象
+	 * @return
+	 * @throws JMSException
+	 */
 	@Override
 	public Connection createConnection() throws JMSException {
 		return getSharedConnectionProxy(getConnection());
