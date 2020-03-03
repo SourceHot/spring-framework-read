@@ -45,6 +45,7 @@ import org.springframework.util.Assert;
  * {@link #setTargetType targetType} is set to {@link MessageType#TEXT}.
  * Unmarshals from a {@link TextMessage} or {@link BytesMessage} to an object.
  *
+ * xml消息转换
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
@@ -156,10 +157,13 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
 		Assert.state(this.marshaller != null, "No Marshaller set");
 		try {
+			// 各类型的转换
 			switch (this.targetType) {
 				case TEXT:
+					// xml to text-message
 					return marshalToTextMessage(object, session, this.marshaller);
 				case BYTES:
+					// xml to byte-message
 					return marshalToBytesMessage(object, session, this.marshaller);
 				default:
 					return marshalToMessage(object, session, this.marshaller, this.targetType);
@@ -172,6 +176,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 
 	/**
 	 * This implementation unmarshals the given {@link Message} into an object.
+	 * 求消息实体
 	 * @see #unmarshalFromTextMessage
 	 * @see #unmarshalFromBytesMessage
 	 */

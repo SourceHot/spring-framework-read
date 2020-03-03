@@ -1407,6 +1407,7 @@ public class DispatcherServlet extends FrameworkServlet {
         String viewName = mv.getViewName();
         if (viewName != null) {
             // We need to resolve the view name.
+            // 解析试图名称获取一个试图对象
             view = resolveViewName(viewName, mv.getModelInternal(), locale, request);
             if (view == null) {
                 throw new ServletException("Could not resolve view with name '" + mv.getViewName() +
@@ -1455,6 +1456,8 @@ public class DispatcherServlet extends FrameworkServlet {
      * <p>The default implementations asks all ViewResolvers of this dispatcher.
      * Can be overridden for custom resolution strategies, potentially based on
      * specific model attributes or request parameters.
+     * <p>
+     * 将视图名称转换成试图对象
      *
      * @param viewName the name of the view to resolve
      * @param model    the model to be passed to the view
@@ -1471,6 +1474,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
         if (this.viewResolvers != null) {
             for (ViewResolver viewResolver : this.viewResolvers) {
+                // 将视图名称转换成试图对象
                 View view = viewResolver.resolveViewName(viewName, locale);
                 if (view != null) {
                     return view;

@@ -198,11 +198,11 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 
 	@Override
 	protected View loadView(String viewName, Locale locale) throws Exception {
+		// 初始化beanFactory
 		BeanFactory factory = initFactory(locale);
 		try {
 			return factory.getBean(viewName, View.class);
-		}
-		catch (NoSuchBeanDefinitionException ex) {
+		} catch (NoSuchBeanDefinitionException ex) {
 			// Allow for ViewResolver chaining...
 			return null;
 		}
@@ -219,7 +219,9 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 	protected synchronized BeanFactory initFactory(Locale locale) throws BeansException {
 		// Try to find cached factory for Locale:
 		// Have we already encountered that Locale before?
+		// 有没有缓存
 		if (isCache()) {
+			// 本地缓存获取
 			BeanFactory cachedFactory = this.localeCache.get(locale);
 			if (cachedFactory != null) {
 				return cachedFactory;

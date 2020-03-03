@@ -20,31 +20,34 @@ package org.springframework.jms.support.converter;
  * Constants that indicate a target message type to convert to: a
  * {@link javax.jms.TextMessage}, a {@link javax.jms.BytesMessage},
  * a {@link javax.jms.MapMessage} or an {@link javax.jms.ObjectMessage}.
+ * <p>
+ * <p>
+ * 消息类型,分别对应{@link javax.jms}中的数据类型
  *
  * @author Juergen Hoeller
- * @since 3.0
  * @see MarshallingMessageConverter#setTargetType
+ * @since 3.0
  */
 public enum MessageType {
 
-	/**
-	 * A {@link javax.jms.TextMessage}.
-	 */
-	TEXT,
+    /**
+     * A {@link javax.jms.TextMessage}.
+     */
+    TEXT,
 
-	/**
-	 * A {@link javax.jms.BytesMessage}.
-	 */
-	BYTES,
+    /**
+     * A {@link javax.jms.BytesMessage}.
+     */
+    BYTES,
 
-	/**
-	 * A {@link javax.jms.MapMessage}.
-	 */
-	MAP,
+    /**
+     * A {@link javax.jms.MapMessage}.
+     */
+    MAP,
 
-	/**
-	 * A {@link javax.jms.ObjectMessage}.
-	 */
-	OBJECT
+    /**
+     * A {@link javax.jms.ObjectMessage}.
+     */
+    OBJECT
 
 }

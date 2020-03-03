@@ -68,12 +68,14 @@ public abstract class JmsUtils {
      * Close the given JMS Connection and ignore any thrown exception.
      * This is useful for typical {@code finally} blocks in manual JMS code.
      *
+     * 关闭连接
      * @param con  the JMS Connection to close (may be {@code null})
      * @param stop whether to call {@code stop()} before closing
      */
     public static void closeConnection(@Nullable Connection con, boolean stop) {
         if (con != null) {
             try {
+                // 标识符
                 if (stop) {
                     try {
                         con.stop();

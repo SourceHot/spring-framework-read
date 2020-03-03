@@ -57,6 +57,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
  *
+ * json消息转换
  * @author Mark Pollack
  * @author Dave Syer
  * @author Juergen Hoeller
