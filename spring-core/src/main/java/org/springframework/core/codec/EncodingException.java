@@ -24,27 +24,29 @@ import org.springframework.lang.Nullable;
  * {@link Encoder} may also choose to raise.
  *
  * @author Rossen Stoyanchev
- * @since 5.0
  * @see Encoder
+ * @since 5.0
  */
 @SuppressWarnings("serial")
 public class EncodingException extends CodecException {
 
-	/**
-	 * Create a new EncodingException.
-	 * @param msg the detail message
-	 */
-	public EncodingException(String msg) {
-		super(msg);
-	}
+    /**
+     * Create a new EncodingException.
+     *
+     * @param msg the detail message
+     */
+    public EncodingException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Create a new EncodingException.
-	 * @param msg the detail message
-	 * @param cause root cause for the exception, if any
-	 */
-	public EncodingException(String msg, @Nullable Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Create a new EncodingException.
+     *
+     * @param msg   the detail message
+     * @param cause root cause for the exception, if any
+     */
+    public EncodingException(String msg, @Nullable Throwable cause) {
+        super(msg, cause);
+    }
 
 }

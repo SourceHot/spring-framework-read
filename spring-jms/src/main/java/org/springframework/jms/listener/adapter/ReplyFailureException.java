@@ -27,7 +27,7 @@ import org.springframework.jms.JmsException;
 @SuppressWarnings("serial")
 public class ReplyFailureException extends JmsException {
 
-	public ReplyFailureException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    public ReplyFailureException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 }

@@ -728,6 +728,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
     /**
      * 接收消息
+     *
      * @return
      * @throws JmsException
      */

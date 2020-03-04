@@ -31,44 +31,45 @@ package org.springframework.core.io;
  * the same resource path resolution strategy.
  *
  * @author Juergen Hoeller
- * @since 1.1.3
  * @see DefaultResourceLoader
  * @see org.springframework.context.support.FileSystemXmlApplicationContext
+ * @since 1.1.3
  */
 public class FileSystemResourceLoader extends DefaultResourceLoader {
 
-	/**
-	 * Resolve resource paths as file system paths.
-	 * <p>Note: Even if a given path starts with a slash, it will get
-	 * interpreted as relative to the current VM working directory.
-	 * @param path the path to the resource
-	 * @return the corresponding Resource handle
-	 * @see FileSystemResource
-	 * @see org.springframework.web.context.support.ServletContextResourceLoader#getResourceByPath
-	 */
-	@Override
-	protected Resource getResourceByPath(String path) {
-		if (path.startsWith("/")) {
-			path = path.substring(1);
-		}
-		return new FileSystemContextResource(path);
-	}
+    /**
+     * Resolve resource paths as file system paths.
+     * <p>Note: Even if a given path starts with a slash, it will get
+     * interpreted as relative to the current VM working directory.
+     *
+     * @param path the path to the resource
+     * @return the corresponding Resource handle
+     * @see FileSystemResource
+     * @see org.springframework.web.context.support.ServletContextResourceLoader#getResourceByPath
+     */
+    @Override
+    protected Resource getResourceByPath(String path) {
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        return new FileSystemContextResource(path);
+    }
 
 
-	/**
-	 * FileSystemResource that explicitly expresses a context-relative path
-	 * through implementing the ContextResource interface.
-	 */
-	private static class FileSystemContextResource extends FileSystemResource implements ContextResource {
+    /**
+     * FileSystemResource that explicitly expresses a context-relative path
+     * through implementing the ContextResource interface.
+     */
+    private static class FileSystemContextResource extends FileSystemResource implements ContextResource {
 
-		public FileSystemContextResource(String path) {
-			super(path);
-		}
+        public FileSystemContextResource(String path) {
+            super(path);
+        }
 
-		@Override
-		public String getPathWithinContext() {
-			return getPath();
-		}
-	}
+        @Override
+        public String getPathWithinContext() {
+            return getPath();
+        }
+    }
 
 }

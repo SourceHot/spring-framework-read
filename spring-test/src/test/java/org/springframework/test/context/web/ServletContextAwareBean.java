@@ -16,9 +16,9 @@
 
 package org.springframework.test.context.web;
 
-import javax.servlet.ServletContext;
-
 import org.springframework.web.context.ServletContextAware;
+
+import javax.servlet.ServletContext;
 
 /**
  * Introduced to investigate claims in SPR-11145.
@@ -28,11 +28,11 @@ import org.springframework.web.context.ServletContextAware;
  */
 public class ServletContextAwareBean implements ServletContextAware {
 
-	protected ServletContext servletContext;
+    protected ServletContext servletContext;
 
-	@Override
-	public void setServletContext(ServletContext servletContext) {
-		this.servletContext = servletContext;
-	}
+    @Override
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
+    }
 
 }

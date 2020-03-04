@@ -16,15 +16,7 @@
 
 package org.springframework.mock.http.client.reactive.test;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -37,6 +29,13 @@ import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 
 /**
  * Mock implementation of {@link ClientHttpResponse}.
@@ -47,105 +46,102 @@ import org.springframework.util.MultiValueMap;
  */
 public class MockClientHttpResponse implements ClientHttpResponse {
 
-	private final int status;
+    private final int status;
 
-	private final HttpHeaders headers = new HttpHeaders();
+    private final HttpHeaders headers = new HttpHeaders();
 
-	private final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
-
-	private Flux<DataBuffer> body = Flux.empty();
-
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+    private final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
+    private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+    private Flux<DataBuffer> body = Flux.empty();
 
 
-	public MockClientHttpResponse(HttpStatus status) {
-		Assert.notNull(status, "HttpStatus is required");
-		this.status = status.value();
-	}
+    public MockClientHttpResponse(HttpStatus status) {
+        Assert.notNull(status, "HttpStatus is required");
+        this.status = status.value();
+    }
 
-	public MockClientHttpResponse(int status) {
-		Assert.isTrue(status >= 100 && status < 600, "Status must be between 1xx and 5xx");
-		this.status = status;
-	}
+    public MockClientHttpResponse(int status) {
+        Assert.isTrue(status >= 100 && status < 600, "Status must be between 1xx and 5xx");
+        this.status = status;
+    }
 
+    private static String dumpString(DataBuffer buffer, Charset charset) {
+        Assert.notNull(charset, "'charset' must not be null");
+        byte[] bytes = new byte[buffer.readableByteCount()];
+        buffer.read(bytes);
+        return new String(bytes, charset);
+    }
 
-	@Override
-	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(this.status);
-	}
+    @Override
+    public HttpStatus getStatusCode() {
+        return HttpStatus.valueOf(this.status);
+    }
 
-	@Override
-	public int getRawStatusCode() {
-		return this.status;
-	}
+    @Override
+    public int getRawStatusCode() {
+        return this.status;
+    }
 
-	@Override
-	public HttpHeaders getHeaders() {
-		if (!getCookies().isEmpty() && this.headers.get(HttpHeaders.SET_COOKIE) == null) {
-			getCookies().values().stream().flatMap(Collection::stream)
-					.forEach(cookie -> getHeaders().add(HttpHeaders.SET_COOKIE, cookie.toString()));
-		}
-		return this.headers;
-	}
+    @Override
+    public HttpHeaders getHeaders() {
+        if (!getCookies().isEmpty() && this.headers.get(HttpHeaders.SET_COOKIE) == null) {
+            getCookies().values().stream().flatMap(Collection::stream)
+                    .forEach(cookie -> getHeaders().add(HttpHeaders.SET_COOKIE, cookie.toString()));
+        }
+        return this.headers;
+    }
 
-	@Override
-	public MultiValueMap<String, ResponseCookie> getCookies() {
-		return this.cookies;
-	}
+    @Override
+    public MultiValueMap<String, ResponseCookie> getCookies() {
+        return this.cookies;
+    }
 
-	public void setBody(Publisher<DataBuffer> body) {
-		this.body = Flux.from(body);
-	}
+    public void setBody(String body, Charset charset) {
+        DataBuffer buffer = toDataBuffer(body, charset);
+        this.body = Flux.just(buffer);
+    }
 
-	public void setBody(String body) {
-		setBody(body, StandardCharsets.UTF_8);
-	}
+    private DataBuffer toDataBuffer(String body, Charset charset) {
+        byte[] bytes = body.getBytes(charset);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        return this.bufferFactory.wrap(byteBuffer);
+    }
 
-	public void setBody(String body, Charset charset) {
-		DataBuffer buffer = toDataBuffer(body, charset);
-		this.body = Flux.just(buffer);
-	}
+    @Override
+    public Flux<DataBuffer> getBody() {
+        return this.body;
+    }
 
-	private DataBuffer toDataBuffer(String body, Charset charset) {
-		byte[] bytes = body.getBytes(charset);
-		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-		return this.bufferFactory.wrap(byteBuffer);
-	}
+    public void setBody(Publisher<DataBuffer> body) {
+        this.body = Flux.from(body);
+    }
 
-	@Override
-	public Flux<DataBuffer> getBody() {
-		return this.body;
-	}
+    public void setBody(String body) {
+        setBody(body, StandardCharsets.UTF_8);
+    }
 
-	/**
-	 * Return the response body aggregated and converted to a String using the
-	 * charset of the Content-Type response or otherwise as "UTF-8".
-	 */
-	public Mono<String> getBodyAsString() {
-		Charset charset = getCharset();
-		return Flux.from(getBody())
-				.reduce(this.bufferFactory.allocateBuffer(), (previous, current) -> {
-					previous.write(current);
-					DataBufferUtils.release(current);
-					return previous;
-				})
-				.map(buffer -> dumpString(buffer, charset));
-	}
+    /**
+     * Return the response body aggregated and converted to a String using the
+     * charset of the Content-Type response or otherwise as "UTF-8".
+     */
+    public Mono<String> getBodyAsString() {
+        Charset charset = getCharset();
+        return Flux.from(getBody())
+                .reduce(this.bufferFactory.allocateBuffer(), (previous, current) -> {
+                    previous.write(current);
+                    DataBufferUtils.release(current);
+                    return previous;
+                })
+                .map(buffer -> dumpString(buffer, charset));
+    }
 
-	private static String dumpString(DataBuffer buffer, Charset charset) {
-		Assert.notNull(charset, "'charset' must not be null");
-		byte[] bytes = new byte[buffer.readableByteCount()];
-		buffer.read(bytes);
-		return new String(bytes, charset);
-	}
-
-	private Charset getCharset() {
-		Charset charset = null;
-		MediaType contentType = getHeaders().getContentType();
-		if (contentType != null) {
-			charset = contentType.getCharset();
-		}
-		return (charset != null ? charset : StandardCharsets.UTF_8);
-	}
+    private Charset getCharset() {
+        Charset charset = null;
+        MediaType contentType = getHeaders().getContentType();
+        if (contentType != null) {
+            charset = contentType.getCharset();
+        }
+        return (charset != null ? charset : StandardCharsets.UTF_8);
+    }
 
 }

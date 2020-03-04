@@ -539,8 +539,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
      * Creates the specified number of concurrent consumers,
      * in the form of a JMS Session plus associated MessageConsumer
      * running in a separate thread.
+     * <p>
+     * 容器初始化方法
      *
-	 * 容器初始化方法
      * @see #scheduleNewInvoker
      * @see #setTaskExecutor
      */
@@ -555,7 +556,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
     /**
      * Destroy the registered JMS Sessions and associated MessageConsumers.
-	 * 关闭 jms session
+     * 关闭 jms session
      */
     @Override
     protected void doShutdown() throws JMSException {

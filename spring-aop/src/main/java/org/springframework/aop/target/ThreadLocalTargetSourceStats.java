@@ -24,19 +24,19 @@ package org.springframework.aop.target;
  */
 public interface ThreadLocalTargetSourceStats {
 
-	/**
-	 * Return the number of client invocations.
-	 */
-	int getInvocationCount();
+    /**
+     * Return the number of client invocations.
+     */
+    int getInvocationCount();
 
-	/**
-	 * Return the number of hits that were satisfied by a thread-bound object.
-	 */
-	int getHitCount();
+    /**
+     * Return the number of hits that were satisfied by a thread-bound object.
+     */
+    int getHitCount();
 
-	/**
-	 * Return the number of thread-bound objects created.
-	 */
-	int getObjectCount();
+    /**
+     * Return the number of thread-bound objects created.
+     */
+    int getObjectCount();
 
 }

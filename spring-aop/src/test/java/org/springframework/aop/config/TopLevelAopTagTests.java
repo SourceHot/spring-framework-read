@@ -17,12 +17,11 @@
 package org.springframework.aop.config;
 
 import org.junit.Test;
-
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 
-import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.*;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 /**
  * Tests that the &lt;aop:config/&gt; element can be used as a top level element.
@@ -32,13 +31,13 @@ import static org.springframework.tests.TestResourceUtils.*;
  */
 public class TopLevelAopTagTests {
 
-	@Test
-	public void testParse() {
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
-				qualifiedResource(TopLevelAopTagTests.class, "context.xml"));
+    @Test
+    public void testParse() {
+        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+        new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
+                qualifiedResource(TopLevelAopTagTests.class, "context.xml"));
 
-		assertTrue(beanFactory.containsBeanDefinition("testPointcut"));
-	}
+        assertTrue(beanFactory.containsBeanDefinition("testPointcut"));
+    }
 
 }

@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.core;
 
+import org.springframework.lang.Nullable;
+
 import java.sql.CallableStatement;
 import java.sql.SQLException;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Interface to be implemented for retrieving values for more complex database-specific
@@ -32,36 +32,38 @@ import org.springframework.lang.Nullable;
  * should be needed to create any database-specific objects.
  *
  * @author Thomas Risberg
- * @since 1.1
  * @see java.sql.Types
  * @see java.sql.CallableStatement#getObject
  * @see org.springframework.jdbc.object.StoredProcedure#execute(java.util.Map)
+ * @since 1.1
  */
 public interface SqlReturnType {
 
-	/**
-	 * Constant that indicates an unknown (or unspecified) SQL type.
-	 * Passed into setTypeValue if the original operation method does
-	 * not specify a SQL type.
-	 * @see java.sql.Types
-	 * @see JdbcOperations#update(String, Object[])
-	 */
-	int TYPE_UNKNOWN = Integer.MIN_VALUE;
+    /**
+     * Constant that indicates an unknown (or unspecified) SQL type.
+     * Passed into setTypeValue if the original operation method does
+     * not specify a SQL type.
+     *
+     * @see java.sql.Types
+     * @see JdbcOperations#update(String, Object[])
+     */
+    int TYPE_UNKNOWN = Integer.MIN_VALUE;
 
 
-	/**
-	 * Get the type value from the specific object.
-	 * @param cs the CallableStatement to operate on
-	 * @param paramIndex the index of the parameter for which we need to set the value
-	 * @param sqlType the SQL type of the parameter we are setting
-	 * @param typeName the type name of the parameter (optional)
-	 * @return the target value
-	 * @throws SQLException if a SQLException is encountered setting parameter values
-	 * (that is, there's no need to catch SQLException)
-	 * @see java.sql.Types
-	 * @see java.sql.CallableStatement#getObject
-	 */
-	Object getTypeValue(CallableStatement cs, int paramIndex, int sqlType, @Nullable  String typeName)
-			throws SQLException;
+    /**
+     * Get the type value from the specific object.
+     *
+     * @param cs         the CallableStatement to operate on
+     * @param paramIndex the index of the parameter for which we need to set the value
+     * @param sqlType    the SQL type of the parameter we are setting
+     * @param typeName   the type name of the parameter (optional)
+     * @return the target value
+     * @throws SQLException if a SQLException is encountered setting parameter values
+     *                      (that is, there's no need to catch SQLException)
+     * @see java.sql.Types
+     * @see java.sql.CallableStatement#getObject
+     */
+    Object getTypeValue(CallableStatement cs, int paramIndex, int sqlType, @Nullable String typeName)
+            throws SQLException;
 
 }

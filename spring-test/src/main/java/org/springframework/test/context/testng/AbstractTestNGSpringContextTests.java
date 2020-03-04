@@ -16,19 +16,8 @@
 
 package org.springframework.test.context.testng;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.testng.IHookCallBack;
-import org.testng.IHookable;
-import org.testng.ITestResult;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.Nullable;
@@ -40,6 +29,16 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.web.ServletTestExecutionListener;
+import org.testng.IHookCallBack;
+import org.testng.IHookable;
+import org.testng.ITestResult;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Abstract base test class which integrates the <em>Spring TestContext Framework</em>
@@ -72,7 +71,6 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
- * @since 2.5
  * @see ContextConfiguration
  * @see TestContext
  * @see TestContextManager
@@ -83,165 +81,168 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * @see DirtiesContextTestExecutionListener
  * @see AbstractTransactionalTestNGSpringContextTests
  * @see org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests
+ * @since 2.5
  */
-@TestExecutionListeners({ ServletTestExecutionListener.class, DirtiesContextBeforeModesTestExecutionListener.class,
-	DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
+@TestExecutionListeners({ServletTestExecutionListener.class, DirtiesContextBeforeModesTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class})
 public abstract class AbstractTestNGSpringContextTests implements IHookable, ApplicationContextAware {
 
-	/** Logger available to subclasses. */
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	/**
-	 * The {@link ApplicationContext} that was injected into this test instance
-	 * via {@link #setApplicationContext(ApplicationContext)}.
-	 */
-	@Nullable
-	protected ApplicationContext applicationContext;
-
-	private final TestContextManager testContextManager;
-
-	@Nullable
-	private Throwable testException;
-
-
-	/**
-	 * Construct a new AbstractTestNGSpringContextTests instance and initialize
-	 * the internal {@link TestContextManager} for the current test class.
-	 */
-	public AbstractTestNGSpringContextTests() {
-		this.testContextManager = new TestContextManager(getClass());
-	}
-
-	/**
-	 * Set the {@link ApplicationContext} to be used by this test instance,
-	 * provided via {@link ApplicationContextAware} semantics.
-	 * @param applicationContext the ApplicationContext that this test runs in
-	 */
-	@Override
-	public final void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
+    /**
+     * Logger available to subclasses.
+     */
+    protected final Log logger = LogFactory.getLog(getClass());
+    private final TestContextManager testContextManager;
+    /**
+     * The {@link ApplicationContext} that was injected into this test instance
+     * via {@link #setApplicationContext(ApplicationContext)}.
+     */
+    @Nullable
+    protected ApplicationContext applicationContext;
+    @Nullable
+    private Throwable testException;
 
 
-	/**
-	 * Delegates to the configured {@link TestContextManager} to call
-	 * {@linkplain TestContextManager#beforeTestClass() 'before test class'} callbacks.
-	 * @throws Exception if a registered TestExecutionListener throws an exception
-	 */
-	@BeforeClass(alwaysRun = true)
-	protected void springTestContextBeforeTestClass() throws Exception {
-		this.testContextManager.beforeTestClass();
-	}
+    /**
+     * Construct a new AbstractTestNGSpringContextTests instance and initialize
+     * the internal {@link TestContextManager} for the current test class.
+     */
+    public AbstractTestNGSpringContextTests() {
+        this.testContextManager = new TestContextManager(getClass());
+    }
 
-	/**
-	 * Delegates to the configured {@link TestContextManager} to
-	 * {@linkplain TestContextManager#prepareTestInstance(Object) prepare} this test
-	 * instance prior to execution of any individual tests, for example for
-	 * injecting dependencies, etc.
-	 * @throws Exception if a registered TestExecutionListener throws an exception
-	 */
-	@BeforeClass(alwaysRun = true, dependsOnMethods = "springTestContextBeforeTestClass")
-	protected void springTestContextPrepareTestInstance() throws Exception {
-		this.testContextManager.prepareTestInstance(this);
-	}
-
-	/**
-	 * Delegates to the configured {@link TestContextManager} to
-	 * {@linkplain TestContextManager#beforeTestMethod(Object,Method) pre-process}
-	 * the test method before the actual test is executed.
-	 * @param testMethod the test method which is about to be executed
-	 * @throws Exception allows all exceptions to propagate
-	 */
-	@BeforeMethod(alwaysRun = true)
-	protected void springTestContextBeforeTestMethod(Method testMethod) throws Exception {
-		this.testContextManager.beforeTestMethod(this, testMethod);
-	}
-
-	/**
-	 * Delegates to the {@linkplain IHookCallBack#runTestMethod(ITestResult) test
-	 * method} in the supplied {@code callback} to execute the actual test
-	 * and then tracks the exception thrown during test execution, if any.
-	 * @see org.testng.IHookable#run(IHookCallBack, ITestResult)
-	 */
-	@Override
-	public void run(IHookCallBack callBack, ITestResult testResult) {
-		Method testMethod = testResult.getMethod().getConstructorOrMethod().getMethod();
-		boolean beforeCallbacksExecuted = false;
-
-		try {
-			this.testContextManager.beforeTestExecution(this, testMethod);
-			beforeCallbacksExecuted = true;
-		}
-		catch (Throwable ex) {
-			this.testException = ex;
-		}
-
-		if (beforeCallbacksExecuted) {
-			callBack.runTestMethod(testResult);
-			this.testException = getTestResultException(testResult);
-		}
-
-		try {
-			this.testContextManager.afterTestExecution(this, testMethod, this.testException);
-		}
-		catch (Throwable ex) {
-			if (this.testException == null) {
-				this.testException = ex;
-			}
-		}
-
-		if (this.testException != null) {
-			throwAsUncheckedException(this.testException);
-		}
-	}
-
-	/**
-	 * Delegates to the configured {@link TestContextManager} to
-	 * {@linkplain TestContextManager#afterTestMethod(Object, Method, Throwable)
-	 * post-process} the test method after the actual test has executed.
-	 *
-	 * @param testMethod the test method which has just been executed on the
-	 * test instance
-	 * @throws Exception allows all exceptions to propagate
-	 */
-	@AfterMethod(alwaysRun = true)
-	protected void springTestContextAfterTestMethod(Method testMethod) throws Exception {
-		try {
-			this.testContextManager.afterTestMethod(this, testMethod, this.testException);
-		}
-		finally {
-			this.testException = null;
-		}
-	}
-
-	/**
-	 * Delegates to the configured {@link TestContextManager} to call
-	 * {@linkplain TestContextManager#afterTestClass() 'after test class'} callbacks.
-	 * @throws Exception if a registered TestExecutionListener throws an exception
-	 */
-	@AfterClass(alwaysRun = true)
-	protected void springTestContextAfterTestClass() throws Exception {
-		this.testContextManager.afterTestClass();
-	}
+    /**
+     * Set the {@link ApplicationContext} to be used by this test instance,
+     * provided via {@link ApplicationContextAware} semantics.
+     *
+     * @param applicationContext the ApplicationContext that this test runs in
+     */
+    @Override
+    public final void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
 
-	private Throwable getTestResultException(ITestResult testResult) {
-		Throwable testResultException = testResult.getThrowable();
-		if (testResultException instanceof InvocationTargetException) {
-			testResultException = ((InvocationTargetException) testResultException).getCause();
-		}
-		return testResultException;
-	}
+    /**
+     * Delegates to the configured {@link TestContextManager} to call
+     * {@linkplain TestContextManager#beforeTestClass() 'before test class'} callbacks.
+     *
+     * @throws Exception if a registered TestExecutionListener throws an exception
+     */
+    @BeforeClass(alwaysRun = true)
+    protected void springTestContextBeforeTestClass() throws Exception {
+        this.testContextManager.beforeTestClass();
+    }
 
-	private RuntimeException throwAsUncheckedException(Throwable t) {
-		throwAs(t);
-		// Appeasing the compiler: the following line will never be executed.
-		throw new IllegalStateException(t);
-	}
+    /**
+     * Delegates to the configured {@link TestContextManager} to
+     * {@linkplain TestContextManager#prepareTestInstance(Object) prepare} this test
+     * instance prior to execution of any individual tests, for example for
+     * injecting dependencies, etc.
+     *
+     * @throws Exception if a registered TestExecutionListener throws an exception
+     */
+    @BeforeClass(alwaysRun = true, dependsOnMethods = "springTestContextBeforeTestClass")
+    protected void springTestContextPrepareTestInstance() throws Exception {
+        this.testContextManager.prepareTestInstance(this);
+    }
 
-	@SuppressWarnings("unchecked")
-	private <T extends Throwable> void throwAs(Throwable t) throws T {
-		throw (T) t;
-	}
+    /**
+     * Delegates to the configured {@link TestContextManager} to
+     * {@linkplain TestContextManager#beforeTestMethod(Object, Method) pre-process}
+     * the test method before the actual test is executed.
+     *
+     * @param testMethod the test method which is about to be executed
+     * @throws Exception allows all exceptions to propagate
+     */
+    @BeforeMethod(alwaysRun = true)
+    protected void springTestContextBeforeTestMethod(Method testMethod) throws Exception {
+        this.testContextManager.beforeTestMethod(this, testMethod);
+    }
+
+    /**
+     * Delegates to the {@linkplain IHookCallBack#runTestMethod(ITestResult) test
+     * method} in the supplied {@code callback} to execute the actual test
+     * and then tracks the exception thrown during test execution, if any.
+     *
+     * @see org.testng.IHookable#run(IHookCallBack, ITestResult)
+     */
+    @Override
+    public void run(IHookCallBack callBack, ITestResult testResult) {
+        Method testMethod = testResult.getMethod().getConstructorOrMethod().getMethod();
+        boolean beforeCallbacksExecuted = false;
+
+        try {
+            this.testContextManager.beforeTestExecution(this, testMethod);
+            beforeCallbacksExecuted = true;
+        } catch (Throwable ex) {
+            this.testException = ex;
+        }
+
+        if (beforeCallbacksExecuted) {
+            callBack.runTestMethod(testResult);
+            this.testException = getTestResultException(testResult);
+        }
+
+        try {
+            this.testContextManager.afterTestExecution(this, testMethod, this.testException);
+        } catch (Throwable ex) {
+            if (this.testException == null) {
+                this.testException = ex;
+            }
+        }
+
+        if (this.testException != null) {
+            throwAsUncheckedException(this.testException);
+        }
+    }
+
+    /**
+     * Delegates to the configured {@link TestContextManager} to
+     * {@linkplain TestContextManager#afterTestMethod(Object, Method, Throwable)
+     * post-process} the test method after the actual test has executed.
+     *
+     * @param testMethod the test method which has just been executed on the
+     *                   test instance
+     * @throws Exception allows all exceptions to propagate
+     */
+    @AfterMethod(alwaysRun = true)
+    protected void springTestContextAfterTestMethod(Method testMethod) throws Exception {
+        try {
+            this.testContextManager.afterTestMethod(this, testMethod, this.testException);
+        } finally {
+            this.testException = null;
+        }
+    }
+
+    /**
+     * Delegates to the configured {@link TestContextManager} to call
+     * {@linkplain TestContextManager#afterTestClass() 'after test class'} callbacks.
+     *
+     * @throws Exception if a registered TestExecutionListener throws an exception
+     */
+    @AfterClass(alwaysRun = true)
+    protected void springTestContextAfterTestClass() throws Exception {
+        this.testContextManager.afterTestClass();
+    }
+
+
+    private Throwable getTestResultException(ITestResult testResult) {
+        Throwable testResultException = testResult.getThrowable();
+        if (testResultException instanceof InvocationTargetException) {
+            testResultException = ((InvocationTargetException) testResultException).getCause();
+        }
+        return testResultException;
+    }
+
+    private RuntimeException throwAsUncheckedException(Throwable t) {
+        throwAs(t);
+        // Appeasing the compiler: the following line will never be executed.
+        throw new IllegalStateException(t);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends Throwable> void throwAs(Throwable t) throws T {
+        throw (T) t;
+    }
 
 }

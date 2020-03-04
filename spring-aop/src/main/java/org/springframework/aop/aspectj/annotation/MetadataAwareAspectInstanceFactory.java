@@ -28,24 +28,26 @@ import org.springframework.lang.Nullable;
  * we need to split out this subinterface.
  *
  * @author Rod Johnson
- * @since 2.0
  * @see AspectMetadata
  * @see org.aspectj.lang.reflect.AjType
+ * @since 2.0
  */
 public interface MetadataAwareAspectInstanceFactory extends AspectInstanceFactory {
 
-	/**
-	 * Return the AspectJ AspectMetadata for this factory's aspect.
-	 * @return the aspect metadata
-	 */
-	AspectMetadata getAspectMetadata();
+    /**
+     * Return the AspectJ AspectMetadata for this factory's aspect.
+     *
+     * @return the aspect metadata
+     */
+    AspectMetadata getAspectMetadata();
 
-	/**
-	 * Return the best possible creation mutex for this factory.
-	 * @return the mutex object (may be {@code null} for no mutex to use)
-	 * @since 4.3
-	 */
-	@Nullable
-	Object getAspectCreationMutex();
+    /**
+     * Return the best possible creation mutex for this factory.
+     *
+     * @return the mutex object (may be {@code null} for no mutex to use)
+     * @since 4.3
+     */
+    @Nullable
+    Object getAspectCreationMutex();
 
 }

@@ -31,40 +31,40 @@ import org.springframework.lang.Nullable;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @since 2.0
  * @see RequestContextHolder#currentRequestAttributes()
  * @see RequestAttributes#SCOPE_SESSION
  * @see RequestContextListener
  * @see org.springframework.web.filter.RequestContextFilter
  * @see org.springframework.web.servlet.DispatcherServlet
+ * @since 2.0
  */
 public class SessionScope extends AbstractRequestAttributesScope {
 
-	@Override
-	protected int getScope() {
-		return RequestAttributes.SCOPE_SESSION;
-	}
+    @Override
+    protected int getScope() {
+        return RequestAttributes.SCOPE_SESSION;
+    }
 
-	@Override
-	public String getConversationId() {
-		return RequestContextHolder.currentRequestAttributes().getSessionId();
-	}
+    @Override
+    public String getConversationId() {
+        return RequestContextHolder.currentRequestAttributes().getSessionId();
+    }
 
-	@Override
-	public Object get(String name, ObjectFactory<?> objectFactory) {
-		Object mutex = RequestContextHolder.currentRequestAttributes().getSessionMutex();
-		synchronized (mutex) {
-			return super.get(name, objectFactory);
-		}
-	}
+    @Override
+    public Object get(String name, ObjectFactory<?> objectFactory) {
+        Object mutex = RequestContextHolder.currentRequestAttributes().getSessionMutex();
+        synchronized (mutex) {
+            return super.get(name, objectFactory);
+        }
+    }
 
-	@Override
-	@Nullable
-	public Object remove(String name) {
-		Object mutex = RequestContextHolder.currentRequestAttributes().getSessionMutex();
-		synchronized (mutex) {
-			return super.remove(name);
-		}
-	}
+    @Override
+    @Nullable
+    public Object remove(String name) {
+        Object mutex = RequestContextHolder.currentRequestAttributes().getSessionMutex();
+        synchronized (mutex) {
+            return super.remove(name);
+        }
+    }
 
 }

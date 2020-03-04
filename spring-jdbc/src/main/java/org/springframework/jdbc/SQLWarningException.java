@@ -16,9 +16,9 @@
 
 package org.springframework.jdbc;
 
-import java.sql.SQLWarning;
-
 import org.springframework.dao.UncategorizedDataAccessException;
+
+import java.sql.SQLWarning;
 
 /**
  * Exception thrown when we're not ignoring {@link java.sql.SQLWarning SQLWarnings}.
@@ -35,20 +35,21 @@ import org.springframework.dao.UncategorizedDataAccessException;
 @SuppressWarnings("serial")
 public class SQLWarningException extends UncategorizedDataAccessException {
 
-	/**
-	 * Constructor for SQLWarningException.
-	 * @param msg the detail message
-	 * @param ex the JDBC warning
-	 */
-	public SQLWarningException(String msg, SQLWarning ex) {
-		super(msg, ex);
-	}
+    /**
+     * Constructor for SQLWarningException.
+     *
+     * @param msg the detail message
+     * @param ex  the JDBC warning
+     */
+    public SQLWarningException(String msg, SQLWarning ex) {
+        super(msg, ex);
+    }
 
-	/**
-	 * Return the underlying SQLWarning.
-	 */
-	public SQLWarning SQLWarning() {
-		return (SQLWarning) getCause();
-	}
+    /**
+     * Return the underlying SQLWarning.
+     */
+    public SQLWarning SQLWarning() {
+        return (SQLWarning) getCause();
+    }
 
 }

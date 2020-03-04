@@ -39,7 +39,6 @@ public interface BeanNameGenerator {
      *                   is supposed to be registered with
      *                   注册器
      * @return the generated bean name beanName
-     *
      */
     String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry);
 

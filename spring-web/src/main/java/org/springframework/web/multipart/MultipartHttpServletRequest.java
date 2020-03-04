@@ -16,11 +16,11 @@
 
 package org.springframework.web.multipart;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Provides additional methods for dealing with multipart content within a
@@ -37,7 +37,6 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @author Trevor D. Cook
- * @since 29.09.2003
  * @see MultipartResolver
  * @see MultipartFile
  * @see javax.servlet.http.HttpServletRequest#getParameter
@@ -45,26 +44,27 @@ import org.springframework.lang.Nullable;
  * @see javax.servlet.http.HttpServletRequest#getParameterMap
  * @see org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest
  * @see org.springframework.web.multipart.support.AbstractMultipartHttpServletRequest
+ * @since 29.09.2003
  */
 public interface MultipartHttpServletRequest extends HttpServletRequest, MultipartRequest {
 
-	/**
-	 * Return this request's method as a convenient HttpMethod instance.
-	 */
-	@Nullable
-	HttpMethod getRequestMethod();
+    /**
+     * Return this request's method as a convenient HttpMethod instance.
+     */
+    @Nullable
+    HttpMethod getRequestMethod();
 
-	/**
-	 * Return this request's headers as a convenient HttpHeaders instance.
-	 */
-	HttpHeaders getRequestHeaders();
+    /**
+     * Return this request's headers as a convenient HttpHeaders instance.
+     */
+    HttpHeaders getRequestHeaders();
 
-	/**
-	 * Return the headers associated with the specified part of the multipart request.
-	 * <p>If the underlying implementation supports access to headers, then all headers are returned.
-	 * Otherwise, the returned headers will include a 'Content-Type' header at the very least.
-	 */
-	@Nullable
-	HttpHeaders getMultipartHeaders(String paramOrFileName);
+    /**
+     * Return the headers associated with the specified part of the multipart request.
+     * <p>If the underlying implementation supports access to headers, then all headers are returned.
+     * Otherwise, the returned headers will include a 'Content-Type' header at the very least.
+     */
+    @Nullable
+    HttpHeaders getMultipartHeaders(String paramOrFileName);
 
 }

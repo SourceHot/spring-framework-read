@@ -29,57 +29,58 @@ import java.util.Comparator;
 @SuppressWarnings("serial")
 public class BooleanComparator implements Comparator<Boolean>, Serializable {
 
-	/**
-	 * A shared default instance of this comparator,
-	 * treating {@code true} lower than {@code false}.
-	 */
-	public static final BooleanComparator TRUE_LOW = new BooleanComparator(true);
+    /**
+     * A shared default instance of this comparator,
+     * treating {@code true} lower than {@code false}.
+     */
+    public static final BooleanComparator TRUE_LOW = new BooleanComparator(true);
 
-	/**
-	 * A shared default instance of this comparator,
-	 * treating {@code true} higher than {@code false}.
-	 */
-	public static final BooleanComparator TRUE_HIGH = new BooleanComparator(false);
-
-
-	private final boolean trueLow;
+    /**
+     * A shared default instance of this comparator,
+     * treating {@code true} higher than {@code false}.
+     */
+    public static final BooleanComparator TRUE_HIGH = new BooleanComparator(false);
 
 
-	/**
-	 * Create a BooleanComparator that sorts boolean values based on
-	 * the provided flag.
-	 * <p>Alternatively, you can use the default shared instances:
-	 * {@code BooleanComparator.TRUE_LOW} and
-	 * {@code BooleanComparator.TRUE_HIGH}.
-	 * @param trueLow whether to treat true as lower or higher than false
-	 * @see #TRUE_LOW
-	 * @see #TRUE_HIGH
-	 */
-	public BooleanComparator(boolean trueLow) {
-		this.trueLow = trueLow;
-	}
+    private final boolean trueLow;
 
 
-	@Override
-	public int compare(Boolean v1, Boolean v2) {
-		return (v1 ^ v2) ? ((v1 ^ this.trueLow) ? 1 : -1) : 0;
-	}
+    /**
+     * Create a BooleanComparator that sorts boolean values based on
+     * the provided flag.
+     * <p>Alternatively, you can use the default shared instances:
+     * {@code BooleanComparator.TRUE_LOW} and
+     * {@code BooleanComparator.TRUE_HIGH}.
+     *
+     * @param trueLow whether to treat true as lower or higher than false
+     * @see #TRUE_LOW
+     * @see #TRUE_HIGH
+     */
+    public BooleanComparator(boolean trueLow) {
+        this.trueLow = trueLow;
+    }
 
 
-	@Override
-	public boolean equals(Object other) {
-		return (this == other || (other instanceof BooleanComparator &&
-				this.trueLow == ((BooleanComparator) other).trueLow));
-	}
+    @Override
+    public int compare(Boolean v1, Boolean v2) {
+        return (v1 ^ v2) ? ((v1 ^ this.trueLow) ? 1 : -1) : 0;
+    }
 
-	@Override
-	public int hashCode() {
-		return getClass().hashCode() * (this.trueLow ? -1 : 1);
-	}
 
-	@Override
-	public String toString() {
-		return "BooleanComparator: " + (this.trueLow ? "true low" : "true high");
-	}
+    @Override
+    public boolean equals(Object other) {
+        return (this == other || (other instanceof BooleanComparator &&
+                this.trueLow == ((BooleanComparator) other).trueLow));
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode() * (this.trueLow ? -1 : 1);
+    }
+
+    @Override
+    public String toString() {
+        return "BooleanComparator: " + (this.trueLow ? "true low" : "true high");
+    }
 
 }

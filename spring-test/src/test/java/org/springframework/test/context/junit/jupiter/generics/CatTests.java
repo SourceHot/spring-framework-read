@@ -33,14 +33,14 @@ import org.springframework.test.context.junit.jupiter.comics.Cat;
  */
 class CatTests extends GenericComicCharactersTests<Cat> {
 
-	@Override
-	int getExpectedNumCharacters() {
-		return 2;
-	}
+    @Override
+    int getExpectedNumCharacters() {
+        return 2;
+    }
 
-	@Override
-	String getExpectedName() {
-		return "Catbert";
-	}
+    @Override
+    String getExpectedName() {
+        return "Catbert";
+    }
 
 }

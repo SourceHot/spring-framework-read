@@ -16,10 +16,10 @@
 
 package org.springframework.aop.target;
 
-import java.io.Serializable;
-
 import org.springframework.aop.TargetSource;
 import org.springframework.util.Assert;
+
+import java.io.Serializable;
 
 /**
  * {@link org.springframework.aop.TargetSource} implementation that
@@ -37,81 +37,87 @@ import org.springframework.util.Assert;
  */
 public class HotSwappableTargetSource implements TargetSource, Serializable {
 
-	/** use serialVersionUID from Spring 1.2 for interoperability. */
-	private static final long serialVersionUID = 7497929212653839187L;
+    /**
+     * use serialVersionUID from Spring 1.2 for interoperability.
+     */
+    private static final long serialVersionUID = 7497929212653839187L;
 
 
-	/** The current target object. */
-	private Object target;
+    /**
+     * The current target object.
+     */
+    private Object target;
 
 
-	/**
-	 * Create a new HotSwappableTargetSource with the given initial target object.
-	 * @param initialTarget the initial target object
-	 */
-	public HotSwappableTargetSource(Object initialTarget) {
-		Assert.notNull(initialTarget, "Target object must not be null");
-		this.target = initialTarget;
-	}
+    /**
+     * Create a new HotSwappableTargetSource with the given initial target object.
+     *
+     * @param initialTarget the initial target object
+     */
+    public HotSwappableTargetSource(Object initialTarget) {
+        Assert.notNull(initialTarget, "Target object must not be null");
+        this.target = initialTarget;
+    }
 
 
-	/**
-	 * Return the type of the current target object.
-	 * <p>The returned type should usually be constant across all target objects.
-	 */
-	@Override
-	public synchronized Class<?> getTargetClass() {
-		return this.target.getClass();
-	}
+    /**
+     * Return the type of the current target object.
+     * <p>The returned type should usually be constant across all target objects.
+     */
+    @Override
+    public synchronized Class<?> getTargetClass() {
+        return this.target.getClass();
+    }
 
-	@Override
-	public final boolean isStatic() {
-		return false;
-	}
+    @Override
+    public final boolean isStatic() {
+        return false;
+    }
 
-	@Override
-	public synchronized Object getTarget() {
-		return this.target;
-	}
+    @Override
+    public synchronized Object getTarget() {
+        return this.target;
+    }
 
-	@Override
-	public void releaseTarget(Object target) {
-		// nothing to do
-	}
-
-
-	/**
-	 * Swap the target, returning the old target object.
-	 * @param newTarget the new target object
-	 * @return the old target object
-	 * @throws IllegalArgumentException if the new target is invalid
-	 */
-	public synchronized Object swap(Object newTarget) throws IllegalArgumentException {
-		Assert.notNull(newTarget, "Target object must not be null");
-		Object old = this.target;
-		this.target = newTarget;
-		return old;
-	}
+    @Override
+    public void releaseTarget(Object target) {
+        // nothing to do
+    }
 
 
-	/**
-	 * Two HotSwappableTargetSources are equal if the current target
-	 * objects are equal.
-	 */
-	@Override
-	public boolean equals(Object other) {
-		return (this == other || (other instanceof HotSwappableTargetSource &&
-				this.target.equals(((HotSwappableTargetSource) other).target)));
-	}
+    /**
+     * Swap the target, returning the old target object.
+     *
+     * @param newTarget the new target object
+     * @return the old target object
+     * @throws IllegalArgumentException if the new target is invalid
+     */
+    public synchronized Object swap(Object newTarget) throws IllegalArgumentException {
+        Assert.notNull(newTarget, "Target object must not be null");
+        Object old = this.target;
+        this.target = newTarget;
+        return old;
+    }
 
-	@Override
-	public int hashCode() {
-		return HotSwappableTargetSource.class.hashCode();
-	}
 
-	@Override
-	public String toString() {
-		return "HotSwappableTargetSource for target: " + this.target;
-	}
+    /**
+     * Two HotSwappableTargetSources are equal if the current target
+     * objects are equal.
+     */
+    @Override
+    public boolean equals(Object other) {
+        return (this == other || (other instanceof HotSwappableTargetSource &&
+                this.target.equals(((HotSwappableTargetSource) other).target)));
+    }
+
+    @Override
+    public int hashCode() {
+        return HotSwappableTargetSource.class.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "HotSwappableTargetSource for target: " + this.target;
+    }
 
 }

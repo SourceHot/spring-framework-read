@@ -30,20 +30,20 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class InfrastructureAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCreator {
 
-	@Nullable
-	private ConfigurableListableBeanFactory beanFactory;
+    @Nullable
+    private ConfigurableListableBeanFactory beanFactory;
 
 
-	@Override
-	protected void initBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		super.initBeanFactory(beanFactory);
-		this.beanFactory = beanFactory;
-	}
+    @Override
+    protected void initBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+        super.initBeanFactory(beanFactory);
+        this.beanFactory = beanFactory;
+    }
 
-	@Override
-	protected boolean isEligibleAdvisorBean(String beanName) {
-		return (this.beanFactory != null && this.beanFactory.containsBeanDefinition(beanName) &&
-				this.beanFactory.getBeanDefinition(beanName).getRole() == BeanDefinition.ROLE_INFRASTRUCTURE);
-	}
+    @Override
+    protected boolean isEligibleAdvisorBean(String beanName) {
+        return (this.beanFactory != null && this.beanFactory.containsBeanDefinition(beanName) &&
+                this.beanFactory.getBeanDefinition(beanName).getRole() == BeanDefinition.ROLE_INFRASTRUCTURE);
+    }
 
 }

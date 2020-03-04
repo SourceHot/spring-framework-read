@@ -26,110 +26,112 @@ import javax.jms.Message;
  */
 public class QosSettings {
 
-	private int deliveryMode;
+    private int deliveryMode;
 
-	private int priority;
+    private int priority;
 
-	private long timeToLive;
-
-
-	/**
-	 * Create a new instance with the default settings.
-	 * @see Message#DEFAULT_DELIVERY_MODE
-	 * @see Message#DEFAULT_PRIORITY
-	 * @see Message#DEFAULT_TIME_TO_LIVE
-	 */
-	public QosSettings() {
-		this(Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
-	}
-
-	/**
-	 * Create a new instance with the specified settings.
-	 */
-	public QosSettings(int deliveryMode, int priority, long timeToLive) {
-		this.deliveryMode = deliveryMode;
-		this.priority = priority;
-		this.timeToLive = timeToLive;
-	}
+    private long timeToLive;
 
 
-	/**
-	 * Set the delivery mode to use when sending a message.
-	 * Default is the JMS Message default: "PERSISTENT".
-	 * @param deliveryMode the delivery mode to use
-	 * @see javax.jms.DeliveryMode#PERSISTENT
-	 * @see javax.jms.DeliveryMode#NON_PERSISTENT
-	 * @see javax.jms.Message#DEFAULT_DELIVERY_MODE
-	 * @see javax.jms.MessageProducer#send(javax.jms.Message, int, int, long)
-	 */
-	public void setDeliveryMode(int deliveryMode) {
-		this.deliveryMode = deliveryMode;
-	}
+    /**
+     * Create a new instance with the default settings.
+     *
+     * @see Message#DEFAULT_DELIVERY_MODE
+     * @see Message#DEFAULT_PRIORITY
+     * @see Message#DEFAULT_TIME_TO_LIVE
+     */
+    public QosSettings() {
+        this(Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+    }
 
-	/**
-	 * Return the delivery mode to use when sending a message.
-	 */
-	public int getDeliveryMode() {
-		return this.deliveryMode;
-	}
+    /**
+     * Create a new instance with the specified settings.
+     */
+    public QosSettings(int deliveryMode, int priority, long timeToLive) {
+        this.deliveryMode = deliveryMode;
+        this.priority = priority;
+        this.timeToLive = timeToLive;
+    }
 
-	/**
-	 * Set the priority of a message when sending.
-	 * @see javax.jms.Message#DEFAULT_PRIORITY
-	 * @see javax.jms.MessageProducer#send(javax.jms.Message, int, int, long)
-	 */
-	public void setPriority(int priority) {
-		this.priority = priority;
-	}
+    /**
+     * Return the delivery mode to use when sending a message.
+     */
+    public int getDeliveryMode() {
+        return this.deliveryMode;
+    }
 
-	/**
-	 * Return the priority of a message when sending.
-	 */
-	public int getPriority() {
-		return this.priority;
-	}
+    /**
+     * Set the delivery mode to use when sending a message.
+     * Default is the JMS Message default: "PERSISTENT".
+     *
+     * @param deliveryMode the delivery mode to use
+     * @see javax.jms.DeliveryMode#PERSISTENT
+     * @see javax.jms.DeliveryMode#NON_PERSISTENT
+     * @see javax.jms.Message#DEFAULT_DELIVERY_MODE
+     * @see javax.jms.MessageProducer#send(javax.jms.Message, int, int, long)
+     */
+    public void setDeliveryMode(int deliveryMode) {
+        this.deliveryMode = deliveryMode;
+    }
 
-	/**
-	 * Set the time-to-live of the message when sending.
-	 * @param timeToLive the message's lifetime (in milliseconds)
-	 * @see javax.jms.Message#DEFAULT_TIME_TO_LIVE
-	 * @see javax.jms.MessageProducer#send(javax.jms.Message, int, int, long)
-	 */
-	public void setTimeToLive(long timeToLive) {
-		this.timeToLive = timeToLive;
-	}
+    /**
+     * Return the priority of a message when sending.
+     */
+    public int getPriority() {
+        return this.priority;
+    }
 
-	/**
-	 * Return the time-to-live of the message when sending.
-	 */
-	public long getTimeToLive() {
-		return this.timeToLive;
-	}
+    /**
+     * Set the priority of a message when sending.
+     *
+     * @see javax.jms.Message#DEFAULT_PRIORITY
+     * @see javax.jms.MessageProducer#send(javax.jms.Message, int, int, long)
+     */
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
 
+    /**
+     * Return the time-to-live of the message when sending.
+     */
+    public long getTimeToLive() {
+        return this.timeToLive;
+    }
 
-	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof QosSettings)) {
-			return false;
-		}
+    /**
+     * Set the time-to-live of the message when sending.
+     *
+     * @param timeToLive the message's lifetime (in milliseconds)
+     * @see javax.jms.Message#DEFAULT_TIME_TO_LIVE
+     * @see javax.jms.MessageProducer#send(javax.jms.Message, int, int, long)
+     */
+    public void setTimeToLive(long timeToLive) {
+        this.timeToLive = timeToLive;
+    }
 
-		QosSettings otherSettings = (QosSettings) other;
-		return (this.deliveryMode == otherSettings.deliveryMode &&
-				this.priority == otherSettings.priority &&
-				this.timeToLive == otherSettings.timeToLive);
-	}
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof QosSettings)) {
+            return false;
+        }
 
-	@Override
-	public int hashCode() {
-		return (this.deliveryMode * 31 + this.priority);
-	}
+        QosSettings otherSettings = (QosSettings) other;
+        return (this.deliveryMode == otherSettings.deliveryMode &&
+                this.priority == otherSettings.priority &&
+                this.timeToLive == otherSettings.timeToLive);
+    }
 
-	@Override
-	public String toString() {
-		return "QosSettings{" + "deliveryMode=" + this.deliveryMode +
-				", priority=" + this.priority + ", timeToLive=" + this.timeToLive + '}';
-	}
+    @Override
+    public int hashCode() {
+        return (this.deliveryMode * 31 + this.priority);
+    }
+
+    @Override
+    public String toString() {
+        return "QosSettings{" + "deliveryMode=" + this.deliveryMode +
+                ", priority=" + this.priority + ", timeToLive=" + this.timeToLive + '}';
+    }
 }

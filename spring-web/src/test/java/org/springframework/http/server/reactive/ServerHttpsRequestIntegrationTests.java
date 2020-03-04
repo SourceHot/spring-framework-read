@@ -16,8 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import java.net.URI;
-
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -29,8 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -38,77 +34,81 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpsServer;
 import org.springframework.web.client.RestTemplate;
+import reactor.core.publisher.Mono;
 
-import static org.junit.Assert.*;
+import java.net.URI;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * HTTPS-specific integration test for {@link ServerHttpRequest}.
+ *
  * @author Arjen Poutsma
  */
 @RunWith(Parameterized.class)
 public class ServerHttpsRequestIntegrationTests {
 
-	private int port;
+    @Parameterized.Parameter(0)
+    public HttpServer server;
+    private int port;
+    private RestTemplate restTemplate;
 
-	@Parameterized.Parameter(0)
-	public HttpServer server;
+    @Parameterized.Parameters(name = "server [{0}]")
+    public static Object[][] arguments() {
+        return new Object[][]{
+                {new ReactorHttpsServer()},
+        };
+    }
 
-	private RestTemplate restTemplate;
+    @Before
+    public void setup() throws Exception {
+        this.server.setHandler(new CheckRequestHandler());
+        this.server.afterPropertiesSet();
+        this.server.start();
 
-	@Parameterized.Parameters(name = "server [{0}]")
-	public static Object[][] arguments() {
-		return new Object[][]{
-				{new ReactorHttpsServer()},
-		};
-	}
+        // Set dynamically chosen port
+        this.port = this.server.getPort();
 
-	@Before
-	public void setup() throws Exception {
-		this.server.setHandler(new CheckRequestHandler());
-		this.server.afterPropertiesSet();
-		this.server.start();
+        SSLContextBuilder builder = new SSLContextBuilder();
+        builder.loadTrustMaterial(new TrustSelfSignedStrategy());
+        SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
+                builder.build(), NoopHostnameVerifier.INSTANCE);
+        CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(
+                socketFactory).build();
+        HttpComponentsClientHttpRequestFactory requestFactory =
+                new HttpComponentsClientHttpRequestFactory(httpclient);
+        this.restTemplate = new RestTemplate(requestFactory);
+    }
 
-		// Set dynamically chosen port
-		this.port = this.server.getPort();
+    @After
+    public void tearDown() throws Exception {
+        this.server.stop();
+        this.port = 0;
+    }
 
-		SSLContextBuilder builder = new SSLContextBuilder();
-		builder.loadTrustMaterial(new TrustSelfSignedStrategy());
-		SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
-				builder.build(), NoopHostnameVerifier.INSTANCE);
-		CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(
-				socketFactory).build();
-		HttpComponentsClientHttpRequestFactory requestFactory =
-				new HttpComponentsClientHttpRequestFactory(httpclient);
-		this.restTemplate = new RestTemplate(requestFactory);
-	}
+    @Test
+    public void checkUri() throws Exception {
+        URI url = new URI("https://localhost:" + port + "/foo?param=bar");
+        RequestEntity<Void> request = RequestEntity.post(url).build();
+        ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
 
-	@After
-	public void tearDown() throws Exception {
-		this.server.stop();
-		this.port = 0;
-	}
+    public static class CheckRequestHandler implements HttpHandler {
 
-	@Test
-	public void checkUri() throws Exception {
-		URI url = new URI("https://localhost:" + port + "/foo?param=bar");
-		RequestEntity<Void> request = RequestEntity.post(url).build();
-		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-	}
-
-	public static class CheckRequestHandler implements HttpHandler {
-
-		@Override
-		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			URI uri = request.getURI();
-			assertEquals("https", uri.getScheme());
-			assertNotNull(uri.getHost());
-			assertNotEquals(-1, uri.getPort());
-			assertNotNull(request.getRemoteAddress());
-			assertEquals("/foo", uri.getPath());
-			assertEquals("param=bar", uri.getQuery());
-			return Mono.empty();
-		}
-	}
+        @Override
+        public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+            URI uri = request.getURI();
+            assertEquals("https", uri.getScheme());
+            assertNotNull(uri.getHost());
+            assertNotEquals(-1, uri.getPort());
+            assertNotNull(request.getRemoteAddress());
+            assertEquals("/foo", uri.getPath());
+            assertEquals("param=bar", uri.getQuery());
+            return Mono.empty();
+        }
+    }
 
 }

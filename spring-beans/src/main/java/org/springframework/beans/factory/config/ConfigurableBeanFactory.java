@@ -357,9 +357,10 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 
     /**
      * Determine whether the bean with the given name is a FactoryBean.
+     * <p>
+     * 判断是否是工厂bean
      *
-	 * 判断是否是工厂bean
-	 * @param name the name of the bean to check
+     * @param name the name of the bean to check
      * @return whether the bean is a FactoryBean
      * ({@code false} means the bean exists but is not a FactoryBean)
      * @throws NoSuchBeanDefinitionException if there is no bean with the given name
@@ -398,9 +399,10 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 
     /**
      * Return the names of all beans which depend on the specified bean, if any.
+     * <p>
+     * 返回beanName 所需要的依赖
      *
-	 * 返回beanName 所需要的依赖
-	 * @param beanName the name of the bean
+     * @param beanName the name of the bean
      * @return the array of dependent bean names, or an empty array if none
      * @since 2.5
      */

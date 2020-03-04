@@ -16,11 +16,8 @@
 
 package org.springframework.test.context.support;
 
-import java.lang.reflect.Method;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
@@ -30,6 +27,8 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.test.context.TestContext;
 import org.springframework.util.Assert;
+
+import java.lang.reflect.Method;
 
 /**
  * Abstract base class for {@code TestExecutionListener} implementations that
@@ -42,111 +41,114 @@ import org.springframework.util.Assert;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
- * @since 4.2
  * @see DirtiesContext
+ * @since 4.2
  */
 public abstract class AbstractDirtiesContextTestExecutionListener extends AbstractTestExecutionListener {
 
-	private static final Log logger = LogFactory.getLog(AbstractDirtiesContextTestExecutionListener.class);
+    private static final Log logger = LogFactory.getLog(AbstractDirtiesContextTestExecutionListener.class);
 
 
-	@Override
-	public abstract int getOrder();
+    @Override
+    public abstract int getOrder();
 
-	/**
-	 * Mark the {@linkplain ApplicationContext application context} of the supplied
-	 * {@linkplain TestContext test context} as
-	 * {@linkplain TestContext#markApplicationContextDirty(DirtiesContext.HierarchyMode) dirty}
-	 * and set {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
-	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context to {@code true}.
-	 * @param testContext the test context whose application context should
-	 * be marked as dirty
-	 * @param hierarchyMode the context cache clearing mode to be applied if the
-	 * context is part of a hierarchy; may be {@code null}
-	 * @since 3.2.2
-	 */
-	protected void dirtyContext(TestContext testContext, @Nullable HierarchyMode hierarchyMode) {
-		testContext.markApplicationContextDirty(hierarchyMode);
-		testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE, Boolean.TRUE);
-	}
+    /**
+     * Mark the {@linkplain ApplicationContext application context} of the supplied
+     * {@linkplain TestContext test context} as
+     * {@linkplain TestContext#markApplicationContextDirty(DirtiesContext.HierarchyMode) dirty}
+     * and set {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
+     * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context to {@code true}.
+     *
+     * @param testContext   the test context whose application context should
+     *                      be marked as dirty
+     * @param hierarchyMode the context cache clearing mode to be applied if the
+     *                      context is part of a hierarchy; may be {@code null}
+     * @since 3.2.2
+     */
+    protected void dirtyContext(TestContext testContext, @Nullable HierarchyMode hierarchyMode) {
+        testContext.markApplicationContextDirty(hierarchyMode);
+        testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE, Boolean.TRUE);
+    }
 
-	/**
-	 * Perform the actual work for {@link #beforeTestMethod} and {@link #afterTestMethod}
-	 * by dirtying the context if appropriate (i.e., according to the required modes).
-	 * @param testContext the test context whose application context should
-	 * potentially be marked as dirty; never {@code null}
-	 * @param requiredMethodMode the method mode required for a context to
-	 * be marked dirty in the current phase; never {@code null}
-	 * @param requiredClassMode the class mode required for a context to
-	 * be marked dirty in the current phase; never {@code null}
-	 * @throws Exception allows any exception to propagate
-	 * @since 4.2
-	 * @see #dirtyContext
-	 */
-	protected void beforeOrAfterTestMethod(TestContext testContext, MethodMode requiredMethodMode,
-			ClassMode requiredClassMode) throws Exception {
+    /**
+     * Perform the actual work for {@link #beforeTestMethod} and {@link #afterTestMethod}
+     * by dirtying the context if appropriate (i.e., according to the required modes).
+     *
+     * @param testContext        the test context whose application context should
+     *                           potentially be marked as dirty; never {@code null}
+     * @param requiredMethodMode the method mode required for a context to
+     *                           be marked dirty in the current phase; never {@code null}
+     * @param requiredClassMode  the class mode required for a context to
+     *                           be marked dirty in the current phase; never {@code null}
+     * @throws Exception allows any exception to propagate
+     * @see #dirtyContext
+     * @since 4.2
+     */
+    protected void beforeOrAfterTestMethod(TestContext testContext, MethodMode requiredMethodMode,
+                                           ClassMode requiredClassMode) throws Exception {
 
-		Assert.notNull(testContext, "TestContext must not be null");
-		Assert.notNull(requiredMethodMode, "requiredMethodMode must not be null");
-		Assert.notNull(requiredClassMode, "requiredClassMode must not be null");
+        Assert.notNull(testContext, "TestContext must not be null");
+        Assert.notNull(requiredMethodMode, "requiredMethodMode must not be null");
+        Assert.notNull(requiredClassMode, "requiredClassMode must not be null");
 
-		Class<?> testClass = testContext.getTestClass();
-		Method testMethod = testContext.getTestMethod();
-		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
-		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
+        Class<?> testClass = testContext.getTestClass();
+        Method testMethod = testContext.getTestMethod();
+        Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
+        Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
 
-		DirtiesContext methodAnn = AnnotatedElementUtils.findMergedAnnotation(testMethod, DirtiesContext.class);
-		DirtiesContext classAnn = AnnotatedElementUtils.findMergedAnnotation(testClass, DirtiesContext.class);
-		boolean methodAnnotated = (methodAnn != null);
-		boolean classAnnotated = (classAnn != null);
-		MethodMode methodMode = (methodAnnotated ? methodAnn.methodMode() : null);
-		ClassMode classMode = (classAnnotated ? classAnn.classMode() : null);
+        DirtiesContext methodAnn = AnnotatedElementUtils.findMergedAnnotation(testMethod, DirtiesContext.class);
+        DirtiesContext classAnn = AnnotatedElementUtils.findMergedAnnotation(testClass, DirtiesContext.class);
+        boolean methodAnnotated = (methodAnn != null);
+        boolean classAnnotated = (classAnn != null);
+        MethodMode methodMode = (methodAnnotated ? methodAnn.methodMode() : null);
+        ClassMode classMode = (classAnnotated ? classAnn.classMode() : null);
 
-		if (logger.isDebugEnabled()) {
-			String phase = (requiredClassMode.name().startsWith("BEFORE") ? "Before" : "After");
-			logger.debug(String.format("%s test method: context %s, class annotated with @DirtiesContext [%s] "
-					+ "with mode [%s], method annotated with @DirtiesContext [%s] with mode [%s].", phase, testContext,
-				classAnnotated, classMode, methodAnnotated, methodMode));
-		}
+        if (logger.isDebugEnabled()) {
+            String phase = (requiredClassMode.name().startsWith("BEFORE") ? "Before" : "After");
+            logger.debug(String.format("%s test method: context %s, class annotated with @DirtiesContext [%s] "
+                            + "with mode [%s], method annotated with @DirtiesContext [%s] with mode [%s].", phase, testContext,
+                    classAnnotated, classMode, methodAnnotated, methodMode));
+        }
 
-		if ((methodMode == requiredMethodMode) || (classMode == requiredClassMode)) {
-			HierarchyMode hierarchyMode = (methodAnnotated ? methodAnn.hierarchyMode() : classAnn.hierarchyMode());
-			dirtyContext(testContext, hierarchyMode);
-		}
-	}
+        if ((methodMode == requiredMethodMode) || (classMode == requiredClassMode)) {
+            HierarchyMode hierarchyMode = (methodAnnotated ? methodAnn.hierarchyMode() : classAnn.hierarchyMode());
+            dirtyContext(testContext, hierarchyMode);
+        }
+    }
 
-	/**
-	 * Perform the actual work for {@link #beforeTestClass} and {@link #afterTestClass}
-	 * by dirtying the context if appropriate (i.e., according to the required mode).
-	 * @param testContext the test context whose application context should
-	 * potentially be marked as dirty; never {@code null}
-	 * @param requiredClassMode the class mode required for a context to
-	 * be marked dirty in the current phase; never {@code null}
-	 * @throws Exception allows any exception to propagate
-	 * @since 4.2
-	 * @see #dirtyContext
-	 */
-	protected void beforeOrAfterTestClass(TestContext testContext, ClassMode requiredClassMode) throws Exception {
-		Assert.notNull(testContext, "TestContext must not be null");
-		Assert.notNull(requiredClassMode, "requiredClassMode must not be null");
+    /**
+     * Perform the actual work for {@link #beforeTestClass} and {@link #afterTestClass}
+     * by dirtying the context if appropriate (i.e., according to the required mode).
+     *
+     * @param testContext       the test context whose application context should
+     *                          potentially be marked as dirty; never {@code null}
+     * @param requiredClassMode the class mode required for a context to
+     *                          be marked dirty in the current phase; never {@code null}
+     * @throws Exception allows any exception to propagate
+     * @see #dirtyContext
+     * @since 4.2
+     */
+    protected void beforeOrAfterTestClass(TestContext testContext, ClassMode requiredClassMode) throws Exception {
+        Assert.notNull(testContext, "TestContext must not be null");
+        Assert.notNull(requiredClassMode, "requiredClassMode must not be null");
 
-		Class<?> testClass = testContext.getTestClass();
-		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
+        Class<?> testClass = testContext.getTestClass();
+        Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
 
-		DirtiesContext dirtiesContext = AnnotatedElementUtils.findMergedAnnotation(testClass, DirtiesContext.class);
-		boolean classAnnotated = (dirtiesContext != null);
-		ClassMode classMode = (classAnnotated ? dirtiesContext.classMode() : null);
+        DirtiesContext dirtiesContext = AnnotatedElementUtils.findMergedAnnotation(testClass, DirtiesContext.class);
+        boolean classAnnotated = (dirtiesContext != null);
+        ClassMode classMode = (classAnnotated ? dirtiesContext.classMode() : null);
 
-		if (logger.isDebugEnabled()) {
-			String phase = (requiredClassMode.name().startsWith("BEFORE") ? "Before" : "After");
-			logger.debug(String.format(
-				"%s test class: context %s, class annotated with @DirtiesContext [%s] with mode [%s].", phase,
-				testContext, classAnnotated, classMode));
-		}
+        if (logger.isDebugEnabled()) {
+            String phase = (requiredClassMode.name().startsWith("BEFORE") ? "Before" : "After");
+            logger.debug(String.format(
+                    "%s test class: context %s, class annotated with @DirtiesContext [%s] with mode [%s].", phase,
+                    testContext, classAnnotated, classMode));
+        }
 
-		if (classMode == requiredClassMode) {
-			dirtyContext(testContext, dirtiesContext.hierarchyMode());
-		}
-	}
+        if (classMode == requiredClassMode) {
+            dirtyContext(testContext, dirtiesContext.hierarchyMode());
+        }
+    }
 
 }

@@ -32,17 +32,18 @@ import org.aopalliance.aop.Advice;
  * will be exposed in an advised object.
  *
  * @author Rod Johnson
- * @since 1.1.1
  * @see IntroductionInfo
  * @see IntroductionAdvisor
+ * @since 1.1.1
  */
 public interface DynamicIntroductionAdvice extends Advice {
 
-	/**
-	 * Does this introduction advice implement the given interface?
-	 * @param intf the interface to check
-	 * @return whether the advice implements the specified interface
-	 */
-	boolean implementsInterface(Class<?> intf);
+    /**
+     * Does this introduction advice implement the given interface?
+     *
+     * @param intf the interface to check
+     * @return whether the advice implements the specified interface
+     */
+    boolean implementsInterface(Class<?> intf);
 
 }

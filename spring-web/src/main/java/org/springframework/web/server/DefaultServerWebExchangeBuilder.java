@@ -16,15 +16,14 @@
 
 package org.springframework.web.server;
 
-import java.security.Principal;
-import java.util.function.Consumer;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import reactor.core.publisher.Mono;
+
+import java.security.Principal;
+import java.util.function.Consumer;
 
 /**
  * Package-private implementation of {@link ServerWebExchange.Builder}.
@@ -34,95 +33,95 @@ import org.springframework.util.Assert;
  */
 class DefaultServerWebExchangeBuilder implements ServerWebExchange.Builder {
 
-	private final ServerWebExchange delegate;
+    private final ServerWebExchange delegate;
 
-	@Nullable
-	private ServerHttpRequest request;
+    @Nullable
+    private ServerHttpRequest request;
 
-	@Nullable
-	private ServerHttpResponse response;
+    @Nullable
+    private ServerHttpResponse response;
 
-	@Nullable
-	private Mono<Principal> principalMono;
-
-
-	DefaultServerWebExchangeBuilder(ServerWebExchange delegate) {
-		Assert.notNull(delegate, "Delegate is required");
-		this.delegate = delegate;
-	}
+    @Nullable
+    private Mono<Principal> principalMono;
 
 
-	@Override
-	public ServerWebExchange.Builder request(Consumer<ServerHttpRequest.Builder> consumer) {
-		ServerHttpRequest.Builder builder = this.delegate.getRequest().mutate();
-		consumer.accept(builder);
-		return request(builder.build());
-	}
-
-	@Override
-	public ServerWebExchange.Builder request(ServerHttpRequest request) {
-		this.request = request;
-		return this;
-	}
-
-	@Override
-	public ServerWebExchange.Builder response(ServerHttpResponse response) {
-		this.response = response;
-		return this;
-	}
-
-	@Override
-	public ServerWebExchange.Builder principal(Mono<Principal> principalMono) {
-		this.principalMono = principalMono;
-		return this;
-	}
-
-	@Override
-	public ServerWebExchange build() {
-		return new MutativeDecorator(this.delegate, this.request, this.response, this.principalMono);
-	}
+    DefaultServerWebExchangeBuilder(ServerWebExchange delegate) {
+        Assert.notNull(delegate, "Delegate is required");
+        this.delegate = delegate;
+    }
 
 
-	/**
-	 * An immutable wrapper of an exchange returning property overrides -- given
-	 * to the constructor -- or original values otherwise.
-	 */
-	private static class MutativeDecorator extends ServerWebExchangeDecorator {
+    @Override
+    public ServerWebExchange.Builder request(Consumer<ServerHttpRequest.Builder> consumer) {
+        ServerHttpRequest.Builder builder = this.delegate.getRequest().mutate();
+        consumer.accept(builder);
+        return request(builder.build());
+    }
 
-		@Nullable
-		private final ServerHttpRequest request;
+    @Override
+    public ServerWebExchange.Builder request(ServerHttpRequest request) {
+        this.request = request;
+        return this;
+    }
 
-		@Nullable
-		private final ServerHttpResponse response;
+    @Override
+    public ServerWebExchange.Builder response(ServerHttpResponse response) {
+        this.response = response;
+        return this;
+    }
 
-		@Nullable
-		private final Mono<Principal> principalMono;
+    @Override
+    public ServerWebExchange.Builder principal(Mono<Principal> principalMono) {
+        this.principalMono = principalMono;
+        return this;
+    }
 
-		public MutativeDecorator(ServerWebExchange delegate, @Nullable ServerHttpRequest request,
-				@Nullable ServerHttpResponse response, @Nullable Mono<Principal> principalMono) {
+    @Override
+    public ServerWebExchange build() {
+        return new MutativeDecorator(this.delegate, this.request, this.response, this.principalMono);
+    }
 
-			super(delegate);
-			this.request = request;
-			this.response = response;
-			this.principalMono = principalMono;
-		}
 
-		@Override
-		public ServerHttpRequest getRequest() {
-			return (this.request != null ? this.request : getDelegate().getRequest());
-		}
+    /**
+     * An immutable wrapper of an exchange returning property overrides -- given
+     * to the constructor -- or original values otherwise.
+     */
+    private static class MutativeDecorator extends ServerWebExchangeDecorator {
 
-		@Override
-		public ServerHttpResponse getResponse() {
-			return (this.response != null ? this.response : getDelegate().getResponse());
-		}
+        @Nullable
+        private final ServerHttpRequest request;
 
-		@SuppressWarnings("unchecked")
-		@Override
-		public <T extends Principal> Mono<T> getPrincipal() {
-			return (this.principalMono != null ? (Mono<T>) this.principalMono : getDelegate().getPrincipal());
-		}
-	}
+        @Nullable
+        private final ServerHttpResponse response;
+
+        @Nullable
+        private final Mono<Principal> principalMono;
+
+        public MutativeDecorator(ServerWebExchange delegate, @Nullable ServerHttpRequest request,
+                                 @Nullable ServerHttpResponse response, @Nullable Mono<Principal> principalMono) {
+
+            super(delegate);
+            this.request = request;
+            this.response = response;
+            this.principalMono = principalMono;
+        }
+
+        @Override
+        public ServerHttpRequest getRequest() {
+            return (this.request != null ? this.request : getDelegate().getRequest());
+        }
+
+        @Override
+        public ServerHttpResponse getResponse() {
+            return (this.response != null ? this.response : getDelegate().getResponse());
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T extends Principal> Mono<T> getPrincipal() {
+            return (this.principalMono != null ? (Mono<T>) this.principalMono : getDelegate().getPrincipal());
+        }
+    }
 
 }
 

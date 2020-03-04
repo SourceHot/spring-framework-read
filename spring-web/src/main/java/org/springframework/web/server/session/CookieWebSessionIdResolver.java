@@ -16,18 +16,18 @@
 
 package org.springframework.web.server.session;
 
-import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
 import org.springframework.http.HttpCookie;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
+
+import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Cookie-based {@link WebSessionIdResolver}.
@@ -38,98 +38,100 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 
-	private String cookieName = "SESSION";
+    private String cookieName = "SESSION";
 
-	private Duration cookieMaxAge = Duration.ofSeconds(-1);
+    private Duration cookieMaxAge = Duration.ofSeconds(-1);
 
-	@Nullable
-	private Consumer<ResponseCookie.ResponseCookieBuilder> cookieInitializer = null;
+    @Nullable
+    private Consumer<ResponseCookie.ResponseCookieBuilder> cookieInitializer = null;
+
+    /**
+     * Return the configured cookie name.
+     */
+    public String getCookieName() {
+        return this.cookieName;
+    }
+
+    /**
+     * Set the name of the cookie to use for the session id.
+     * <p>By default set to "SESSION".
+     *
+     * @param cookieName the cookie name
+     */
+    public void setCookieName(String cookieName) {
+        Assert.hasText(cookieName, "'cookieName' must not be empty");
+        this.cookieName = cookieName;
+    }
+
+    /**
+     * Return the configured "Max-Age" attribute value for the session cookie.
+     */
+    public Duration getCookieMaxAge() {
+        return this.cookieMaxAge;
+    }
+
+    /**
+     * Set the value for the "Max-Age" attribute of the cookie that holds the
+     * session id. For the range of values see {@link ResponseCookie#getMaxAge()}.
+     * <p>By default set to -1.
+     *
+     * @param maxAge the maxAge duration value
+     */
+    public void setCookieMaxAge(Duration maxAge) {
+        this.cookieMaxAge = maxAge;
+    }
+
+    /**
+     * Add a {@link Consumer} for a {@code ResponseCookieBuilder} that will be invoked
+     * for each cookie being built, just before the call to {@code build()}.
+     *
+     * @param initializer consumer for a cookie builder
+     * @since 5.1
+     */
+    public void addCookieInitializer(Consumer<ResponseCookie.ResponseCookieBuilder> initializer) {
+        this.cookieInitializer = this.cookieInitializer != null ?
+                this.cookieInitializer.andThen(initializer) : initializer;
+    }
 
 
-	/**
-	 * Set the name of the cookie to use for the session id.
-	 * <p>By default set to "SESSION".
-	 * @param cookieName the cookie name
-	 */
-	public void setCookieName(String cookieName) {
-		Assert.hasText(cookieName, "'cookieName' must not be empty");
-		this.cookieName = cookieName;
-	}
+    @Override
+    public List<String> resolveSessionIds(ServerWebExchange exchange) {
+        MultiValueMap<String, HttpCookie> cookieMap = exchange.getRequest().getCookies();
+        List<HttpCookie> cookies = cookieMap.get(getCookieName());
+        if (cookies == null) {
+            return Collections.emptyList();
+        }
+        return cookies.stream().map(HttpCookie::getValue).collect(Collectors.toList());
+    }
 
-	/**
-	 * Return the configured cookie name.
-	 */
-	public String getCookieName() {
-		return this.cookieName;
-	}
+    @Override
+    public void setSessionId(ServerWebExchange exchange, String id) {
+        Assert.notNull(id, "'id' is required");
+        ResponseCookie cookie = initSessionCookie(exchange, id, getCookieMaxAge());
+        exchange.getResponse().getCookies().set(this.cookieName, cookie);
+    }
 
-	/**
-	 * Set the value for the "Max-Age" attribute of the cookie that holds the
-	 * session id. For the range of values see {@link ResponseCookie#getMaxAge()}.
-	 * <p>By default set to -1.
-	 * @param maxAge the maxAge duration value
-	 */
-	public void setCookieMaxAge(Duration maxAge) {
-		this.cookieMaxAge = maxAge;
-	}
+    @Override
+    public void expireSession(ServerWebExchange exchange) {
+        ResponseCookie cookie = initSessionCookie(exchange, "", Duration.ZERO);
+        exchange.getResponse().getCookies().set(this.cookieName, cookie);
+    }
 
-	/**
-	 * Return the configured "Max-Age" attribute value for the session cookie.
-	 */
-	public Duration getCookieMaxAge() {
-		return this.cookieMaxAge;
-	}
+    private ResponseCookie initSessionCookie(
+            ServerWebExchange exchange, String id, Duration maxAge) {
 
-	/**
-	 * Add a {@link Consumer} for a {@code ResponseCookieBuilder} that will be invoked
-	 * for each cookie being built, just before the call to {@code build()}.
-	 * @param initializer consumer for a cookie builder
-	 * @since 5.1
-	 */
-	public void addCookieInitializer(Consumer<ResponseCookie.ResponseCookieBuilder> initializer) {
-		this.cookieInitializer = this.cookieInitializer != null ?
-				this.cookieInitializer.andThen(initializer) : initializer;
-	}
+        ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from(this.cookieName, id)
+                .path(exchange.getRequest().getPath().contextPath().value() + "/")
+                .maxAge(maxAge)
+                .httpOnly(true)
+                .secure("https".equalsIgnoreCase(exchange.getRequest().getURI().getScheme()))
+                .sameSite("Lax");
 
+        if (this.cookieInitializer != null) {
+            this.cookieInitializer.accept(cookieBuilder);
+        }
 
-	@Override
-	public List<String> resolveSessionIds(ServerWebExchange exchange) {
-		MultiValueMap<String, HttpCookie> cookieMap = exchange.getRequest().getCookies();
-		List<HttpCookie> cookies = cookieMap.get(getCookieName());
-		if (cookies == null) {
-			return Collections.emptyList();
-		}
-		return cookies.stream().map(HttpCookie::getValue).collect(Collectors.toList());
-	}
-
-	@Override
-	public void setSessionId(ServerWebExchange exchange, String id) {
-		Assert.notNull(id, "'id' is required");
-		ResponseCookie cookie = initSessionCookie(exchange, id, getCookieMaxAge());
-		exchange.getResponse().getCookies().set(this.cookieName, cookie);
-	}
-
-	@Override
-	public void expireSession(ServerWebExchange exchange) {
-		ResponseCookie cookie = initSessionCookie(exchange, "", Duration.ZERO);
-		exchange.getResponse().getCookies().set(this.cookieName, cookie);
-	}
-
-	private ResponseCookie initSessionCookie(
-			ServerWebExchange exchange, String id, Duration maxAge) {
-
-		ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from(this.cookieName, id)
-				.path(exchange.getRequest().getPath().contextPath().value() + "/")
-				.maxAge(maxAge)
-				.httpOnly(true)
-				.secure("https".equalsIgnoreCase(exchange.getRequest().getURI().getScheme()))
-				.sameSite("Lax");
-
-		if (this.cookieInitializer != null) {
-			this.cookieInitializer.accept(cookieBuilder);
-		}
-
-		return cookieBuilder.build();
-	}
+        return cookieBuilder.build();
+    }
 
 }

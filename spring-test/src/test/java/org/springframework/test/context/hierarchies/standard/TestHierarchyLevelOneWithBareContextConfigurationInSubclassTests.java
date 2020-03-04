@@ -18,7 +18,6 @@ package org.springframework.test.context.hierarchies.standard;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +26,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Sam Brannen
@@ -37,37 +38,33 @@ import static org.junit.Assert.*;
 @ContextHierarchy(@ContextConfiguration)
 public class TestHierarchyLevelOneWithBareContextConfigurationInSubclassTests {
 
-	@Configuration
-	static class Config {
+    @Autowired
+    private String foo;
+    @Autowired
+    private String bar;
+    @Autowired
+    private ApplicationContext context;
 
-		@Bean
-		public String foo() {
-			return "foo-level-1";
-		}
+    @Test
+    public void loadContextHierarchy() {
+        assertNotNull("child ApplicationContext", context);
+        assertNull("parent ApplicationContext", context.getParent());
+        assertEquals("foo-level-1", foo);
+        assertEquals("bar", bar);
+    }
 
-		@Bean
-		public String bar() {
-			return "bar";
-		}
-	}
+    @Configuration
+    static class Config {
 
+        @Bean
+        public String foo() {
+            return "foo-level-1";
+        }
 
-	@Autowired
-	private String foo;
-
-	@Autowired
-	private String bar;
-
-	@Autowired
-	private ApplicationContext context;
-
-
-	@Test
-	public void loadContextHierarchy() {
-		assertNotNull("child ApplicationContext", context);
-		assertNull("parent ApplicationContext", context.getParent());
-		assertEquals("foo-level-1", foo);
-		assertEquals("bar", bar);
-	}
+        @Bean
+        public String bar() {
+            return "bar";
+        }
+    }
 
 }

@@ -19,7 +19,6 @@ package org.springframework.aop.target;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -31,8 +30,10 @@ import org.springframework.tests.sample.beans.SerializablePerson;
 import org.springframework.tests.sample.beans.SideEffectBean;
 import org.springframework.util.SerializationTestUtils;
 
-import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 /**
  * @author Rod Johnson
@@ -40,114 +41,115 @@ import static org.springframework.tests.TestResourceUtils.*;
  */
 public class HotSwappableTargetSourceTests {
 
-	/** Initial count value set in bean factory XML */
-	private static final int INITIAL_COUNT = 10;
+    /**
+     * Initial count value set in bean factory XML
+     */
+    private static final int INITIAL_COUNT = 10;
 
-	private DefaultListableBeanFactory beanFactory;
-
-
-	@Before
-	public void setup() {
-		this.beanFactory = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
-				qualifiedResource(HotSwappableTargetSourceTests.class, "context.xml"));
-	}
-
-	/**
-	 * We must simulate container shutdown, which should clear threads.
-	 */
-	@After
-	public void close() {
-		// Will call pool.close()
-		this.beanFactory.destroySingletons();
-	}
+    private DefaultListableBeanFactory beanFactory;
 
 
-	/**
-	 * Check it works like a normal invoker
-	 */
-	@Test
-	public void testBasicFunctionality() {
-		SideEffectBean proxied = (SideEffectBean) beanFactory.getBean("swappable");
-		assertEquals(INITIAL_COUNT, proxied.getCount());
-		proxied.doWork();
-		assertEquals(INITIAL_COUNT + 1, proxied.getCount());
+    @Before
+    public void setup() {
+        this.beanFactory = new DefaultListableBeanFactory();
+        new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
+                qualifiedResource(HotSwappableTargetSourceTests.class, "context.xml"));
+    }
 
-		proxied = (SideEffectBean) beanFactory.getBean("swappable");
-		proxied.doWork();
-		assertEquals(INITIAL_COUNT + 2, proxied.getCount());
-	}
+    /**
+     * We must simulate container shutdown, which should clear threads.
+     */
+    @After
+    public void close() {
+        // Will call pool.close()
+        this.beanFactory.destroySingletons();
+    }
 
-	@Test
-	public void testValidSwaps() {
-		SideEffectBean target1 = (SideEffectBean) beanFactory.getBean("target1");
-		SideEffectBean target2 = (SideEffectBean) beanFactory.getBean("target2");
 
-		SideEffectBean proxied = (SideEffectBean) beanFactory.getBean("swappable");
-		assertEquals(target1.getCount(), proxied.getCount());
-		proxied.doWork();
-		assertEquals(INITIAL_COUNT + 1, proxied.getCount());
+    /**
+     * Check it works like a normal invoker
+     */
+    @Test
+    public void testBasicFunctionality() {
+        SideEffectBean proxied = (SideEffectBean) beanFactory.getBean("swappable");
+        assertEquals(INITIAL_COUNT, proxied.getCount());
+        proxied.doWork();
+        assertEquals(INITIAL_COUNT + 1, proxied.getCount());
 
-		HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
-		Object old = swapper.swap(target2);
-		assertEquals("Correct old target was returned", target1, old);
+        proxied = (SideEffectBean) beanFactory.getBean("swappable");
+        proxied.doWork();
+        assertEquals(INITIAL_COUNT + 2, proxied.getCount());
+    }
 
-		// TODO should be able to make this assertion: need to fix target handling
-		// in AdvisedSupport
-		//assertEquals(target2, ((Advised) proxied).getTarget());
+    @Test
+    public void testValidSwaps() {
+        SideEffectBean target1 = (SideEffectBean) beanFactory.getBean("target1");
+        SideEffectBean target2 = (SideEffectBean) beanFactory.getBean("target2");
 
-		assertEquals(20, proxied.getCount());
-		proxied.doWork();
-		assertEquals(21, target2.getCount());
+        SideEffectBean proxied = (SideEffectBean) beanFactory.getBean("swappable");
+        assertEquals(target1.getCount(), proxied.getCount());
+        proxied.doWork();
+        assertEquals(INITIAL_COUNT + 1, proxied.getCount());
 
-		// Swap it back
-		swapper.swap(target1);
-		assertEquals(target1.getCount(), proxied.getCount());
-	}
+        HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
+        Object old = swapper.swap(target2);
+        assertEquals("Correct old target was returned", target1, old);
 
-	@Test
-	public void testRejectsSwapToNull() {
-		HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
-		IllegalArgumentException aopex = null;
-		try {
-			swapper.swap(null);
-			fail("Shouldn't be able to swap to invalid value");
-		}
-		catch (IllegalArgumentException ex) {
-			// Ok
-			aopex = ex;
-		}
+        // TODO should be able to make this assertion: need to fix target handling
+        // in AdvisedSupport
+        //assertEquals(target2, ((Advised) proxied).getTarget());
 
-		// It shouldn't be corrupted, it should still work
-		testBasicFunctionality();
-		assertTrue(aopex.getMessage().contains("null"));
-	}
+        assertEquals(20, proxied.getCount());
+        proxied.doWork();
+        assertEquals(21, target2.getCount());
 
-	@Test
-	public void testSerialization() throws Exception {
-		SerializablePerson sp1 = new SerializablePerson();
-		sp1.setName("Tony");
-		SerializablePerson sp2 = new SerializablePerson();
-		sp1.setName("Gordon");
+        // Swap it back
+        swapper.swap(target1);
+        assertEquals(target1.getCount(), proxied.getCount());
+    }
 
-		HotSwappableTargetSource hts = new HotSwappableTargetSource(sp1);
-		ProxyFactory pf = new ProxyFactory();
-		pf.addInterface(Person.class);
-		pf.setTargetSource(hts);
-		pf.addAdvisor(new DefaultPointcutAdvisor(new SerializableNopInterceptor()));
-		Person p = (Person) pf.getProxy();
+    @Test
+    public void testRejectsSwapToNull() {
+        HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
+        IllegalArgumentException aopex = null;
+        try {
+            swapper.swap(null);
+            fail("Shouldn't be able to swap to invalid value");
+        } catch (IllegalArgumentException ex) {
+            // Ok
+            aopex = ex;
+        }
 
-		assertEquals(sp1.getName(), p.getName());
-		hts.swap(sp2);
-		assertEquals(sp2.getName(), p.getName());
+        // It shouldn't be corrupted, it should still work
+        testBasicFunctionality();
+        assertTrue(aopex.getMessage().contains("null"));
+    }
 
-		p = (Person) SerializationTestUtils.serializeAndDeserialize(p);
-		// We need to get a reference to the client-side targetsource
-		hts = (HotSwappableTargetSource) ((Advised) p).getTargetSource();
-		assertEquals(sp2.getName(), p.getName());
-		hts.swap(sp1);
-		assertEquals(sp1.getName(), p.getName());
+    @Test
+    public void testSerialization() throws Exception {
+        SerializablePerson sp1 = new SerializablePerson();
+        sp1.setName("Tony");
+        SerializablePerson sp2 = new SerializablePerson();
+        sp1.setName("Gordon");
 
-	}
+        HotSwappableTargetSource hts = new HotSwappableTargetSource(sp1);
+        ProxyFactory pf = new ProxyFactory();
+        pf.addInterface(Person.class);
+        pf.setTargetSource(hts);
+        pf.addAdvisor(new DefaultPointcutAdvisor(new SerializableNopInterceptor()));
+        Person p = (Person) pf.getProxy();
+
+        assertEquals(sp1.getName(), p.getName());
+        hts.swap(sp2);
+        assertEquals(sp2.getName(), p.getName());
+
+        p = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+        // We need to get a reference to the client-side targetsource
+        hts = (HotSwappableTargetSource) ((Advised) p).getTargetSource();
+        assertEquals(sp2.getName(), p.getName());
+        hts.swap(sp1);
+        assertEquals(sp1.getName(), p.getName());
+
+    }
 
 }

@@ -30,9 +30,9 @@ import java.lang.annotation.Target;
  * which case it is inherited and does not need to be added on the method level.
  *
  * @author Arjen Poutsma
- * @since 3.0
  * @see RequestBody
  * @see RestController
+ * @since 3.0
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

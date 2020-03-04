@@ -45,7 +45,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @SuppressWarnings("javadoc")
 @RunWith(Suite.class)
-@SuiteClasses({ TestClass1.class, TestClass2.class, TestClass3.class, TestClass4.class })
+@SuiteClasses({TestClass1.class, TestClass2.class, TestClass3.class, TestClass4.class})
 public class Spr8849Tests {
 
 }

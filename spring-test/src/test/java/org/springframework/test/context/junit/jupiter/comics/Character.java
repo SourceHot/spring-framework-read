@@ -24,13 +24,13 @@ package org.springframework.test.context.junit.jupiter.comics;
  */
 public abstract class Character {
 
-	private final String name;
+    private final String name;
 
-	Character(String name) {
-		this.name = name;
-	}
+    Character(String name) {
+        this.name = name;
+    }
 
-	public String getName() {
-		return this.name;
-	}
+    public String getName() {
+        return this.name;
+    }
 }

@@ -17,10 +17,10 @@
 package org.springframework.test.context.junit4.spr3896;
 
 import org.junit.Test;
-
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * JUnit 4 based integration test for verifying support for the
@@ -35,10 +35,10 @@ import static org.junit.Assert.*;
 @ContextConfiguration("BeanOverridingDefaultLocationsInheritedTests-context.xml")
 public class BeanOverridingExplicitLocationsInheritedTests extends ExplicitLocationsBaseTests {
 
-	@Test
-	@Override
-	public void verifyEmployeeSetFromBaseContextConfig() {
-		assertNotNull("The employee should have been autowired.", this.employee);
-		assertEquals("The employee bean should have been overridden.", "Yoda", this.employee.getName());
-	}
+    @Test
+    @Override
+    public void verifyEmployeeSetFromBaseContextConfig() {
+        assertNotNull("The employee should have been autowired.", this.employee);
+        assertEquals("The employee bean should have been overridden.", "Yoda", this.employee.getName());
+    }
 }

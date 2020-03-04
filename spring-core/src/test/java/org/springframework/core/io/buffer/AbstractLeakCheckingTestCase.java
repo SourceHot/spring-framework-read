@@ -24,24 +24,24 @@ import org.junit.After;
  * throwing an {@link AssertionError} if not.
  *
  * @author Arjen Poutsma
- * @since 5.1.3
  * @see LeakAwareDataBufferFactory
+ * @since 5.1.3
  */
 public abstract class AbstractLeakCheckingTestCase {
 
-	/**
-	 * The data buffer factory.
-	 */
-	@SuppressWarnings("ProtectedField")
-	protected final LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
+    /**
+     * The data buffer factory.
+     */
+    @SuppressWarnings("ProtectedField")
+    protected final LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
 
-	/**
-	 * Checks whether any of the data buffers created by {@link #bufferFactory} have not been
-	 * released, throwing an assertion error if so.
-	 */
-	@After
-	public final void checkForLeaks() {
-		this.bufferFactory.checkForLeaks();
-	}
+    /**
+     * Checks whether any of the data buffers created by {@link #bufferFactory} have not been
+     * released, throwing an assertion error if so.
+     */
+    @After
+    public final void checkForLeaks() {
+        this.bufferFactory.checkForLeaks();
+    }
 
 }

@@ -16,8 +16,6 @@
 
 package org.springframework.test.web.servlet.htmlunit.webdriver;
 
-import java.io.IOException;
-
 import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import org.junit.Before;
@@ -29,10 +27,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openqa.selenium.WebDriverException;
 
+import java.io.IOException;
+
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link WebConnectionHtmlUnitDriver}.
@@ -44,38 +45,36 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class WebConnectionHtmlUnitDriverTests {
 
-	private final WebConnectionHtmlUnitDriver driver = new WebConnectionHtmlUnitDriver();
+    private final WebConnectionHtmlUnitDriver driver = new WebConnectionHtmlUnitDriver();
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+    @Mock
+    private WebConnection connection;
 
-	@Mock
-	private WebConnection connection;
-
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
-
-	@Before
-	public void setup() throws Exception {
-		when(this.connection.getResponse(any(WebRequest.class))).thenThrow(new IOException(""));
-	}
+    @Before
+    public void setup() throws Exception {
+        when(this.connection.getResponse(any(WebRequest.class))).thenThrow(new IOException(""));
+    }
 
 
-	@Test
-	public void getWebConnectionDefaultNotNull() {
-		assertThat(this.driver.getWebConnection(), notNullValue());
-	}
+    @Test
+    public void getWebConnectionDefaultNotNull() {
+        assertThat(this.driver.getWebConnection(), notNullValue());
+    }
 
-	@Test
-	public void setWebConnectionToNull() {
-		this.exception.expect(IllegalArgumentException.class);
-		this.driver.setWebConnection(null);
-	}
+    @Test
+    public void setWebConnectionToNull() {
+        this.exception.expect(IllegalArgumentException.class);
+        this.driver.setWebConnection(null);
+    }
 
-	@Test
-	public void setWebConnection() {
-		this.driver.setWebConnection(this.connection);
-		assertThat(this.driver.getWebConnection(), equalTo(this.connection));
+    @Test
+    public void setWebConnection() {
+        this.driver.setWebConnection(this.connection);
+        assertThat(this.driver.getWebConnection(), equalTo(this.connection));
 
-		this.exception.expect(WebDriverException.class);
-		this.driver.get("https://example.com");
-	}
+        this.exception.expect(WebDriverException.class);
+        this.driver.get("https://example.com");
+    }
 
 }

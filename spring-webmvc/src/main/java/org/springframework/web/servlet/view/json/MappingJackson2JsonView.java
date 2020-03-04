@@ -16,22 +16,21 @@
 
 package org.springframework.web.servlet.view.json;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
-
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Spring MVC {@link View} that renders JSON content by serializing the model for the current request
@@ -54,124 +53,128 @@ import org.springframework.web.servlet.View;
  */
 public class MappingJackson2JsonView extends AbstractJackson2View {
 
-	/**
-	 * Default content type: "application/json".
-	 * Overridable through {@link #setContentType}.
-	 */
-	public static final String DEFAULT_CONTENT_TYPE = "application/json";
+    /**
+     * Default content type: "application/json".
+     * Overridable through {@link #setContentType}.
+     */
+    public static final String DEFAULT_CONTENT_TYPE = "application/json";
 
-	@Nullable
-	private String jsonPrefix;
+    @Nullable
+    private String jsonPrefix;
 
-	@Nullable
-	private Set<String> modelKeys;
+    @Nullable
+    private Set<String> modelKeys;
 
-	private boolean extractValueFromSingleKeyModel = false;
-
-
-	/**
-	 * Construct a new {@code MappingJackson2JsonView} using default configuration
-	 * provided by {@link Jackson2ObjectMapperBuilder} and setting the content type
-	 * to {@code application/json}.
-	 */
-	public MappingJackson2JsonView() {
-		super(Jackson2ObjectMapperBuilder.json().build(), DEFAULT_CONTENT_TYPE);
-	}
-
-	/**
-	 * Construct a new {@code MappingJackson2JsonView} using the provided
-	 * {@link ObjectMapper} and setting the content type to {@code application/json}.
-	 * @since 4.2.1
-	 */
-	public MappingJackson2JsonView(ObjectMapper objectMapper) {
-		super(objectMapper, DEFAULT_CONTENT_TYPE);
-	}
+    private boolean extractValueFromSingleKeyModel = false;
 
 
-	/**
-	 * Specify a custom prefix to use for this view's JSON output.
-	 * Default is none.
-	 * @see #setPrefixJson
-	 */
-	public void setJsonPrefix(String jsonPrefix) {
-		this.jsonPrefix = jsonPrefix;
-	}
+    /**
+     * Construct a new {@code MappingJackson2JsonView} using default configuration
+     * provided by {@link Jackson2ObjectMapperBuilder} and setting the content type
+     * to {@code application/json}.
+     */
+    public MappingJackson2JsonView() {
+        super(Jackson2ObjectMapperBuilder.json().build(), DEFAULT_CONTENT_TYPE);
+    }
 
-	/**
-	 * Indicates whether the JSON output by this view should be prefixed with <tt>")]}', "</tt>.
-	 * Default is {@code false}.
-	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON Hijacking.
-	 * The prefix renders the string syntactically invalid as a script so that it cannot be hijacked.
-	 * This prefix should be stripped before parsing the string as JSON.
-	 * @see #setJsonPrefix
-	 */
-	public void setPrefixJson(boolean prefixJson) {
-		this.jsonPrefix = (prefixJson ? ")]}', " : null);
-	}
+    /**
+     * Construct a new {@code MappingJackson2JsonView} using the provided
+     * {@link ObjectMapper} and setting the content type to {@code application/json}.
+     *
+     * @since 4.2.1
+     */
+    public MappingJackson2JsonView(ObjectMapper objectMapper) {
+        super(objectMapper, DEFAULT_CONTENT_TYPE);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setModelKey(String modelKey) {
-		this.modelKeys = Collections.singleton(modelKey);
-	}
 
-	/**
-	 * Set the attributes in the model that should be rendered by this view.
-	 * When set, all other model attributes will be ignored.
-	 */
-	public void setModelKeys(@Nullable Set<String> modelKeys) {
-		this.modelKeys = modelKeys;
-	}
+    /**
+     * Specify a custom prefix to use for this view's JSON output.
+     * Default is none.
+     *
+     * @see #setPrefixJson
+     */
+    public void setJsonPrefix(String jsonPrefix) {
+        this.jsonPrefix = jsonPrefix;
+    }
 
-	/**
-	 * Return the attributes in the model that should be rendered by this view.
-	 */
-	@Nullable
-	public final Set<String> getModelKeys() {
-		return this.modelKeys;
-	}
+    /**
+     * Indicates whether the JSON output by this view should be prefixed with <tt>")]}', "</tt>.
+     * Default is {@code false}.
+     * <p>Prefixing the JSON string in this manner is used to help prevent JSON Hijacking.
+     * The prefix renders the string syntactically invalid as a script so that it cannot be hijacked.
+     * This prefix should be stripped before parsing the string as JSON.
+     *
+     * @see #setJsonPrefix
+     */
+    public void setPrefixJson(boolean prefixJson) {
+        this.jsonPrefix = (prefixJson ? ")]}', " : null);
+    }
 
-	/**
-	 * Set whether to serialize models containing a single attribute as a map or
-	 * whether to extract the single value from the model and serialize it directly.
-	 * <p>The effect of setting this flag is similar to using
-	 * {@code MappingJackson2HttpMessageConverter} with an {@code @ResponseBody}
-	 * request-handling method.
-	 * <p>Default is {@code false}.
-	 */
-	public void setExtractValueFromSingleKeyModel(boolean extractValueFromSingleKeyModel) {
-		this.extractValueFromSingleKeyModel = extractValueFromSingleKeyModel;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setModelKey(String modelKey) {
+        this.modelKeys = Collections.singleton(modelKey);
+    }
 
-	/**
-	 * Filter out undesired attributes from the given model.
-	 * The return value can be either another {@link Map} or a single value object.
-	 * <p>The default implementation removes {@link BindingResult} instances and entries
-	 * not included in the {@link #setModelKeys modelKeys} property.
-	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
-	 * @return the value to be rendered
-	 */
-	@Override
-	protected Object filterModel(Map<String, Object> model) {
-		Map<String, Object> result = new HashMap<>(model.size());
-		Set<String> modelKeys = (!CollectionUtils.isEmpty(this.modelKeys) ? this.modelKeys : model.keySet());
-		model.forEach((clazz, value) -> {
-			if (!(value instanceof BindingResult) && modelKeys.contains(clazz) &&
-					!clazz.equals(JsonView.class.getName()) &&
-					!clazz.equals(FilterProvider.class.getName())) {
-				result.put(clazz, value);
-			}
-		});
-		return (this.extractValueFromSingleKeyModel && result.size() == 1 ? result.values().iterator().next() : result);
-	}
+    /**
+     * Return the attributes in the model that should be rendered by this view.
+     */
+    @Nullable
+    public final Set<String> getModelKeys() {
+        return this.modelKeys;
+    }
 
-	@Override
-	protected void writePrefix(JsonGenerator generator, Object object) throws IOException {
-		if (this.jsonPrefix != null) {
-			generator.writeRaw(this.jsonPrefix);
-		}
-	}
+    /**
+     * Set the attributes in the model that should be rendered by this view.
+     * When set, all other model attributes will be ignored.
+     */
+    public void setModelKeys(@Nullable Set<String> modelKeys) {
+        this.modelKeys = modelKeys;
+    }
+
+    /**
+     * Set whether to serialize models containing a single attribute as a map or
+     * whether to extract the single value from the model and serialize it directly.
+     * <p>The effect of setting this flag is similar to using
+     * {@code MappingJackson2HttpMessageConverter} with an {@code @ResponseBody}
+     * request-handling method.
+     * <p>Default is {@code false}.
+     */
+    public void setExtractValueFromSingleKeyModel(boolean extractValueFromSingleKeyModel) {
+        this.extractValueFromSingleKeyModel = extractValueFromSingleKeyModel;
+    }
+
+    /**
+     * Filter out undesired attributes from the given model.
+     * The return value can be either another {@link Map} or a single value object.
+     * <p>The default implementation removes {@link BindingResult} instances and entries
+     * not included in the {@link #setModelKeys modelKeys} property.
+     *
+     * @param model the model, as passed on to {@link #renderMergedOutputModel}
+     * @return the value to be rendered
+     */
+    @Override
+    protected Object filterModel(Map<String, Object> model) {
+        Map<String, Object> result = new HashMap<>(model.size());
+        Set<String> modelKeys = (!CollectionUtils.isEmpty(this.modelKeys) ? this.modelKeys : model.keySet());
+        model.forEach((clazz, value) -> {
+            if (!(value instanceof BindingResult) && modelKeys.contains(clazz) &&
+                    !clazz.equals(JsonView.class.getName()) &&
+                    !clazz.equals(FilterProvider.class.getName())) {
+                result.put(clazz, value);
+            }
+        });
+        return (this.extractValueFromSingleKeyModel && result.size() == 1 ? result.values().iterator().next() : result);
+    }
+
+    @Override
+    protected void writePrefix(JsonGenerator generator, Object object) throws IOException {
+        if (this.jsonPrefix != null) {
+            generator.writeRaw(this.jsonPrefix);
+        }
+    }
 
 }

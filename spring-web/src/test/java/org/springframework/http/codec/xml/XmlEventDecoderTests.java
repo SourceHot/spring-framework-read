@@ -16,19 +16,17 @@
 
 package org.springframework.http.codec.xml;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-
-import javax.xml.stream.events.XMLEvent;
-
 import org.junit.Test;
+import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferLimitException;
+import javax.xml.stream.events.XMLEvent;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -38,135 +36,134 @@ import static org.junit.Assert.assertTrue;
  */
 public class XmlEventDecoderTests extends AbstractLeakCheckingTestCase {
 
-	private static final String XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-			"<pojo>" +
-			"<foo>foofoo</foo>" +
-			"<bar>barbar</bar>" +
-			"</pojo>";
+    private static final String XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+            "<pojo>" +
+            "<foo>foofoo</foo>" +
+            "<bar>barbar</bar>" +
+            "</pojo>";
 
-	private XmlEventDecoder decoder = new XmlEventDecoder();
+    private XmlEventDecoder decoder = new XmlEventDecoder();
 
+    private static void assertStartElement(XMLEvent event, String expectedLocalName) {
+        assertTrue(event.isStartElement());
+        assertEquals(expectedLocalName, event.asStartElement().getName().getLocalPart());
+    }
 
-	@Test
-	public void toXMLEventsAalto() {
+    private static void assertEndElement(XMLEvent event, String expectedLocalName) {
+        assertTrue(event + " is no end element", event.isEndElement());
+        assertEquals(expectedLocalName, event.asEndElement().getName().getLocalPart());
+    }
 
-		Flux<XMLEvent> events =
-				this.decoder.decode(stringBufferMono(XML), null, null, Collections.emptyMap());
+    private static void assertCharacters(XMLEvent event, String expectedData) {
+        assertTrue(event.isCharacters());
+        assertEquals(expectedData, event.asCharacters().getData());
+    }
 
-		StepVerifier.create(events)
-				.consumeNextWith(e -> assertTrue(e.isStartDocument()))
-				.consumeNextWith(e -> assertStartElement(e, "pojo"))
-				.consumeNextWith(e -> assertStartElement(e, "foo"))
-				.consumeNextWith(e -> assertCharacters(e, "foofoo"))
-				.consumeNextWith(e -> assertEndElement(e, "foo"))
-				.consumeNextWith(e -> assertStartElement(e, "bar"))
-				.consumeNextWith(e -> assertCharacters(e, "barbar"))
-				.consumeNextWith(e -> assertEndElement(e, "bar"))
-				.consumeNextWith(e -> assertEndElement(e, "pojo"))
-				.expectComplete()
-				.verify();
-	}
+    @Test
+    public void toXMLEventsAalto() {
 
-	@Test
-	public void toXMLEventsNonAalto() {
-		decoder.useAalto = false;
+        Flux<XMLEvent> events =
+                this.decoder.decode(stringBufferMono(XML), null, null, Collections.emptyMap());
 
-		Flux<XMLEvent> events =
-				this.decoder.decode(stringBufferMono(XML), null, null, Collections.emptyMap());
+        StepVerifier.create(events)
+                .consumeNextWith(e -> assertTrue(e.isStartDocument()))
+                .consumeNextWith(e -> assertStartElement(e, "pojo"))
+                .consumeNextWith(e -> assertStartElement(e, "foo"))
+                .consumeNextWith(e -> assertCharacters(e, "foofoo"))
+                .consumeNextWith(e -> assertEndElement(e, "foo"))
+                .consumeNextWith(e -> assertStartElement(e, "bar"))
+                .consumeNextWith(e -> assertCharacters(e, "barbar"))
+                .consumeNextWith(e -> assertEndElement(e, "bar"))
+                .consumeNextWith(e -> assertEndElement(e, "pojo"))
+                .expectComplete()
+                .verify();
+    }
 
-		StepVerifier.create(events)
-				.consumeNextWith(e -> assertTrue(e.isStartDocument()))
-				.consumeNextWith(e -> assertStartElement(e, "pojo"))
-				.consumeNextWith(e -> assertStartElement(e, "foo"))
-				.consumeNextWith(e -> assertCharacters(e, "foofoo"))
-				.consumeNextWith(e -> assertEndElement(e, "foo"))
-				.consumeNextWith(e -> assertStartElement(e, "bar"))
-				.consumeNextWith(e -> assertCharacters(e, "barbar"))
-				.consumeNextWith(e -> assertEndElement(e, "bar"))
-				.consumeNextWith(e -> assertEndElement(e, "pojo"))
-				.consumeNextWith(e -> assertTrue(e.isEndDocument()))
-				.expectComplete()
-				.verify();
-	}
+    @Test
+    public void toXMLEventsNonAalto() {
+        decoder.useAalto = false;
 
-	@Test
-	public void toXMLEventsWithLimit() {
+        Flux<XMLEvent> events =
+                this.decoder.decode(stringBufferMono(XML), null, null, Collections.emptyMap());
 
-		this.decoder.setMaxInMemorySize(6);
+        StepVerifier.create(events)
+                .consumeNextWith(e -> assertTrue(e.isStartDocument()))
+                .consumeNextWith(e -> assertStartElement(e, "pojo"))
+                .consumeNextWith(e -> assertStartElement(e, "foo"))
+                .consumeNextWith(e -> assertCharacters(e, "foofoo"))
+                .consumeNextWith(e -> assertEndElement(e, "foo"))
+                .consumeNextWith(e -> assertStartElement(e, "bar"))
+                .consumeNextWith(e -> assertCharacters(e, "barbar"))
+                .consumeNextWith(e -> assertEndElement(e, "bar"))
+                .consumeNextWith(e -> assertEndElement(e, "pojo"))
+                .consumeNextWith(e -> assertTrue(e.isEndDocument()))
+                .expectComplete()
+                .verify();
+    }
 
-		Flux<String> source = Flux.just(
-				"<pojo>", "<foo>", "foofoo", "</foo>", "<bar>", "barbarbar", "</bar>", "</pojo>");
+    @Test
+    public void toXMLEventsWithLimit() {
 
-		Flux<XMLEvent> events = this.decoder.decode(
-				source.map(this::stringBuffer), null, null, Collections.emptyMap());
+        this.decoder.setMaxInMemorySize(6);
 
-		StepVerifier.create(events)
-				.consumeNextWith(e -> assertTrue(e.isStartDocument()))
-				.consumeNextWith(e -> assertStartElement(e, "pojo"))
-				.consumeNextWith(e -> assertStartElement(e, "foo"))
-				.consumeNextWith(e -> assertCharacters(e, "foofoo"))
-				.consumeNextWith(e -> assertEndElement(e, "foo"))
-				.consumeNextWith(e -> assertStartElement(e, "bar"))
-				.expectError(DataBufferLimitException.class)
-				.verify();
-	}
+        Flux<String> source = Flux.just(
+                "<pojo>", "<foo>", "foofoo", "</foo>", "<bar>", "barbarbar", "</bar>", "</pojo>");
 
-	@Test
-	public void decodeErrorAalto() {
-		Flux<DataBuffer> source = Flux.concat(
-				stringBufferMono("<pojo>"),
-				Flux.error(new RuntimeException()));
+        Flux<XMLEvent> events = this.decoder.decode(
+                source.map(this::stringBuffer), null, null, Collections.emptyMap());
 
-		Flux<XMLEvent> events =
-				this.decoder.decode(source, null, null, Collections.emptyMap());
+        StepVerifier.create(events)
+                .consumeNextWith(e -> assertTrue(e.isStartDocument()))
+                .consumeNextWith(e -> assertStartElement(e, "pojo"))
+                .consumeNextWith(e -> assertStartElement(e, "foo"))
+                .consumeNextWith(e -> assertCharacters(e, "foofoo"))
+                .consumeNextWith(e -> assertEndElement(e, "foo"))
+                .consumeNextWith(e -> assertStartElement(e, "bar"))
+                .expectError(DataBufferLimitException.class)
+                .verify();
+    }
 
-		StepVerifier.create(events)
-				.consumeNextWith(e -> assertTrue(e.isStartDocument()))
-				.consumeNextWith(e -> assertStartElement(e, "pojo"))
-				.expectError(RuntimeException.class)
-				.verify();
-	}
+    @Test
+    public void decodeErrorAalto() {
+        Flux<DataBuffer> source = Flux.concat(
+                stringBufferMono("<pojo>"),
+                Flux.error(new RuntimeException()));
 
-	@Test
-	public void decodeErrorNonAalto() {
-		decoder.useAalto = false;
+        Flux<XMLEvent> events =
+                this.decoder.decode(source, null, null, Collections.emptyMap());
 
-		Flux<DataBuffer> source = Flux.concat(
-				stringBufferMono("<pojo>"),
-				Flux.error(new RuntimeException()));
+        StepVerifier.create(events)
+                .consumeNextWith(e -> assertTrue(e.isStartDocument()))
+                .consumeNextWith(e -> assertStartElement(e, "pojo"))
+                .expectError(RuntimeException.class)
+                .verify();
+    }
 
-		Flux<XMLEvent> events =
-				this.decoder.decode(source, null, null, Collections.emptyMap());
+    @Test
+    public void decodeErrorNonAalto() {
+        decoder.useAalto = false;
 
-		StepVerifier.create(events)
-				.expectError(RuntimeException.class)
-				.verify();
-	}
+        Flux<DataBuffer> source = Flux.concat(
+                stringBufferMono("<pojo>"),
+                Flux.error(new RuntimeException()));
 
-	private static void assertStartElement(XMLEvent event, String expectedLocalName) {
-		assertTrue(event.isStartElement());
-		assertEquals(expectedLocalName, event.asStartElement().getName().getLocalPart());
-	}
+        Flux<XMLEvent> events =
+                this.decoder.decode(source, null, null, Collections.emptyMap());
 
-	private static void assertEndElement(XMLEvent event, String expectedLocalName) {
-		assertTrue(event + " is no end element", event.isEndElement());
-		assertEquals(expectedLocalName, event.asEndElement().getName().getLocalPart());
-	}
+        StepVerifier.create(events)
+                .expectError(RuntimeException.class)
+                .verify();
+    }
 
-	private static void assertCharacters(XMLEvent event, String expectedData) {
-		assertTrue(event.isCharacters());
-		assertEquals(expectedData, event.asCharacters().getData());
-	}
+    private DataBuffer stringBuffer(String value) {
+        byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+        DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
+        buffer.write(bytes);
+        return buffer;
+    }
 
-	private DataBuffer stringBuffer(String value) {
-		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-		DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
-		buffer.write(bytes);
-		return buffer;
-	}
-
-	private Mono<DataBuffer> stringBufferMono(String value) {
-		return Mono.defer(() -> Mono.just(stringBuffer(value)));
-	}
+    private Mono<DataBuffer> stringBufferMono(String value) {
+        return Mono.defer(() -> Mono.just(stringBuffer(value)));
+    }
 
 }

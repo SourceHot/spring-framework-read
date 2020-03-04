@@ -16,9 +16,6 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -32,6 +29,9 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 
 /**
  * Static {@link org.springframework.web.context.WebApplicationContext}
@@ -56,151 +56,153 @@ import org.springframework.web.context.ServletContextAware;
  * @see org.springframework.ui.context.ThemeSource
  */
 public class StaticWebApplicationContext extends StaticApplicationContext
-		implements ConfigurableWebApplicationContext, ThemeSource {
+        implements ConfigurableWebApplicationContext, ThemeSource {
 
-	@Nullable
-	private ServletContext servletContext;
+    @Nullable
+    private ServletContext servletContext;
 
-	@Nullable
-	private ServletConfig servletConfig;
+    @Nullable
+    private ServletConfig servletConfig;
 
-	@Nullable
-	private String namespace;
+    @Nullable
+    private String namespace;
 
-	@Nullable
-	private ThemeSource themeSource;
-
-
-	public StaticWebApplicationContext() {
-		setDisplayName("Root WebApplicationContext");
-	}
+    @Nullable
+    private ThemeSource themeSource;
 
 
-	/**
-	 * Set the ServletContext that this WebApplicationContext runs in.
-	 */
-	@Override
-	public void setServletContext(@Nullable ServletContext servletContext) {
-		this.servletContext = servletContext;
-	}
+    public StaticWebApplicationContext() {
+        setDisplayName("Root WebApplicationContext");
+    }
 
-	@Override
-	@Nullable
-	public ServletContext getServletContext() {
-		return this.servletContext;
-	}
+    @Override
+    @Nullable
+    public ServletContext getServletContext() {
+        return this.servletContext;
+    }
 
-	@Override
-	public void setServletConfig(@Nullable ServletConfig servletConfig) {
-		this.servletConfig = servletConfig;
-		if (servletConfig != null && this.servletContext == null) {
-			this.servletContext = servletConfig.getServletContext();
-		}
-	}
+    /**
+     * Set the ServletContext that this WebApplicationContext runs in.
+     */
+    @Override
+    public void setServletContext(@Nullable ServletContext servletContext) {
+        this.servletContext = servletContext;
+    }
 
-	@Override
-	@Nullable
-	public ServletConfig getServletConfig() {
-		return this.servletConfig;
-	}
+    @Override
+    @Nullable
+    public ServletConfig getServletConfig() {
+        return this.servletConfig;
+    }
 
-	@Override
-	public void setNamespace(@Nullable String namespace) {
-		this.namespace = namespace;
-		if (namespace != null) {
-			setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
-		}
-	}
+    @Override
+    public void setServletConfig(@Nullable ServletConfig servletConfig) {
+        this.servletConfig = servletConfig;
+        if (servletConfig != null && this.servletContext == null) {
+            this.servletContext = servletConfig.getServletContext();
+        }
+    }
 
-	@Override
-	@Nullable
-	public String getNamespace() {
-		return this.namespace;
-	}
+    @Override
+    @Nullable
+    public String getNamespace() {
+        return this.namespace;
+    }
 
-	/**
-	 * The {@link StaticWebApplicationContext} class does not support this method.
-	 * @throws UnsupportedOperationException <b>always</b>
-	 */
-	@Override
-	public void setConfigLocation(String configLocation) {
-		throw new UnsupportedOperationException("StaticWebApplicationContext does not support config locations");
-	}
+    @Override
+    public void setNamespace(@Nullable String namespace) {
+        this.namespace = namespace;
+        if (namespace != null) {
+            setDisplayName("WebApplicationContext for namespace '" + namespace + "'");
+        }
+    }
 
-	/**
-	 * The {@link StaticWebApplicationContext} class does not support this method.
-	 * @throws UnsupportedOperationException <b>always</b>
-	 */
-	@Override
-	public void setConfigLocations(String... configLocations) {
-		throw new UnsupportedOperationException("StaticWebApplicationContext does not support config locations");
-	}
+    /**
+     * The {@link StaticWebApplicationContext} class does not support this method.
+     *
+     * @throws UnsupportedOperationException <b>always</b>
+     */
+    @Override
+    public void setConfigLocation(String configLocation) {
+        throw new UnsupportedOperationException("StaticWebApplicationContext does not support config locations");
+    }
 
-	@Override
-	public String[] getConfigLocations() {
-		return null;
-	}
+    @Override
+    public String[] getConfigLocations() {
+        return null;
+    }
 
+    /**
+     * The {@link StaticWebApplicationContext} class does not support this method.
+     *
+     * @throws UnsupportedOperationException <b>always</b>
+     */
+    @Override
+    public void setConfigLocations(String... configLocations) {
+        throw new UnsupportedOperationException("StaticWebApplicationContext does not support config locations");
+    }
 
-	/**
-	 * Register request/session scopes, a {@link ServletContextAwareProcessor}, etc.
-	 */
-	@Override
-	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));
-		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
-		beanFactory.ignoreDependencyInterface(ServletConfigAware.class);
+    /**
+     * Register request/session scopes, a {@link ServletContextAwareProcessor}, etc.
+     */
+    @Override
+    protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+        beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));
+        beanFactory.ignoreDependencyInterface(ServletContextAware.class);
+        beanFactory.ignoreDependencyInterface(ServletConfigAware.class);
 
-		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory, this.servletContext);
-		WebApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.servletContext, this.servletConfig);
-	}
+        WebApplicationContextUtils.registerWebApplicationScopes(beanFactory, this.servletContext);
+        WebApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.servletContext, this.servletConfig);
+    }
 
-	/**
-	 * This implementation supports file paths beneath the root of the ServletContext.
-	 * @see ServletContextResource
-	 */
-	@Override
-	protected Resource getResourceByPath(String path) {
-		Assert.state(this.servletContext != null, "No ServletContext available");
-		return new ServletContextResource(this.servletContext, path);
-	}
+    /**
+     * This implementation supports file paths beneath the root of the ServletContext.
+     *
+     * @see ServletContextResource
+     */
+    @Override
+    protected Resource getResourceByPath(String path) {
+        Assert.state(this.servletContext != null, "No ServletContext available");
+        return new ServletContextResource(this.servletContext, path);
+    }
 
-	/**
-	 * This implementation supports pattern matching in unexpanded WARs too.
-	 * @see ServletContextResourcePatternResolver
-	 */
-	@Override
-	protected ResourcePatternResolver getResourcePatternResolver() {
-		return new ServletContextResourcePatternResolver(this);
-	}
+    /**
+     * This implementation supports pattern matching in unexpanded WARs too.
+     *
+     * @see ServletContextResourcePatternResolver
+     */
+    @Override
+    protected ResourcePatternResolver getResourcePatternResolver() {
+        return new ServletContextResourcePatternResolver(this);
+    }
 
-	/**
-	 * Create and return a new {@link StandardServletEnvironment}.
-	 */
-	@Override
-	protected ConfigurableEnvironment createEnvironment() {
-		return new StandardServletEnvironment();
-	}
+    /**
+     * Create and return a new {@link StandardServletEnvironment}.
+     */
+    @Override
+    protected ConfigurableEnvironment createEnvironment() {
+        return new StandardServletEnvironment();
+    }
 
-	/**
-	 * Initialize the theme capability.
-	 */
-	@Override
-	protected void onRefresh() {
-		this.themeSource = UiApplicationContextUtils.initThemeSource(this);
-	}
+    /**
+     * Initialize the theme capability.
+     */
+    @Override
+    protected void onRefresh() {
+        this.themeSource = UiApplicationContextUtils.initThemeSource(this);
+    }
 
-	@Override
-	protected void initPropertySources() {
-		WebApplicationContextUtils.initServletPropertySources(getEnvironment().getPropertySources(),
-				this.servletContext, this.servletConfig);
-	}
+    @Override
+    protected void initPropertySources() {
+        WebApplicationContextUtils.initServletPropertySources(getEnvironment().getPropertySources(),
+                this.servletContext, this.servletConfig);
+    }
 
-	@Override
-	@Nullable
-	public Theme getTheme(String themeName) {
-		Assert.state(this.themeSource != null, "No ThemeSource available");
-		return this.themeSource.getTheme(themeName);
-	}
+    @Override
+    @Nullable
+    public Theme getTheme(String themeName) {
+        Assert.state(this.themeSource != null, "No ThemeSource available");
+        return this.themeSource.getTheme(themeName);
+    }
 
 }

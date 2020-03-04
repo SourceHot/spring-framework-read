@@ -29,19 +29,20 @@ import org.springframework.lang.Nullable;
  * class name as bean name.
  *
  * @author Rod Johnson
- * @since 2.0
  * @see BeanWiringInfo
  * @see ClassNameBeanWiringInfoResolver
  * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
+ * @since 2.0
  */
 public interface BeanWiringInfoResolver {
 
-	/**
-	 * Resolve the BeanWiringInfo for the given bean instance.
-	 * @param beanInstance the bean instance to resolve info for
-	 * @return the BeanWiringInfo, or {@code null} if not found
-	 */
-	@Nullable
-	BeanWiringInfo resolveWiringInfo(Object beanInstance);
+    /**
+     * Resolve the BeanWiringInfo for the given bean instance.
+     *
+     * @param beanInstance the bean instance to resolve info for
+     * @return the BeanWiringInfo, or {@code null} if not found
+     */
+    @Nullable
+    BeanWiringInfo resolveWiringInfo(Object beanInstance);
 
 }

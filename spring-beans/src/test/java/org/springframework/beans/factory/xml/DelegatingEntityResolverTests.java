@@ -28,27 +28,27 @@ import org.xml.sax.InputSource;
  */
 public class DelegatingEntityResolverTests {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testCtorWhereDtdEntityResolverIsNull() throws Exception {
-		new DelegatingEntityResolver(null, new NoOpEntityResolver());
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testCtorWhereDtdEntityResolverIsNull() throws Exception {
+        new DelegatingEntityResolver(null, new NoOpEntityResolver());
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testCtorWhereSchemaEntityResolverIsNull() throws Exception {
-		new DelegatingEntityResolver(new NoOpEntityResolver(), null);
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testCtorWhereSchemaEntityResolverIsNull() throws Exception {
+        new DelegatingEntityResolver(new NoOpEntityResolver(), null);
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testCtorWhereEntityResolversAreBothNull() throws Exception {
-		new DelegatingEntityResolver(null, null);
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testCtorWhereEntityResolversAreBothNull() throws Exception {
+        new DelegatingEntityResolver(null, null);
+    }
 
 
-	private static final class NoOpEntityResolver implements EntityResolver {
-		@Override
-		public InputSource resolveEntity(String publicId, String systemId) {
-			return null;
-		}
-	}
+    private static final class NoOpEntityResolver implements EntityResolver {
+        @Override
+        public InputSource resolveEntity(String publicId, String systemId) {
+            return null;
+        }
+    }
 
 }

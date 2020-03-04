@@ -126,20 +126,20 @@ import org.springframework.context.NoSuchMessageException;
 @SuppressWarnings("serial")
 public class ThemeTag extends MessageTag {
 
-	/**
-	 * Use the theme MessageSource for theme message resolution.
-	 */
-	@Override
-	protected MessageSource getMessageSource() {
-		return getRequestContext().getTheme().getMessageSource();
-	}
+    /**
+     * Use the theme MessageSource for theme message resolution.
+     */
+    @Override
+    protected MessageSource getMessageSource() {
+        return getRequestContext().getTheme().getMessageSource();
+    }
 
-	/**
-	 * Return exception message that indicates the current theme.
-	 */
-	@Override
-	protected String getNoSuchMessageExceptionDescription(NoSuchMessageException ex) {
-		return "Theme '" + getRequestContext().getTheme().getName() + "': " + ex.getMessage();
-	}
+    /**
+     * Return exception message that indicates the current theme.
+     */
+    @Override
+    protected String getNoSuchMessageExceptionDescription(NoSuchMessageException ex) {
+        return "Theme '" + getRequestContext().getTheme().getName() + "': " + ex.getMessage();
+    }
 
 }

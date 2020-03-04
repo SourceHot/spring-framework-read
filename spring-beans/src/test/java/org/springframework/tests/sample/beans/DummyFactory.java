@@ -38,148 +38,139 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  * @since 10.03.2003
  */
 public class DummyFactory
-		implements FactoryBean<Object>, BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
+        implements FactoryBean<Object>, BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
 
-	public static final String SINGLETON_NAME = "Factory singleton";
+    public static final String SINGLETON_NAME = "Factory singleton";
 
-	private static boolean prototypeCreated;
+    private static boolean prototypeCreated;
+    /**
+     * Default is for factories to return a singleton instance.
+     */
+    private boolean singleton = true;
+    private String beanName;
+    private AutowireCapableBeanFactory beanFactory;
+    private boolean postProcessed;
+    private boolean initialized;
+    private TestBean testBean;
+    private TestBean otherTestBean;
 
-	/**
-	 * Clear static state.
-	 */
-	public static void reset() {
-		prototypeCreated = false;
-	}
+    public DummyFactory() {
+        this.testBean = new TestBean();
+        this.testBean.setName(SINGLETON_NAME);
+        this.testBean.setAge(25);
+    }
 
+    /**
+     * Clear static state.
+     */
+    public static void reset() {
+        prototypeCreated = false;
+    }
 
-	/**
-	 * Default is for factories to return a singleton instance.
-	 */
-	private boolean singleton = true;
+    public static boolean wasPrototypeCreated() {
+        return prototypeCreated;
+    }
 
-	private String beanName;
+    /**
+     * Return if the bean managed by this factory is a singleton.
+     *
+     * @see FactoryBean#isSingleton()
+     */
+    @Override
+    public boolean isSingleton() {
+        return this.singleton;
+    }
 
-	private AutowireCapableBeanFactory beanFactory;
+    /**
+     * Set if the bean managed by this factory is a singleton.
+     */
+    public void setSingleton(boolean singleton) {
+        this.singleton = singleton;
+    }
 
-	private boolean postProcessed;
+    public String getBeanName() {
+        return beanName;
+    }
 
-	private boolean initialized;
+    @Override
+    public void setBeanName(String beanName) {
+        this.beanName = beanName;
+    }
 
-	private TestBean testBean;
+    public BeanFactory getBeanFactory() {
+        return beanFactory;
+    }
 
-	private TestBean otherTestBean;
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) {
+        this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
+        this.beanFactory.applyBeanPostProcessorsBeforeInitialization(this.testBean, this.beanName);
+    }
 
+    public boolean isPostProcessed() {
+        return postProcessed;
+    }
 
-	public DummyFactory() {
-		this.testBean = new TestBean();
-		this.testBean.setName(SINGLETON_NAME);
-		this.testBean.setAge(25);
-	}
+    public void setPostProcessed(boolean postProcessed) {
+        this.postProcessed = postProcessed;
+    }
 
-	/**
-	 * Return if the bean managed by this factory is a singleton.
-	 * @see FactoryBean#isSingleton()
-	 */
-	@Override
-	public boolean isSingleton() {
-		return this.singleton;
-	}
+    public TestBean getOtherTestBean() {
+        return otherTestBean;
+    }
 
-	/**
-	 * Set if the bean managed by this factory is a singleton.
-	 */
-	public void setSingleton(boolean singleton) {
-		this.singleton = singleton;
-	}
+    public void setOtherTestBean(TestBean otherTestBean) {
+        this.otherTestBean = otherTestBean;
+        this.testBean.setSpouse(otherTestBean);
+    }
 
-	@Override
-	public void setBeanName(String beanName) {
-		this.beanName = beanName;
-	}
+    @Override
+    public void afterPropertiesSet() {
+        if (initialized) {
+            throw new RuntimeException("Cannot call afterPropertiesSet twice on the one bean");
+        }
+        this.initialized = true;
+    }
 
-	public String getBeanName() {
-		return beanName;
-	}
+    /**
+     * Was this initialized by invocation of the
+     * afterPropertiesSet() method from the InitializingBean interface?
+     */
+    public boolean wasInitialized() {
+        return initialized;
+    }
 
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
-		this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
-		this.beanFactory.applyBeanPostProcessorsBeforeInitialization(this.testBean, this.beanName);
-	}
+    /**
+     * Return the managed object, supporting both singleton
+     * and prototype mode.
+     *
+     * @see FactoryBean#getObject()
+     */
+    @Override
+    public Object getObject() throws BeansException {
+        if (isSingleton()) {
+            return this.testBean;
+        } else {
+            TestBean prototype = new TestBean("prototype created at " + System.currentTimeMillis(), 11);
+            if (this.beanFactory != null) {
+                this.beanFactory.applyBeanPostProcessorsBeforeInitialization(prototype, this.beanName);
+            }
+            prototypeCreated = true;
+            return prototype;
+        }
+    }
 
-	public BeanFactory getBeanFactory() {
-		return beanFactory;
-	}
-
-	public void setPostProcessed(boolean postProcessed) {
-		this.postProcessed = postProcessed;
-	}
-
-	public boolean isPostProcessed() {
-		return postProcessed;
-	}
-
-	public void setOtherTestBean(TestBean otherTestBean) {
-		this.otherTestBean = otherTestBean;
-		this.testBean.setSpouse(otherTestBean);
-	}
-
-	public TestBean getOtherTestBean() {
-		return otherTestBean;
-	}
-
-	@Override
-	public void afterPropertiesSet() {
-		if (initialized) {
-			throw new RuntimeException("Cannot call afterPropertiesSet twice on the one bean");
-		}
-		this.initialized = true;
-	}
-
-	/**
-	 * Was this initialized by invocation of the
-	 * afterPropertiesSet() method from the InitializingBean interface?
-	 */
-	public boolean wasInitialized() {
-		return initialized;
-	}
-
-	public static boolean wasPrototypeCreated() {
-		return prototypeCreated;
-	}
-
-
-	/**
-	 * Return the managed object, supporting both singleton
-	 * and prototype mode.
-	 * @see FactoryBean#getObject()
-	 */
-	@Override
-	public Object getObject() throws BeansException {
-		if (isSingleton()) {
-			return this.testBean;
-		}
-		else {
-			TestBean prototype = new TestBean("prototype created at " + System.currentTimeMillis(), 11);
-			if (this.beanFactory != null) {
-				this.beanFactory.applyBeanPostProcessorsBeforeInitialization(prototype, this.beanName);
-			}
-			prototypeCreated = true;
-			return prototype;
-		}
-	}
-
-	@Override
-	public Class<?> getObjectType() {
-		return TestBean.class;
-	}
+    @Override
+    public Class<?> getObjectType() {
+        return TestBean.class;
+    }
 
 
-	@Override
-	public void destroy() {
-		if (this.testBean != null) {
-			this.testBean.setName(null);
-		}
-	}
+    @Override
+    public void destroy() {
+        if (this.testBean != null) {
+            this.testBean.setName(null);
+        }
+    }
 
 }

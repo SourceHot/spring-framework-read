@@ -27,10 +27,10 @@ import org.springframework.lang.Nullable;
  */
 public interface ExpressionPointcut extends Pointcut {
 
-	/**
-	 * Return the String expression for this pointcut.
-	 */
-	@Nullable
-	String getExpression();
+    /**
+     * Return the String expression for this pointcut.
+     */
+    @Nullable
+    String getExpression();
 
 }

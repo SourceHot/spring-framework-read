@@ -15,123 +15,129 @@
  */
 package org.springframework.http.client.reactive;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.junit.Test;
 import reactor.netty.http.HttpResources;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * Unit tests for {@link ReactorResourceFactory}.
+ *
  * @author Rossen Stoyanchev
  */
 public class ReactorResourceFactoryTests {
 
-	private final ReactorResourceFactory resourceFactory = new ReactorResourceFactory();
+    private final ReactorResourceFactory resourceFactory = new ReactorResourceFactory();
 
-	private final ConnectionProvider connectionProvider = mock(ConnectionProvider.class);
+    private final ConnectionProvider connectionProvider = mock(ConnectionProvider.class);
 
-	private final LoopResources loopResources = mock(LoopResources.class);
+    private final LoopResources loopResources = mock(LoopResources.class);
 
 
-	@Test
-	public void globalResources() throws Exception {
+    @Test
+    public void globalResources() throws Exception {
 
-		this.resourceFactory.setUseGlobalResources(true);
-		this.resourceFactory.afterPropertiesSet();
+        this.resourceFactory.setUseGlobalResources(true);
+        this.resourceFactory.afterPropertiesSet();
 
-		HttpResources globalResources = HttpResources.get();
-		assertSame(globalResources, this.resourceFactory.getConnectionProvider());
-		assertSame(globalResources, this.resourceFactory.getLoopResources());
-		assertFalse(globalResources.isDisposed());
+        HttpResources globalResources = HttpResources.get();
+        assertSame(globalResources, this.resourceFactory.getConnectionProvider());
+        assertSame(globalResources, this.resourceFactory.getLoopResources());
+        assertFalse(globalResources.isDisposed());
 
-		this.resourceFactory.destroy();
+        this.resourceFactory.destroy();
 
-		assertTrue(globalResources.isDisposed());
-	}
+        assertTrue(globalResources.isDisposed());
+    }
 
-	@Test
-	public void globalResourcesWithConsumer() throws Exception {
+    @Test
+    public void globalResourcesWithConsumer() throws Exception {
 
-		AtomicBoolean invoked = new AtomicBoolean(false);
+        AtomicBoolean invoked = new AtomicBoolean(false);
 
-		this.resourceFactory.addGlobalResourcesConsumer(httpResources -> invoked.set(true));
-		this.resourceFactory.afterPropertiesSet();
+        this.resourceFactory.addGlobalResourcesConsumer(httpResources -> invoked.set(true));
+        this.resourceFactory.afterPropertiesSet();
 
-		assertTrue(invoked.get());
-		this.resourceFactory.destroy();
-	}
+        assertTrue(invoked.get());
+        this.resourceFactory.destroy();
+    }
 
-	@Test
-	public void localResources() throws Exception {
+    @Test
+    public void localResources() throws Exception {
 
-		this.resourceFactory.setUseGlobalResources(false);
-		this.resourceFactory.afterPropertiesSet();
+        this.resourceFactory.setUseGlobalResources(false);
+        this.resourceFactory.afterPropertiesSet();
 
-		ConnectionProvider connectionProvider = this.resourceFactory.getConnectionProvider();
-		LoopResources loopResources = this.resourceFactory.getLoopResources();
+        ConnectionProvider connectionProvider = this.resourceFactory.getConnectionProvider();
+        LoopResources loopResources = this.resourceFactory.getLoopResources();
 
-		assertNotSame(HttpResources.get(), connectionProvider);
-		assertNotSame(HttpResources.get(), loopResources);
+        assertNotSame(HttpResources.get(), connectionProvider);
+        assertNotSame(HttpResources.get(), loopResources);
 
-		// The below does not work since ConnectionPoolProvider simply checks if pool is empty.
-		// assertFalse(connectionProvider.isDisposed());
-		assertFalse(loopResources.isDisposed());
+        // The below does not work since ConnectionPoolProvider simply checks if pool is empty.
+        // assertFalse(connectionProvider.isDisposed());
+        assertFalse(loopResources.isDisposed());
 
-		this.resourceFactory.destroy();
+        this.resourceFactory.destroy();
 
-		assertTrue(connectionProvider.isDisposed());
-		assertTrue(loopResources.isDisposed());
-	}
+        assertTrue(connectionProvider.isDisposed());
+        assertTrue(loopResources.isDisposed());
+    }
 
-	@Test
-	public void localResourcesViaSupplier() throws Exception {
+    @Test
+    public void localResourcesViaSupplier() throws Exception {
 
-		this.resourceFactory.setUseGlobalResources(false);
-		this.resourceFactory.setConnectionProviderSupplier(() -> this.connectionProvider);
-		this.resourceFactory.setLoopResourcesSupplier(() -> this.loopResources);
-		this.resourceFactory.afterPropertiesSet();
+        this.resourceFactory.setUseGlobalResources(false);
+        this.resourceFactory.setConnectionProviderSupplier(() -> this.connectionProvider);
+        this.resourceFactory.setLoopResourcesSupplier(() -> this.loopResources);
+        this.resourceFactory.afterPropertiesSet();
 
-		ConnectionProvider connectionProvider = this.resourceFactory.getConnectionProvider();
-		LoopResources loopResources = this.resourceFactory.getLoopResources();
+        ConnectionProvider connectionProvider = this.resourceFactory.getConnectionProvider();
+        LoopResources loopResources = this.resourceFactory.getLoopResources();
 
-		assertSame(this.connectionProvider, connectionProvider);
-		assertSame(this.loopResources, loopResources);
+        assertSame(this.connectionProvider, connectionProvider);
+        assertSame(this.loopResources, loopResources);
 
-		verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
+        verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
 
-		this.resourceFactory.destroy();
+        this.resourceFactory.destroy();
 
-		// Managed (destroy disposes)..
-		verify(this.connectionProvider).disposeLater();
-		verify(this.loopResources).disposeLater();
-		verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
-	}
+        // Managed (destroy disposes)..
+        verify(this.connectionProvider).disposeLater();
+        verify(this.loopResources).disposeLater();
+        verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
+    }
 
-	@Test
-	public void externalResources() throws Exception {
+    @Test
+    public void externalResources() throws Exception {
 
-		this.resourceFactory.setUseGlobalResources(false);
-		this.resourceFactory.setConnectionProvider(this.connectionProvider);
-		this.resourceFactory.setLoopResources(this.loopResources);
-		this.resourceFactory.afterPropertiesSet();
+        this.resourceFactory.setUseGlobalResources(false);
+        this.resourceFactory.setConnectionProvider(this.connectionProvider);
+        this.resourceFactory.setLoopResources(this.loopResources);
+        this.resourceFactory.afterPropertiesSet();
 
-		ConnectionProvider connectionProvider = this.resourceFactory.getConnectionProvider();
-		LoopResources loopResources = this.resourceFactory.getLoopResources();
+        ConnectionProvider connectionProvider = this.resourceFactory.getConnectionProvider();
+        LoopResources loopResources = this.resourceFactory.getLoopResources();
 
-		assertSame(this.connectionProvider, connectionProvider);
-		assertSame(this.loopResources, loopResources);
+        assertSame(this.connectionProvider, connectionProvider);
+        assertSame(this.loopResources, loopResources);
 
-		verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
+        verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
 
-		this.resourceFactory.destroy();
+        this.resourceFactory.destroy();
 
-		// Not managed (destroy has no impact)..
-		verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
-	}
+        // Not managed (destroy has no impact)..
+        verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
+    }
 
 }

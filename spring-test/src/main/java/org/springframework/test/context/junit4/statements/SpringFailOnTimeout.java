@@ -16,13 +16,12 @@
 
 package org.springframework.test.context.junit4.statements;
 
-import java.lang.reflect.Method;
-import java.util.concurrent.TimeoutException;
-
 import org.junit.runners.model.Statement;
-
 import org.springframework.test.annotation.TestAnnotationUtils;
 import org.springframework.util.Assert;
+
+import java.lang.reflect.Method;
+import java.util.concurrent.TimeoutException;
 
 /**
  * {@code SpringFailOnTimeout} is a custom JUnit {@link Statement} which adds
@@ -36,65 +35,66 @@ import org.springframework.util.Assert;
  * caller and will therefore not be aborted preemptively.
  *
  * @author Sam Brannen
- * @since 3.0
  * @see #evaluate()
+ * @since 3.0
  */
 public class SpringFailOnTimeout extends Statement {
 
-	private final Statement next;
+    private final Statement next;
 
-	private final long timeout;
-
-
-	/**
-	 * Construct a new {@code SpringFailOnTimeout} statement for the supplied
-	 * {@code testMethod}, retrieving the configured timeout from the
-	 * {@code @Timed} annotation on the supplied method.
-	 * @param next the next {@code Statement} in the execution chain
-	 * @param testMethod the current test method
-	 * @see TestAnnotationUtils#getTimeout(Method)
-	 */
-	public SpringFailOnTimeout(Statement next, Method testMethod) {
-		this(next, TestAnnotationUtils.getTimeout(testMethod));
-	}
-
-	/**
-	 * Construct a new {@code SpringFailOnTimeout} statement for the supplied
-	 * {@code timeout}.
-	 * <p>If the supplied {@code timeout} is {@code 0}, the execution of the
-	 * {@code next} statement will not be timed.
-	 * @param next the next {@code Statement} in the execution chain; never {@code null}
-	 * @param timeout the configured {@code timeout} for the current test, in milliseconds;
-	 * never negative
-	 */
-	public SpringFailOnTimeout(Statement next, long timeout) {
-		Assert.notNull(next, "next statement must not be null");
-		Assert.isTrue(timeout >= 0, "timeout must be non-negative");
-		this.next = next;
-		this.timeout = timeout;
-	}
+    private final long timeout;
 
 
-	/**
-	 * Evaluate the next {@link Statement statement} in the execution chain
-	 * (typically an instance of {@link SpringRepeat}) and throw a
-	 * {@link TimeoutException} if the next {@code statement} executes longer
-	 * than the specified {@code timeout}.
-	 */
-	@Override
-	public void evaluate() throws Throwable {
-		if (this.timeout == 0) {
-			this.next.evaluate();
-		}
-		else {
-			long startTime = System.currentTimeMillis();
-			this.next.evaluate();
-			long elapsed = System.currentTimeMillis() - startTime;
-			if (elapsed > this.timeout) {
-				throw new TimeoutException(
-						String.format("Test took %s ms; limit was %s ms.", elapsed, this.timeout));
-			}
-		}
-	}
+    /**
+     * Construct a new {@code SpringFailOnTimeout} statement for the supplied
+     * {@code testMethod}, retrieving the configured timeout from the
+     * {@code @Timed} annotation on the supplied method.
+     *
+     * @param next       the next {@code Statement} in the execution chain
+     * @param testMethod the current test method
+     * @see TestAnnotationUtils#getTimeout(Method)
+     */
+    public SpringFailOnTimeout(Statement next, Method testMethod) {
+        this(next, TestAnnotationUtils.getTimeout(testMethod));
+    }
+
+    /**
+     * Construct a new {@code SpringFailOnTimeout} statement for the supplied
+     * {@code timeout}.
+     * <p>If the supplied {@code timeout} is {@code 0}, the execution of the
+     * {@code next} statement will not be timed.
+     *
+     * @param next    the next {@code Statement} in the execution chain; never {@code null}
+     * @param timeout the configured {@code timeout} for the current test, in milliseconds;
+     *                never negative
+     */
+    public SpringFailOnTimeout(Statement next, long timeout) {
+        Assert.notNull(next, "next statement must not be null");
+        Assert.isTrue(timeout >= 0, "timeout must be non-negative");
+        this.next = next;
+        this.timeout = timeout;
+    }
+
+
+    /**
+     * Evaluate the next {@link Statement statement} in the execution chain
+     * (typically an instance of {@link SpringRepeat}) and throw a
+     * {@link TimeoutException} if the next {@code statement} executes longer
+     * than the specified {@code timeout}.
+     */
+    @Override
+    public void evaluate() throws Throwable {
+        if (this.timeout == 0) {
+            this.next.evaluate();
+        } else {
+            long startTime = System.currentTimeMillis();
+            this.next.evaluate();
+            long elapsed = System.currentTimeMillis() - startTime;
+            if (elapsed > this.timeout) {
+                throw new TimeoutException(
+                        String.format("Test took %s ms; limit was %s ms.", elapsed, this.timeout));
+            }
+        }
+    }
 
 }

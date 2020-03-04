@@ -16,13 +16,13 @@
 
 package org.springframework.core.annotation;
 
+import org.springframework.core.Ordered;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.springframework.core.Ordered;
 
 /**
  * {@code @Order} defines the sort order for an annotated component.
@@ -54,24 +54,25 @@ import org.springframework.core.Ordered;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 2.0
  * @see org.springframework.core.Ordered
  * @see AnnotationAwareOrderComparator
  * @see OrderUtils
  * @see javax.annotation.Priority
+ * @since 2.0
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 @Documented
 public @interface Order {
 
-	/**
-	 * The order value.
-	 * <p>Default is {@link Ordered#LOWEST_PRECEDENCE}.
-	 *
-	 * 启动顺序,默认integer最大值
-	 * @see Ordered#getOrder()
-	 */
-	int value() default Ordered.LOWEST_PRECEDENCE;
+    /**
+     * The order value.
+     * <p>Default is {@link Ordered#LOWEST_PRECEDENCE}.
+     * <p>
+     * 启动顺序,默认integer最大值
+     *
+     * @see Ordered#getOrder()
+     */
+    int value() default Ordered.LOWEST_PRECEDENCE;
 
 }

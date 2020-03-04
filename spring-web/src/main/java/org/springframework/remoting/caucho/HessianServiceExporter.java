@@ -16,15 +16,14 @@
 
 package org.springframework.remoting.caucho;
 
-import java.io.IOException;
+import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.util.NestedServletException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.web.HttpRequestHandler;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.util.NestedServletException;
+import java.io.IOException;
 
 /**
  * Servlet-API-based HTTP request handler that exports the specified service bean
@@ -39,33 +38,32 @@ import org.springframework.web.util.NestedServletException;
  * any Hessian client, as there isn't any special handling involved.
  *
  * @author Juergen Hoeller
- * @since 13.05.2003
  * @see HessianClientInterceptor
  * @see HessianProxyFactoryBean
  * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
  * @see org.springframework.remoting.rmi.RmiServiceExporter
+ * @since 13.05.2003
  */
 public class HessianServiceExporter extends HessianExporter implements HttpRequestHandler {
 
-	/**
-	 * Processes the incoming Hessian request and creates a Hessian response.
-	 */
-	@Override
-	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+    /**
+     * Processes the incoming Hessian request and creates a Hessian response.
+     */
+    @Override
+    public void handleRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-		if (!"POST".equals(request.getMethod())) {
-			throw new HttpRequestMethodNotSupportedException(request.getMethod(),
-					new String[] {"POST"}, "HessianServiceExporter only supports POST requests");
-		}
+        if (!"POST".equals(request.getMethod())) {
+            throw new HttpRequestMethodNotSupportedException(request.getMethod(),
+                    new String[]{"POST"}, "HessianServiceExporter only supports POST requests");
+        }
 
-		response.setContentType(CONTENT_TYPE_HESSIAN);
-		try {
-			invoke(request.getInputStream(), response.getOutputStream());
-		}
-		catch (Throwable ex) {
-			throw new NestedServletException("Hessian skeleton invocation failed", ex);
-		}
-	}
+        response.setContentType(CONTENT_TYPE_HESSIAN);
+        try {
+            invoke(request.getInputStream(), response.getOutputStream());
+        } catch (Throwable ex) {
+            throw new NestedServletException("Hessian skeleton invocation failed", ex);
+        }
+    }
 
 }

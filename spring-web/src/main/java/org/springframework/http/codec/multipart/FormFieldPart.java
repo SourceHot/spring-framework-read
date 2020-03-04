@@ -24,9 +24,9 @@ package org.springframework.http.codec.multipart;
  */
 public interface FormFieldPart extends Part {
 
-	/**
-	 * Return the form field value.
-	 */
-	String value();
+    /**
+     * Return the form field value.
+     */
+    String value();
 
 }

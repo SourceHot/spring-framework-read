@@ -49,20 +49,20 @@ import java.lang.annotation.Target;
  * to resort to {@code @Inject Provider<TargetBean>} or the like instead.
  *
  * @author Juergen Hoeller
- * @since 4.1
  * @see org.springframework.beans.factory.BeanFactory#getBean(Class, Object...)
  * @see org.springframework.beans.factory.BeanFactory#getBean(String, Object...)
+ * @since 4.1
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Lookup {
 
-	/**
-	 * This annotation attribute may suggest a target bean name to look up.
-	 * If not specified, the target bean will be resolved based on the
-	 * annotated method's return type declaration.
-	 */
-	String value() default "";
+    /**
+     * This annotation attribute may suggest a target bean name to look up.
+     * If not specified, the target bean will be resolved based on the
+     * annotated method's return type declaration.
+     */
+    String value() default "";
 
 }

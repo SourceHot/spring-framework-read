@@ -33,14 +33,14 @@ import org.springframework.test.context.junit.jupiter.comics.Dog;
  */
 class DogTests extends GenericComicCharactersTests<Dog> {
 
-	@Override
-	int getExpectedNumCharacters() {
-		return 1;
-	}
+    @Override
+    int getExpectedNumCharacters() {
+        return 1;
+    }
 
-	@Override
-	String getExpectedName() {
-		return "Dogbert";
-	}
+    @Override
+    String getExpectedName() {
+        return "Dogbert";
+    }
 
 }

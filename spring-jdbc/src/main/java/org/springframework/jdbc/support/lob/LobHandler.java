@@ -16,12 +16,12 @@
 
 package org.springframework.jdbc.support.lob;
 
+import org.springframework.lang.Nullable;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Abstraction for handling large binary fields and large text fields in
@@ -63,7 +63,6 @@ import org.springframework.lang.Nullable;
  * </ul>
  *
  * @author Juergen Hoeller
- * @since 23.12.2003
  * @see DefaultLobHandler
  * @see java.sql.ResultSet#getBlob
  * @see java.sql.ResultSet#getClob
@@ -72,144 +71,156 @@ import org.springframework.lang.Nullable;
  * @see java.sql.ResultSet#getString
  * @see java.sql.ResultSet#getAsciiStream
  * @see java.sql.ResultSet#getCharacterStream
+ * @since 23.12.2003
  */
 public interface LobHandler {
 
-	/**
-	 * Retrieve the given column as bytes from the given ResultSet.
-	 * Might simply invoke {@code ResultSet.getBytes} or work with
-	 * {@code ResultSet.getBlob}, depending on the database and driver.
-	 * @param rs the ResultSet to retrieve the content from
-	 * @param columnName the column name to use
-	 * @return the content as byte array, or {@code null} in case of SQL NULL
-	 * @throws SQLException if thrown by JDBC methods
-	 * @see java.sql.ResultSet#getBytes
-	 */
-	@Nullable
-	byte[] getBlobAsBytes(ResultSet rs, String columnName) throws SQLException;
+    /**
+     * Retrieve the given column as bytes from the given ResultSet.
+     * Might simply invoke {@code ResultSet.getBytes} or work with
+     * {@code ResultSet.getBlob}, depending on the database and driver.
+     *
+     * @param rs         the ResultSet to retrieve the content from
+     * @param columnName the column name to use
+     * @return the content as byte array, or {@code null} in case of SQL NULL
+     * @throws SQLException if thrown by JDBC methods
+     * @see java.sql.ResultSet#getBytes
+     */
+    @Nullable
+    byte[] getBlobAsBytes(ResultSet rs, String columnName) throws SQLException;
 
-	/**
-	 * Retrieve the given column as bytes from the given ResultSet.
-	 * Might simply invoke {@code ResultSet.getBytes} or work with
-	 * {@code ResultSet.getBlob}, depending on the database and driver.
-	 * @param rs the ResultSet to retrieve the content from
-	 * @param columnIndex the column index to use
-	 * @return the content as byte array, or {@code null} in case of SQL NULL
-	 * @throws SQLException if thrown by JDBC methods
-	 * @see java.sql.ResultSet#getBytes
-	 */
-	@Nullable
-	byte[] getBlobAsBytes(ResultSet rs, int columnIndex) throws SQLException;
+    /**
+     * Retrieve the given column as bytes from the given ResultSet.
+     * Might simply invoke {@code ResultSet.getBytes} or work with
+     * {@code ResultSet.getBlob}, depending on the database and driver.
+     *
+     * @param rs          the ResultSet to retrieve the content from
+     * @param columnIndex the column index to use
+     * @return the content as byte array, or {@code null} in case of SQL NULL
+     * @throws SQLException if thrown by JDBC methods
+     * @see java.sql.ResultSet#getBytes
+     */
+    @Nullable
+    byte[] getBlobAsBytes(ResultSet rs, int columnIndex) throws SQLException;
 
-	/**
-	 * Retrieve the given column as binary stream from the given ResultSet.
-	 * Might simply invoke {@code ResultSet.getBinaryStream} or work with
-	 * {@code ResultSet.getBlob}, depending on the database and driver.
-	 * @param rs the ResultSet to retrieve the content from
-	 * @param columnName the column name to use
-	 * @return the content as binary stream, or {@code null} in case of SQL NULL
-	 * @throws SQLException if thrown by JDBC methods
-	 * @see java.sql.ResultSet#getBinaryStream
-	 */
-	@Nullable
-	InputStream getBlobAsBinaryStream(ResultSet rs, String columnName) throws SQLException;
+    /**
+     * Retrieve the given column as binary stream from the given ResultSet.
+     * Might simply invoke {@code ResultSet.getBinaryStream} or work with
+     * {@code ResultSet.getBlob}, depending on the database and driver.
+     *
+     * @param rs         the ResultSet to retrieve the content from
+     * @param columnName the column name to use
+     * @return the content as binary stream, or {@code null} in case of SQL NULL
+     * @throws SQLException if thrown by JDBC methods
+     * @see java.sql.ResultSet#getBinaryStream
+     */
+    @Nullable
+    InputStream getBlobAsBinaryStream(ResultSet rs, String columnName) throws SQLException;
 
-	/**
-	 * Retrieve the given column as binary stream from the given ResultSet.
-	 * Might simply invoke {@code ResultSet.getBinaryStream} or work with
-	 * {@code ResultSet.getBlob}, depending on the database and driver.
-	 * @param rs the ResultSet to retrieve the content from
-	 * @param columnIndex the column index to use
-	 * @return the content as binary stream, or {@code null} in case of SQL NULL
-	 * @throws SQLException if thrown by JDBC methods
-	 * @see java.sql.ResultSet#getBinaryStream
-	 */
-	@Nullable
-	InputStream getBlobAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException;
+    /**
+     * Retrieve the given column as binary stream from the given ResultSet.
+     * Might simply invoke {@code ResultSet.getBinaryStream} or work with
+     * {@code ResultSet.getBlob}, depending on the database and driver.
+     *
+     * @param rs          the ResultSet to retrieve the content from
+     * @param columnIndex the column index to use
+     * @return the content as binary stream, or {@code null} in case of SQL NULL
+     * @throws SQLException if thrown by JDBC methods
+     * @see java.sql.ResultSet#getBinaryStream
+     */
+    @Nullable
+    InputStream getBlobAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException;
 
-	/**
-	 * Retrieve the given column as String from the given ResultSet.
-	 * Might simply invoke {@code ResultSet.getString} or work with
-	 * {@code ResultSet.getClob}, depending on the database and driver.
-	 * @param rs the ResultSet to retrieve the content from
-	 * @param columnName the column name to use
-	 * @return the content as String, or {@code null} in case of SQL NULL
-	 * @throws SQLException if thrown by JDBC methods
-	 * @see java.sql.ResultSet#getString
-	 */
-	@Nullable
-	String getClobAsString(ResultSet rs, String columnName) throws SQLException;
+    /**
+     * Retrieve the given column as String from the given ResultSet.
+     * Might simply invoke {@code ResultSet.getString} or work with
+     * {@code ResultSet.getClob}, depending on the database and driver.
+     *
+     * @param rs         the ResultSet to retrieve the content from
+     * @param columnName the column name to use
+     * @return the content as String, or {@code null} in case of SQL NULL
+     * @throws SQLException if thrown by JDBC methods
+     * @see java.sql.ResultSet#getString
+     */
+    @Nullable
+    String getClobAsString(ResultSet rs, String columnName) throws SQLException;
 
-	/**
-	 * Retrieve the given column as String from the given ResultSet.
-	 * Might simply invoke {@code ResultSet.getString} or work with
-	 * {@code ResultSet.getClob}, depending on the database and driver.
-	 * @param rs the ResultSet to retrieve the content from
-	 * @param columnIndex the column index to use
-	 * @return the content as String, or {@code null} in case of SQL NULL
-	 * @throws SQLException if thrown by JDBC methods
-	 * @see java.sql.ResultSet#getString
-	 */
-	@Nullable
-	String getClobAsString(ResultSet rs, int columnIndex) throws SQLException;
+    /**
+     * Retrieve the given column as String from the given ResultSet.
+     * Might simply invoke {@code ResultSet.getString} or work with
+     * {@code ResultSet.getClob}, depending on the database and driver.
+     *
+     * @param rs          the ResultSet to retrieve the content from
+     * @param columnIndex the column index to use
+     * @return the content as String, or {@code null} in case of SQL NULL
+     * @throws SQLException if thrown by JDBC methods
+     * @see java.sql.ResultSet#getString
+     */
+    @Nullable
+    String getClobAsString(ResultSet rs, int columnIndex) throws SQLException;
 
-	/**
-	 * Retrieve the given column as ASCII stream from the given ResultSet.
-	 * Might simply invoke {@code ResultSet.getAsciiStream} or work with
-	 * {@code ResultSet.getClob}, depending on the database and driver.
-	 * @param rs the ResultSet to retrieve the content from
-	 * @param columnName the column name to use
-	 * @return the content as ASCII stream, or {@code null} in case of SQL NULL
-	 * @throws SQLException if thrown by JDBC methods
-	 * @see java.sql.ResultSet#getAsciiStream
-	 */
-	@Nullable
-	InputStream getClobAsAsciiStream(ResultSet rs, String columnName) throws SQLException;
+    /**
+     * Retrieve the given column as ASCII stream from the given ResultSet.
+     * Might simply invoke {@code ResultSet.getAsciiStream} or work with
+     * {@code ResultSet.getClob}, depending on the database and driver.
+     *
+     * @param rs         the ResultSet to retrieve the content from
+     * @param columnName the column name to use
+     * @return the content as ASCII stream, or {@code null} in case of SQL NULL
+     * @throws SQLException if thrown by JDBC methods
+     * @see java.sql.ResultSet#getAsciiStream
+     */
+    @Nullable
+    InputStream getClobAsAsciiStream(ResultSet rs, String columnName) throws SQLException;
 
-	/**
-	 * Retrieve the given column as ASCII stream from the given ResultSet.
-	 * Might simply invoke {@code ResultSet.getAsciiStream} or work with
-	 * {@code ResultSet.getClob}, depending on the database and driver.
-	 * @param rs the ResultSet to retrieve the content from
-	 * @param columnIndex the column index to use
-	 * @return the content as ASCII stream, or {@code null} in case of SQL NULL
-	 * @throws SQLException if thrown by JDBC methods
-	 * @see java.sql.ResultSet#getAsciiStream
-	 */
-	@Nullable
-	InputStream getClobAsAsciiStream(ResultSet rs, int columnIndex) throws SQLException;
+    /**
+     * Retrieve the given column as ASCII stream from the given ResultSet.
+     * Might simply invoke {@code ResultSet.getAsciiStream} or work with
+     * {@code ResultSet.getClob}, depending on the database and driver.
+     *
+     * @param rs          the ResultSet to retrieve the content from
+     * @param columnIndex the column index to use
+     * @return the content as ASCII stream, or {@code null} in case of SQL NULL
+     * @throws SQLException if thrown by JDBC methods
+     * @see java.sql.ResultSet#getAsciiStream
+     */
+    @Nullable
+    InputStream getClobAsAsciiStream(ResultSet rs, int columnIndex) throws SQLException;
 
-	/**
-	 * Retrieve the given column as character stream from the given ResultSet.
-	 * Might simply invoke {@code ResultSet.getCharacterStream} or work with
-	 * {@code ResultSet.getClob}, depending on the database and driver.
-	 * @param rs the ResultSet to retrieve the content from
-	 * @param columnName the column name to use
-	 * @return the content as character stream
-	 * @throws SQLException if thrown by JDBC methods
-	 * @see java.sql.ResultSet#getCharacterStream
-	 */
-	Reader getClobAsCharacterStream(ResultSet rs, String columnName) throws SQLException;
+    /**
+     * Retrieve the given column as character stream from the given ResultSet.
+     * Might simply invoke {@code ResultSet.getCharacterStream} or work with
+     * {@code ResultSet.getClob}, depending on the database and driver.
+     *
+     * @param rs         the ResultSet to retrieve the content from
+     * @param columnName the column name to use
+     * @return the content as character stream
+     * @throws SQLException if thrown by JDBC methods
+     * @see java.sql.ResultSet#getCharacterStream
+     */
+    Reader getClobAsCharacterStream(ResultSet rs, String columnName) throws SQLException;
 
-	/**
-	 * Retrieve the given column as character stream from the given ResultSet.
-	 * Might simply invoke {@code ResultSet.getCharacterStream} or work with
-	 * {@code ResultSet.getClob}, depending on the database and driver.
-	 * @param rs the ResultSet to retrieve the content from
-	 * @param columnIndex the column index to use
-	 * @return the content as character stream
-	 * @throws SQLException if thrown by JDBC methods
-	 * @see java.sql.ResultSet#getCharacterStream
-	 */
-	Reader getClobAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException;
+    /**
+     * Retrieve the given column as character stream from the given ResultSet.
+     * Might simply invoke {@code ResultSet.getCharacterStream} or work with
+     * {@code ResultSet.getClob}, depending on the database and driver.
+     *
+     * @param rs          the ResultSet to retrieve the content from
+     * @param columnIndex the column index to use
+     * @return the content as character stream
+     * @throws SQLException if thrown by JDBC methods
+     * @see java.sql.ResultSet#getCharacterStream
+     */
+    Reader getClobAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException;
 
-	/**
-	 * Create a new {@link LobCreator} instance, i.e. a session for creating BLOBs
-	 * and CLOBs. Needs to be closed after the created LOBs are not needed anymore -
-	 * typically after statement execution or transaction completion.
-	 * @return the new LobCreator instance
-	 * @see LobCreator#close()
-	 */
-	LobCreator getLobCreator();
+    /**
+     * Create a new {@link LobCreator} instance, i.e. a session for creating BLOBs
+     * and CLOBs. Needs to be closed after the created LOBs are not needed anymore -
+     * typically after statement execution or transaction completion.
+     *
+     * @return the new LobCreator instance
+     * @see LobCreator#close()
+     */
+    LobCreator getLobCreator();
 
 }

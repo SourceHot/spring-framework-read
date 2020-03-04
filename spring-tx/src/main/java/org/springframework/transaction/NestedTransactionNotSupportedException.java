@@ -26,21 +26,23 @@ package org.springframework.transaction;
 @SuppressWarnings("serial")
 public class NestedTransactionNotSupportedException extends CannotCreateTransactionException {
 
-	/**
-	 * Constructor for NestedTransactionNotSupportedException.
-	 * @param msg the detail message
-	 */
-	public NestedTransactionNotSupportedException(String msg) {
-		super(msg);
-	}
+    /**
+     * Constructor for NestedTransactionNotSupportedException.
+     *
+     * @param msg the detail message
+     */
+    public NestedTransactionNotSupportedException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Constructor for NestedTransactionNotSupportedException.
-	 * @param msg the detail message
-	 * @param cause the root cause from the transaction API in use
-	 */
-	public NestedTransactionNotSupportedException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Constructor for NestedTransactionNotSupportedException.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause from the transaction API in use
+     */
+    public NestedTransactionNotSupportedException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

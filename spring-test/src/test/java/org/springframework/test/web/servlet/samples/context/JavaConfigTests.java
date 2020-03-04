@@ -16,13 +16,10 @@
 
 package org.springframework.test.web.servlet.samples.context;
 
-import javax.servlet.ServletContext;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -46,6 +43,8 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 
+import javax.servlet.ServletContext;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -66,121 +65,121 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("classpath:META-INF/web-resources")
 @ContextHierarchy({
-	@ContextConfiguration(classes = RootConfig.class),
-	@ContextConfiguration(classes = WebConfig.class)
+        @ContextConfiguration(classes = RootConfig.class),
+        @ContextConfiguration(classes = WebConfig.class)
 })
 public class JavaConfigTests {
 
-	@Autowired
-	private WebApplicationContext wac;
+    @Autowired
+    private WebApplicationContext wac;
 
-	@Autowired
-	private PersonDao personDao;
+    @Autowired
+    private PersonDao personDao;
 
-	@Autowired
-	private PersonController personController;
+    @Autowired
+    private PersonController personController;
 
-	private MockMvc mockMvc;
-
-
-	@Before
-	public void setup() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-		verifyRootWacSupport();
-		given(this.personDao.getPerson(5L)).willReturn(new Person("Joe"));
-	}
-
-	@Test
-	public void person() throws Exception {
-		this.mockMvc.perform(get("/person/5").accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
-	}
-
-	@Test
-	public void tilesDefinitions() throws Exception {
-		this.mockMvc.perform(get("/"))
-			.andExpect(status().isOk())
-			.andExpect(forwardedUrl("/WEB-INF/layouts/standardLayout.jsp"));
-	}
-
-	/**
-	 * Verify that the breaking change introduced in <a
-	 * href="https://jira.spring.io/browse/SPR-12553">SPR-12553</a> has been reverted.
-	 *
-	 * <p>This code has been copied from
-	 * {@link org.springframework.test.context.hierarchies.web.ControllerIntegrationTests}.
-	 *
-	 * @see org.springframework.test.context.hierarchies.web.ControllerIntegrationTests#verifyRootWacSupport()
-	 */
-	private void verifyRootWacSupport() {
-		assertNotNull(personDao);
-		assertNotNull(personController);
-
-		ApplicationContext parent = wac.getParent();
-		assertNotNull(parent);
-		assertTrue(parent instanceof WebApplicationContext);
-		WebApplicationContext root = (WebApplicationContext) parent;
-
-		ServletContext childServletContext = wac.getServletContext();
-		assertNotNull(childServletContext);
-		ServletContext rootServletContext = root.getServletContext();
-		assertNotNull(rootServletContext);
-		assertSame(childServletContext, rootServletContext);
-
-		assertSame(root, rootServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
-		assertSame(root, childServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
-	}
+    private MockMvc mockMvc;
 
 
-	@Configuration
-	static class RootConfig {
+    @Before
+    public void setup() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+        verifyRootWacSupport();
+        given(this.personDao.getPerson(5L)).willReturn(new Person("Joe"));
+    }
 
-		@Bean
-		public PersonDao personDao() {
-			return Mockito.mock(PersonDao.class);
-		}
-	}
+    @Test
+    public void person() throws Exception {
+        this.mockMvc.perform(get("/person/5").accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+    }
 
-	@Configuration
-	@EnableWebMvc
-	static class WebConfig implements WebMvcConfigurer {
+    @Test
+    public void tilesDefinitions() throws Exception {
+        this.mockMvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/WEB-INF/layouts/standardLayout.jsp"));
+    }
 
-		@Autowired
-		private RootConfig rootConfig;
+    /**
+     * Verify that the breaking change introduced in <a
+     * href="https://jira.spring.io/browse/SPR-12553">SPR-12553</a> has been reverted.
+     *
+     * <p>This code has been copied from
+     * {@link org.springframework.test.context.hierarchies.web.ControllerIntegrationTests}.
+     *
+     * @see org.springframework.test.context.hierarchies.web.ControllerIntegrationTests#verifyRootWacSupport()
+     */
+    private void verifyRootWacSupport() {
+        assertNotNull(personDao);
+        assertNotNull(personController);
 
-		@Bean
-		public PersonController personController() {
-			return new PersonController(this.rootConfig.personDao());
-		}
+        ApplicationContext parent = wac.getParent();
+        assertNotNull(parent);
+        assertTrue(parent instanceof WebApplicationContext);
+        WebApplicationContext root = (WebApplicationContext) parent;
 
-		@Override
-		public void addResourceHandlers(ResourceHandlerRegistry registry) {
-			registry.addResourceHandler("/resources/**").addResourceLocations("/resources/");
-		}
+        ServletContext childServletContext = wac.getServletContext();
+        assertNotNull(childServletContext);
+        ServletContext rootServletContext = root.getServletContext();
+        assertNotNull(rootServletContext);
+        assertSame(childServletContext, rootServletContext);
 
-		@Override
-		public void addViewControllers(ViewControllerRegistry registry) {
-			registry.addViewController("/").setViewName("home");
-		}
+        assertSame(root, rootServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
+        assertSame(root, childServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
+    }
 
-		@Override
-		public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
-			configurer.enable();
-		}
 
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.tiles();
-		}
+    @Configuration
+    static class RootConfig {
 
-		@Bean
-		public TilesConfigurer tilesConfigurer() {
-			TilesConfigurer configurer = new TilesConfigurer();
-			configurer.setDefinitions("/WEB-INF/**/tiles.xml");
-			return configurer;
-		}
-	}
+        @Bean
+        public PersonDao personDao() {
+            return Mockito.mock(PersonDao.class);
+        }
+    }
+
+    @Configuration
+    @EnableWebMvc
+    static class WebConfig implements WebMvcConfigurer {
+
+        @Autowired
+        private RootConfig rootConfig;
+
+        @Bean
+        public PersonController personController() {
+            return new PersonController(this.rootConfig.personDao());
+        }
+
+        @Override
+        public void addResourceHandlers(ResourceHandlerRegistry registry) {
+            registry.addResourceHandler("/resources/**").addResourceLocations("/resources/");
+        }
+
+        @Override
+        public void addViewControllers(ViewControllerRegistry registry) {
+            registry.addViewController("/").setViewName("home");
+        }
+
+        @Override
+        public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+            configurer.enable();
+        }
+
+        @Override
+        public void configureViewResolvers(ViewResolverRegistry registry) {
+            registry.tiles();
+        }
+
+        @Bean
+        public TilesConfigurer tilesConfigurer() {
+            TilesConfigurer configurer = new TilesConfigurer();
+            configurer.setDefinitions("/WEB-INF/**/tiles.xml");
+            return configurer;
+        }
+    }
 
 }

@@ -26,6 +26,6 @@ import javax.jws.soap.SOAPBinding;
 @SOAPBinding(style = SOAPBinding.Style.RPC)
 public interface OrderService {
 
-	String getOrder(int id) throws OrderNotFoundException;
+    String getOrder(int id) throws OrderNotFoundException;
 
 }

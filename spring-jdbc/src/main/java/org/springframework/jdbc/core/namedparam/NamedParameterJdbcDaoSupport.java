@@ -25,32 +25,32 @@ import org.springframework.lang.Nullable;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @since 2.0
  * @see NamedParameterJdbcTemplate
+ * @since 2.0
  */
 public class NamedParameterJdbcDaoSupport extends JdbcDaoSupport {
 
-	@Nullable
-	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    @Nullable
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 
-	/**
-	 * Create a NamedParameterJdbcTemplate based on the configured JdbcTemplate.
-	 */
-	@Override
-	protected void initTemplateConfig() {
-		JdbcTemplate jdbcTemplate = getJdbcTemplate();
-		if (jdbcTemplate != null) {
-			this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-		}
-	}
+    /**
+     * Create a NamedParameterJdbcTemplate based on the configured JdbcTemplate.
+     */
+    @Override
+    protected void initTemplateConfig() {
+        JdbcTemplate jdbcTemplate = getJdbcTemplate();
+        if (jdbcTemplate != null) {
+            this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        }
+    }
 
-	/**
-	 * Return a NamedParameterJdbcTemplate wrapping the configured JdbcTemplate.
-	 */
-	@Nullable
-	public NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
-		return this.namedParameterJdbcTemplate;
-	}
+    /**
+     * Return a NamedParameterJdbcTemplate wrapping the configured JdbcTemplate.
+     */
+    @Nullable
+    public NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
+        return this.namedParameterJdbcTemplate;
+    }
 
 }

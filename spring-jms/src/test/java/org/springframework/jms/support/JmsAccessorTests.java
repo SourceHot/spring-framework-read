@@ -16,11 +16,12 @@
 
 package org.springframework.jms.support;
 
-import javax.jms.Session;
-
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import javax.jms.Session;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Unit tests for the {@link JmsAccessor} class.
@@ -30,41 +31,41 @@ import static org.junit.Assert.*;
  */
 public class JmsAccessorTests {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testChokesIfConnectionFactoryIsNotSupplied() throws Exception {
-		JmsAccessor accessor = new StubJmsAccessor();
-		accessor.afterPropertiesSet();
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testChokesIfConnectionFactoryIsNotSupplied() throws Exception {
+        JmsAccessor accessor = new StubJmsAccessor();
+        accessor.afterPropertiesSet();
+    }
 
-	@Test
-	public void testSessionTransactedModeReallyDoesDefaultToFalse() throws Exception {
-		JmsAccessor accessor = new StubJmsAccessor();
-		assertFalse("The [sessionTransacted] property of JmsAccessor must default to " +
-				"false. Change this test (and the attendant Javadoc) if you have " +
-				"changed the default.",
-				accessor.isSessionTransacted());
-	}
+    @Test
+    public void testSessionTransactedModeReallyDoesDefaultToFalse() throws Exception {
+        JmsAccessor accessor = new StubJmsAccessor();
+        assertFalse("The [sessionTransacted] property of JmsAccessor must default to " +
+                        "false. Change this test (and the attendant Javadoc) if you have " +
+                        "changed the default.",
+                accessor.isSessionTransacted());
+    }
 
-	@Test
-	public void testAcknowledgeModeReallyDoesDefaultToAutoAcknowledge() throws Exception {
-		JmsAccessor accessor = new StubJmsAccessor();
-		assertEquals("The [sessionAcknowledgeMode] property of JmsAccessor must default to " +
-				"[Session.AUTO_ACKNOWLEDGE]. Change this test (and the attendant " +
-				"Javadoc) if you have changed the default.",
-				Session.AUTO_ACKNOWLEDGE,
-				accessor.getSessionAcknowledgeMode());
-	}
+    @Test
+    public void testAcknowledgeModeReallyDoesDefaultToAutoAcknowledge() throws Exception {
+        JmsAccessor accessor = new StubJmsAccessor();
+        assertEquals("The [sessionAcknowledgeMode] property of JmsAccessor must default to " +
+                        "[Session.AUTO_ACKNOWLEDGE]. Change this test (and the attendant " +
+                        "Javadoc) if you have changed the default.",
+                Session.AUTO_ACKNOWLEDGE,
+                accessor.getSessionAcknowledgeMode());
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testSetAcknowledgeModeNameChokesIfBadAckModeIsSupplied() throws Exception {
-		new StubJmsAccessor().setSessionAcknowledgeModeName("Tally ho chaps!");
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetAcknowledgeModeNameChokesIfBadAckModeIsSupplied() throws Exception {
+        new StubJmsAccessor().setSessionAcknowledgeModeName("Tally ho chaps!");
+    }
 
 
-	/**
-	 * Crummy, stub, do-nothing subclass of the JmsAccessor class for use in testing.
-	 */
-	private static final class StubJmsAccessor extends JmsAccessor {
-	}
+    /**
+     * Crummy, stub, do-nothing subclass of the JmsAccessor class for use in testing.
+     */
+    private static final class StubJmsAccessor extends JmsAccessor {
+    }
 
 }

@@ -35,21 +35,21 @@ import java.util.Properties;
  */
 public class PropertiesPropertySource extends MapPropertySource {
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	public PropertiesPropertySource(String name, Properties source) {
-		super(name, (Map) source);
-	}
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public PropertiesPropertySource(String name, Properties source) {
+        super(name, (Map) source);
+    }
 
-	protected PropertiesPropertySource(String name, Map<String, Object> source) {
-		super(name, source);
-	}
+    protected PropertiesPropertySource(String name, Map<String, Object> source) {
+        super(name, source);
+    }
 
 
-	@Override
-	public String[] getPropertyNames() {
-		synchronized (this.source) {
-			return super.getPropertyNames();
-		}
-	}
+    @Override
+    public String[] getPropertyNames() {
+        synchronized (this.source) {
+            return super.getPropertyNames();
+        }
+    }
 
 }

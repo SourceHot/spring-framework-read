@@ -29,18 +29,20 @@ import javax.sql.DataSource;
  */
 public interface EmbeddedDatabaseConfigurer {
 
-	/**
-	 * Configure the properties required to create and connect to the embedded database.
-	 * @param properties connection properties to configure
-	 * @param databaseName the name of the embedded database
-	 */
-	void configureConnectionProperties(ConnectionProperties properties, String databaseName);
+    /**
+     * Configure the properties required to create and connect to the embedded database.
+     *
+     * @param properties   connection properties to configure
+     * @param databaseName the name of the embedded database
+     */
+    void configureConnectionProperties(ConnectionProperties properties, String databaseName);
 
-	/**
-	 * Shut down the embedded database instance that backs the supplied {@link DataSource}.
-	 * @param dataSource the corresponding {@link DataSource}
-	 * @param databaseName the name of the database being shut down
-	 */
-	void shutdown(DataSource dataSource, String databaseName);
+    /**
+     * Shut down the embedded database instance that backs the supplied {@link DataSource}.
+     *
+     * @param dataSource   the corresponding {@link DataSource}
+     * @param databaseName the name of the database being shut down
+     */
+    void shutdown(DataSource dataSource, String databaseName);
 
 }

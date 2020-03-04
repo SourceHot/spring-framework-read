@@ -16,9 +16,9 @@
 
 package org.springframework.aop.support;
 
-import java.lang.reflect.Method;
-
 import org.springframework.aop.MethodMatcher;
+
+import java.lang.reflect.Method;
 
 /**
  * Convenient abstract superclass for dynamic method matchers,
@@ -28,18 +28,18 @@ import org.springframework.aop.MethodMatcher;
  */
 public abstract class DynamicMethodMatcher implements MethodMatcher {
 
-	@Override
-	public final boolean isRuntime() {
-		return true;
-	}
+    @Override
+    public final boolean isRuntime() {
+        return true;
+    }
 
-	/**
-	 * Can override to add preconditions for dynamic matching. This implementation
-	 * always returns true.
-	 */
-	@Override
-	public boolean matches(Method method, Class<?> targetClass) {
-		return true;
-	}
+    /**
+     * Can override to add preconditions for dynamic matching. This implementation
+     * always returns true.
+     */
+    @Override
+    public boolean matches(Method method, Class<?> targetClass) {
+        return true;
+    }
 
 }

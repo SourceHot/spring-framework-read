@@ -28,20 +28,20 @@ import java.io.OutputStream;
  */
 public final class OutputStreamFactory {
 
-	private OutputStreamFactory() {
-	}
+    private OutputStreamFactory() {
+    }
 
 
-	/**
-	 * Returns an {@link java.io.OutputStream} that ignores all data given to it.
-	 */
-	public static OutputStream getNoopOutputStream() {
-		return new OutputStream() {
-			@Override
-			public void write(int b) throws IOException {
-				// ignore the output
-			}
-		};
-	}
+    /**
+     * Returns an {@link java.io.OutputStream} that ignores all data given to it.
+     */
+    public static OutputStream getNoopOutputStream() {
+        return new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                // ignore the output
+            }
+        };
+    }
 
 }

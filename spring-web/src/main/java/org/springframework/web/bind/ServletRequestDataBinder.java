@@ -82,37 +82,37 @@ public class ServletRequestDataBinder extends WebDataBinder {
     }
 
 
-	/**
-	 * Bind the parameters of the given request to this binder's target,
-	 * also binding multipart files in case of a multipart request.
-	 * <p>This call can create field errors, representing basic binding
-	 * errors like a required field (code "required"), or type mismatch
-	 * between value and bean property (code "typeMismatch").
-	 * <p>Multipart files are bound via their parameter name, just like normal
-	 * HTTP parameters: i.e. "uploadedFile" to an "uploadedFile" bean property,
-	 * invoking a "setUploadedFile" setter method.
-	 * <p>The type of the target property for a multipart file can be MultipartFile,
-	 * byte[], or String. The latter two receive the contents of the uploaded file;
-	 * all metadata like original file name, content type, etc are lost in those cases.
-	 * <p>
-	 * 请求信息绑定
-	 *
-	 * @param request request with parameters to bind (can be multipart)
-	 * @see org.springframework.web.multipart.MultipartHttpServletRequest
-	 * @see org.springframework.web.multipart.MultipartFile
-	 * @see #bind(org.springframework.beans.PropertyValues)
-	 */
-	public void bind(ServletRequest request) {
-		// 绑定请求信息,mpvs 中为请求参数
-		MutablePropertyValues mpvs = new ServletRequestParameterPropertyValues(request);
+    /**
+     * Bind the parameters of the given request to this binder's target,
+     * also binding multipart files in case of a multipart request.
+     * <p>This call can create field errors, representing basic binding
+     * errors like a required field (code "required"), or type mismatch
+     * between value and bean property (code "typeMismatch").
+     * <p>Multipart files are bound via their parameter name, just like normal
+     * HTTP parameters: i.e. "uploadedFile" to an "uploadedFile" bean property,
+     * invoking a "setUploadedFile" setter method.
+     * <p>The type of the target property for a multipart file can be MultipartFile,
+     * byte[], or String. The latter two receive the contents of the uploaded file;
+     * all metadata like original file name, content type, etc are lost in those cases.
+     * <p>
+     * 请求信息绑定
+     *
+     * @param request request with parameters to bind (can be multipart)
+     * @see org.springframework.web.multipart.MultipartHttpServletRequest
+     * @see org.springframework.web.multipart.MultipartFile
+     * @see #bind(org.springframework.beans.PropertyValues)
+     */
+    public void bind(ServletRequest request) {
+        // 绑定请求信息,mpvs 中为请求参数
+        MutablePropertyValues mpvs = new ServletRequestParameterPropertyValues(request);
 
-		MultipartRequest multipartRequest = WebUtils.getNativeRequest(request, MultipartRequest.class);
-		if (multipartRequest != null) {
-			bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
-		}
-		addBindValues(mpvs, request);
-		doBind(mpvs);
-	}
+        MultipartRequest multipartRequest = WebUtils.getNativeRequest(request, MultipartRequest.class);
+        if (multipartRequest != null) {
+            bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
+        }
+        addBindValues(mpvs, request);
+        doBind(mpvs);
+    }
 
     /**
      * Extension point that subclasses can use to add extra bind values for a

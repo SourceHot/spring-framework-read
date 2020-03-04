@@ -28,29 +28,30 @@ import java.sql.Types;
  */
 public class SqlReturnUpdateCount extends SqlParameter {
 
-	/**
-	 * Create a new SqlReturnUpdateCount.
-	 * @param name name of the parameter, as used in input and output maps
-	 */
-	public SqlReturnUpdateCount(String name) {
-		super(name, Types.INTEGER);
-	}
+    /**
+     * Create a new SqlReturnUpdateCount.
+     *
+     * @param name name of the parameter, as used in input and output maps
+     */
+    public SqlReturnUpdateCount(String name) {
+        super(name, Types.INTEGER);
+    }
 
 
-	/**
-	 * This implementation always returns {@code false}.
-	 */
-	@Override
-	public boolean isInputValueProvided() {
-		return false;
-	}
+    /**
+     * This implementation always returns {@code false}.
+     */
+    @Override
+    public boolean isInputValueProvided() {
+        return false;
+    }
 
-	/**
-	 * This implementation always returns {@code true}.
-	 */
-	@Override
-	public boolean isResultsParameter() {
-		return true;
-	}
+    /**
+     * This implementation always returns {@code true}.
+     */
+    @Override
+    public boolean isResultsParameter() {
+        return true;
+    }
 
 }

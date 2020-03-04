@@ -25,21 +25,23 @@ package org.springframework.dao;
 @SuppressWarnings("serial")
 public class CannotSerializeTransactionException extends PessimisticLockingFailureException {
 
-	/**
-	 * Constructor for CannotSerializeTransactionException.
-	 * @param msg the detail message
-	 */
-	public CannotSerializeTransactionException(String msg) {
-		super(msg);
-	}
+    /**
+     * Constructor for CannotSerializeTransactionException.
+     *
+     * @param msg the detail message
+     */
+    public CannotSerializeTransactionException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Constructor for CannotSerializeTransactionException.
-	 * @param msg the detail message
-	 * @param cause the root cause from the data access API in use
-	 */
-	public CannotSerializeTransactionException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Constructor for CannotSerializeTransactionException.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause from the data access API in use
+     */
+    public CannotSerializeTransactionException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

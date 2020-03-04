@@ -16,13 +16,13 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
-import javax.persistence.spi.ClassTransformer;
-
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.SimpleThrowawayClassLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.persistence.spi.ClassTransformer;
 
 /**
  * Subclass of {@link MutablePersistenceUnitInfo} that adds instrumentation hooks based on
@@ -33,70 +33,70 @@ import org.springframework.util.Assert;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Costin Leau
- * @since 2.0
  * @see PersistenceUnitManager
+ * @since 2.0
  */
 class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 
-	@Nullable
-	private LoadTimeWeaver loadTimeWeaver;
+    @Nullable
+    private LoadTimeWeaver loadTimeWeaver;
 
-	@Nullable
-	private ClassLoader classLoader;
-
-
-	/**
-	 * Initialize this PersistenceUnitInfo with the LoadTimeWeaver SPI interface
-	 * used by Spring to add instrumentation to the current class loader.
-	 */
-	public void init(LoadTimeWeaver loadTimeWeaver) {
-		Assert.notNull(loadTimeWeaver, "LoadTimeWeaver must not be null");
-		this.loadTimeWeaver = loadTimeWeaver;
-		this.classLoader = loadTimeWeaver.getInstrumentableClassLoader();
-	}
-
-	/**
-	 * Initialize this PersistenceUnitInfo with the current class loader
-	 * (instead of with a LoadTimeWeaver).
-	 */
-	public void init(@Nullable ClassLoader classLoader) {
-		this.classLoader = classLoader;
-	}
+    @Nullable
+    private ClassLoader classLoader;
 
 
-	/**
-	 * This implementation returns the LoadTimeWeaver's instrumentable ClassLoader,
-	 * if specified.
-	 */
-	@Override
-	@Nullable
-	public ClassLoader getClassLoader() {
-		return this.classLoader;
-	}
+    /**
+     * Initialize this PersistenceUnitInfo with the LoadTimeWeaver SPI interface
+     * used by Spring to add instrumentation to the current class loader.
+     */
+    public void init(LoadTimeWeaver loadTimeWeaver) {
+        Assert.notNull(loadTimeWeaver, "LoadTimeWeaver must not be null");
+        this.loadTimeWeaver = loadTimeWeaver;
+        this.classLoader = loadTimeWeaver.getInstrumentableClassLoader();
+    }
 
-	/**
-	 * This implementation delegates to the LoadTimeWeaver, if specified.
-	 */
-	@Override
-	public void addTransformer(ClassTransformer classTransformer) {
-		if (this.loadTimeWeaver == null) {
-			throw new IllegalStateException("Cannot apply class transformer without LoadTimeWeaver specified");
-		}
-		this.loadTimeWeaver.addTransformer(new ClassFileTransformerAdapter(classTransformer));
-	}
+    /**
+     * Initialize this PersistenceUnitInfo with the current class loader
+     * (instead of with a LoadTimeWeaver).
+     */
+    public void init(@Nullable ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
 
-	/**
-	 * This implementation delegates to the LoadTimeWeaver, if specified.
-	 */
-	@Override
-	public ClassLoader getNewTempClassLoader() {
-		ClassLoader tcl = (this.loadTimeWeaver != null ? this.loadTimeWeaver.getThrowawayClassLoader() :
-				new SimpleThrowawayClassLoader(this.classLoader));
-		String packageToExclude = getPersistenceProviderPackageName();
-		if (packageToExclude != null && tcl instanceof DecoratingClassLoader) {
-			((DecoratingClassLoader) tcl).excludePackage(packageToExclude);
-		}
-		return tcl;
-	}
+
+    /**
+     * This implementation returns the LoadTimeWeaver's instrumentable ClassLoader,
+     * if specified.
+     */
+    @Override
+    @Nullable
+    public ClassLoader getClassLoader() {
+        return this.classLoader;
+    }
+
+    /**
+     * This implementation delegates to the LoadTimeWeaver, if specified.
+     */
+    @Override
+    public void addTransformer(ClassTransformer classTransformer) {
+        if (this.loadTimeWeaver == null) {
+            throw new IllegalStateException("Cannot apply class transformer without LoadTimeWeaver specified");
+        }
+        this.loadTimeWeaver.addTransformer(new ClassFileTransformerAdapter(classTransformer));
+    }
+
+    /**
+     * This implementation delegates to the LoadTimeWeaver, if specified.
+     */
+    @Override
+    public ClassLoader getNewTempClassLoader() {
+        ClassLoader tcl = (this.loadTimeWeaver != null ? this.loadTimeWeaver.getThrowawayClassLoader() :
+                new SimpleThrowawayClassLoader(this.classLoader));
+        String packageToExclude = getPersistenceProviderPackageName();
+        if (packageToExclude != null && tcl instanceof DecoratingClassLoader) {
+            ((DecoratingClassLoader) tcl).excludePackage(packageToExclude);
+        }
+        return tcl;
+    }
 
 }

@@ -50,9 +50,9 @@ import java.lang.annotation.Target;
  * {@link Commit @Commit} for a concrete example.
  *
  * @author Sam Brannen
- * @since 2.5
  * @see Commit
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
+ * @since 2.5
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -60,13 +60,13 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface Rollback {
 
-	/**
-	 * Whether the <em>test-managed transaction</em> should be rolled back
-	 * after the test method has completed.
-	 * <p>If {@code true}, the transaction will be rolled back; otherwise,
-	 * the transaction will be committed.
-	 * <p>Defaults to {@code true}.
-	 */
-	boolean value() default true;
+    /**
+     * Whether the <em>test-managed transaction</em> should be rolled back
+     * after the test method has completed.
+     * <p>If {@code true}, the transaction will be rolled back; otherwise,
+     * the transaction will be committed.
+     * <p>Defaults to {@code true}.
+     */
+    boolean value() default true;
 
 }

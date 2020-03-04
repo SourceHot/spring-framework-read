@@ -16,6 +16,11 @@
 
 package org.springframework.core.annotation;
 
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationHandler;
@@ -25,21 +30,16 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
-
 /**
  * {@link InvocationHandler} for an {@link Annotation} that Spring has
  * <em>synthesized</em> (i.e., wrapped in a dynamic proxy) with additional
  * functionality.
  *
  * @author Sam Brannen
- * @since 4.2
  * @see Annotation
  * @see AnnotationAttributeExtractor
  * @see AnnotationUtils#synthesizeAnnotation(Annotation, AnnotatedElement)
+ * @since 4.2
  */
 class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
@@ -90,6 +90,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
     /**
      * 获取 attributeValue 属性值
+     *
      * @param attributeMethod
      * @return
      */
@@ -107,8 +108,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
             // Synthesize nested annotations before returning them.
             if (value instanceof Annotation) {
                 value = AnnotationUtils.synthesizeAnnotation((Annotation) value, this.attributeExtractor.getAnnotatedElement());
-            }
-            else if (value instanceof Annotation[]) {
+            } else if (value instanceof Annotation[]) {
                 value = AnnotationUtils.synthesizeAnnotationArray((Annotation[]) value, this.attributeExtractor.getAnnotatedElement());
             }
 
@@ -194,8 +194,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
             int hashCode;
             if (value.getClass().isArray()) {
                 hashCode = hashCodeForArray(value);
-            }
-            else {
+            } else {
                 hashCode = value.hashCode();
             }
             result += (127 * attributeMethod.getName().hashCode()) ^ hashCode;

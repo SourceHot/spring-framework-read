@@ -16,11 +16,11 @@
 
 package org.springframework.web.servlet.mvc;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Base Controller interface, representing a component that receives
@@ -110,19 +110,20 @@ import org.springframework.web.servlet.ModelAndView;
 @FunctionalInterface
 public interface Controller {
 
-	/**
-	 * Process the request and return a ModelAndView object which the DispatcherServlet
-	 * will render. A {@code null} return value is not an error: it indicates that
-	 * this object completed request processing itself and that there is therefore no
-	 * ModelAndView to render.
-	 *
-	 * 处理用户请求
-	 * @param request  current HTTP request 请求
-	 * @param response current HTTP response 返回
-	 * @return a ModelAndView to render, or {@code null} if handled directly 模型和视图
-	 * @throws Exception in case of errors
-	 */
-	@Nullable
-	ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception;
+    /**
+     * Process the request and return a ModelAndView object which the DispatcherServlet
+     * will render. A {@code null} return value is not an error: it indicates that
+     * this object completed request processing itself and that there is therefore no
+     * ModelAndView to render.
+     * <p>
+     * 处理用户请求
+     *
+     * @param request  current HTTP request 请求
+     * @param response current HTTP response 返回
+     * @return a ModelAndView to render, or {@code null} if handled directly 模型和视图
+     * @throws Exception in case of errors
+     */
+    @Nullable
+    ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

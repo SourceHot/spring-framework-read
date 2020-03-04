@@ -16,6 +16,13 @@
 
 package org.springframework.jdbc.core;
 
+import org.springframework.jdbc.core.test.ConcretePerson;
+import org.springframework.jdbc.core.test.DatePerson;
+import org.springframework.jdbc.core.test.Person;
+import org.springframework.jdbc.core.test.SpacePerson;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
+
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -24,15 +31,13 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 
-import org.springframework.jdbc.core.test.ConcretePerson;
-import org.springframework.jdbc.core.test.DatePerson;
-import org.springframework.jdbc.core.test.Person;
-import org.springframework.jdbc.core.test.SpacePerson;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
-import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
-
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.anyInt;
+import static org.mockito.BDDMockito.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Mock object based abstract class for RowMapper tests.
@@ -42,95 +47,97 @@ import static org.mockito.BDDMockito.*;
  */
 public abstract class AbstractRowMapperTests {
 
-	protected void verifyPerson(Person bean) throws Exception {
-		assertEquals("Bubba", bean.getName());
-		assertEquals(22L, bean.getAge());
-		assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
-		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
-	}
+    protected void verifyPerson(Person bean) throws Exception {
+        assertEquals("Bubba", bean.getName());
+        assertEquals(22L, bean.getAge());
+        assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
+        assertEquals(new BigDecimal("1234.56"), bean.getBalance());
+    }
 
-	protected void verifyPerson(ConcretePerson bean) throws Exception {
-		assertEquals("Bubba", bean.getName());
-		assertEquals(22L, bean.getAge());
-		assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
-		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
-	}
+    protected void verifyPerson(ConcretePerson bean) throws Exception {
+        assertEquals("Bubba", bean.getName());
+        assertEquals(22L, bean.getAge());
+        assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
+        assertEquals(new BigDecimal("1234.56"), bean.getBalance());
+    }
 
-	protected void verifyPerson(SpacePerson bean) {
-		assertEquals("Bubba", bean.getLastName());
-		assertEquals(22L, bean.getAge());
-		assertEquals(new java.sql.Timestamp(1221222L).toLocalDateTime(), bean.getBirthDate());
-		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
-	}
+    protected void verifyPerson(SpacePerson bean) {
+        assertEquals("Bubba", bean.getLastName());
+        assertEquals(22L, bean.getAge());
+        assertEquals(new java.sql.Timestamp(1221222L).toLocalDateTime(), bean.getBirthDate());
+        assertEquals(new BigDecimal("1234.56"), bean.getBalance());
+    }
 
-	protected void verifyPerson(DatePerson bean) {
-		assertEquals("Bubba", bean.getLastName());
-		assertEquals(22L, bean.getAge());
-		assertEquals(new java.sql.Date(1221222L).toLocalDate(), bean.getBirthDate());
-		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
-	}
-
-
-	protected enum MockType {ONE, TWO, THREE};
+    protected void verifyPerson(DatePerson bean) {
+        assertEquals("Bubba", bean.getLastName());
+        assertEquals(22L, bean.getAge());
+        assertEquals(new java.sql.Date(1221222L).toLocalDate(), bean.getBirthDate());
+        assertEquals(new BigDecimal("1234.56"), bean.getBalance());
+    }
 
 
-	protected static class Mock {
+    protected enum MockType {ONE, TWO, THREE}
 
-		private Connection connection;
+    ;
 
-		private ResultSetMetaData resultSetMetaData;
 
-		private ResultSet resultSet;
+    protected static class Mock {
 
-		private Statement statement;
+        private Connection connection;
 
-		private JdbcTemplate jdbcTemplate;
+        private ResultSetMetaData resultSetMetaData;
 
-		public Mock() throws Exception {
-			this(MockType.ONE);
-		}
+        private ResultSet resultSet;
 
-		@SuppressWarnings("unchecked")
-		public Mock(MockType type) throws Exception {
-			connection = mock(Connection.class);
-			statement = mock(Statement.class);
-			resultSet = mock(ResultSet.class);
-			resultSetMetaData = mock(ResultSetMetaData.class);
+        private Statement statement;
 
-			given(connection.createStatement()).willReturn(statement);
-			given(statement.executeQuery(anyString())).willReturn(resultSet);
-			given(resultSet.getMetaData()).willReturn(resultSetMetaData);
+        private JdbcTemplate jdbcTemplate;
 
-			given(resultSet.next()).willReturn(true, false);
-			given(resultSet.getString(1)).willReturn("Bubba");
-			given(resultSet.getLong(2)).willReturn(22L);
-			given(resultSet.getTimestamp(3)).willReturn(new Timestamp(1221222L));
-			given(resultSet.getObject(anyInt(), any(Class.class))).willThrow(new SQLFeatureNotSupportedException());
-			given(resultSet.getDate(3)).willReturn(new java.sql.Date(1221222L));
-			given(resultSet.getBigDecimal(4)).willReturn(new BigDecimal("1234.56"));
-			given(resultSet.wasNull()).willReturn(type == MockType.TWO);
+        public Mock() throws Exception {
+            this(MockType.ONE);
+        }
 
-			given(resultSetMetaData.getColumnCount()).willReturn(4);
-			given(resultSetMetaData.getColumnLabel(1)).willReturn(
-					type == MockType.THREE ? "Last Name" : "name");
-			given(resultSetMetaData.getColumnLabel(2)).willReturn("age");
-			given(resultSetMetaData.getColumnLabel(3)).willReturn("birth_date");
-			given(resultSetMetaData.getColumnLabel(4)).willReturn("balance");
+        @SuppressWarnings("unchecked")
+        public Mock(MockType type) throws Exception {
+            connection = mock(Connection.class);
+            statement = mock(Statement.class);
+            resultSet = mock(ResultSet.class);
+            resultSetMetaData = mock(ResultSetMetaData.class);
 
-			jdbcTemplate = new JdbcTemplate();
-			jdbcTemplate.setDataSource(new SingleConnectionDataSource(connection, false));
-			jdbcTemplate.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
-			jdbcTemplate.afterPropertiesSet();
-		}
+            given(connection.createStatement()).willReturn(statement);
+            given(statement.executeQuery(anyString())).willReturn(resultSet);
+            given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 
-		public JdbcTemplate getJdbcTemplate() {
-			return jdbcTemplate;
-		}
+            given(resultSet.next()).willReturn(true, false);
+            given(resultSet.getString(1)).willReturn("Bubba");
+            given(resultSet.getLong(2)).willReturn(22L);
+            given(resultSet.getTimestamp(3)).willReturn(new Timestamp(1221222L));
+            given(resultSet.getObject(anyInt(), any(Class.class))).willThrow(new SQLFeatureNotSupportedException());
+            given(resultSet.getDate(3)).willReturn(new java.sql.Date(1221222L));
+            given(resultSet.getBigDecimal(4)).willReturn(new BigDecimal("1234.56"));
+            given(resultSet.wasNull()).willReturn(type == MockType.TWO);
 
-		public void verifyClosed() throws Exception {
-			verify(resultSet).close();
-			verify(statement).close();
-		}
-	}
+            given(resultSetMetaData.getColumnCount()).willReturn(4);
+            given(resultSetMetaData.getColumnLabel(1)).willReturn(
+                    type == MockType.THREE ? "Last Name" : "name");
+            given(resultSetMetaData.getColumnLabel(2)).willReturn("age");
+            given(resultSetMetaData.getColumnLabel(3)).willReturn("birth_date");
+            given(resultSetMetaData.getColumnLabel(4)).willReturn("balance");
+
+            jdbcTemplate = new JdbcTemplate();
+            jdbcTemplate.setDataSource(new SingleConnectionDataSource(connection, false));
+            jdbcTemplate.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
+            jdbcTemplate.afterPropertiesSet();
+        }
+
+        public JdbcTemplate getJdbcTemplate() {
+            return jdbcTemplate;
+        }
+
+        public void verifyClosed() throws Exception {
+            verify(resultSet).close();
+            verify(statement).close();
+        }
+    }
 
 }

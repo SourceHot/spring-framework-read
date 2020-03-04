@@ -18,14 +18,13 @@ package org.springframework.test.context.junit4.spr6128;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.hamcrest.core.IsEqual.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
 
 /**
  * Integration tests to verify claims made in <a
@@ -40,18 +39,18 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class AutowiredQualifierTests {
 
-	@Autowired
-	private String foo;
+    @Autowired
+    private String foo;
 
-	@Autowired
-	@Qualifier("customFoo")
-	private String customFoo;
+    @Autowired
+    @Qualifier("customFoo")
+    private String customFoo;
 
 
-	@Test
-	public void test() {
-		assertThat(foo, equalTo("normal"));
-		assertThat(customFoo, equalTo("custom"));
-	}
+    @Test
+    public void test() {
+        assertThat(foo, equalTo("normal"));
+        assertThat(customFoo, equalTo("custom"));
+    }
 
 }

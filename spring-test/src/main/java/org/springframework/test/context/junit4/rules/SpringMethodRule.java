@@ -16,14 +16,11 @@
 
 package org.springframework.test.context.junit4.rules;
 
-import java.lang.reflect.Method;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
-
 import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.junit4.statements.ProfileValueChecker;
 import org.springframework.test.context.junit4.statements.RunAfterTestMethodCallbacks;
@@ -31,6 +28,8 @@ import org.springframework.test.context.junit4.statements.RunBeforeTestMethodCal
 import org.springframework.test.context.junit4.statements.RunPrepareTestInstanceCallbacks;
 import org.springframework.test.context.junit4.statements.SpringFailOnTimeout;
 import org.springframework.test.context.junit4.statements.SpringRepeat;
+
+import java.lang.reflect.Method;
 
 /**
  * {@code SpringMethodRule} is a custom JUnit 4 {@link MethodRule} that
@@ -86,121 +85,128 @@ import org.springframework.test.context.junit4.statements.SpringRepeat;
  *
  * @author Sam Brannen
  * @author Philippe Marschall
- * @since 4.2
  * @see #apply(Statement, FrameworkMethod, Object)
  * @see SpringClassRule
  * @see org.springframework.test.context.TestContextManager
  * @see org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+ * @since 4.2
  */
 public class SpringMethodRule implements MethodRule {
 
-	private static final Log logger = LogFactory.getLog(SpringMethodRule.class);
+    private static final Log logger = LogFactory.getLog(SpringMethodRule.class);
 
 
-	/**
-	 * Apply <em>instance-level</em> and <em>method-level</em> features of
-	 * the <em>Spring TestContext Framework</em> to the supplied {@code base}
-	 * statement.
-	 * <p>Specifically, this method invokes the
-	 * {@link TestContextManager#prepareTestInstance prepareTestInstance()},
-	 * {@link TestContextManager#beforeTestMethod beforeTestMethod()}, and
-	 * {@link TestContextManager#afterTestMethod afterTestMethod()} methods
-	 * on the {@code TestContextManager}, potentially with Spring timeouts
-	 * and repetitions.
-	 * <p>In addition, this method checks whether the test is enabled in
-	 * the current execution environment. This prevents methods with a
-	 * non-matching {@code @IfProfileValue} annotation from running altogether,
-	 * even skipping the execution of {@code prepareTestInstance()} methods
-	 * in {@code TestExecutionListeners}.
-	 * @param base the base {@code Statement} that this rule should be applied to
-	 * @param frameworkMethod the method which is about to be invoked on the test instance
-	 * @param testInstance the current test instance
-	 * @return a statement that wraps the supplied {@code base} with instance-level
-	 * and method-level features of the Spring TestContext Framework
-	 * @see #withBeforeTestMethodCallbacks
-	 * @see #withAfterTestMethodCallbacks
-	 * @see #withPotentialRepeat
-	 * @see #withPotentialTimeout
-	 * @see #withTestInstancePreparation
-	 * @see #withProfileValueCheck
-	 */
-	@Override
-	public Statement apply(Statement base, FrameworkMethod frameworkMethod, Object testInstance) {
-		Method testMethod = frameworkMethod.getMethod();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Applying SpringMethodRule to test method [" + testMethod + "]");
-		}
-		Class<?> testClass = testInstance.getClass();
-		TestContextManager testContextManager = SpringClassRule.getTestContextManager(testClass);
+    /**
+     * Apply <em>instance-level</em> and <em>method-level</em> features of
+     * the <em>Spring TestContext Framework</em> to the supplied {@code base}
+     * statement.
+     * <p>Specifically, this method invokes the
+     * {@link TestContextManager#prepareTestInstance prepareTestInstance()},
+     * {@link TestContextManager#beforeTestMethod beforeTestMethod()}, and
+     * {@link TestContextManager#afterTestMethod afterTestMethod()} methods
+     * on the {@code TestContextManager}, potentially with Spring timeouts
+     * and repetitions.
+     * <p>In addition, this method checks whether the test is enabled in
+     * the current execution environment. This prevents methods with a
+     * non-matching {@code @IfProfileValue} annotation from running altogether,
+     * even skipping the execution of {@code prepareTestInstance()} methods
+     * in {@code TestExecutionListeners}.
+     *
+     * @param base            the base {@code Statement} that this rule should be applied to
+     * @param frameworkMethod the method which is about to be invoked on the test instance
+     * @param testInstance    the current test instance
+     * @return a statement that wraps the supplied {@code base} with instance-level
+     * and method-level features of the Spring TestContext Framework
+     * @see #withBeforeTestMethodCallbacks
+     * @see #withAfterTestMethodCallbacks
+     * @see #withPotentialRepeat
+     * @see #withPotentialTimeout
+     * @see #withTestInstancePreparation
+     * @see #withProfileValueCheck
+     */
+    @Override
+    public Statement apply(Statement base, FrameworkMethod frameworkMethod, Object testInstance) {
+        Method testMethod = frameworkMethod.getMethod();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Applying SpringMethodRule to test method [" + testMethod + "]");
+        }
+        Class<?> testClass = testInstance.getClass();
+        TestContextManager testContextManager = SpringClassRule.getTestContextManager(testClass);
 
-		Statement statement = base;
-		statement = withBeforeTestMethodCallbacks(statement, testMethod, testInstance, testContextManager);
-		statement = withAfterTestMethodCallbacks(statement, testMethod, testInstance, testContextManager);
-		statement = withTestInstancePreparation(statement, testInstance, testContextManager);
-		statement = withPotentialRepeat(statement, testMethod, testInstance);
-		statement = withPotentialTimeout(statement, testMethod, testInstance);
-		statement = withProfileValueCheck(statement, testMethod, testInstance);
-		return statement;
-	}
+        Statement statement = base;
+        statement = withBeforeTestMethodCallbacks(statement, testMethod, testInstance, testContextManager);
+        statement = withAfterTestMethodCallbacks(statement, testMethod, testInstance, testContextManager);
+        statement = withTestInstancePreparation(statement, testInstance, testContextManager);
+        statement = withPotentialRepeat(statement, testMethod, testInstance);
+        statement = withPotentialTimeout(statement, testMethod, testInstance);
+        statement = withProfileValueCheck(statement, testMethod, testInstance);
+        return statement;
+    }
 
-	/**
-	 * Wrap the supplied {@link Statement} with a {@code RunBeforeTestMethodCallbacks} statement.
-	 * @see RunBeforeTestMethodCallbacks
-	 */
-	private Statement withBeforeTestMethodCallbacks(Statement next, Method testMethod,
-			Object testInstance, TestContextManager testContextManager) {
+    /**
+     * Wrap the supplied {@link Statement} with a {@code RunBeforeTestMethodCallbacks} statement.
+     *
+     * @see RunBeforeTestMethodCallbacks
+     */
+    private Statement withBeforeTestMethodCallbacks(Statement next, Method testMethod,
+                                                    Object testInstance, TestContextManager testContextManager) {
 
-		return new RunBeforeTestMethodCallbacks(
-				next, testInstance, testMethod, testContextManager);
-	}
+        return new RunBeforeTestMethodCallbacks(
+                next, testInstance, testMethod, testContextManager);
+    }
 
-	/**
-	 * Wrap the supplied {@link Statement} with a {@code RunAfterTestMethodCallbacks} statement.
-	 * @see RunAfterTestMethodCallbacks
-	 */
-	private Statement withAfterTestMethodCallbacks(Statement next, Method testMethod,
-			Object testInstance, TestContextManager testContextManager) {
+    /**
+     * Wrap the supplied {@link Statement} with a {@code RunAfterTestMethodCallbacks} statement.
+     *
+     * @see RunAfterTestMethodCallbacks
+     */
+    private Statement withAfterTestMethodCallbacks(Statement next, Method testMethod,
+                                                   Object testInstance, TestContextManager testContextManager) {
 
-		return new RunAfterTestMethodCallbacks(
-				next, testInstance, testMethod, testContextManager);
-	}
+        return new RunAfterTestMethodCallbacks(
+                next, testInstance, testMethod, testContextManager);
+    }
 
-	/**
-	 * Wrap the supplied {@link Statement} with a {@code RunPrepareTestInstanceCallbacks} statement.
-	 * @see RunPrepareTestInstanceCallbacks
-	 */
-	private Statement withTestInstancePreparation(
-			Statement next, Object testInstance, TestContextManager testContextManager) {
+    /**
+     * Wrap the supplied {@link Statement} with a {@code RunPrepareTestInstanceCallbacks} statement.
+     *
+     * @see RunPrepareTestInstanceCallbacks
+     */
+    private Statement withTestInstancePreparation(
+            Statement next, Object testInstance, TestContextManager testContextManager) {
 
-		return new RunPrepareTestInstanceCallbacks(next, testInstance, testContextManager);
-	}
+        return new RunPrepareTestInstanceCallbacks(next, testInstance, testContextManager);
+    }
 
-	/**
-	 * Wrap the supplied {@link Statement} with a {@code SpringRepeat} statement.
-	 * <p>Supports Spring's {@link org.springframework.test.annotation.Repeat @Repeat}
-	 * annotation.
-	 * @see SpringRepeat
-	 */
-	private Statement withPotentialRepeat(Statement next, Method testMethod, Object testInstance) {
-		return new SpringRepeat(next, testMethod);
-	}
+    /**
+     * Wrap the supplied {@link Statement} with a {@code SpringRepeat} statement.
+     * <p>Supports Spring's {@link org.springframework.test.annotation.Repeat @Repeat}
+     * annotation.
+     *
+     * @see SpringRepeat
+     */
+    private Statement withPotentialRepeat(Statement next, Method testMethod, Object testInstance) {
+        return new SpringRepeat(next, testMethod);
+    }
 
-	/**
-	 * Wrap the supplied {@link Statement} with a {@code SpringFailOnTimeout} statement.
-	 * <p>Supports Spring's {@link org.springframework.test.annotation.Timed @Timed}
-	 * annotation.
-	 * @see SpringFailOnTimeout
-	 */
-	private Statement withPotentialTimeout(Statement next, Method testMethod, Object testInstance) {
-		return new SpringFailOnTimeout(next, testMethod);
-	}
+    /**
+     * Wrap the supplied {@link Statement} with a {@code SpringFailOnTimeout} statement.
+     * <p>Supports Spring's {@link org.springframework.test.annotation.Timed @Timed}
+     * annotation.
+     *
+     * @see SpringFailOnTimeout
+     */
+    private Statement withPotentialTimeout(Statement next, Method testMethod, Object testInstance) {
+        return new SpringFailOnTimeout(next, testMethod);
+    }
 
-	/**
-	 * Wrap the supplied {@link Statement} with a {@code ProfileValueChecker} statement.
-	 * @see ProfileValueChecker
-	 */
-	private Statement withProfileValueCheck(Statement next, Method testMethod, Object testInstance) {
-		return new ProfileValueChecker(next, testInstance.getClass(), testMethod);
-	}
+    /**
+     * Wrap the supplied {@link Statement} with a {@code ProfileValueChecker} statement.
+     *
+     * @see ProfileValueChecker
+     */
+    private Statement withProfileValueCheck(Statement next, Method testMethod, Object testInstance) {
+        return new ProfileValueChecker(next, testInstance.getClass(), testMethod);
+    }
 
 }

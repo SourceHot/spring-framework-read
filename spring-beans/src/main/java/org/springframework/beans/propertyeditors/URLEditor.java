@@ -16,13 +16,13 @@
 
 package org.springframework.beans.propertyeditors;
 
-import java.beans.PropertyEditorSupport;
-import java.io.IOException;
-import java.net.URL;
-
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.util.Assert;
+
+import java.beans.PropertyEditorSupport;
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * Editor for {@code java.net.URL}, to directly populate a URL property
@@ -37,51 +37,50 @@ import org.springframework.util.Assert;
  * at the time of URL creation; this depends on the specific resource type.
  *
  * @author Juergen Hoeller
- * @since 15.12.2003
  * @see java.net.URL
  * @see org.springframework.core.io.ResourceEditor
  * @see org.springframework.core.io.ResourceLoader
  * @see FileEditor
  * @see InputStreamEditor
+ * @since 15.12.2003
  */
 public class URLEditor extends PropertyEditorSupport {
 
-	private final ResourceEditor resourceEditor;
+    private final ResourceEditor resourceEditor;
 
 
-	/**
-	 * Create a new URLEditor, using a default ResourceEditor underneath.
-	 */
-	public URLEditor() {
-		this.resourceEditor = new ResourceEditor();
-	}
+    /**
+     * Create a new URLEditor, using a default ResourceEditor underneath.
+     */
+    public URLEditor() {
+        this.resourceEditor = new ResourceEditor();
+    }
 
-	/**
-	 * Create a new URLEditor, using the given ResourceEditor underneath.
-	 * @param resourceEditor the ResourceEditor to use
-	 */
-	public URLEditor(ResourceEditor resourceEditor) {
-		Assert.notNull(resourceEditor, "ResourceEditor must not be null");
-		this.resourceEditor = resourceEditor;
-	}
+    /**
+     * Create a new URLEditor, using the given ResourceEditor underneath.
+     *
+     * @param resourceEditor the ResourceEditor to use
+     */
+    public URLEditor(ResourceEditor resourceEditor) {
+        Assert.notNull(resourceEditor, "ResourceEditor must not be null");
+        this.resourceEditor = resourceEditor;
+    }
 
+    @Override
+    public String getAsText() {
+        URL value = (URL) getValue();
+        return (value != null ? value.toExternalForm() : "");
+    }
 
-	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
-		this.resourceEditor.setAsText(text);
-		Resource resource = (Resource) this.resourceEditor.getValue();
-		try {
-			setValue(resource != null ? resource.getURL() : null);
-		}
-		catch (IOException ex) {
-			throw new IllegalArgumentException("Could not retrieve URL for " + resource + ": " + ex.getMessage());
-		}
-	}
-
-	@Override
-	public String getAsText() {
-		URL value = (URL) getValue();
-		return (value != null ? value.toExternalForm() : "");
-	}
+    @Override
+    public void setAsText(String text) throws IllegalArgumentException {
+        this.resourceEditor.setAsText(text);
+        Resource resource = (Resource) this.resourceEditor.getValue();
+        try {
+            setValue(resource != null ? resource.getURL() : null);
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Could not retrieve URL for " + resource + ": " + ex.getMessage());
+        }
+    }
 
 }

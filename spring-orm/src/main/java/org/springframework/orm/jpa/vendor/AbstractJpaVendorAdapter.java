@@ -16,16 +16,15 @@
 
 package org.springframework.orm.jpa.vendor;
 
-import java.util.Collections;
-import java.util.Map;
+import org.springframework.lang.Nullable;
+import org.springframework.orm.jpa.JpaDialect;
+import org.springframework.orm.jpa.JpaVendorAdapter;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceUnitInfo;
-
-import org.springframework.lang.Nullable;
-import org.springframework.orm.jpa.JpaDialect;
-import org.springframework.orm.jpa.JpaVendorAdapter;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Abstract {@link JpaVendorAdapter} implementation that defines common properties,
@@ -37,127 +36,127 @@ import org.springframework.orm.jpa.JpaVendorAdapter;
  */
 public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
-	private Database database = Database.DEFAULT;
+    private Database database = Database.DEFAULT;
 
-	@Nullable
-	private String databasePlatform;
+    @Nullable
+    private String databasePlatform;
 
-	private boolean generateDdl = false;
+    private boolean generateDdl = false;
 
-	private boolean showSql = false;
+    private boolean showSql = false;
 
+    /**
+     * Return the target database to operate on.
+     */
+    protected Database getDatabase() {
+        return this.database;
+    }
 
-	/**
-	 * Specify the target database to operate on, as a value of the {@code Database} enum:
-	 * DB2, DERBY, H2, HANA, HSQL, INFORMIX, MYSQL, ORACLE, POSTGRESQL, SQL_SERVER, SYBASE
-	 * <p><b>NOTE:</b> This setting will override your JPA provider's default algorithm.
-	 * Custom vendor properties may still fine-tune the database dialect. However,
-	 * there may nevertheless be conflicts: For example, specify either this setting
-	 * or Hibernate's "hibernate.dialect_resolvers" property, not both.
-	 */
-	public void setDatabase(Database database) {
-		this.database = database;
-	}
+    /**
+     * Specify the target database to operate on, as a value of the {@code Database} enum:
+     * DB2, DERBY, H2, HANA, HSQL, INFORMIX, MYSQL, ORACLE, POSTGRESQL, SQL_SERVER, SYBASE
+     * <p><b>NOTE:</b> This setting will override your JPA provider's default algorithm.
+     * Custom vendor properties may still fine-tune the database dialect. However,
+     * there may nevertheless be conflicts: For example, specify either this setting
+     * or Hibernate's "hibernate.dialect_resolvers" property, not both.
+     */
+    public void setDatabase(Database database) {
+        this.database = database;
+    }
 
-	/**
-	 * Return the target database to operate on.
-	 */
-	protected Database getDatabase() {
-		return this.database;
-	}
+    /**
+     * Return the name of the target database to operate on.
+     */
+    @Nullable
+    protected String getDatabasePlatform() {
+        return this.databasePlatform;
+    }
 
-	/**
-	 * Specify the name of the target database to operate on.
-	 * The supported values are vendor-dependent platform identifiers.
-	 */
-	public void setDatabasePlatform(@Nullable String databasePlatform) {
-		this.databasePlatform = databasePlatform;
-	}
+    /**
+     * Specify the name of the target database to operate on.
+     * The supported values are vendor-dependent platform identifiers.
+     */
+    public void setDatabasePlatform(@Nullable String databasePlatform) {
+        this.databasePlatform = databasePlatform;
+    }
 
-	/**
-	 * Return the name of the target database to operate on.
-	 */
-	@Nullable
-	protected String getDatabasePlatform() {
-		return this.databasePlatform;
-	}
+    /**
+     * Return whether to generate DDL after the EntityManagerFactory has been initialized
+     * creating/updating all relevant tables.
+     */
+    protected boolean isGenerateDdl() {
+        return this.generateDdl;
+    }
 
-	/**
-	 * Set whether to generate DDL after the EntityManagerFactory has been initialized,
-	 * creating/updating all relevant tables.
-	 * <p>Note that the exact semantics of this flag depend on the underlying
-	 * persistence provider. For any more advanced needs, specify the appropriate
-	 * vendor-specific settings as "jpaProperties".
-	 * <p><b>NOTE: Do not set this flag to 'true' while also setting JPA 2.1's
-	 * {@code javax.persistence.schema-generation.database.action} property.</b>
-	 * These two schema generation mechanisms - standard JPA versus provider-native -
-	 * are mutually exclusive, e.g. with Hibernate 5.
-	 * @see org.springframework.orm.jpa.AbstractEntityManagerFactoryBean#setJpaProperties
-	 */
-	public void setGenerateDdl(boolean generateDdl) {
-		this.generateDdl = generateDdl;
-	}
+    /**
+     * Set whether to generate DDL after the EntityManagerFactory has been initialized,
+     * creating/updating all relevant tables.
+     * <p>Note that the exact semantics of this flag depend on the underlying
+     * persistence provider. For any more advanced needs, specify the appropriate
+     * vendor-specific settings as "jpaProperties".
+     * <p><b>NOTE: Do not set this flag to 'true' while also setting JPA 2.1's
+     * {@code javax.persistence.schema-generation.database.action} property.</b>
+     * These two schema generation mechanisms - standard JPA versus provider-native -
+     * are mutually exclusive, e.g. with Hibernate 5.
+     *
+     * @see org.springframework.orm.jpa.AbstractEntityManagerFactoryBean#setJpaProperties
+     */
+    public void setGenerateDdl(boolean generateDdl) {
+        this.generateDdl = generateDdl;
+    }
 
-	/**
-	 * Return whether to generate DDL after the EntityManagerFactory has been initialized
-	 * creating/updating all relevant tables.
-	 */
-	protected boolean isGenerateDdl() {
-		return this.generateDdl;
-	}
+    /**
+     * Return whether to show SQL in the log (or in the console).
+     */
+    protected boolean isShowSql() {
+        return this.showSql;
+    }
 
-	/**
-	 * Set whether to show SQL in the log (or in the console).
-	 * <p>For more specific logging configuration, specify the appropriate
-	 * vendor-specific settings as "jpaProperties".
-	 * @see org.springframework.orm.jpa.AbstractEntityManagerFactoryBean#setJpaProperties
-	 */
-	public void setShowSql(boolean showSql) {
-		this.showSql = showSql;
-	}
+    /**
+     * Set whether to show SQL in the log (or in the console).
+     * <p>For more specific logging configuration, specify the appropriate
+     * vendor-specific settings as "jpaProperties".
+     *
+     * @see org.springframework.orm.jpa.AbstractEntityManagerFactoryBean#setJpaProperties
+     */
+    public void setShowSql(boolean showSql) {
+        this.showSql = showSql;
+    }
 
-	/**
-	 * Return whether to show SQL in the log (or in the console).
-	 */
-	protected boolean isShowSql() {
-		return this.showSql;
-	}
+    @Override
+    @Nullable
+    public String getPersistenceProviderRootPackage() {
+        return null;
+    }
 
+    @Override
+    public Map<String, ?> getJpaPropertyMap(PersistenceUnitInfo pui) {
+        return getJpaPropertyMap();
+    }
 
-	@Override
-	@Nullable
-	public String getPersistenceProviderRootPackage() {
-		return null;
-	}
+    @Override
+    public Map<String, ?> getJpaPropertyMap() {
+        return Collections.emptyMap();
+    }
 
-	@Override
-	public Map<String, ?> getJpaPropertyMap(PersistenceUnitInfo pui) {
-		return getJpaPropertyMap();
-	}
+    @Override
+    @Nullable
+    public JpaDialect getJpaDialect() {
+        return null;
+    }
 
-	@Override
-	public Map<String, ?> getJpaPropertyMap() {
-		return Collections.emptyMap();
-	}
+    @Override
+    public Class<? extends EntityManagerFactory> getEntityManagerFactoryInterface() {
+        return EntityManagerFactory.class;
+    }
 
-	@Override
-	@Nullable
-	public JpaDialect getJpaDialect() {
-		return null;
-	}
+    @Override
+    public Class<? extends EntityManager> getEntityManagerInterface() {
+        return EntityManager.class;
+    }
 
-	@Override
-	public Class<? extends EntityManagerFactory> getEntityManagerFactoryInterface() {
-		return EntityManagerFactory.class;
-	}
-
-	@Override
-	public Class<? extends EntityManager> getEntityManagerInterface() {
-		return EntityManager.class;
-	}
-
-	@Override
-	public void postProcessEntityManagerFactory(EntityManagerFactory emf) {
-	}
+    @Override
+    public void postProcessEntityManagerFactory(EntityManagerFactory emf) {
+    }
 
 }

@@ -24,17 +24,18 @@ import groovy.text.markup.MarkupTemplateEngine;
  * Detected and used by {@link GroovyMarkupView}.
  *
  * @author Brian Clozel
- * @since 4.1
  * @see GroovyMarkupConfigurer
+ * @since 4.1
  */
 public interface GroovyMarkupConfig {
 
-	/**
-	 * Return the Groovy {@link MarkupTemplateEngine} for the current
-	 * web application context. May be unique to one servlet, or shared
-	 * in the root context.
-	 * @return the Groovy MarkupTemplateEngine engine
-	 */
-	MarkupTemplateEngine getTemplateEngine();
+    /**
+     * Return the Groovy {@link MarkupTemplateEngine} for the current
+     * web application context. May be unique to one servlet, or shared
+     * in the root context.
+     *
+     * @return the Groovy MarkupTemplateEngine engine
+     */
+    MarkupTemplateEngine getTemplateEngine();
 
 }

@@ -43,14 +43,14 @@ public enum Autowire {
 
     /**
      * Constant that indicates autowiring bean properties by name.
-	 * 根据名称自动装配
-	 */
+     * 根据名称自动装配
+     */
     BY_NAME(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME),
 
     /**
      * Constant that indicates autowiring bean properties by type.
-	 * 根据类型自动装配
-	 */
+     * 根据类型自动装配
+     */
     BY_TYPE(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
 
 

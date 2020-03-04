@@ -16,14 +16,13 @@
 
 package org.springframework.http.converter.json;
 
-import java.text.SimpleDateFormat;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
+
+import java.text.SimpleDateFormat;
 
 /**
  * A {@link FactoryBean} for creating a Google Gson 2.x {@link Gson} instance.
@@ -34,117 +33,118 @@ import org.springframework.lang.Nullable;
  */
 public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean {
 
-	private boolean base64EncodeByteArrays = false;
+    private boolean base64EncodeByteArrays = false;
 
-	private boolean serializeNulls = false;
+    private boolean serializeNulls = false;
 
-	private boolean prettyPrinting = false;
+    private boolean prettyPrinting = false;
 
-	private boolean disableHtmlEscaping = false;
+    private boolean disableHtmlEscaping = false;
 
-	@Nullable
-	private String dateFormatPattern;
+    @Nullable
+    private String dateFormatPattern;
 
-	@Nullable
-	private Gson gson;
-
-
-	/**
-	 * Whether to Base64-encode {@code byte[]} properties when reading and
-	 * writing JSON.
-	 * <p>When set to {@code true}, a custom {@link com.google.gson.TypeAdapter} will be
-	 * registered via {@link GsonBuilder#registerTypeHierarchyAdapter(Class, Object)}
-	 * which serializes a {@code byte[]} property to and from a Base64-encoded String
-	 * instead of a JSON array.
-	 * @see GsonBuilderUtils#gsonBuilderWithBase64EncodedByteArrays()
-	 */
-	public void setBase64EncodeByteArrays(boolean base64EncodeByteArrays) {
-		this.base64EncodeByteArrays = base64EncodeByteArrays;
-	}
-
-	/**
-	 * Whether to use the {@link GsonBuilder#serializeNulls()} option when writing
-	 * JSON. This is a shortcut for setting up a {@code Gson} as follows:
-	 * <pre class="code">
-	 * new GsonBuilder().serializeNulls().create();
-	 * </pre>
-	 */
-	public void setSerializeNulls(boolean serializeNulls) {
-		this.serializeNulls = serializeNulls;
-	}
-
-	/**
-	 * Whether to use the {@link GsonBuilder#setPrettyPrinting()} when writing
-	 * JSON. This is a shortcut for setting up a {@code Gson} as follows:
-	 * <pre class="code">
-	 * new GsonBuilder().setPrettyPrinting().create();
-	 * </pre>
-	 */
-	public void setPrettyPrinting(boolean prettyPrinting) {
-		this.prettyPrinting = prettyPrinting;
-	}
-
-	/**
-	 * Whether to use the {@link GsonBuilder#disableHtmlEscaping()} when writing
-	 * JSON. Set to {@code true} to disable HTML escaping in JSON. This is a
-	 * shortcut for setting up a {@code Gson} as follows:
-	 * <pre class="code">
-	 * new GsonBuilder().disableHtmlEscaping().create();
-	 * </pre>
-	 */
-	public void setDisableHtmlEscaping(boolean disableHtmlEscaping) {
-		this.disableHtmlEscaping = disableHtmlEscaping;
-	}
-
-	/**
-	 * Define the date/time format with a {@link SimpleDateFormat}-style pattern.
-	 * This is a shortcut for setting up a {@code Gson} as follows:
-	 * <pre class="code">
-	 * new GsonBuilder().setDateFormat(dateFormatPattern).create();
-	 * </pre>
-	 */
-	public void setDateFormatPattern(String dateFormatPattern) {
-		this.dateFormatPattern = dateFormatPattern;
-	}
+    @Nullable
+    private Gson gson;
 
 
-	@Override
-	public void afterPropertiesSet() {
-		GsonBuilder builder = (this.base64EncodeByteArrays ?
-				GsonBuilderUtils.gsonBuilderWithBase64EncodedByteArrays() : new GsonBuilder());
-		if (this.serializeNulls) {
-			builder.serializeNulls();
-		}
-		if (this.prettyPrinting) {
-			builder.setPrettyPrinting();
-		}
-		if (this.disableHtmlEscaping) {
-			builder.disableHtmlEscaping();
-		}
-		if (this.dateFormatPattern != null) {
-			builder.setDateFormat(this.dateFormatPattern);
-		}
-		this.gson = builder.create();
-	}
+    /**
+     * Whether to Base64-encode {@code byte[]} properties when reading and
+     * writing JSON.
+     * <p>When set to {@code true}, a custom {@link com.google.gson.TypeAdapter} will be
+     * registered via {@link GsonBuilder#registerTypeHierarchyAdapter(Class, Object)}
+     * which serializes a {@code byte[]} property to and from a Base64-encoded String
+     * instead of a JSON array.
+     *
+     * @see GsonBuilderUtils#gsonBuilderWithBase64EncodedByteArrays()
+     */
+    public void setBase64EncodeByteArrays(boolean base64EncodeByteArrays) {
+        this.base64EncodeByteArrays = base64EncodeByteArrays;
+    }
+
+    /**
+     * Whether to use the {@link GsonBuilder#serializeNulls()} option when writing
+     * JSON. This is a shortcut for setting up a {@code Gson} as follows:
+     * <pre class="code">
+     * new GsonBuilder().serializeNulls().create();
+     * </pre>
+     */
+    public void setSerializeNulls(boolean serializeNulls) {
+        this.serializeNulls = serializeNulls;
+    }
+
+    /**
+     * Whether to use the {@link GsonBuilder#setPrettyPrinting()} when writing
+     * JSON. This is a shortcut for setting up a {@code Gson} as follows:
+     * <pre class="code">
+     * new GsonBuilder().setPrettyPrinting().create();
+     * </pre>
+     */
+    public void setPrettyPrinting(boolean prettyPrinting) {
+        this.prettyPrinting = prettyPrinting;
+    }
+
+    /**
+     * Whether to use the {@link GsonBuilder#disableHtmlEscaping()} when writing
+     * JSON. Set to {@code true} to disable HTML escaping in JSON. This is a
+     * shortcut for setting up a {@code Gson} as follows:
+     * <pre class="code">
+     * new GsonBuilder().disableHtmlEscaping().create();
+     * </pre>
+     */
+    public void setDisableHtmlEscaping(boolean disableHtmlEscaping) {
+        this.disableHtmlEscaping = disableHtmlEscaping;
+    }
+
+    /**
+     * Define the date/time format with a {@link SimpleDateFormat}-style pattern.
+     * This is a shortcut for setting up a {@code Gson} as follows:
+     * <pre class="code">
+     * new GsonBuilder().setDateFormat(dateFormatPattern).create();
+     * </pre>
+     */
+    public void setDateFormatPattern(String dateFormatPattern) {
+        this.dateFormatPattern = dateFormatPattern;
+    }
 
 
-	/**
-	 * Return the created Gson instance.
-	 */
-	@Override
-	@Nullable
-	public Gson getObject() {
-		return this.gson;
-	}
+    @Override
+    public void afterPropertiesSet() {
+        GsonBuilder builder = (this.base64EncodeByteArrays ?
+                GsonBuilderUtils.gsonBuilderWithBase64EncodedByteArrays() : new GsonBuilder());
+        if (this.serializeNulls) {
+            builder.serializeNulls();
+        }
+        if (this.prettyPrinting) {
+            builder.setPrettyPrinting();
+        }
+        if (this.disableHtmlEscaping) {
+            builder.disableHtmlEscaping();
+        }
+        if (this.dateFormatPattern != null) {
+            builder.setDateFormat(this.dateFormatPattern);
+        }
+        this.gson = builder.create();
+    }
 
-	@Override
-	public Class<?> getObjectType() {
-		return Gson.class;
-	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
+    /**
+     * Return the created Gson instance.
+     */
+    @Override
+    @Nullable
+    public Gson getObject() {
+        return this.gson;
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return Gson.class;
+    }
+
+    @Override
+    public boolean isSingleton() {
+        return true;
+    }
 
 }

@@ -15,7 +15,12 @@
  */
 package org.springframework.web.filter;
 
-import java.io.IOException;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.mock.web.test.MockFilterChain;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.util.WebUtils;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
@@ -23,172 +28,167 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import org.springframework.mock.web.test.MockFilterChain;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.web.util.WebUtils;
+import java.io.IOException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link OncePerRequestFilter}.
+ *
  * @author Rossen Stoyanchev
  * @since 5.1.9
  */
 public class OncePerRequestFilterTests {
 
-	private final TestOncePerRequestFilter filter = new TestOncePerRequestFilter();
+    private final TestOncePerRequestFilter filter = new TestOncePerRequestFilter();
 
-	private MockHttpServletRequest request;
+    private MockHttpServletRequest request;
 
-	private MockFilterChain filterChain;
-
-
-	@Before
-	@SuppressWarnings("serial")
-	public void setup() throws Exception {
-		this.request = new MockHttpServletRequest();
-		this.request.setScheme("http");
-		this.request.setServerName("localhost");
-		this.request.setServerPort(80);
-		this.filterChain = new MockFilterChain(new HttpServlet() {});
-	}
+    private MockFilterChain filterChain;
 
 
-	@Test
-	public void filterOnce() throws ServletException, IOException {
-
-		// Already filtered
-		this.request.setAttribute(this.filter.getAlreadyFilteredAttributeName(), Boolean.TRUE);
-
-		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
-		assertFalse(this.filter.didFilter);
-		assertFalse(this.filter.didFilterNestedErrorDispatch);
-
-		// Remove already filtered
-		this.request.removeAttribute(this.filter.getAlreadyFilteredAttributeName());
-		this.filter.reset();
-
-		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
-		assertTrue(this.filter.didFilter);
-		assertFalse(this.filter.didFilterNestedErrorDispatch);
-	}
-
-	@Test
-	public void shouldNotFilterErrorDispatch() throws ServletException, IOException {
-
-		initErrorDispatch();
-
-		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
-		assertFalse(this.filter.didFilter);
-		assertFalse(this.filter.didFilterNestedErrorDispatch);
-	}
-
-	@Test
-	public void shouldNotFilterNestedErrorDispatch() throws ServletException, IOException {
-
-		initErrorDispatch();
-		this.request.setAttribute(this.filter.getAlreadyFilteredAttributeName(), Boolean.TRUE);
-
-		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
-		assertFalse(this.filter.didFilter);
-		assertFalse(this.filter.didFilterNestedErrorDispatch);
-	}
-
-	@Test // gh-23196
-	public void filterNestedErrorDispatch() throws ServletException, IOException {
-
-		// Opt in for ERROR dispatch
-		this.filter.setShouldNotFilterErrorDispatch(false);
-
-		this.request.setAttribute(this.filter.getAlreadyFilteredAttributeName(), Boolean.TRUE);
-		initErrorDispatch();
-
-		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
-		assertFalse(this.filter.didFilter);
-		assertTrue(this.filter.didFilterNestedErrorDispatch);
-	}
-
-	private void initErrorDispatch() {
-		this.request.setDispatcherType(DispatcherType.ERROR);
-		this.request.setAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE, "/error");
-	}
+    @Before
+    @SuppressWarnings("serial")
+    public void setup() throws Exception {
+        this.request = new MockHttpServletRequest();
+        this.request.setScheme("http");
+        this.request.setServerName("localhost");
+        this.request.setServerPort(80);
+        this.filterChain = new MockFilterChain(new HttpServlet() {
+        });
+    }
 
 
-	private static class TestOncePerRequestFilter extends OncePerRequestFilter {
+    @Test
+    public void filterOnce() throws ServletException, IOException {
 
-		private boolean shouldNotFilter;
+        // Already filtered
+        this.request.setAttribute(this.filter.getAlreadyFilteredAttributeName(), Boolean.TRUE);
 
-		private boolean shouldNotFilterAsyncDispatch = true;
+        this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+        assertFalse(this.filter.didFilter);
+        assertFalse(this.filter.didFilterNestedErrorDispatch);
 
-		private boolean shouldNotFilterErrorDispatch = true;
+        // Remove already filtered
+        this.request.removeAttribute(this.filter.getAlreadyFilteredAttributeName());
+        this.filter.reset();
 
-		private boolean didFilter;
+        this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+        assertTrue(this.filter.didFilter);
+        assertFalse(this.filter.didFilterNestedErrorDispatch);
+    }
 
-		private boolean didFilterNestedErrorDispatch;
+    @Test
+    public void shouldNotFilterErrorDispatch() throws ServletException, IOException {
+
+        initErrorDispatch();
+
+        this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+        assertFalse(this.filter.didFilter);
+        assertFalse(this.filter.didFilterNestedErrorDispatch);
+    }
+
+    @Test
+    public void shouldNotFilterNestedErrorDispatch() throws ServletException, IOException {
+
+        initErrorDispatch();
+        this.request.setAttribute(this.filter.getAlreadyFilteredAttributeName(), Boolean.TRUE);
+
+        this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+        assertFalse(this.filter.didFilter);
+        assertFalse(this.filter.didFilterNestedErrorDispatch);
+    }
+
+    @Test // gh-23196
+    public void filterNestedErrorDispatch() throws ServletException, IOException {
+
+        // Opt in for ERROR dispatch
+        this.filter.setShouldNotFilterErrorDispatch(false);
+
+        this.request.setAttribute(this.filter.getAlreadyFilteredAttributeName(), Boolean.TRUE);
+        initErrorDispatch();
+
+        this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+        assertFalse(this.filter.didFilter);
+        assertTrue(this.filter.didFilterNestedErrorDispatch);
+    }
+
+    private void initErrorDispatch() {
+        this.request.setDispatcherType(DispatcherType.ERROR);
+        this.request.setAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE, "/error");
+    }
 
 
-		public void setShouldNotFilter(boolean shouldNotFilter) {
-			this.shouldNotFilter = shouldNotFilter;
-		}
+    private static class TestOncePerRequestFilter extends OncePerRequestFilter {
 
-		public void setShouldNotFilterAsyncDispatch(boolean shouldNotFilterAsyncDispatch) {
-			this.shouldNotFilterAsyncDispatch = shouldNotFilterAsyncDispatch;
-		}
+        private boolean shouldNotFilter;
 
-		public void setShouldNotFilterErrorDispatch(boolean shouldNotFilterErrorDispatch) {
-			this.shouldNotFilterErrorDispatch = shouldNotFilterErrorDispatch;
-		}
+        private boolean shouldNotFilterAsyncDispatch = true;
 
+        private boolean shouldNotFilterErrorDispatch = true;
 
-		public boolean didFilter() {
-			return this.didFilter;
-		}
+        private boolean didFilter;
 
-		public boolean didFilterNestedErrorDispatch() {
-			return this.didFilterNestedErrorDispatch;
-		}
-
-		public void reset() {
-			this.didFilter = false;
-			this.didFilterNestedErrorDispatch = false;
-		}
+        private boolean didFilterNestedErrorDispatch;
 
 
-		@Override
-		protected boolean shouldNotFilter(HttpServletRequest request) {
-			return this.shouldNotFilter;
-		}
+        public void setShouldNotFilter(boolean shouldNotFilter) {
+            this.shouldNotFilter = shouldNotFilter;
+        }
 
-		@Override
-		protected boolean shouldNotFilterAsyncDispatch() {
-			return this.shouldNotFilterAsyncDispatch;
-		}
+        public void setShouldNotFilterAsyncDispatch(boolean shouldNotFilterAsyncDispatch) {
+            this.shouldNotFilterAsyncDispatch = shouldNotFilterAsyncDispatch;
+        }
 
-		@Override
-		protected boolean shouldNotFilterErrorDispatch() {
-			return this.shouldNotFilterErrorDispatch;
-		}
+        public void setShouldNotFilterErrorDispatch(boolean shouldNotFilterErrorDispatch) {
+            this.shouldNotFilterErrorDispatch = shouldNotFilterErrorDispatch;
+        }
 
-		@Override
-		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-				FilterChain filterChain) {
 
-			this.didFilter = true;
-		}
+        public boolean didFilter() {
+            return this.didFilter;
+        }
 
-		@Override
-		protected void doFilterNestedErrorDispatch(HttpServletRequest request, HttpServletResponse response,
-				FilterChain filterChain) throws ServletException, IOException {
+        public boolean didFilterNestedErrorDispatch() {
+            return this.didFilterNestedErrorDispatch;
+        }
 
-			this.didFilterNestedErrorDispatch = true;
-			super.doFilterNestedErrorDispatch(request, response, filterChain);
-		}
-	}
+        public void reset() {
+            this.didFilter = false;
+            this.didFilterNestedErrorDispatch = false;
+        }
+
+
+        @Override
+        protected boolean shouldNotFilter(HttpServletRequest request) {
+            return this.shouldNotFilter;
+        }
+
+        @Override
+        protected boolean shouldNotFilterAsyncDispatch() {
+            return this.shouldNotFilterAsyncDispatch;
+        }
+
+        @Override
+        protected boolean shouldNotFilterErrorDispatch() {
+            return this.shouldNotFilterErrorDispatch;
+        }
+
+        @Override
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                        FilterChain filterChain) {
+
+            this.didFilter = true;
+        }
+
+        @Override
+        protected void doFilterNestedErrorDispatch(HttpServletRequest request, HttpServletResponse response,
+                                                   FilterChain filterChain) throws ServletException, IOException {
+
+            this.didFilterNestedErrorDispatch = true;
+            super.doFilterNestedErrorDispatch(request, response, filterChain);
+        }
+    }
 
 }

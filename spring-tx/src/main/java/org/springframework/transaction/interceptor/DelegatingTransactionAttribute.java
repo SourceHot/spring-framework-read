@@ -16,10 +16,10 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.io.Serializable;
-
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.DelegatingTransactionDefinition;
+
+import java.io.Serializable;
 
 /**
  * {@link TransactionAttribute} implementation that delegates all calls to a given target
@@ -32,30 +32,31 @@ import org.springframework.transaction.support.DelegatingTransactionDefinition;
  */
 @SuppressWarnings("serial")
 public abstract class DelegatingTransactionAttribute extends DelegatingTransactionDefinition
-		implements TransactionAttribute, Serializable {
+        implements TransactionAttribute, Serializable {
 
-	private final TransactionAttribute targetAttribute;
-
-
-	/**
-	 * Create a DelegatingTransactionAttribute for the given target attribute.
-	 * @param targetAttribute the target TransactionAttribute to delegate to
-	 */
-	public DelegatingTransactionAttribute(TransactionAttribute targetAttribute) {
-		super(targetAttribute);
-		this.targetAttribute = targetAttribute;
-	}
+    private final TransactionAttribute targetAttribute;
 
 
-	@Override
-	@Nullable
-	public String getQualifier() {
-		return this.targetAttribute.getQualifier();
-	}
+    /**
+     * Create a DelegatingTransactionAttribute for the given target attribute.
+     *
+     * @param targetAttribute the target TransactionAttribute to delegate to
+     */
+    public DelegatingTransactionAttribute(TransactionAttribute targetAttribute) {
+        super(targetAttribute);
+        this.targetAttribute = targetAttribute;
+    }
 
-	@Override
-	public boolean rollbackOn(Throwable ex) {
-		return this.targetAttribute.rollbackOn(ex);
-	}
+
+    @Override
+    @Nullable
+    public String getQualifier() {
+        return this.targetAttribute.getQualifier();
+    }
+
+    @Override
+    public boolean rollbackOn(Throwable ex) {
+        return this.targetAttribute.rollbackOn(ex);
+    }
 
 }

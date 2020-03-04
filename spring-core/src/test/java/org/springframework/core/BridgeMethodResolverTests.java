@@ -16,6 +16,9 @@
 
 package org.springframework.core;
 
+import org.junit.Test;
+import org.springframework.util.ReflectionUtils;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -28,11 +31,11 @@ import java.util.Map;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 
-import org.junit.Test;
-
-import org.springframework.util.ReflectionUtils;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rob Harrop
@@ -42,1304 +45,1252 @@ import static org.junit.Assert.*;
 @SuppressWarnings("rawtypes")
 public class BridgeMethodResolverTests {
 
-	private static Method findMethodWithReturnType(String name, Class<?> returnType, Class<SettingsDaoImpl> targetType) {
-		Method[] methods = targetType.getMethods();
-		for (Method m : methods) {
-			if (m.getName().equals(name) && m.getReturnType().equals(returnType)) {
-				return m;
-			}
-		}
-		return null;
-	}
-
-
-	@Test
-	public void testFindBridgedMethod() throws Exception {
-		Method unbridged = MyFoo.class.getDeclaredMethod("someMethod", String.class, Object.class);
-		Method bridged = MyFoo.class.getDeclaredMethod("someMethod", Serializable.class, Object.class);
-		assertFalse(unbridged.isBridge());
-		assertTrue(bridged.isBridge());
-
-		assertEquals("Unbridged method not returned directly", unbridged, BridgeMethodResolver.findBridgedMethod(unbridged));
-		assertEquals("Incorrect bridged method returned", unbridged, BridgeMethodResolver.findBridgedMethod(bridged));
-	}
-
-	@Test
-	public void testFindBridgedVarargMethod() throws Exception {
-		Method unbridged = MyFoo.class.getDeclaredMethod("someVarargMethod", String.class, Object[].class);
-		Method bridged = MyFoo.class.getDeclaredMethod("someVarargMethod", Serializable.class, Object[].class);
-		assertFalse(unbridged.isBridge());
-		assertTrue(bridged.isBridge());
-
-		assertEquals("Unbridged method not returned directly", unbridged, BridgeMethodResolver.findBridgedMethod(unbridged));
-		assertEquals("Incorrect bridged method returned", unbridged, BridgeMethodResolver.findBridgedMethod(bridged));
-	}
-
-	@Test
-	public void testFindBridgedMethodInHierarchy() throws Exception {
-		Method bridgeMethod = DateAdder.class.getMethod("add", Object.class);
-		assertTrue(bridgeMethod.isBridge());
-		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(bridgeMethod);
-		assertFalse(bridgedMethod.isBridge());
-		assertEquals("add", bridgedMethod.getName());
-		assertEquals(1, bridgedMethod.getParameterCount());
-		assertEquals(Date.class, bridgedMethod.getParameterTypes()[0]);
-	}
-
-	@Test
-	public void testIsBridgeMethodFor() throws Exception {
-		Method bridged = MyBar.class.getDeclaredMethod("someMethod", String.class, Object.class);
-		Method other = MyBar.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
-		Method bridge = MyBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
-
-		assertTrue("Should be bridge method", BridgeMethodResolver.isBridgeMethodFor(bridge, bridged, MyBar.class));
-		assertFalse("Should not be bridge method", BridgeMethodResolver.isBridgeMethodFor(bridge, other, MyBar.class));
-	}
-
-	@Test
-	public void testDoubleParameterization() throws Exception {
-		Method objectBridge = MyBoo.class.getDeclaredMethod("foo", Object.class);
-		Method serializableBridge = MyBoo.class.getDeclaredMethod("foo", Serializable.class);
-
-		Method stringFoo = MyBoo.class.getDeclaredMethod("foo", String.class);
-		Method integerFoo = MyBoo.class.getDeclaredMethod("foo", Integer.class);
-
-		assertEquals("foo(String) not resolved.", stringFoo, BridgeMethodResolver.findBridgedMethod(objectBridge));
-		assertEquals("foo(Integer) not resolved.", integerFoo, BridgeMethodResolver.findBridgedMethod(serializableBridge));
-	}
-
-	@Test
-	public void testFindBridgedMethodFromMultipleBridges() throws Exception {
-		Method loadWithObjectReturn = findMethodWithReturnType("load", Object.class, SettingsDaoImpl.class);
-		assertNotNull(loadWithObjectReturn);
-
-		Method loadWithSettingsReturn = findMethodWithReturnType("load", Settings.class, SettingsDaoImpl.class);
-		assertNotNull(loadWithSettingsReturn);
-		assertNotSame(loadWithObjectReturn, loadWithSettingsReturn);
-
-		Method method = SettingsDaoImpl.class.getMethod("load");
-		assertEquals(method, BridgeMethodResolver.findBridgedMethod(loadWithObjectReturn));
-		assertEquals(method, BridgeMethodResolver.findBridgedMethod(loadWithSettingsReturn));
-	}
-
-	@Test
-	public void testFindBridgedMethodFromParent() throws Exception {
-		Method loadFromParentBridge = SettingsDaoImpl.class.getMethod("loadFromParent");
-		assertTrue(loadFromParentBridge.isBridge());
-
-		Method loadFromParent = AbstractDaoImpl.class.getMethod("loadFromParent");
-		assertFalse(loadFromParent.isBridge());
-
-		assertEquals(loadFromParent, BridgeMethodResolver.findBridgedMethod(loadFromParentBridge));
-	}
-
-	@Test
-	public void testWithSingleBoundParameterizedOnInstantiate() throws Exception {
-		Method bridgeMethod = DelayQueue.class.getMethod("add", Object.class);
-		assertTrue(bridgeMethod.isBridge());
-		Method actualMethod = DelayQueue.class.getMethod("add", Delayed.class);
-		assertFalse(actualMethod.isBridge());
-		assertEquals(actualMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
-	}
-
-	@Test
-	public void testWithDoubleBoundParameterizedOnInstantiate() throws Exception {
-		Method bridgeMethod = SerializableBounded.class.getMethod("boundedOperation", Object.class);
-		assertTrue(bridgeMethod.isBridge());
-		Method actualMethod = SerializableBounded.class.getMethod("boundedOperation", HashMap.class);
-		assertFalse(actualMethod.isBridge());
-		assertEquals(actualMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
-	}
-
-	@Test
-	public void testWithGenericParameter() throws Exception {
-		Method[] methods = StringGenericParameter.class.getMethods();
-		Method bridgeMethod = null;
-		Method bridgedMethod = null;
-		for (Method method : methods) {
-			if ("getFor".equals(method.getName()) && !method.getParameterTypes()[0].equals(Integer.class)) {
-				if (method.getReturnType().equals(Object.class)) {
-					bridgeMethod = method;
-				}
-				else {
-					bridgedMethod = method;
-				}
-			}
-		}
-		assertTrue(bridgeMethod != null && bridgeMethod.isBridge());
-		assertTrue(bridgedMethod != null && !bridgedMethod.isBridge());
-		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
-	}
-
-	@Test
-	public void testOnAllMethods() throws Exception {
-		Method[] methods = StringList.class.getMethods();
-		for (Method method : methods) {
-			assertNotNull(BridgeMethodResolver.findBridgedMethod(method));
-		}
-	}
-
-	@Test
-	public void testSPR2583() throws Exception {
-		Method bridgedMethod = MessageBroadcasterImpl.class.getMethod("receive", MessageEvent.class);
-		assertFalse(bridgedMethod.isBridge());
-		Method bridgeMethod = MessageBroadcasterImpl.class.getMethod("receive", Event.class);
-		assertTrue(bridgeMethod.isBridge());
-
-		Method otherMethod = MessageBroadcasterImpl.class.getMethod("receive", NewMessageEvent.class);
-		assertFalse(otherMethod.isBridge());
-
-		assertFalse("Match identified incorrectly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, otherMethod, MessageBroadcasterImpl.class));
-		assertTrue("Match not found correctly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, bridgedMethod, MessageBroadcasterImpl.class));
-
-		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
-	}
-
-	@Test
-	public void testSPR2603() throws Exception {
-		Method objectBridge = YourHomer.class.getDeclaredMethod("foo", Bounded.class);
-		Method abstractBoundedFoo = YourHomer.class.getDeclaredMethod("foo", AbstractBounded.class);
-
-		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(objectBridge);
-		assertEquals("foo(AbstractBounded) not resolved.", abstractBoundedFoo, bridgedMethod);
-	}
-
-	@Test
-	public void testSPR2648() throws Exception {
-		Method bridgeMethod = ReflectionUtils.findMethod(GenericSqlMapIntegerDao.class, "saveOrUpdate", Object.class);
-		assertTrue(bridgeMethod != null && bridgeMethod.isBridge());
-		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(bridgeMethod);
-		assertFalse(bridgedMethod.isBridge());
-		assertEquals("saveOrUpdate", bridgedMethod.getName());
-	}
-
-	@Test
-	public void testSPR2763() throws Exception {
-		Method bridgedMethod = AbstractDao.class.getDeclaredMethod("save", Object.class);
-		assertFalse(bridgedMethod.isBridge());
-
-		Method bridgeMethod = UserDaoImpl.class.getDeclaredMethod("save", User.class);
-		assertTrue(bridgeMethod.isBridge());
-
-		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
-	}
-
-	@Test
-	public void testSPR3041() throws Exception {
-		Method bridgedMethod = BusinessDao.class.getDeclaredMethod("save", Business.class);
-		assertFalse(bridgedMethod.isBridge());
-
-		Method bridgeMethod = BusinessDao.class.getDeclaredMethod("save", Object.class);
-		assertTrue(bridgeMethod.isBridge());
-
-		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
-	}
-
-	@Test
-	public void testSPR3173() throws Exception {
-		Method bridgedMethod = UserDaoImpl.class.getDeclaredMethod("saveVararg", User.class, Object[].class);
-		assertFalse(bridgedMethod.isBridge());
-
-		Method bridgeMethod = UserDaoImpl.class.getDeclaredMethod("saveVararg", Object.class, Object[].class);
-		assertTrue(bridgeMethod.isBridge());
-
-		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
-	}
-
-	@Test
-	public void testSPR3304() throws Exception {
-		Method bridgedMethod = MegaMessageProducerImpl.class.getDeclaredMethod("receive", MegaMessageEvent.class);
-		assertFalse(bridgedMethod.isBridge());
-
-		Method bridgeMethod  = MegaMessageProducerImpl.class.getDeclaredMethod("receive", MegaEvent.class);
-		assertTrue(bridgeMethod.isBridge());
-
-		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
-	}
-
-	@Test
-	public void testSPR3324() throws Exception {
-		Method bridgedMethod = BusinessDao.class.getDeclaredMethod("get", Long.class);
-		assertFalse(bridgedMethod.isBridge());
-
-		Method bridgeMethod = BusinessDao.class.getDeclaredMethod("get", Object.class);
-		assertTrue(bridgeMethod.isBridge());
-
-		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
-	}
-
-	@Test
-	public void testSPR3357() throws Exception {
-		Method bridgedMethod = ExtendsAbstractImplementsInterface.class.getDeclaredMethod(
-				"doSomething", DomainObjectExtendsSuper.class, Object.class);
-		assertFalse(bridgedMethod.isBridge());
-
-		Method bridgeMethod = ExtendsAbstractImplementsInterface.class.getDeclaredMethod(
-				"doSomething", DomainObjectSuper.class, Object.class);
-		assertTrue(bridgeMethod.isBridge());
-
-		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
-	}
+    private static Method findMethodWithReturnType(String name, Class<?> returnType, Class<SettingsDaoImpl> targetType) {
+        Method[] methods = targetType.getMethods();
+        for (Method m : methods) {
+            if (m.getName().equals(name) && m.getReturnType().equals(returnType)) {
+                return m;
+            }
+        }
+        return null;
+    }
+
+
+    @Test
+    public void testFindBridgedMethod() throws Exception {
+        Method unbridged = MyFoo.class.getDeclaredMethod("someMethod", String.class, Object.class);
+        Method bridged = MyFoo.class.getDeclaredMethod("someMethod", Serializable.class, Object.class);
+        assertFalse(unbridged.isBridge());
+        assertTrue(bridged.isBridge());
+
+        assertEquals("Unbridged method not returned directly", unbridged, BridgeMethodResolver.findBridgedMethod(unbridged));
+        assertEquals("Incorrect bridged method returned", unbridged, BridgeMethodResolver.findBridgedMethod(bridged));
+    }
+
+    @Test
+    public void testFindBridgedVarargMethod() throws Exception {
+        Method unbridged = MyFoo.class.getDeclaredMethod("someVarargMethod", String.class, Object[].class);
+        Method bridged = MyFoo.class.getDeclaredMethod("someVarargMethod", Serializable.class, Object[].class);
+        assertFalse(unbridged.isBridge());
+        assertTrue(bridged.isBridge());
+
+        assertEquals("Unbridged method not returned directly", unbridged, BridgeMethodResolver.findBridgedMethod(unbridged));
+        assertEquals("Incorrect bridged method returned", unbridged, BridgeMethodResolver.findBridgedMethod(bridged));
+    }
+
+    @Test
+    public void testFindBridgedMethodInHierarchy() throws Exception {
+        Method bridgeMethod = DateAdder.class.getMethod("add", Object.class);
+        assertTrue(bridgeMethod.isBridge());
+        Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(bridgeMethod);
+        assertFalse(bridgedMethod.isBridge());
+        assertEquals("add", bridgedMethod.getName());
+        assertEquals(1, bridgedMethod.getParameterCount());
+        assertEquals(Date.class, bridgedMethod.getParameterTypes()[0]);
+    }
+
+    @Test
+    public void testIsBridgeMethodFor() throws Exception {
+        Method bridged = MyBar.class.getDeclaredMethod("someMethod", String.class, Object.class);
+        Method other = MyBar.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
+        Method bridge = MyBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
+
+        assertTrue("Should be bridge method", BridgeMethodResolver.isBridgeMethodFor(bridge, bridged, MyBar.class));
+        assertFalse("Should not be bridge method", BridgeMethodResolver.isBridgeMethodFor(bridge, other, MyBar.class));
+    }
+
+    @Test
+    public void testDoubleParameterization() throws Exception {
+        Method objectBridge = MyBoo.class.getDeclaredMethod("foo", Object.class);
+        Method serializableBridge = MyBoo.class.getDeclaredMethod("foo", Serializable.class);
+
+        Method stringFoo = MyBoo.class.getDeclaredMethod("foo", String.class);
+        Method integerFoo = MyBoo.class.getDeclaredMethod("foo", Integer.class);
+
+        assertEquals("foo(String) not resolved.", stringFoo, BridgeMethodResolver.findBridgedMethod(objectBridge));
+        assertEquals("foo(Integer) not resolved.", integerFoo, BridgeMethodResolver.findBridgedMethod(serializableBridge));
+    }
+
+    @Test
+    public void testFindBridgedMethodFromMultipleBridges() throws Exception {
+        Method loadWithObjectReturn = findMethodWithReturnType("load", Object.class, SettingsDaoImpl.class);
+        assertNotNull(loadWithObjectReturn);
+
+        Method loadWithSettingsReturn = findMethodWithReturnType("load", Settings.class, SettingsDaoImpl.class);
+        assertNotNull(loadWithSettingsReturn);
+        assertNotSame(loadWithObjectReturn, loadWithSettingsReturn);
+
+        Method method = SettingsDaoImpl.class.getMethod("load");
+        assertEquals(method, BridgeMethodResolver.findBridgedMethod(loadWithObjectReturn));
+        assertEquals(method, BridgeMethodResolver.findBridgedMethod(loadWithSettingsReturn));
+    }
+
+    @Test
+    public void testFindBridgedMethodFromParent() throws Exception {
+        Method loadFromParentBridge = SettingsDaoImpl.class.getMethod("loadFromParent");
+        assertTrue(loadFromParentBridge.isBridge());
+
+        Method loadFromParent = AbstractDaoImpl.class.getMethod("loadFromParent");
+        assertFalse(loadFromParent.isBridge());
+
+        assertEquals(loadFromParent, BridgeMethodResolver.findBridgedMethod(loadFromParentBridge));
+    }
+
+    @Test
+    public void testWithSingleBoundParameterizedOnInstantiate() throws Exception {
+        Method bridgeMethod = DelayQueue.class.getMethod("add", Object.class);
+        assertTrue(bridgeMethod.isBridge());
+        Method actualMethod = DelayQueue.class.getMethod("add", Delayed.class);
+        assertFalse(actualMethod.isBridge());
+        assertEquals(actualMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+    }
+
+    @Test
+    public void testWithDoubleBoundParameterizedOnInstantiate() throws Exception {
+        Method bridgeMethod = SerializableBounded.class.getMethod("boundedOperation", Object.class);
+        assertTrue(bridgeMethod.isBridge());
+        Method actualMethod = SerializableBounded.class.getMethod("boundedOperation", HashMap.class);
+        assertFalse(actualMethod.isBridge());
+        assertEquals(actualMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+    }
+
+    @Test
+    public void testWithGenericParameter() throws Exception {
+        Method[] methods = StringGenericParameter.class.getMethods();
+        Method bridgeMethod = null;
+        Method bridgedMethod = null;
+        for (Method method : methods) {
+            if ("getFor".equals(method.getName()) && !method.getParameterTypes()[0].equals(Integer.class)) {
+                if (method.getReturnType().equals(Object.class)) {
+                    bridgeMethod = method;
+                } else {
+                    bridgedMethod = method;
+                }
+            }
+        }
+        assertTrue(bridgeMethod != null && bridgeMethod.isBridge());
+        assertTrue(bridgedMethod != null && !bridgedMethod.isBridge());
+        assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+    }
+
+    @Test
+    public void testOnAllMethods() throws Exception {
+        Method[] methods = StringList.class.getMethods();
+        for (Method method : methods) {
+            assertNotNull(BridgeMethodResolver.findBridgedMethod(method));
+        }
+    }
+
+    @Test
+    public void testSPR2583() throws Exception {
+        Method bridgedMethod = MessageBroadcasterImpl.class.getMethod("receive", MessageEvent.class);
+        assertFalse(bridgedMethod.isBridge());
+        Method bridgeMethod = MessageBroadcasterImpl.class.getMethod("receive", Event.class);
+        assertTrue(bridgeMethod.isBridge());
+
+        Method otherMethod = MessageBroadcasterImpl.class.getMethod("receive", NewMessageEvent.class);
+        assertFalse(otherMethod.isBridge());
+
+        assertFalse("Match identified incorrectly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, otherMethod, MessageBroadcasterImpl.class));
+        assertTrue("Match not found correctly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, bridgedMethod, MessageBroadcasterImpl.class));
+
+        assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+    }
+
+    @Test
+    public void testSPR2603() throws Exception {
+        Method objectBridge = YourHomer.class.getDeclaredMethod("foo", Bounded.class);
+        Method abstractBoundedFoo = YourHomer.class.getDeclaredMethod("foo", AbstractBounded.class);
+
+        Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(objectBridge);
+        assertEquals("foo(AbstractBounded) not resolved.", abstractBoundedFoo, bridgedMethod);
+    }
+
+    @Test
+    public void testSPR2648() throws Exception {
+        Method bridgeMethod = ReflectionUtils.findMethod(GenericSqlMapIntegerDao.class, "saveOrUpdate", Object.class);
+        assertTrue(bridgeMethod != null && bridgeMethod.isBridge());
+        Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(bridgeMethod);
+        assertFalse(bridgedMethod.isBridge());
+        assertEquals("saveOrUpdate", bridgedMethod.getName());
+    }
+
+    @Test
+    public void testSPR2763() throws Exception {
+        Method bridgedMethod = AbstractDao.class.getDeclaredMethod("save", Object.class);
+        assertFalse(bridgedMethod.isBridge());
+
+        Method bridgeMethod = UserDaoImpl.class.getDeclaredMethod("save", User.class);
+        assertTrue(bridgeMethod.isBridge());
+
+        assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+    }
+
+    @Test
+    public void testSPR3041() throws Exception {
+        Method bridgedMethod = BusinessDao.class.getDeclaredMethod("save", Business.class);
+        assertFalse(bridgedMethod.isBridge());
+
+        Method bridgeMethod = BusinessDao.class.getDeclaredMethod("save", Object.class);
+        assertTrue(bridgeMethod.isBridge());
+
+        assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+    }
+
+    @Test
+    public void testSPR3173() throws Exception {
+        Method bridgedMethod = UserDaoImpl.class.getDeclaredMethod("saveVararg", User.class, Object[].class);
+        assertFalse(bridgedMethod.isBridge());
+
+        Method bridgeMethod = UserDaoImpl.class.getDeclaredMethod("saveVararg", Object.class, Object[].class);
+        assertTrue(bridgeMethod.isBridge());
+
+        assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+    }
+
+    @Test
+    public void testSPR3304() throws Exception {
+        Method bridgedMethod = MegaMessageProducerImpl.class.getDeclaredMethod("receive", MegaMessageEvent.class);
+        assertFalse(bridgedMethod.isBridge());
+
+        Method bridgeMethod = MegaMessageProducerImpl.class.getDeclaredMethod("receive", MegaEvent.class);
+        assertTrue(bridgeMethod.isBridge());
+
+        assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+    }
+
+    @Test
+    public void testSPR3324() throws Exception {
+        Method bridgedMethod = BusinessDao.class.getDeclaredMethod("get", Long.class);
+        assertFalse(bridgedMethod.isBridge());
 
-	@Test
-	public void testSPR3485() throws Exception {
-		Method bridgedMethod = DomainObject.class.getDeclaredMethod(
-				"method2", ParameterType.class, byte[].class);
-		assertFalse(bridgedMethod.isBridge());
+        Method bridgeMethod = BusinessDao.class.getDeclaredMethod("get", Object.class);
+        assertTrue(bridgeMethod.isBridge());
 
-		Method bridgeMethod = DomainObject.class.getDeclaredMethod(
-				"method2", Serializable.class, Object.class);
-		assertTrue(bridgeMethod.isBridge());
+        assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+    }
 
-		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
-	}
+    @Test
+    public void testSPR3357() throws Exception {
+        Method bridgedMethod = ExtendsAbstractImplementsInterface.class.getDeclaredMethod(
+                "doSomething", DomainObjectExtendsSuper.class, Object.class);
+        assertFalse(bridgedMethod.isBridge());
 
-	@Test
-	public void testSPR3534() throws Exception {
-		Method bridgeMethod = ReflectionUtils.findMethod(TestEmailProvider.class, "findBy", Object.class);
-		assertTrue(bridgeMethod != null && bridgeMethod.isBridge());
-		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(bridgeMethod);
-		assertFalse(bridgedMethod.isBridge());
-		assertEquals("findBy", bridgedMethod.getName());
-	}
+        Method bridgeMethod = ExtendsAbstractImplementsInterface.class.getDeclaredMethod(
+                "doSomething", DomainObjectSuper.class, Object.class);
+        assertTrue(bridgeMethod.isBridge());
 
-	@Test  // SPR-16103
-	public void testClassHierarchy() throws Exception {
-		doTestHierarchyResolution(FooClass.class);
-	}
+        assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+    }
 
-	@Test  // SPR-16103
-	public void testInterfaceHierarchy() throws Exception {
-		doTestHierarchyResolution(FooInterface.class);
-	}
+    @Test
+    public void testSPR3485() throws Exception {
+        Method bridgedMethod = DomainObject.class.getDeclaredMethod(
+                "method2", ParameterType.class, byte[].class);
+        assertFalse(bridgedMethod.isBridge());
 
-	private void doTestHierarchyResolution(Class<?> clazz) throws Exception {
-		for (Method method : clazz.getDeclaredMethods()){
-			Method bridged = BridgeMethodResolver.findBridgedMethod(method);
-			Method expected = clazz.getMethod("test", FooEntity.class);
-			assertEquals(expected, bridged);
-		}
-	}
+        Method bridgeMethod = DomainObject.class.getDeclaredMethod(
+                "method2", Serializable.class, Object.class);
+        assertTrue(bridgeMethod.isBridge());
 
+        assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+    }
 
-	public interface Foo<T extends Serializable> {
+    @Test
+    public void testSPR3534() throws Exception {
+        Method bridgeMethod = ReflectionUtils.findMethod(TestEmailProvider.class, "findBy", Object.class);
+        assertTrue(bridgeMethod != null && bridgeMethod.isBridge());
+        Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(bridgeMethod);
+        assertFalse(bridgedMethod.isBridge());
+        assertEquals("findBy", bridgedMethod.getName());
+    }
 
-		void someMethod(T theArg, Object otherArg);
+    @Test  // SPR-16103
+    public void testClassHierarchy() throws Exception {
+        doTestHierarchyResolution(FooClass.class);
+    }
 
-		void someVarargMethod(T theArg, Object... otherArg);
-	}
+    @Test  // SPR-16103
+    public void testInterfaceHierarchy() throws Exception {
+        doTestHierarchyResolution(FooInterface.class);
+    }
 
+    private void doTestHierarchyResolution(Class<?> clazz) throws Exception {
+        for (Method method : clazz.getDeclaredMethods()) {
+            Method bridged = BridgeMethodResolver.findBridgedMethod(method);
+            Method expected = clazz.getMethod("test", FooEntity.class);
+            assertEquals(expected, bridged);
+        }
+    }
 
-	public static class MyFoo implements Foo<String> {
 
-		public void someMethod(Integer theArg, Object otherArg) {
-		}
+    public interface Foo<T extends Serializable> {
 
-		@Override
-		public void someMethod(String theArg, Object otherArg) {
-		}
+        void someMethod(T theArg, Object otherArg);
 
-		@Override
-		public void someVarargMethod(String theArg, Object... otherArgs) {
-		}
-	}
+        void someVarargMethod(T theArg, Object... otherArg);
+    }
 
 
-	public static abstract class Bar<T> {
+    public interface Adder<T> {
 
-		void someMethod(Map<?, ?> m, Object otherArg) {
-		}
+        void add(T item);
+    }
 
-		void someMethod(T theArg, Map<?, ?> m) {
-		}
 
-		abstract void someMethod(T theArg, Object otherArg);
-	}
+    public interface Boo<E, T extends Serializable> {
 
+        void foo(E e);
 
-	public static abstract class InterBar<T> extends Bar<T> {
+        void foo(T t);
+    }
 
-	}
 
+    public interface Settings {
+    }
 
-	public static class MyBar extends InterBar<String> {
 
-		@Override
-		public void someMethod(String theArg, Object otherArg) {
-		}
+    public interface ConcreteSettings extends Settings {
+    }
 
-		public void someMethod(Integer theArg, Object otherArg) {
-		}
-	}
 
+    public interface Dao<T, S> {
 
-	public interface Adder<T> {
+        T load();
 
-		void add(T item);
-	}
+        S loadFromParent();
+    }
 
 
-	public static abstract class AbstractDateAdder implements Adder<Date> {
+    public interface SettingsDao<T extends Settings, S> extends Dao<T, S> {
 
-		@Override
-		public abstract void add(Date date);
-	}
+        @Override
+        T load();
+    }
 
 
-	public static class DateAdder extends AbstractDateAdder {
+    public interface ConcreteSettingsDao extends SettingsDao<ConcreteSettings, String> {
 
-		@Override
-		public void add(Date date) {
-		}
-	}
+        @Override
+        String loadFromParent();
+    }
 
 
-	public static class Enclosing<T> {
+    public interface Bounded<E> {
 
-		public class Enclosed<S> {
+        boolean boundedOperation(E e);
+    }
 
-			public class ReallyDeepNow<R> {
 
-				void someMethod(S s, T t, R r) {
-				}
-			}
-		}
-	}
+    public interface GenericParameter<T> {
 
+        T getFor(Class<T> cls);
+    }
 
-	public static class ExtendsEnclosing extends Enclosing<String> {
 
-		public class ExtendsEnclosed extends Enclosed<Integer> {
+    public interface Event {
 
-			public class ExtendsReallyDeepNow extends ReallyDeepNow<Long> {
+        int getPriority();
+    }
 
-				@Override
-				void someMethod(Integer s, String t, Long r) {
-					throw new UnsupportedOperationException();
-				}
-			}
-		}
-	}
 
+    public interface UserInitiatedEvent {
+    }
 
-	public interface Boo<E, T extends Serializable> {
 
-		void foo(E e);
+    public interface Channel<E extends Event> {
 
-		void foo(T t);
-	}
+        void send(E event);
 
+        void subscribe(final Receiver<E> receiver, Class<E> event);
 
-	public static class MyBoo implements Boo<String, Integer> {
+        void unsubscribe(final Receiver<E> receiver, Class<E> event);
+    }
 
-		@Override
-		public void foo(String e) {
-			throw new UnsupportedOperationException();
-		}
 
-		@Override
-		public void foo(Integer t) {
-			throw new UnsupportedOperationException();
-		}
-	}
+    public interface Broadcaster {
+    }
 
 
-	public interface Settings {
-	}
+    public interface EventBroadcaster extends Broadcaster {
 
+        void subscribe();
 
-	public interface ConcreteSettings extends Settings {
-	}
+        void unsubscribe();
 
+        void setChannel(Channel<?> channel);
+    }
 
-	public interface Dao<T, S> {
 
-		T load();
+    public interface Receiver<E extends Event> {
 
-		S loadFromParent();
-	}
+        void receive(E event);
+    }
 
 
-	public interface SettingsDao<T extends Settings, S> extends Dao<T, S> {
+    public interface MessageBroadcaster extends Receiver<MessageEvent> {
 
-		@Override
-		T load();
-	}
+    }
 
 
-	public interface ConcreteSettingsDao extends SettingsDao<ConcreteSettings, String> {
+    public interface SimpleGenericRepository<T> {
 
-		@Override
-		String loadFromParent();
-	}
+        public Class<T> getPersistentClass();
 
+        List<T> findByQuery();
 
-	static abstract class AbstractDaoImpl<T, S> implements Dao<T, S> {
+        List<T> findAll();
 
-		protected T object;
+        T refresh(T entity);
 
-		protected S otherObject;
+        T saveOrUpdate(T entity);
 
-		protected AbstractDaoImpl(T object, S otherObject) {
-			this.object = object;
-			this.otherObject = otherObject;
-		}
+        void delete(Collection<T> entities);
+    }
 
-		// @Transactional(readOnly = true)
-		@Override
-		public S loadFromParent() {
-			return otherObject;
-		}
-	}
 
+    public interface RepositoryRegistry {
 
-	static class SettingsDaoImpl extends AbstractDaoImpl<ConcreteSettings, String>
-			implements ConcreteSettingsDao {
+        <T> SimpleGenericRepository<T> getFor(Class<T> entityType);
+    }
 
-		protected SettingsDaoImpl(ConcreteSettings object) {
-			super(object, "From Parent");
-		}
 
-		// @Transactional(readOnly = true)
-		@Override
-		public ConcreteSettings load() {
-			return super.object;
-		}
-	}
+    public interface ConvenientGenericRepository<T, ID extends Serializable>
+            extends SimpleGenericRepository<T> {
 
+        T findById(ID id, boolean lock);
 
-	public interface Bounded<E> {
+        List<T> findByExample(T exampleInstance);
 
-		boolean boundedOperation(E e);
-	}
+        void delete(ID id);
 
+        void delete(T entity);
+    }
 
-	private static class AbstractBounded<E> implements Bounded<E> {
 
-		@Override
-		public boolean boundedOperation(E myE) {
-			return true;
-		}
-	}
+    public interface Homer<E> {
 
+        void foo(E e);
+    }
 
-	private static class SerializableBounded<E extends HashMap & Delayed> extends AbstractBounded<E> {
 
-		@Override
-		public boolean boundedOperation(E myE) {
-			return false;
-		}
-	}
+    public interface GenericDao<T> {
 
+        void saveOrUpdate(T t);
+    }
 
-	public interface GenericParameter<T> {
 
-		T getFor(Class<T> cls);
-	}
+    public interface ConvenienceGenericDao<T> extends GenericDao<T> {
+    }
 
 
-	@SuppressWarnings("unused")
-	private static class StringGenericParameter implements GenericParameter<String> {
+    public interface UserDao {
 
-		@Override
-		public String getFor(Class<String> cls) {
-			return "foo";
-		}
+        // @Transactional
+        void save(User user);
 
-		public String getFor(Integer integer) {
-			return "foo";
-		}
-	}
+        // @Transactional
+        void save(Permission perm);
+    }
 
 
-	private static class StringList implements List<String> {
+    public interface DaoInterface<T, P> {
 
-		@Override
-		public int size() {
-			throw new UnsupportedOperationException();
-		}
+        T get(P id);
+    }
 
-		@Override
-		public boolean isEmpty() {
-			throw new UnsupportedOperationException();
-		}
 
-		@Override
-		public boolean contains(Object o) {
-			throw new UnsupportedOperationException();
-		}
+    public interface MegaReceiver<E extends MegaEvent> {
 
-		@Override
-		public Iterator<String> iterator() {
-			throw new UnsupportedOperationException();
-		}
+        void receive(E event);
+    }
 
-		@Override
-		public Object[] toArray() {
-			throw new UnsupportedOperationException();
-		}
 
-		@Override
-		public <T> T[] toArray(T[] a) {
-			throw new UnsupportedOperationException();
-		}
+    public interface MegaMessageProducer extends MegaReceiver<MegaMessageEvent> {
+    }
 
-		@Override
-		public boolean add(String o) {
-			throw new UnsupportedOperationException();
-		}
 
-		@Override
-		public boolean remove(Object o) {
-			throw new UnsupportedOperationException();
-		}
+    public interface IGenericInterface<D extends DomainObjectSuper> {
 
-		@Override
-		public boolean containsAll(Collection<?> c) {
-			throw new UnsupportedOperationException();
-		}
+        <T> void doSomething(final D domainObject, final T value);
+    }
 
-		@Override
-		public boolean addAll(Collection<? extends String> c) {
-			throw new UnsupportedOperationException();
-		}
 
-		@Override
-		public boolean addAll(int index, Collection<? extends String> c) {
-			throw new UnsupportedOperationException();
-		}
+    public interface SearchProvider<RETURN_TYPE, CONDITIONS_TYPE> {
 
-		@Override
-		public boolean removeAll(Collection<?> c) {
-			throw new UnsupportedOperationException();
-		}
+        Collection<RETURN_TYPE> findBy(CONDITIONS_TYPE conditions);
+    }
 
-		@Override
-		public boolean retainAll(Collection<?> c) {
-			throw new UnsupportedOperationException();
-		}
 
-		@Override
-		public void clear() {
-			throw new UnsupportedOperationException();
-		}
+    public interface IExternalMessageProvider<S extends ExternalMessage, T extends ExternalMessageSearchConditions<?>>
+            extends SearchProvider<S, T> {
+    }
 
-		@Override
-		public String get(int index) {
-			throw new UnsupportedOperationException();
-		}
 
-		@Override
-		public String set(int index, String element) {
-			throw new UnsupportedOperationException();
-		}
+    public interface BaseInterface<T> {
 
-		@Override
-		public void add(int index, String element) {
-			throw new UnsupportedOperationException();
-		}
+        <S extends T> S test(S T);
+    }
 
-		@Override
-		public String remove(int index) {
-			throw new UnsupportedOperationException();
-		}
 
-		@Override
-		public int indexOf(Object o) {
-			throw new UnsupportedOperationException();
-		}
+    public interface EntityInterface<T extends BaseEntity> extends BaseInterface<T> {
 
-		@Override
-		public int lastIndexOf(Object o) {
-			throw new UnsupportedOperationException();
-		}
+        @Override
+        <S extends T> S test(S T);
+    }
 
-		@Override
-		public ListIterator<String> listIterator() {
-			throw new UnsupportedOperationException();
-		}
 
-		@Override
-		public ListIterator<String> listIterator(int index) {
-			throw new UnsupportedOperationException();
-		}
+    public interface FooInterface extends EntityInterface<FooEntity> {
 
-		@Override
-		public List<String> subList(int fromIndex, int toIndex) {
-			throw new UnsupportedOperationException();
-		}
-	}
+        @Override
+        <S extends FooEntity> S test(S T);
+    }
 
+    public static class MyFoo implements Foo<String> {
 
-	public interface Event {
+        public void someMethod(Integer theArg, Object otherArg) {
+        }
 
-		int getPriority();
-	}
+        @Override
+        public void someMethod(String theArg, Object otherArg) {
+        }
 
+        @Override
+        public void someVarargMethod(String theArg, Object... otherArgs) {
+        }
+    }
 
-	public static class GenericEvent implements Event {
+    public static abstract class Bar<T> {
 
-		private int priority;
+        void someMethod(Map<?, ?> m, Object otherArg) {
+        }
 
-		@Override
-		public int getPriority() {
-			return priority;
-		}
+        void someMethod(T theArg, Map<?, ?> m) {
+        }
 
-		/**
-		 * Constructor that takes an event priority
-		 */
-		public GenericEvent(int priority) {
-			this.priority = priority;
-		}
+        abstract void someMethod(T theArg, Object otherArg);
+    }
 
-		/**
-		 * Default Constructor
-		 */
-		public GenericEvent() {
-		}
-	}
+    public static abstract class InterBar<T> extends Bar<T> {
 
+    }
 
-	public interface UserInitiatedEvent {
-	}
+    public static class MyBar extends InterBar<String> {
 
+        @Override
+        public void someMethod(String theArg, Object otherArg) {
+        }
 
-	public static abstract class BaseUserInitiatedEvent extends GenericEvent implements UserInitiatedEvent {
-	}
+        public void someMethod(Integer theArg, Object otherArg) {
+        }
+    }
 
+    public static abstract class AbstractDateAdder implements Adder<Date> {
 
-	public static class MessageEvent extends BaseUserInitiatedEvent {
-	}
+        @Override
+        public abstract void add(Date date);
+    }
 
+    public static class DateAdder extends AbstractDateAdder {
 
-	public interface Channel<E extends Event> {
+        @Override
+        public void add(Date date) {
+        }
+    }
 
-		void send(E event);
+    public static class Enclosing<T> {
 
-		void subscribe(final Receiver<E> receiver, Class<E> event);
+        public class Enclosed<S> {
 
-		void unsubscribe(final Receiver<E> receiver, Class<E> event);
-	}
+            public class ReallyDeepNow<R> {
 
+                void someMethod(S s, T t, R r) {
+                }
+            }
+        }
+    }
 
-	public interface Broadcaster {
-	}
+    public static class ExtendsEnclosing extends Enclosing<String> {
 
+        public class ExtendsEnclosed extends Enclosed<Integer> {
 
-	public interface EventBroadcaster extends Broadcaster {
+            public class ExtendsReallyDeepNow extends ReallyDeepNow<Long> {
 
-		void subscribe();
+                @Override
+                void someMethod(Integer s, String t, Long r) {
+                    throw new UnsupportedOperationException();
+                }
+            }
+        }
+    }
 
-		void unsubscribe();
 
-		void setChannel(Channel<?> channel);
-	}
+    //-----------------------------
+    // SPR-2454 Test Classes
+    //-----------------------------
 
+    public static class MyBoo implements Boo<String, Integer> {
 
-	public static class GenericBroadcasterImpl implements Broadcaster {
-	}
+        @Override
+        public void foo(String e) {
+            throw new UnsupportedOperationException();
+        }
 
+        @Override
+        public void foo(Integer t) {
+            throw new UnsupportedOperationException();
+        }
+    }
 
-	@SuppressWarnings({"unused", "unchecked"})
-	public static abstract class GenericEventBroadcasterImpl<T extends Event>
-			extends GenericBroadcasterImpl implements EventBroadcaster {
+    static abstract class AbstractDaoImpl<T, S> implements Dao<T, S> {
 
-		private Class<T>[] subscribingEvents;
+        protected T object;
 
-		private Channel<T> channel;
+        protected S otherObject;
 
-		/**
-		 * Abstract method to retrieve instance of subclass
-		 *
-		 * @return receiver instance
-		 */
-		public abstract Receiver<T> getInstance();
+        protected AbstractDaoImpl(T object, S otherObject) {
+            this.object = object;
+            this.otherObject = otherObject;
+        }
 
-		@Override
-		public void setChannel(Channel channel) {
-			this.channel = channel;
-		}
+        // @Transactional(readOnly = true)
+        @Override
+        public S loadFromParent() {
+            return otherObject;
+        }
+    }
 
-		private String beanName;
+    static class SettingsDaoImpl extends AbstractDaoImpl<ConcreteSettings, String>
+            implements ConcreteSettingsDao {
 
-		public void setBeanName(String name) {
-			this.beanName = name;
-		}
+        protected SettingsDaoImpl(ConcreteSettings object) {
+            super(object, "From Parent");
+        }
 
-		@Override
-		public void subscribe() {
-		}
+        // @Transactional(readOnly = true)
+        @Override
+        public ConcreteSettings load() {
+            return super.object;
+        }
+    }
 
-		@Override
-		public void unsubscribe() {
-		}
+    private static class AbstractBounded<E> implements Bounded<E> {
 
-		public GenericEventBroadcasterImpl(Class<? extends T>... events) {
-		}
-	}
+        @Override
+        public boolean boundedOperation(E myE) {
+            return true;
+        }
+    }
 
+    private static class SerializableBounded<E extends HashMap & Delayed> extends AbstractBounded<E> {
 
-	public interface Receiver<E extends Event> {
+        @Override
+        public boolean boundedOperation(E myE) {
+            return false;
+        }
+    }
 
-		void receive(E event);
-	}
+    @SuppressWarnings("unused")
+    private static class StringGenericParameter implements GenericParameter<String> {
 
+        @Override
+        public String getFor(Class<String> cls) {
+            return "foo";
+        }
 
-	public interface MessageBroadcaster extends Receiver<MessageEvent> {
+        public String getFor(Integer integer) {
+            return "foo";
+        }
+    }
 
-	}
 
+    //-------------------
+    // SPR-2603 classes
+    //-------------------
 
-	public static class RemovedMessageEvent extends MessageEvent {
+    private static class StringList implements List<String> {
 
-	}
+        @Override
+        public int size() {
+            throw new UnsupportedOperationException();
+        }
 
+        @Override
+        public boolean isEmpty() {
+            throw new UnsupportedOperationException();
+        }
 
-	public static class NewMessageEvent extends MessageEvent {
+        @Override
+        public boolean contains(Object o) {
+            throw new UnsupportedOperationException();
+        }
 
-	}
+        @Override
+        public Iterator<String> iterator() {
+            throw new UnsupportedOperationException();
+        }
 
+        @Override
+        public Object[] toArray() {
+            throw new UnsupportedOperationException();
+        }
 
-	public static class ModifiedMessageEvent extends MessageEvent {
+        @Override
+        public <T> T[] toArray(T[] a) {
+            throw new UnsupportedOperationException();
+        }
 
-	}
+        @Override
+        public boolean add(String o) {
+            throw new UnsupportedOperationException();
+        }
 
+        @Override
+        public boolean remove(Object o) {
+            throw new UnsupportedOperationException();
+        }
 
-	@SuppressWarnings({"serial", "unchecked"})
-	public static class MessageBroadcasterImpl extends GenericEventBroadcasterImpl<MessageEvent>
-			implements Serializable,  // implement an unrelated interface first (SPR-16288)
-			MessageBroadcaster {
+        @Override
+        public boolean containsAll(Collection<?> c) {
+            throw new UnsupportedOperationException();
+        }
 
-		public MessageBroadcasterImpl() {
-			super(NewMessageEvent.class);
-		}
+        @Override
+        public boolean addAll(Collection<? extends String> c) {
+            throw new UnsupportedOperationException();
+        }
 
-		@Override
-		public void receive(MessageEvent event) {
-			throw new UnsupportedOperationException("should not be called, use subclassed events");
-		}
+        @Override
+        public boolean addAll(int index, Collection<? extends String> c) {
+            throw new UnsupportedOperationException();
+        }
 
-		public void receive(NewMessageEvent event) {
-		}
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            throw new UnsupportedOperationException();
+        }
 
-		@Override
-		public Receiver<MessageEvent> getInstance() {
-			return null;
-		}
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            throw new UnsupportedOperationException();
+        }
 
-		public void receive(RemovedMessageEvent event) {
-		}
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException();
+        }
 
-		public void receive(ModifiedMessageEvent event) {
-		}
-	}
+        @Override
+        public String get(int index) {
+            throw new UnsupportedOperationException();
+        }
 
+        @Override
+        public String set(int index, String element) {
+            throw new UnsupportedOperationException();
+        }
 
-	//-----------------------------
-	// SPR-2454 Test Classes
-	//-----------------------------
+        @Override
+        public void add(int index, String element) {
+            throw new UnsupportedOperationException();
+        }
 
-	public interface SimpleGenericRepository<T> {
+        @Override
+        public String remove(int index) {
+            throw new UnsupportedOperationException();
+        }
 
-		public Class<T> getPersistentClass();
+        @Override
+        public int indexOf(Object o) {
+            throw new UnsupportedOperationException();
+        }
 
-		List<T> findByQuery();
+        @Override
+        public int lastIndexOf(Object o) {
+            throw new UnsupportedOperationException();
+        }
 
-		List<T> findAll();
+        @Override
+        public ListIterator<String> listIterator() {
+            throw new UnsupportedOperationException();
+        }
 
-		T refresh(T entity);
+        @Override
+        public ListIterator<String> listIterator(int index) {
+            throw new UnsupportedOperationException();
+        }
 
-		T saveOrUpdate(T entity);
+        @Override
+        public List<String> subList(int fromIndex, int toIndex) {
+            throw new UnsupportedOperationException();
+        }
+    }
 
-		void delete(Collection<T> entities);
-	}
+    public static class GenericEvent implements Event {
 
+        private int priority;
 
-	public interface RepositoryRegistry {
+        /**
+         * Constructor that takes an event priority
+         */
+        public GenericEvent(int priority) {
+            this.priority = priority;
+        }
 
-		<T> SimpleGenericRepository<T> getFor(Class<T> entityType);
-	}
+        /**
+         * Default Constructor
+         */
+        public GenericEvent() {
+        }
 
+        @Override
+        public int getPriority() {
+            return priority;
+        }
+    }
 
-	@SuppressWarnings("unchecked")
-	public static class SettableRepositoryRegistry<R extends SimpleGenericRepository<?>>
-			implements RepositoryRegistry {
+    public static abstract class BaseUserInitiatedEvent extends GenericEvent implements UserInitiatedEvent {
+    }
 
-		protected void injectInto(R rep) {
-		}
+    public static class MessageEvent extends BaseUserInitiatedEvent {
+    }
 
-		public void register(R rep) {
-		}
+    public static class GenericBroadcasterImpl implements Broadcaster {
+    }
 
-		public void register(R... reps) {
-		}
+    @SuppressWarnings({"unused", "unchecked"})
+    public static abstract class GenericEventBroadcasterImpl<T extends Event>
+            extends GenericBroadcasterImpl implements EventBroadcaster {
 
-		public void setRepos(R... reps) {
-		}
+        private Class<T>[] subscribingEvents;
 
-		@Override
-		public <T> SimpleGenericRepository<T> getFor(Class<T> entityType) {
-			return null;
-		}
+        private Channel<T> channel;
+        private String beanName;
 
-		public void afterPropertiesSet() throws Exception {
-		}
-	}
+        public GenericEventBroadcasterImpl(Class<? extends T>... events) {
+        }
 
+        /**
+         * Abstract method to retrieve instance of subclass
+         *
+         * @return receiver instance
+         */
+        public abstract Receiver<T> getInstance();
 
-	public interface ConvenientGenericRepository<T, ID extends Serializable>
-			extends SimpleGenericRepository<T> {
+        @Override
+        public void setChannel(Channel channel) {
+            this.channel = channel;
+        }
 
-		T findById(ID id, boolean lock);
+        public void setBeanName(String name) {
+            this.beanName = name;
+        }
 
-		List<T> findByExample(T exampleInstance);
+        @Override
+        public void subscribe() {
+        }
 
-		void delete(ID id);
+        @Override
+        public void unsubscribe() {
+        }
+    }
 
-		void delete(T entity);
-	}
+    public static class RemovedMessageEvent extends MessageEvent {
 
+    }
 
-	public static class GenericHibernateRepository<T, ID extends Serializable>
-			implements ConvenientGenericRepository<T, ID> {
+    public static class NewMessageEvent extends MessageEvent {
 
-		/**
-		 * @param c Mandatory. The domain class this repository is responsible for.
-		 */
-		// Since it is impossible to determine the actual type of a type
-		// parameter (!), we resort to requiring the caller to provide the
-		// actual type as parameter, too.
-		// Not set in a constructor to enable easy CGLIB-proxying (passing
-		// constructor arguments to Spring AOP proxies is quite cumbersome).
-		public void setPersistentClass(Class<T> c) {
-		}
+    }
 
-		@Override
-		public Class<T> getPersistentClass() {
-			return null;
-		}
+    public static class ModifiedMessageEvent extends MessageEvent {
 
-		@Override
-		public T findById(ID id, boolean lock) {
-			return null;
-		}
+    }
 
-		@Override
-		public List<T> findAll() {
-			return null;
-		}
+    @SuppressWarnings({"serial", "unchecked"})
+    public static class MessageBroadcasterImpl extends GenericEventBroadcasterImpl<MessageEvent>
+            implements Serializable,  // implement an unrelated interface first (SPR-16288)
+            MessageBroadcaster {
 
-		@Override
-		public List<T> findByExample(T exampleInstance) {
-			return null;
-		}
+        public MessageBroadcasterImpl() {
+            super(NewMessageEvent.class);
+        }
 
-		@Override
-		public List<T> findByQuery() {
-			return null;
-		}
+        @Override
+        public void receive(MessageEvent event) {
+            throw new UnsupportedOperationException("should not be called, use subclassed events");
+        }
 
-		@Override
-		public T saveOrUpdate(T entity) {
-			return null;
-		}
+        public void receive(NewMessageEvent event) {
+        }
 
-		@Override
-		public void delete(T entity) {
-		}
+        @Override
+        public Receiver<MessageEvent> getInstance() {
+            return null;
+        }
 
-		@Override
-		public T refresh(T entity) {
-			return null;
-		}
+        public void receive(RemovedMessageEvent event) {
+        }
 
-		@Override
-		public void delete(ID id) {
-		}
+        public void receive(ModifiedMessageEvent event) {
+        }
+    }
 
-		@Override
-		public void delete(Collection<T> entities) {
-		}
-	}
+    @SuppressWarnings("unchecked")
+    public static class SettableRepositoryRegistry<R extends SimpleGenericRepository<?>>
+            implements RepositoryRegistry {
 
+        protected void injectInto(R rep) {
+        }
 
-	public static class HibernateRepositoryRegistry
-			extends SettableRepositoryRegistry<GenericHibernateRepository<?, ?>> {
+        public void register(R rep) {
+        }
 
-		@Override
-		public void injectInto(GenericHibernateRepository<?, ?> rep) {
-		}
+        public void register(R... reps) {
+        }
 
-		@Override
-		public <T> GenericHibernateRepository<T, ?> getFor(Class<T> entityType) {
-			return null;
-		}
-	}
+        public void setRepos(R... reps) {
+        }
 
+        @Override
+        public <T> SimpleGenericRepository<T> getFor(Class<T> entityType) {
+            return null;
+        }
 
-	//-------------------
-	// SPR-2603 classes
-	//-------------------
+        public void afterPropertiesSet() throws Exception {
+        }
+    }
 
-	public interface Homer<E> {
+    public static class GenericHibernateRepository<T, ID extends Serializable>
+            implements ConvenientGenericRepository<T, ID> {
 
-		void foo(E e);
-	}
+        @Override
+        public Class<T> getPersistentClass() {
+            return null;
+        }
 
+        /**
+         * @param c Mandatory. The domain class this repository is responsible for.
+         */
+        // Since it is impossible to determine the actual type of a type
+        // parameter (!), we resort to requiring the caller to provide the
+        // actual type as parameter, too.
+        // Not set in a constructor to enable easy CGLIB-proxying (passing
+        // constructor arguments to Spring AOP proxies is quite cumbersome).
+        public void setPersistentClass(Class<T> c) {
+        }
 
-	public static class MyHomer<T extends Bounded<T>, L extends T> implements Homer<L> {
+        @Override
+        public T findById(ID id, boolean lock) {
+            return null;
+        }
 
-		@Override
-		public void foo(L t) {
-			throw new UnsupportedOperationException();
-		}
-	}
+        @Override
+        public List<T> findAll() {
+            return null;
+        }
 
+        @Override
+        public List<T> findByExample(T exampleInstance) {
+            return null;
+        }
 
-	public static class YourHomer<T extends AbstractBounded<T>, L extends T> extends
-			MyHomer<T, L> {
+        @Override
+        public List<T> findByQuery() {
+            return null;
+        }
 
-		@Override
-		public void foo(L t) {
-			throw new UnsupportedOperationException();
-		}
-	}
+        @Override
+        public T saveOrUpdate(T entity) {
+            return null;
+        }
 
+        @Override
+        public void delete(T entity) {
+        }
 
-	public interface GenericDao<T> {
+        @Override
+        public T refresh(T entity) {
+            return null;
+        }
 
-		void saveOrUpdate(T t);
-	}
+        @Override
+        public void delete(ID id) {
+        }
 
+        @Override
+        public void delete(Collection<T> entities) {
+        }
+    }
 
-	public interface ConvenienceGenericDao<T> extends GenericDao<T> {
-	}
+    public static class HibernateRepositoryRegistry
+            extends SettableRepositoryRegistry<GenericHibernateRepository<?, ?>> {
 
+        @Override
+        public void injectInto(GenericHibernateRepository<?, ?> rep) {
+        }
 
-	public static class GenericSqlMapDao<T extends Serializable> implements ConvenienceGenericDao<T> {
+        @Override
+        public <T> GenericHibernateRepository<T, ?> getFor(Class<T> entityType) {
+            return null;
+        }
+    }
 
-		@Override
-		public void saveOrUpdate(T t) {
-			throw new UnsupportedOperationException();
-		}
-	}
+    public static class MyHomer<T extends Bounded<T>, L extends T> implements Homer<L> {
 
+        @Override
+        public void foo(L t) {
+            throw new UnsupportedOperationException();
+        }
+    }
 
-	public static class GenericSqlMapIntegerDao<T extends Number> extends GenericSqlMapDao<T> {
+    public static class YourHomer<T extends AbstractBounded<T>, L extends T> extends
+            MyHomer<T, L> {
 
-		@Override
-		public void saveOrUpdate(T t) {
-		}
-	}
+        @Override
+        public void foo(L t) {
+            throw new UnsupportedOperationException();
+        }
+    }
 
+    public static class GenericSqlMapDao<T extends Serializable> implements ConvenienceGenericDao<T> {
 
-	public static class Permission {
-	}
+        @Override
+        public void saveOrUpdate(T t) {
+            throw new UnsupportedOperationException();
+        }
+    }
 
 
-	public static class User {
-	}
+    //-------------------
+    // SPR-3304 classes
+    //-------------------
 
+    public static class GenericSqlMapIntegerDao<T extends Number> extends GenericSqlMapDao<T> {
 
-	public interface UserDao {
+        @Override
+        public void saveOrUpdate(T t) {
+        }
+    }
 
-		// @Transactional
-		void save(User user);
+    public static class Permission {
+    }
 
-		// @Transactional
-		void save(Permission perm);
-	}
+    public static class User {
+    }
 
+    public static abstract class AbstractDao<T> {
 
-	public static abstract class AbstractDao<T> {
+        public void save(T t) {
+        }
 
-		public void save(T t) {
-		}
+        public void saveVararg(T t, Object... args) {
+        }
+    }
 
-		public void saveVararg(T t, Object... args) {
-		}
-	}
+    public static class UserDaoImpl extends AbstractDao<User> implements UserDao {
 
+        @Override
+        public void save(Permission perm) {
+        }
 
-	public static class UserDaoImpl extends AbstractDao<User> implements UserDao {
+        @Override
+        public void saveVararg(User user, Object... args) {
+        }
+    }
 
-		@Override
-		public void save(Permission perm) {
-		}
+    public static abstract class BusinessGenericDao<T, PK extends Serializable>
+            implements DaoInterface<T, PK> {
 
-		@Override
-		public void saveVararg(User user, Object... args) {
-		}
-	}
+        public void save(T object) {
+        }
+    }
 
+    public static class Business<T> {
+    }
 
-	public interface DaoInterface<T, P> {
+    public static class BusinessDao extends BusinessGenericDao<Business<?>, Long> {
 
-		T get(P id);
-	}
+        @Override
+        public void save(Business<?> business) {
+        }
 
+        @Override
+        public Business<?> get(Long id) {
+            return null;
+        }
 
-	public static abstract class BusinessGenericDao<T, PK extends Serializable>
-			implements DaoInterface<T, PK> {
+        public Business<?> get(String code) {
+            return null;
+        }
+    }
 
-		public void save(T object) {
-		}
-	}
 
+    //-------------------
+    // SPR-3357 classes
+    //-------------------
 
-	public static class Business<T> {
-	}
+    private static class MegaEvent {
+    }
 
+    private static class MegaMessageEvent extends MegaEvent {
+    }
 
-	public static class BusinessDao extends BusinessGenericDao<Business<?>, Long> {
+    private static class NewMegaMessageEvent extends MegaEvent {
+    }
 
-		@Override
-		public void save(Business<?> business) {
-		}
+    private static class ModifiedMegaMessageEvent extends MegaEvent {
+    }
 
-		@Override
-		public Business<?> get(Long id) {
-			return null;
-		}
+    private static class Other<S, E> {
+    }
 
-		public Business<?> get(String code) {
-			return null;
-		}
-	}
 
+    //-------------------
+    // SPR-3485 classes
+    //-------------------
 
-	//-------------------
-	// SPR-3304 classes
-	//-------------------
+    @SuppressWarnings("unused")
+    private static class MegaMessageProducerImpl extends Other<Long, String> implements MegaMessageProducer {
 
-	private static class MegaEvent {
-	}
+        public void receive(NewMegaMessageEvent event) {
+            throw new UnsupportedOperationException();
+        }
 
+        public void receive(ModifiedMegaMessageEvent event) {
+            throw new UnsupportedOperationException();
+        }
 
-	private static class MegaMessageEvent extends MegaEvent {
-	}
+        @Override
+        public void receive(MegaMessageEvent event) {
+            throw new UnsupportedOperationException();
+        }
+    }
 
+    private static class DomainObjectSuper {
+    }
 
-	private static class NewMegaMessageEvent extends MegaEvent {
-	}
+    private static class DomainObjectExtendsSuper extends DomainObjectSuper {
+    }
 
 
-	private static class ModifiedMegaMessageEvent extends MegaEvent {
-	}
+    //-------------------
+    // SPR-3534 classes
+    //-------------------
 
+    @SuppressWarnings("unused")
+    private static abstract class AbstractImplementsInterface<D extends DomainObjectSuper> implements IGenericInterface<D> {
 
-	public interface MegaReceiver<E extends MegaEvent> {
+        @Override
+        public <T> void doSomething(D domainObject, T value) {
+        }
 
-		void receive(E event);
-	}
+        public void anotherBaseMethod() {
+        }
+    }
 
+    private static class ExtendsAbstractImplementsInterface extends AbstractImplementsInterface<DomainObjectExtendsSuper> {
 
-	public interface MegaMessageProducer extends MegaReceiver<MegaMessageEvent> {
-	}
+        @Override
+        public <T> void doSomething(DomainObjectExtendsSuper domainObject, T value) {
+            super.doSomething(domainObject, value);
+        }
+    }
 
+    @SuppressWarnings("serial")
+    private static class ParameterType implements Serializable {
+    }
 
-	private static class Other<S,E> {
-	}
+    private static class AbstractDomainObject<P extends Serializable, R> {
 
+        public R method1(P p) {
+            return null;
+        }
 
-	@SuppressWarnings("unused")
-	private static class MegaMessageProducerImpl extends Other<Long, String> implements MegaMessageProducer {
+        public void method2(P p, R r) {
+        }
+    }
 
-		public void receive(NewMegaMessageEvent event) {
-			throw new UnsupportedOperationException();
-		}
+    private static class DomainObject extends AbstractDomainObject<ParameterType, byte[]> {
 
-		public void receive(ModifiedMegaMessageEvent event) {
-			throw new UnsupportedOperationException();
-		}
+        @Override
+        public byte[] method1(ParameterType p) {
+            return super.method1(p);
+        }
 
-		@Override
-		public void receive(MegaMessageEvent event) {
-			throw new UnsupportedOperationException();
-		}
-	}
+        @Override
+        public void method2(ParameterType p, byte[] r) {
+            super.method2(p, r);
+        }
+    }
 
+    public static class SearchConditions {
+    }
 
-	//-------------------
-	// SPR-3357 classes
-	//-------------------
+    public static class ExternalMessage {
+    }
 
-	private static class DomainObjectSuper {
-	}
+    public static class ExternalMessageSearchConditions<T extends ExternalMessage> extends SearchConditions {
+    }
 
+    public static class ExternalMessageProvider<S extends ExternalMessage, T extends ExternalMessageSearchConditions<S>>
+            implements IExternalMessageProvider<S, T> {
 
-	private static class DomainObjectExtendsSuper extends DomainObjectSuper {
-	}
+        @Override
+        public Collection<S> findBy(T conditions) {
+            return null;
+        }
+    }
 
+    public static class EmailMessage extends ExternalMessage {
+    }
 
-	public interface IGenericInterface<D extends DomainObjectSuper> {
 
-		<T> void doSomething(final D domainObject, final T value);
-	}
+    //-------------------
+    // SPR-16103 classes
+    //-------------------
 
+    public static class EmailSearchConditions extends ExternalMessageSearchConditions<EmailMessage> {
+    }
 
-	@SuppressWarnings("unused")
-	private static abstract class AbstractImplementsInterface<D extends DomainObjectSuper> implements IGenericInterface<D> {
+    public static class EmailMessageProvider extends ExternalMessageProvider<EmailMessage, EmailSearchConditions> {
+    }
 
-		@Override
-		public <T> void doSomething(D domainObject, T value) {
-		}
+    public static class TestEmailProvider extends EmailMessageProvider {
 
-		public void anotherBaseMethod() {
-		}
-	}
+        @Override
+        public Collection<EmailMessage> findBy(EmailSearchConditions conditions) {
+            return null;
+        }
+    }
 
+    public static abstract class BaseEntity {
+    }
 
-	private static class ExtendsAbstractImplementsInterface extends AbstractImplementsInterface<DomainObjectExtendsSuper> {
+    public static class FooEntity extends BaseEntity {
+    }
 
-		@Override
-		public <T> void doSomething(DomainObjectExtendsSuper domainObject, T value) {
-			super.doSomething(domainObject, value);
-		}
-	}
+    public static class BaseClass<T> {
 
+        public <S extends T> S test(S T) {
+            return null;
+        }
+    }
 
-	//-------------------
-	// SPR-3485 classes
-	//-------------------
+    public static class EntityClass<T extends BaseEntity> extends BaseClass<T> {
 
-	@SuppressWarnings("serial")
-	private static class ParameterType implements Serializable {
-	}
+        @Override
+        public <S extends T> S test(S T) {
+            return null;
+        }
+    }
 
+    public static class FooClass extends EntityClass<FooEntity> {
 
-	private static class AbstractDomainObject<P extends Serializable, R> {
-
-		public R method1(P p) {
-			return null;
-		}
-
-		public void method2(P p, R r) {
-		}
-	}
-
-
-	private static class DomainObject extends AbstractDomainObject<ParameterType, byte[]> {
-
-		@Override
-		public byte[] method1(ParameterType p) {
-			return super.method1(p);
-		}
-
-		@Override
-		public void method2(ParameterType p, byte[] r) {
-			super.method2(p, r);
-		}
-	}
-
-
-	//-------------------
-	// SPR-3534 classes
-	//-------------------
-
-	public interface SearchProvider<RETURN_TYPE, CONDITIONS_TYPE> {
-
-		Collection<RETURN_TYPE> findBy(CONDITIONS_TYPE conditions);
-	}
-
-
-	public static class SearchConditions {
-	}
-
-
-	public interface IExternalMessageProvider<S extends ExternalMessage, T extends ExternalMessageSearchConditions<?>>
-			extends SearchProvider<S, T> {
-	}
-
-
-	public static class ExternalMessage {
-	}
-
-
-	public static class ExternalMessageSearchConditions<T extends ExternalMessage> extends SearchConditions {
-	}
-
-
-	public static class ExternalMessageProvider<S extends ExternalMessage, T extends ExternalMessageSearchConditions<S>>
-			implements IExternalMessageProvider<S, T> {
-
-		@Override
-		public Collection<S> findBy(T conditions) {
-			return null;
-		}
-	}
-
-
-	public static class EmailMessage extends ExternalMessage {
-	}
-
-
-	public static class EmailSearchConditions extends ExternalMessageSearchConditions<EmailMessage> {
-	}
-
-
-	public static class EmailMessageProvider extends ExternalMessageProvider<EmailMessage, EmailSearchConditions> {
-	}
-
-
-	public static class TestEmailProvider extends EmailMessageProvider {
-
-		@Override
-		public Collection<EmailMessage> findBy(EmailSearchConditions conditions) {
-			return null;
-		}
-	}
-
-
-	//-------------------
-	// SPR-16103 classes
-	//-------------------
-
-	public static abstract class BaseEntity {
-	}
-
-	public static class FooEntity extends BaseEntity {
-	}
-
-	public static class BaseClass<T> {
-
-		public <S extends T> S test(S T) {
-			return null;
-		}
-	}
-
-	public static class EntityClass<T extends BaseEntity> extends BaseClass<T> {
-
-		@Override
-		public <S extends T> S test(S T) {
-			return null;
-		}
-	}
-
-	public static class FooClass extends EntityClass<FooEntity> {
-
-		@Override
-		public <S extends FooEntity> S test(S T) {
-			return null;
-		}
-	}
-
-	public interface BaseInterface<T> {
-
-		<S extends T> S test(S T);
-	}
-
-	public interface EntityInterface<T extends BaseEntity> extends BaseInterface<T> {
-
-		@Override
-		<S extends T> S test(S T);
-	}
-
-	public interface FooInterface extends EntityInterface<FooEntity> {
-
-		@Override
-		<S extends FooEntity> S test(S T);
-	}
+        @Override
+        public <S extends FooEntity> S test(S T) {
+            return null;
+        }
+    }
 
 }

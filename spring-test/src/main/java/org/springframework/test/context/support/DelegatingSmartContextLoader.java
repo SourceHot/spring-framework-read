@@ -27,53 +27,51 @@ import org.springframework.util.ClassUtils;
  * is present in the classpath) and an {@link AnnotationConfigContextLoader}.
  *
  * @author Sam Brannen
- * @since 3.1
  * @see SmartContextLoader
  * @see AbstractDelegatingSmartContextLoader
  * @see GenericXmlContextLoader
  * @see GenericGroovyXmlContextLoader
  * @see AnnotationConfigContextLoader
+ * @since 3.1
  */
 public class DelegatingSmartContextLoader extends AbstractDelegatingSmartContextLoader {
 
-	private static final String GROOVY_XML_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.GenericGroovyXmlContextLoader";
+    private static final String GROOVY_XML_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.GenericGroovyXmlContextLoader";
 
-	private static final boolean groovyPresent = ClassUtils.isPresent("groovy.lang.Closure",
-		DelegatingSmartContextLoader.class.getClassLoader())
-			&& ClassUtils.isPresent(GROOVY_XML_CONTEXT_LOADER_CLASS_NAME,
-				DelegatingSmartContextLoader.class.getClassLoader());
+    private static final boolean groovyPresent = ClassUtils.isPresent("groovy.lang.Closure",
+            DelegatingSmartContextLoader.class.getClassLoader())
+            && ClassUtils.isPresent(GROOVY_XML_CONTEXT_LOADER_CLASS_NAME,
+            DelegatingSmartContextLoader.class.getClassLoader());
 
-	private final SmartContextLoader xmlLoader;
-	private final SmartContextLoader annotationConfigLoader;
+    private final SmartContextLoader xmlLoader;
+    private final SmartContextLoader annotationConfigLoader;
 
 
-	public DelegatingSmartContextLoader() {
-		if (groovyPresent) {
-			try {
-				Class<?> loaderClass = ClassUtils.forName(GROOVY_XML_CONTEXT_LOADER_CLASS_NAME,
-					DelegatingSmartContextLoader.class.getClassLoader());
-				this.xmlLoader = (SmartContextLoader) BeanUtils.instantiateClass(loaderClass);
-			}
-			catch (Throwable ex) {
-				throw new IllegalStateException("Failed to enable support for Groovy scripts; "
-						+ "could not load class: " + GROOVY_XML_CONTEXT_LOADER_CLASS_NAME, ex);
-			}
-		}
-		else {
-			this.xmlLoader = new GenericXmlContextLoader();
-		}
+    public DelegatingSmartContextLoader() {
+        if (groovyPresent) {
+            try {
+                Class<?> loaderClass = ClassUtils.forName(GROOVY_XML_CONTEXT_LOADER_CLASS_NAME,
+                        DelegatingSmartContextLoader.class.getClassLoader());
+                this.xmlLoader = (SmartContextLoader) BeanUtils.instantiateClass(loaderClass);
+            } catch (Throwable ex) {
+                throw new IllegalStateException("Failed to enable support for Groovy scripts; "
+                        + "could not load class: " + GROOVY_XML_CONTEXT_LOADER_CLASS_NAME, ex);
+            }
+        } else {
+            this.xmlLoader = new GenericXmlContextLoader();
+        }
 
-		this.annotationConfigLoader = new AnnotationConfigContextLoader();
-	}
+        this.annotationConfigLoader = new AnnotationConfigContextLoader();
+    }
 
-	@Override
-	protected SmartContextLoader getXmlLoader() {
-		return this.xmlLoader;
-	}
+    @Override
+    protected SmartContextLoader getXmlLoader() {
+        return this.xmlLoader;
+    }
 
-	@Override
-	protected SmartContextLoader getAnnotationConfigLoader() {
-		return this.annotationConfigLoader;
-	}
+    @Override
+    protected SmartContextLoader getAnnotationConfigLoader() {
+        return this.annotationConfigLoader;
+    }
 
 }

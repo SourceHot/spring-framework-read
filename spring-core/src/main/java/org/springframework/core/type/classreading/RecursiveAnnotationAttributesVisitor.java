@@ -30,20 +30,20 @@ import org.springframework.lang.Nullable;
  */
 class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVisitor {
 
-	protected final String annotationType;
+    protected final String annotationType;
 
 
-	public RecursiveAnnotationAttributesVisitor(
-			String annotationType, AnnotationAttributes attributes, @Nullable ClassLoader classLoader) {
+    public RecursiveAnnotationAttributesVisitor(
+            String annotationType, AnnotationAttributes attributes, @Nullable ClassLoader classLoader) {
 
-		super(classLoader, attributes);
-		this.annotationType = annotationType;
-	}
+        super(classLoader, attributes);
+        this.annotationType = annotationType;
+    }
 
 
-	@Override
-	public void visitEnd() {
-		AnnotationUtils.registerDefaultValues(this.attributes);
-	}
+    @Override
+    public void visitEnd() {
+        AnnotationUtils.registerDefaultValues(this.attributes);
+    }
 
 }

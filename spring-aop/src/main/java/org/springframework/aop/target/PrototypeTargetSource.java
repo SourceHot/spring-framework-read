@@ -34,27 +34,29 @@ import org.springframework.beans.BeansException;
 @SuppressWarnings("serial")
 public class PrototypeTargetSource extends AbstractPrototypeBasedTargetSource {
 
-	/**
-	 * Obtain a new prototype instance for every call.
-	 * @see #newPrototypeInstance()
-	 */
-	@Override
-	public Object getTarget() throws BeansException {
-		return newPrototypeInstance();
-	}
+    /**
+     * Obtain a new prototype instance for every call.
+     *
+     * @see #newPrototypeInstance()
+     */
+    @Override
+    public Object getTarget() throws BeansException {
+        return newPrototypeInstance();
+    }
 
-	/**
-	 * Destroy the given independent instance.
-	 * @see #destroyPrototypeInstance
-	 */
-	@Override
-	public void releaseTarget(Object target) {
-		destroyPrototypeInstance(target);
-	}
+    /**
+     * Destroy the given independent instance.
+     *
+     * @see #destroyPrototypeInstance
+     */
+    @Override
+    public void releaseTarget(Object target) {
+        destroyPrototypeInstance(target);
+    }
 
-	@Override
-	public String toString() {
-		return "PrototypeTargetSource for target bean with name '" + getTargetBeanName() + "'";
-	}
+    @Override
+    public String toString() {
+        return "PrototypeTargetSource for target bean with name '" + getTargetBeanName() + "'";
+    }
 
 }

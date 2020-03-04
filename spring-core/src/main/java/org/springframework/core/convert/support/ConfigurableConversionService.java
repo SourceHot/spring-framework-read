@@ -29,10 +29,10 @@ import org.springframework.core.convert.converter.ConverterRegistry;
  * instance in application context bootstrapping code.
  *
  * @author Chris Beams
- * @since 3.1
  * @see org.springframework.core.env.ConfigurablePropertyResolver#getConversionService()
  * @see org.springframework.core.env.ConfigurableEnvironment
  * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment()
+ * @since 3.1
  */
 public interface ConfigurableConversionService extends ConversionService, ConverterRegistry {
 

@@ -16,12 +16,12 @@
 
 package org.springframework.orm.jpa;
 
-import javax.persistence.EntityManager;
-
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.SavepointManager;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
+
+import javax.persistence.EntityManager;
 
 /**
  * Resource holder wrapping a JPA {@link EntityManager}.
@@ -34,54 +34,53 @@ import org.springframework.util.Assert;
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *
  * @author Juergen Hoeller
- * @since 2.0
  * @see JpaTransactionManager
  * @see EntityManagerFactoryUtils
+ * @since 2.0
  */
 public class EntityManagerHolder extends ResourceHolderSupport {
 
-	@Nullable
-	private final EntityManager entityManager;
+    @Nullable
+    private final EntityManager entityManager;
 
-	private boolean transactionActive;
+    private boolean transactionActive;
 
-	@Nullable
-	private SavepointManager savepointManager;
-
-
-	public EntityManagerHolder(@Nullable EntityManager entityManager) {
-		this.entityManager = entityManager;
-	}
+    @Nullable
+    private SavepointManager savepointManager;
 
 
-	public EntityManager getEntityManager() {
-		Assert.state(this.entityManager != null, "No EntityManager available");
-		return this.entityManager;
-	}
-
-	protected void setTransactionActive(boolean transactionActive) {
-		this.transactionActive = transactionActive;
-	}
-
-	protected boolean isTransactionActive() {
-		return this.transactionActive;
-	}
-
-	protected void setSavepointManager(@Nullable SavepointManager savepointManager) {
-		this.savepointManager = savepointManager;
-	}
-
-	@Nullable
-	protected SavepointManager getSavepointManager() {
-		return this.savepointManager;
-	}
+    public EntityManagerHolder(@Nullable EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
 
-	@Override
-	public void clear() {
-		super.clear();
-		this.transactionActive = false;
-		this.savepointManager = null;
-	}
+    public EntityManager getEntityManager() {
+        Assert.state(this.entityManager != null, "No EntityManager available");
+        return this.entityManager;
+    }
+
+    protected boolean isTransactionActive() {
+        return this.transactionActive;
+    }
+
+    protected void setTransactionActive(boolean transactionActive) {
+        this.transactionActive = transactionActive;
+    }
+
+    @Nullable
+    protected SavepointManager getSavepointManager() {
+        return this.savepointManager;
+    }
+
+    protected void setSavepointManager(@Nullable SavepointManager savepointManager) {
+        this.savepointManager = savepointManager;
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        this.transactionActive = false;
+        this.savepointManager = null;
+    }
 
 }

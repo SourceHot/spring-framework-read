@@ -16,14 +16,17 @@
 
 package org.springframework.mock.web;
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.*;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link MockCookie}.
@@ -34,114 +37,114 @@ import static org.junit.Assert.*;
  */
 public class MockCookieTests {
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
 
 
-	@Test
-	public void constructCookie() {
-		MockCookie cookie = new MockCookie("SESSION", "123");
+    @Test
+    public void constructCookie() {
+        MockCookie cookie = new MockCookie("SESSION", "123");
 
-		assertCookie(cookie, "SESSION", "123");
-		assertNull(cookie.getDomain());
-		assertEquals(-1, cookie.getMaxAge());
-		assertNull(cookie.getPath());
-		assertFalse(cookie.isHttpOnly());
-		assertFalse(cookie.getSecure());
-		assertNull(cookie.getSameSite());
-	}
+        assertCookie(cookie, "SESSION", "123");
+        assertNull(cookie.getDomain());
+        assertEquals(-1, cookie.getMaxAge());
+        assertNull(cookie.getPath());
+        assertFalse(cookie.isHttpOnly());
+        assertFalse(cookie.getSecure());
+        assertNull(cookie.getSameSite());
+    }
 
-	@Test
-	public void setSameSite() {
-		MockCookie cookie = new MockCookie("SESSION", "123");
-		cookie.setSameSite("Strict");
+    @Test
+    public void setSameSite() {
+        MockCookie cookie = new MockCookie("SESSION", "123");
+        cookie.setSameSite("Strict");
 
-		assertEquals("Strict", cookie.getSameSite());
-	}
+        assertEquals("Strict", cookie.getSameSite());
+    }
 
-	@Test
-	public void parseHeaderWithoutAttributes() {
-		MockCookie cookie = MockCookie.parse("SESSION=123");
-		assertCookie(cookie, "SESSION", "123");
+    @Test
+    public void parseHeaderWithoutAttributes() {
+        MockCookie cookie = MockCookie.parse("SESSION=123");
+        assertCookie(cookie, "SESSION", "123");
 
-		cookie = MockCookie.parse("SESSION=123;");
-		assertCookie(cookie, "SESSION", "123");
-	}
+        cookie = MockCookie.parse("SESSION=123;");
+        assertCookie(cookie, "SESSION", "123");
+    }
 
-	@Test
-	public void parseHeaderWithAttributes() {
-		MockCookie cookie = MockCookie.parse("SESSION=123; Domain=example.com; Max-Age=60; " +
-				"Expires=Tue, 8 Oct 2019 19:50:00 GMT; Path=/; Secure; HttpOnly; SameSite=Lax");
+    @Test
+    public void parseHeaderWithAttributes() {
+        MockCookie cookie = MockCookie.parse("SESSION=123; Domain=example.com; Max-Age=60; " +
+                "Expires=Tue, 8 Oct 2019 19:50:00 GMT; Path=/; Secure; HttpOnly; SameSite=Lax");
 
-		assertCookie(cookie, "SESSION", "123");
-		assertEquals("example.com", cookie.getDomain());
-		assertEquals(60, cookie.getMaxAge());
-		assertEquals("/", cookie.getPath());
-		assertTrue(cookie.getSecure());
-		assertTrue(cookie.isHttpOnly());
-		assertEquals(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
-				DateTimeFormatter.RFC_1123_DATE_TIME), cookie.getExpires());
-		assertEquals("Lax", cookie.getSameSite());
-	}
+        assertCookie(cookie, "SESSION", "123");
+        assertEquals("example.com", cookie.getDomain());
+        assertEquals(60, cookie.getMaxAge());
+        assertEquals("/", cookie.getPath());
+        assertTrue(cookie.getSecure());
+        assertTrue(cookie.isHttpOnly());
+        assertEquals(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
+                DateTimeFormatter.RFC_1123_DATE_TIME), cookie.getExpires());
+        assertEquals("Lax", cookie.getSameSite());
+    }
 
-	@Test
-	public void parseHeaderWithZeroExpiresAttribute() {
-		MockCookie cookie = MockCookie.parse("SESSION=123; Expires=0");
+    @Test
+    public void parseHeaderWithZeroExpiresAttribute() {
+        MockCookie cookie = MockCookie.parse("SESSION=123; Expires=0");
 
-		assertCookie(cookie, "SESSION", "123");
-		assertNull(cookie.getExpires());
-	}
+        assertCookie(cookie, "SESSION", "123");
+        assertNull(cookie.getExpires());
+    }
 
-	@Test
-	public void parseHeaderWithBogusExpiresAttribute() {
-		MockCookie cookie = MockCookie.parse("SESSION=123; Expires=bogus");
+    @Test
+    public void parseHeaderWithBogusExpiresAttribute() {
+        MockCookie cookie = MockCookie.parse("SESSION=123; Expires=bogus");
 
-		assertCookie(cookie, "SESSION", "123");
-		assertNull(cookie.getExpires());
-	}
+        assertCookie(cookie, "SESSION", "123");
+        assertNull(cookie.getExpires());
+    }
 
-	private void assertCookie(MockCookie cookie, String name, String value) {
-		assertEquals(name, cookie.getName());
-		assertEquals(value, cookie.getValue());
-	}
+    private void assertCookie(MockCookie cookie, String name, String value) {
+        assertEquals(name, cookie.getName());
+        assertEquals(value, cookie.getValue());
+    }
 
-	@Test
-	public void parseNullHeader() {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage("Set-Cookie header must not be null");
-		MockCookie.parse(null);
-	}
+    @Test
+    public void parseNullHeader() {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Set-Cookie header must not be null");
+        MockCookie.parse(null);
+    }
 
-	@Test
-	public void parseInvalidHeader() {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage("Invalid Set-Cookie header 'BOOM'");
-		MockCookie.parse("BOOM");
-	}
+    @Test
+    public void parseInvalidHeader() {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Invalid Set-Cookie header 'BOOM'");
+        MockCookie.parse("BOOM");
+    }
 
-	@Test
-	public void parseInvalidAttribute() {
-		String header = "SESSION=123; Path=";
+    @Test
+    public void parseInvalidAttribute() {
+        String header = "SESSION=123; Path=";
 
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage("No value in attribute 'Path' for Set-Cookie header '" + header + "'");
-		MockCookie.parse(header);
-	}
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("No value in attribute 'Path' for Set-Cookie header '" + header + "'");
+        MockCookie.parse(header);
+    }
 
-	@Test
-	public void parseHeaderWithAttributesCaseSensitivity() {
-		MockCookie cookie = MockCookie.parse("SESSION=123; domain=example.com; max-age=60; " +
-				"expires=Tue, 8 Oct 2019 19:50:00 GMT; path=/; secure; httponly; samesite=Lax");
+    @Test
+    public void parseHeaderWithAttributesCaseSensitivity() {
+        MockCookie cookie = MockCookie.parse("SESSION=123; domain=example.com; max-age=60; " +
+                "expires=Tue, 8 Oct 2019 19:50:00 GMT; path=/; secure; httponly; samesite=Lax");
 
-		assertCookie(cookie, "SESSION", "123");
-		assertEquals("example.com", cookie.getDomain());
-		assertEquals(60, cookie.getMaxAge());
-		assertEquals("/", cookie.getPath());
-		assertTrue(cookie.getSecure());
-		assertTrue(cookie.isHttpOnly());
-		assertEquals(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
-				DateTimeFormatter.RFC_1123_DATE_TIME), cookie.getExpires());
-		assertEquals("Lax", cookie.getSameSite());
-	}
+        assertCookie(cookie, "SESSION", "123");
+        assertEquals("example.com", cookie.getDomain());
+        assertEquals(60, cookie.getMaxAge());
+        assertEquals("/", cookie.getPath());
+        assertTrue(cookie.getSecure());
+        assertTrue(cookie.isHttpOnly());
+        assertEquals(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
+                DateTimeFormatter.RFC_1123_DATE_TIME), cookie.getExpires());
+        assertEquals("Lax", cookie.getSameSite());
+    }
 
 }

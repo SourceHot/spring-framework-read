@@ -16,13 +16,13 @@
 
 package org.springframework.mock.http;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.util.Assert;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Mock implementation of {@link HttpInputMessage}.
@@ -32,30 +32,30 @@ import org.springframework.util.Assert;
  */
 public class MockHttpInputMessage implements HttpInputMessage {
 
-	private final HttpHeaders headers = new HttpHeaders();
+    private final HttpHeaders headers = new HttpHeaders();
 
-	private final InputStream body;
-
-
-	public MockHttpInputMessage(byte[] content) {
-		Assert.notNull(content, "Byte array must not be null");
-		this.body = new ByteArrayInputStream(content);
-	}
-
-	public MockHttpInputMessage(InputStream body) {
-		Assert.notNull(body, "InputStream must not be null");
-		this.body = body;
-	}
+    private final InputStream body;
 
 
-	@Override
-	public HttpHeaders getHeaders() {
-		return this.headers;
-	}
+    public MockHttpInputMessage(byte[] content) {
+        Assert.notNull(content, "Byte array must not be null");
+        this.body = new ByteArrayInputStream(content);
+    }
 
-	@Override
-	public InputStream getBody() throws IOException {
-		return this.body;
-	}
+    public MockHttpInputMessage(InputStream body) {
+        Assert.notNull(body, "InputStream must not be null");
+        this.body = body;
+    }
+
+
+    @Override
+    public HttpHeaders getHeaders() {
+        return this.headers;
+    }
+
+    @Override
+    public InputStream getBody() throws IOException {
+        return this.body;
+    }
 
 }

@@ -29,21 +29,23 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public abstract class ScriptException extends DataAccessException {
 
-	/**
-	 * Constructor for {@code ScriptException}.
-	 * @param message the detail message
-	 */
-	public ScriptException(String message) {
-		super(message);
-	}
+    /**
+     * Constructor for {@code ScriptException}.
+     *
+     * @param message the detail message
+     */
+    public ScriptException(String message) {
+        super(message);
+    }
 
-	/**
-	 * Constructor for {@code ScriptException}.
-	 * @param message the detail message
-	 * @param cause the root cause
-	 */
-	public ScriptException(String message, @Nullable Throwable cause) {
-		super(message, cause);
-	}
+    /**
+     * Constructor for {@code ScriptException}.
+     *
+     * @param message the detail message
+     * @param cause   the root cause
+     */
+    public ScriptException(String message, @Nullable Throwable cause) {
+        super(message, cause);
+    }
 
 }

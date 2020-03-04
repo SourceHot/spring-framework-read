@@ -16,16 +16,15 @@
 
 package org.springframework.jdbc.core.simple;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Map;
-
-import javax.sql.DataSource;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+
+import javax.sql.DataSource;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Map;
 
 /**
  * A SimpleJdbcCall is a multi-threaded, reusable object representing a call
@@ -55,147 +54,149 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  *
  * @author Thomas Risberg
  * @author Stephane Nicoll
- * @since 2.5
  * @see java.sql.DatabaseMetaData
  * @see org.springframework.jdbc.core.JdbcTemplate
+ * @since 2.5
  */
 public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOperations {
 
-	/**
-	 * Constructor that takes one parameter with the JDBC DataSource to use when
-	 * creating the underlying JdbcTemplate.
-	 * @param dataSource the {@code DataSource} to use
-	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
-	 */
-	public SimpleJdbcCall(DataSource dataSource) {
-		super(dataSource);
-	}
+    /**
+     * Constructor that takes one parameter with the JDBC DataSource to use when
+     * creating the underlying JdbcTemplate.
+     *
+     * @param dataSource the {@code DataSource} to use
+     * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
+     */
+    public SimpleJdbcCall(DataSource dataSource) {
+        super(dataSource);
+    }
 
-	/**
-	 * Alternative Constructor that takes one parameter with the JdbcTemplate to be used.
-	 * @param jdbcTemplate the {@code JdbcTemplate} to use
-	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
-	 */
-	public SimpleJdbcCall(JdbcTemplate jdbcTemplate) {
-		super(jdbcTemplate);
-	}
+    /**
+     * Alternative Constructor that takes one parameter with the JdbcTemplate to be used.
+     *
+     * @param jdbcTemplate the {@code JdbcTemplate} to use
+     * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
+     */
+    public SimpleJdbcCall(JdbcTemplate jdbcTemplate) {
+        super(jdbcTemplate);
+    }
 
 
-	@Override
-	public SimpleJdbcCall withProcedureName(String procedureName) {
-		setProcedureName(procedureName);
-		setFunction(false);
-		return this;
-	}
+    @Override
+    public SimpleJdbcCall withProcedureName(String procedureName) {
+        setProcedureName(procedureName);
+        setFunction(false);
+        return this;
+    }
 
-	@Override
-	public SimpleJdbcCall withFunctionName(String functionName) {
-		setProcedureName(functionName);
-		setFunction(true);
-		return this;
-	}
+    @Override
+    public SimpleJdbcCall withFunctionName(String functionName) {
+        setProcedureName(functionName);
+        setFunction(true);
+        return this;
+    }
 
-	@Override
-	public SimpleJdbcCall withSchemaName(String schemaName) {
-		setSchemaName(schemaName);
-		return this;
-	}
+    @Override
+    public SimpleJdbcCall withSchemaName(String schemaName) {
+        setSchemaName(schemaName);
+        return this;
+    }
 
-	@Override
-	public SimpleJdbcCall withCatalogName(String catalogName) {
-		setCatalogName(catalogName);
-		return this;
-	}
+    @Override
+    public SimpleJdbcCall withCatalogName(String catalogName) {
+        setCatalogName(catalogName);
+        return this;
+    }
 
-	@Override
-	public SimpleJdbcCall withReturnValue() {
-		setReturnValueRequired(true);
-		return this;
-	}
+    @Override
+    public SimpleJdbcCall withReturnValue() {
+        setReturnValueRequired(true);
+        return this;
+    }
 
-	@Override
-	public SimpleJdbcCall declareParameters(SqlParameter... sqlParameters) {
-		for (SqlParameter sqlParameter : sqlParameters) {
-			if (sqlParameter != null) {
-				addDeclaredParameter(sqlParameter);
-			}
-		}
-		return this;
-	}
+    @Override
+    public SimpleJdbcCall declareParameters(SqlParameter... sqlParameters) {
+        for (SqlParameter sqlParameter : sqlParameters) {
+            if (sqlParameter != null) {
+                addDeclaredParameter(sqlParameter);
+            }
+        }
+        return this;
+    }
 
-	@Override
-	public SimpleJdbcCall useInParameterNames(String... inParameterNames) {
-		setInParameterNames(new LinkedHashSet<>(Arrays.asList(inParameterNames)));
-		return this;
-	}
+    @Override
+    public SimpleJdbcCall useInParameterNames(String... inParameterNames) {
+        setInParameterNames(new LinkedHashSet<>(Arrays.asList(inParameterNames)));
+        return this;
+    }
 
-	@Override
-	public SimpleJdbcCall returningResultSet(String parameterName, RowMapper<?> rowMapper) {
-		addDeclaredRowMapper(parameterName, rowMapper);
-		return this;
-	}
+    @Override
+    public SimpleJdbcCall returningResultSet(String parameterName, RowMapper<?> rowMapper) {
+        addDeclaredRowMapper(parameterName, rowMapper);
+        return this;
+    }
 
-	@Override
-	public SimpleJdbcCall withoutProcedureColumnMetaDataAccess() {
-		setAccessCallParameterMetaData(false);
-		return this;
-	}
+    @Override
+    public SimpleJdbcCall withoutProcedureColumnMetaDataAccess() {
+        setAccessCallParameterMetaData(false);
+        return this;
+    }
 
-	@Override
-	public SimpleJdbcCall withNamedBinding() {
-		setNamedBinding(true);
-		return this;
-	}
+    @Override
+    public SimpleJdbcCall withNamedBinding() {
+        setNamedBinding(true);
+        return this;
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T executeFunction(Class<T> returnType, Object... args) {
-		return (T) doExecute(args).get(getScalarOutParameterName());
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T executeFunction(Class<T> returnType, Object... args) {
+        return (T) doExecute(args).get(getScalarOutParameterName());
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T executeFunction(Class<T> returnType, Map<String, ?> args) {
-		return (T) doExecute(args).get(getScalarOutParameterName());
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T executeFunction(Class<T> returnType, Map<String, ?> args) {
+        return (T) doExecute(args).get(getScalarOutParameterName());
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T executeFunction(Class<T> returnType, SqlParameterSource args) {
-		return (T) doExecute(args).get(getScalarOutParameterName());
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T executeFunction(Class<T> returnType, SqlParameterSource args) {
+        return (T) doExecute(args).get(getScalarOutParameterName());
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T executeObject(Class<T> returnType, Object... args) {
-		return (T) doExecute(args).get(getScalarOutParameterName());
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T executeObject(Class<T> returnType, Object... args) {
+        return (T) doExecute(args).get(getScalarOutParameterName());
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T executeObject(Class<T> returnType, Map<String, ?> args) {
-		return (T) doExecute(args).get(getScalarOutParameterName());
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T executeObject(Class<T> returnType, Map<String, ?> args) {
+        return (T) doExecute(args).get(getScalarOutParameterName());
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T executeObject(Class<T> returnType, SqlParameterSource args) {
-		return (T) doExecute(args).get(getScalarOutParameterName());
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T executeObject(Class<T> returnType, SqlParameterSource args) {
+        return (T) doExecute(args).get(getScalarOutParameterName());
+    }
 
-	@Override
-	public Map<String, Object> execute(Object... args) {
-		return doExecute(args);
-	}
+    @Override
+    public Map<String, Object> execute(Object... args) {
+        return doExecute(args);
+    }
 
-	@Override
-	public Map<String, Object> execute(Map<String, ?> args) {
-		return doExecute(args);
-	}
+    @Override
+    public Map<String, Object> execute(Map<String, ?> args) {
+        return doExecute(args);
+    }
 
-	@Override
-	public Map<String, Object> execute(SqlParameterSource parameterSource) {
-		return doExecute(parameterSource);
-	}
+    @Override
+    public Map<String, Object> execute(SqlParameterSource parameterSource) {
+        return doExecute(parameterSource);
+    }
 
 }

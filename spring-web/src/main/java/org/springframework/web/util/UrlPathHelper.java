@@ -16,21 +16,19 @@
 
 package org.springframework.web.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.lang.Nullable;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
+
+import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 
 /**
  * Helper class for URL path matching. Provides support for URL paths in
@@ -43,9 +41,9 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Rossen Stoyanchev
- * @since 14.01.2004
  * @see #getLookupPathForRequest
  * @see javax.servlet.RequestDispatcher
+ * @since 14.01.2004
  */
 public class UrlPathHelper {
 
@@ -178,8 +176,7 @@ public class UrlPathHelper {
         String rest = getPathWithinServletMapping(request);
         if (!"".equals(rest)) {
             return rest;
-        }
-        else {
+        } else {
             return getPathWithinApplication(request);
         }
     }
@@ -211,8 +208,7 @@ public class UrlPathHelper {
         // If the app container sanitized the servletPath, check against the sanitized version
         if (servletPath.contains(sanitizedPathWithinApp)) {
             path = getRemainingPath(sanitizedPathWithinApp, servletPath, false);
-        }
-        else {
+        } else {
             // 路径处理
             path = getRemainingPath(pathWithinApp, servletPath, false);
         }
@@ -220,8 +216,7 @@ public class UrlPathHelper {
         if (path != null) {
             // Normal case: URI contains servlet path.
             return path;
-        }
-        else {
+        } else {
             // Special case: URI is different from servlet path.
             String pathInfo = request.getPathInfo();
             if (pathInfo != null) {
@@ -262,8 +257,7 @@ public class UrlPathHelper {
         if (path != null) {
             // Normal case: URI contains context path.
             return (StringUtils.hasText(path) ? path : "/");
-        }
-        else {
+        } else {
             return requestUri;
         }
     }
@@ -295,11 +289,9 @@ public class UrlPathHelper {
         }
         if (index2 != mapping.length()) {
             return null;
-        }
-        else if (index1 == requestUri.length()) {
+        } else if (index1 == requestUri.length()) {
             return "";
-        }
-        else if (requestUri.charAt(index1) == ';') {
+        } else if (requestUri.charAt(index1) == ';') {
             index1 = requestUri.indexOf('/', index1);
         }
         return (index1 != -1 ? requestUri.substring(index1) : "");
@@ -317,8 +309,7 @@ public class UrlPathHelper {
             int index = sanitized.indexOf("//");
             if (index < 0) {
                 break;
-            }
-            else {
+            } else {
                 sanitized = sanitized.substring(0, index) + sanitized.substring(index + 1);
             }
         }
@@ -456,8 +447,7 @@ public class UrlPathHelper {
         if ((request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE) != null) ||
                 (request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) != null)) {
             return (String) request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE);
-        }
-        else {
+        } else {
             return request.getQueryString();
         }
     }
@@ -499,8 +489,7 @@ public class UrlPathHelper {
         try {
             // decode
             return UriUtils.decode(source, enc);
-        }
-        catch (UnsupportedCharsetException ex) {
+        } catch (UnsupportedCharsetException ex) {
             if (logger.isWarnEnabled()) {
                 logger.warn("Could not decode request string [" + source + "] with encoding '" + enc +
                         "': falling back to platform default encoding; exception message: " + ex.getMessage());
@@ -575,8 +564,7 @@ public class UrlPathHelper {
     public Map<String, String> decodePathVariables(HttpServletRequest request, Map<String, String> vars) {
         if (this.urlDecode) {
             return vars;
-        }
-        else {
+        } else {
             Map<String, String> decodedVars = new LinkedHashMap<>(vars.size());
             vars.forEach((key, value) -> decodedVars.put(key, decodeInternal(request, value)));
             return decodedVars;
@@ -598,8 +586,7 @@ public class UrlPathHelper {
 
         if (this.urlDecode) {
             return vars;
-        }
-        else {
+        } else {
             MultiValueMap<String, String> decodedVars = new LinkedMultiValueMap<>(vars.size());
             vars.forEach((key, values) -> {
                 for (String value : values) {
@@ -628,8 +615,7 @@ public class UrlPathHelper {
                 Class<?> cl = classLoader.loadClass(className);
                 Properties prop = (Properties) cl.getMethod(methodName).invoke(null);
                 flag = Boolean.parseBoolean(prop.getProperty(propName));
-            }
-            catch (Throwable ex) {
+            } catch (Throwable ex) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Could not introspect WebSphere web container properties: " + ex);
                 }

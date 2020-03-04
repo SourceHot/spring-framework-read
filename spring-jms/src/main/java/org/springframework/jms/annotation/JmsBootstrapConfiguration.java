@@ -30,37 +30,40 @@ import org.springframework.jms.config.JmsListenerEndpointRegistry;
  *
  * <p>This configuration class is automatically imported when using the @{@link EnableJms}
  * annotation. See the {@link EnableJms} javadocs for complete usage details.
- *
- *
+ * <p>
+ * <p>
  * JMS 引导程序配置 创建bean对象
+ *
  * @author Stephane Nicoll
- * @since 4.1
  * @see JmsListenerAnnotationBeanPostProcessor
  * @see JmsListenerEndpointRegistry
  * @see EnableJms
+ * @since 4.1
  */
 @Configuration
 @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class JmsBootstrapConfiguration {
 
-	/**
-	 * jms 监听注解后处理, 将{@link JmsListener} 注册到{@link JmsListenerContainerFactory}
-	 * @return
-	 */
-	@Bean(name = JmsListenerConfigUtils.JMS_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME)
-	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-	public JmsListenerAnnotationBeanPostProcessor jmsListenerAnnotationProcessor() {
-		return new JmsListenerAnnotationBeanPostProcessor();
-	}
+    /**
+     * jms 监听注解后处理, 将{@link JmsListener} 注册到{@link JmsListenerContainerFactory}
+     *
+     * @return
+     */
+    @Bean(name = JmsListenerConfigUtils.JMS_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME)
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    public JmsListenerAnnotationBeanPostProcessor jmsListenerAnnotationProcessor() {
+        return new JmsListenerAnnotationBeanPostProcessor();
+    }
 
 
-	/**
-	 * JMS 监听注册
-	 * @return
-	 */
-	@Bean(name = JmsListenerConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME)
-	public JmsListenerEndpointRegistry defaultJmsListenerEndpointRegistry() {
-		return new JmsListenerEndpointRegistry();
-	}
+    /**
+     * JMS 监听注册
+     *
+     * @return
+     */
+    @Bean(name = JmsListenerConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME)
+    public JmsListenerEndpointRegistry defaultJmsListenerEndpointRegistry() {
+        return new JmsListenerEndpointRegistry();
+    }
 
 }

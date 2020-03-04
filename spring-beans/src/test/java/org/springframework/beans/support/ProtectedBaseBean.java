@@ -22,14 +22,14 @@ package org.springframework.beans.support;
  */
 class ProtectedBaseBean {
 
-	private String someProperty;
+    private String someProperty;
 
-	public void setSomeProperty(String someProperty) {
-		this.someProperty = someProperty;
-	}
+    public String getSomeProperty() {
+        return someProperty;
+    }
 
-	public String getSomeProperty() {
-		return someProperty;
-	}
+    public void setSomeProperty(String someProperty) {
+        this.someProperty = someProperty;
+    }
 
 }

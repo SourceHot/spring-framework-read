@@ -25,8 +25,8 @@ import org.springframework.tests.transaction.CallCountingTransactionManager;
 @SuppressWarnings("serial")
 public class NoSynchTransactionManager extends CallCountingTransactionManager {
 
-	public NoSynchTransactionManager() {
-		setTransactionSynchronization(CallCountingTransactionManager.SYNCHRONIZATION_NEVER);
-	}
+    public NoSynchTransactionManager() {
+        setTransactionSynchronization(CallCountingTransactionManager.SYNCHRONIZATION_NEVER);
+    }
 
 }

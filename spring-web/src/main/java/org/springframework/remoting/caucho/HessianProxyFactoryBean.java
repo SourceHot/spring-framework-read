@@ -33,41 +33,41 @@ import org.springframework.lang.Nullable;
  * For details, see the {@link HessianClientInterceptor} javadoc.
  *
  * @author Juergen Hoeller
- * @since 13.05.2003
  * @see #setServiceInterface
  * @see #setServiceUrl
  * @see HessianClientInterceptor
  * @see HessianServiceExporter
  * @see org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean
  * @see org.springframework.remoting.rmi.RmiProxyFactoryBean
+ * @since 13.05.2003
  */
 public class HessianProxyFactoryBean extends HessianClientInterceptor implements FactoryBean<Object> {
 
-	@Nullable
-	private Object serviceProxy;
+    @Nullable
+    private Object serviceProxy;
 
 
-	@Override
-	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
-		this.serviceProxy = new ProxyFactory(getServiceInterface(), this).getProxy(getBeanClassLoader());
-	}
+    @Override
+    public void afterPropertiesSet() {
+        super.afterPropertiesSet();
+        this.serviceProxy = new ProxyFactory(getServiceInterface(), this).getProxy(getBeanClassLoader());
+    }
 
 
-	@Override
-	@Nullable
-	public Object getObject() {
-		return this.serviceProxy;
-	}
+    @Override
+    @Nullable
+    public Object getObject() {
+        return this.serviceProxy;
+    }
 
-	@Override
-	public Class<?> getObjectType() {
-		return getServiceInterface();
-	}
+    @Override
+    public Class<?> getObjectType() {
+        return getServiceInterface();
+    }
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
+    @Override
+    public boolean isSingleton() {
+        return true;
+    }
 
 }

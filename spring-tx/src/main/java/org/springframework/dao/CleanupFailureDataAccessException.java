@@ -32,14 +32,15 @@ package org.springframework.dao;
 @SuppressWarnings("serial")
 public class CleanupFailureDataAccessException extends NonTransientDataAccessException {
 
-	/**
-	 * Constructor for CleanupFailureDataAccessException.
-	 * @param msg the detail message
-	 * @param cause the root cause from the underlying data access API,
-	 * such as JDBC
-	 */
-	public CleanupFailureDataAccessException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Constructor for CleanupFailureDataAccessException.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause from the underlying data access API,
+     *              such as JDBC
+     */
+    public CleanupFailureDataAccessException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

@@ -21,24 +21,24 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="DRIVERS_LICENSE")
+@Table(name = "DRIVERS_LICENSE")
 public class DriversLicense {
 
-	@Id
-	private int id;
+    @Id
+    private int id;
 
-	private String serial_number;
+    private String serial_number;
 
 
-	protected DriversLicense() {
-	}
+    protected DriversLicense() {
+    }
 
-	public DriversLicense(String serialNumber) {
-		this.serial_number = serialNumber;
-	}
+    public DriversLicense(String serialNumber) {
+        this.serial_number = serialNumber;
+    }
 
-	public String getSerialNumber() {
-		return serial_number;
-	}
+    public String getSerialNumber() {
+        return serial_number;
+    }
 
 }

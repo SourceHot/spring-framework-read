@@ -26,33 +26,37 @@ import java.sql.Driver;
  *
  * @author Keith Donald
  * @author Sam Brannen
- * @since 3.0
  * @see DataSourceFactory
+ * @since 3.0
  */
 public interface ConnectionProperties {
 
-	/**
-	 * Set the JDBC driver class to use to connect to the database.
-	 * @param driverClass the jdbc driver class
-	 */
-	void setDriverClass(Class<? extends Driver> driverClass);
+    /**
+     * Set the JDBC driver class to use to connect to the database.
+     *
+     * @param driverClass the jdbc driver class
+     */
+    void setDriverClass(Class<? extends Driver> driverClass);
 
-	/**
-	 * Set the JDBC connection URL for the database.
-	 * @param url the connection url
-	 */
-	void setUrl(String url);
+    /**
+     * Set the JDBC connection URL for the database.
+     *
+     * @param url the connection url
+     */
+    void setUrl(String url);
 
-	/**
-	 * Set the username to use to connect to the database.
-	 * @param username the username
-	 */
-	void setUsername(String username);
+    /**
+     * Set the username to use to connect to the database.
+     *
+     * @param username the username
+     */
+    void setUsername(String username);
 
-	/**
-	 * Set the password to use to connect to the database.
-	 * @param password the password
-	 */
-	void setPassword(String password);
+    /**
+     * Set the password to use to connect to the database.
+     *
+     * @param password the password
+     */
+    void setPassword(String password);
 
 }

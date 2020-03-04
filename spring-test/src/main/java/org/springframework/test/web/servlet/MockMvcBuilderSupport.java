@@ -16,15 +16,14 @@
 
 package org.springframework.test.web.servlet;
 
-import java.util.List;
-
-import javax.servlet.Filter;
-import javax.servlet.ServletException;
-
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.web.context.WebApplicationContext;
+
+import javax.servlet.Filter;
+import javax.servlet.ServletException;
+import java.util.List;
 
 /**
  * Base class for MockMvc builder implementations, providing the capability to
@@ -40,44 +39,43 @@ import org.springframework.web.context.WebApplicationContext;
  * @since 3.2
  */
 public abstract class MockMvcBuilderSupport {
-	/**
-	 * 构造 MockMvc 的方法
-	 */
-	protected final MockMvc createMockMvc(Filter[] filters, MockServletConfig servletConfig,
-			WebApplicationContext webAppContext, @Nullable RequestBuilder defaultRequestBuilder,
-			List<ResultMatcher> globalResultMatchers, List<ResultHandler> globalResultHandlers,
-			@Nullable List<DispatcherServletCustomizer> dispatcherServletCustomizers) {
+    /**
+     * 构造 MockMvc 的方法
+     */
+    protected final MockMvc createMockMvc(Filter[] filters, MockServletConfig servletConfig,
+                                          WebApplicationContext webAppContext, @Nullable RequestBuilder defaultRequestBuilder,
+                                          List<ResultMatcher> globalResultMatchers, List<ResultHandler> globalResultHandlers,
+                                          @Nullable List<DispatcherServletCustomizer> dispatcherServletCustomizers) {
 
-		// 创建 DispatcherServlet
-		TestDispatcherServlet dispatcherServlet = new TestDispatcherServlet(webAppContext);
-		if (dispatcherServletCustomizers != null) {
-			for (DispatcherServletCustomizer customizers : dispatcherServletCustomizers) {
-				customizers.customize(dispatcherServlet);
-			}
-		}
-		try {
-			dispatcherServlet.init(servletConfig);
-		}
-		catch (ServletException ex) {
-			// should never happen..
-			throw new MockMvcBuildException("Failed to initialize TestDispatcherServlet", ex);
-		}
+        // 创建 DispatcherServlet
+        TestDispatcherServlet dispatcherServlet = new TestDispatcherServlet(webAppContext);
+        if (dispatcherServletCustomizers != null) {
+            for (DispatcherServletCustomizer customizers : dispatcherServletCustomizers) {
+                customizers.customize(dispatcherServlet);
+            }
+        }
+        try {
+            dispatcherServlet.init(servletConfig);
+        } catch (ServletException ex) {
+            // should never happen..
+            throw new MockMvcBuildException("Failed to initialize TestDispatcherServlet", ex);
+        }
 
-		MockMvc mockMvc = new MockMvc(dispatcherServlet, filters);
-		mockMvc.setDefaultRequest(defaultRequestBuilder);
-		mockMvc.setGlobalResultMatchers(globalResultMatchers);
-		mockMvc.setGlobalResultHandlers(globalResultHandlers);
+        MockMvc mockMvc = new MockMvc(dispatcherServlet, filters);
+        mockMvc.setDefaultRequest(defaultRequestBuilder);
+        mockMvc.setGlobalResultMatchers(globalResultMatchers);
+        mockMvc.setGlobalResultHandlers(globalResultHandlers);
 
-		return mockMvc;
-	}
+        return mockMvc;
+    }
 
 
-	@SuppressWarnings("serial")
-	private static class MockMvcBuildException extends NestedRuntimeException {
+    @SuppressWarnings("serial")
+    private static class MockMvcBuildException extends NestedRuntimeException {
 
-		public MockMvcBuildException(String msg, Throwable cause) {
-			super(msg, cause);
-		}
-	}
+        public MockMvcBuildException(String msg, Throwable cause) {
+            super(msg, cause);
+        }
+    }
 
 }

@@ -16,12 +16,17 @@
 
 package org.springframework.beans;
 
-import java.util.Iterator;
-
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import java.util.Iterator;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests for {@link MutablePropertyValues}.
@@ -32,125 +37,124 @@ import static org.junit.Assert.*;
  */
 public class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
 
-	@Test
-	public void testValid() {
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("forname", "Tony"));
-		pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
-		pvs.addPropertyValue(new PropertyValue("age", "50"));
-		doTestTony(pvs);
+    @Test
+    public void testValid() {
+        MutablePropertyValues pvs = new MutablePropertyValues();
+        pvs.addPropertyValue(new PropertyValue("forname", "Tony"));
+        pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
+        pvs.addPropertyValue(new PropertyValue("age", "50"));
+        doTestTony(pvs);
 
-		MutablePropertyValues deepCopy = new MutablePropertyValues(pvs);
-		doTestTony(deepCopy);
-		deepCopy.setPropertyValueAt(new PropertyValue("name", "Gordon"), 0);
-		doTestTony(pvs);
-		assertEquals("Gordon", deepCopy.getPropertyValue("name").getValue());
-	}
+        MutablePropertyValues deepCopy = new MutablePropertyValues(pvs);
+        doTestTony(deepCopy);
+        deepCopy.setPropertyValueAt(new PropertyValue("name", "Gordon"), 0);
+        doTestTony(pvs);
+        assertEquals("Gordon", deepCopy.getPropertyValue("name").getValue());
+    }
 
-	@Test
-	public void testAddOrOverride() {
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("forname", "Tony"));
-		pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
-		pvs.addPropertyValue(new PropertyValue("age", "50"));
-		doTestTony(pvs);
-		PropertyValue addedPv = new PropertyValue("rod", "Rod");
-		pvs.addPropertyValue(addedPv);
-		assertTrue(pvs.getPropertyValue("rod").equals(addedPv));
-		PropertyValue changedPv = new PropertyValue("forname", "Greg");
-		pvs.addPropertyValue(changedPv);
-		assertTrue(pvs.getPropertyValue("forname").equals(changedPv));
-	}
+    @Test
+    public void testAddOrOverride() {
+        MutablePropertyValues pvs = new MutablePropertyValues();
+        pvs.addPropertyValue(new PropertyValue("forname", "Tony"));
+        pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
+        pvs.addPropertyValue(new PropertyValue("age", "50"));
+        doTestTony(pvs);
+        PropertyValue addedPv = new PropertyValue("rod", "Rod");
+        pvs.addPropertyValue(addedPv);
+        assertTrue(pvs.getPropertyValue("rod").equals(addedPv));
+        PropertyValue changedPv = new PropertyValue("forname", "Greg");
+        pvs.addPropertyValue(changedPv);
+        assertTrue(pvs.getPropertyValue("forname").equals(changedPv));
+    }
 
-	@Test
-	public void testChangesOnEquals() {
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("forname", "Tony"));
-		pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
-		pvs.addPropertyValue(new PropertyValue("age", "50"));
-		MutablePropertyValues pvs2 = pvs;
-		PropertyValues changes = pvs2.changesSince(pvs);
-		assertTrue("changes are empty", changes.getPropertyValues().length == 0);
-	}
+    @Test
+    public void testChangesOnEquals() {
+        MutablePropertyValues pvs = new MutablePropertyValues();
+        pvs.addPropertyValue(new PropertyValue("forname", "Tony"));
+        pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
+        pvs.addPropertyValue(new PropertyValue("age", "50"));
+        MutablePropertyValues pvs2 = pvs;
+        PropertyValues changes = pvs2.changesSince(pvs);
+        assertTrue("changes are empty", changes.getPropertyValues().length == 0);
+    }
 
-	@Test
-	public void testChangeOfOneField() {
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("forname", "Tony"));
-		pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
-		pvs.addPropertyValue(new PropertyValue("age", "50"));
+    @Test
+    public void testChangeOfOneField() {
+        MutablePropertyValues pvs = new MutablePropertyValues();
+        pvs.addPropertyValue(new PropertyValue("forname", "Tony"));
+        pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
+        pvs.addPropertyValue(new PropertyValue("age", "50"));
 
-		MutablePropertyValues pvs2 = new MutablePropertyValues(pvs);
-		PropertyValues changes = pvs2.changesSince(pvs);
-		assertTrue("changes are empty, not of length " + changes.getPropertyValues().length,
-				changes.getPropertyValues().length == 0);
+        MutablePropertyValues pvs2 = new MutablePropertyValues(pvs);
+        PropertyValues changes = pvs2.changesSince(pvs);
+        assertTrue("changes are empty, not of length " + changes.getPropertyValues().length,
+                changes.getPropertyValues().length == 0);
 
-		pvs2.addPropertyValue(new PropertyValue("forname", "Gordon"));
-		changes = pvs2.changesSince(pvs);
-		assertEquals("1 change", 1, changes.getPropertyValues().length);
-		PropertyValue fn = changes.getPropertyValue("forname");
-		assertTrue("change is forname", fn != null);
-		assertTrue("new value is gordon", fn.getValue().equals("Gordon"));
+        pvs2.addPropertyValue(new PropertyValue("forname", "Gordon"));
+        changes = pvs2.changesSince(pvs);
+        assertEquals("1 change", 1, changes.getPropertyValues().length);
+        PropertyValue fn = changes.getPropertyValue("forname");
+        assertTrue("change is forname", fn != null);
+        assertTrue("new value is gordon", fn.getValue().equals("Gordon"));
 
-		MutablePropertyValues pvs3 = new MutablePropertyValues(pvs);
-		changes = pvs3.changesSince(pvs);
-		assertTrue("changes are empty, not of length " + changes.getPropertyValues().length,
-				changes.getPropertyValues().length == 0);
+        MutablePropertyValues pvs3 = new MutablePropertyValues(pvs);
+        changes = pvs3.changesSince(pvs);
+        assertTrue("changes are empty, not of length " + changes.getPropertyValues().length,
+                changes.getPropertyValues().length == 0);
 
-		// add new
-		pvs3.addPropertyValue(new PropertyValue("foo", "bar"));
-		pvs3.addPropertyValue(new PropertyValue("fi", "fum"));
-		changes = pvs3.changesSince(pvs);
-		assertTrue("2 change", changes.getPropertyValues().length == 2);
-		fn = changes.getPropertyValue("foo");
-		assertTrue("change in foo", fn != null);
-		assertTrue("new value is bar", fn.getValue().equals("bar"));
-	}
+        // add new
+        pvs3.addPropertyValue(new PropertyValue("foo", "bar"));
+        pvs3.addPropertyValue(new PropertyValue("fi", "fum"));
+        changes = pvs3.changesSince(pvs);
+        assertTrue("2 change", changes.getPropertyValues().length == 2);
+        fn = changes.getPropertyValue("foo");
+        assertTrue("change in foo", fn != null);
+        assertTrue("new value is bar", fn.getValue().equals("bar"));
+    }
 
-	@Test
-	public void iteratorContainsPropertyValue() {
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("foo", "bar");
+    @Test
+    public void iteratorContainsPropertyValue() {
+        MutablePropertyValues pvs = new MutablePropertyValues();
+        pvs.add("foo", "bar");
 
-		Iterator<PropertyValue> it = pvs.iterator();
-		assertTrue(it.hasNext());
-		PropertyValue pv = it.next();
-		assertEquals("foo", pv.getName());
-		assertEquals("bar", pv.getValue());
+        Iterator<PropertyValue> it = pvs.iterator();
+        assertTrue(it.hasNext());
+        PropertyValue pv = it.next();
+        assertEquals("foo", pv.getName());
+        assertEquals("bar", pv.getValue());
 
-		try {
-			it.remove();
-			fail("Should have thrown UnsupportedOperationException");
-		}
-		catch (UnsupportedOperationException ex) {
-			// expected
-		}
-		assertFalse(it.hasNext());
-	}
+        try {
+            it.remove();
+            fail("Should have thrown UnsupportedOperationException");
+        } catch (UnsupportedOperationException ex) {
+            // expected
+        }
+        assertFalse(it.hasNext());
+    }
 
-	@Test
-	public void iteratorIsEmptyForEmptyValues() {
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		Iterator<PropertyValue> it = pvs.iterator();
-		assertFalse(it.hasNext());
-	}
+    @Test
+    public void iteratorIsEmptyForEmptyValues() {
+        MutablePropertyValues pvs = new MutablePropertyValues();
+        Iterator<PropertyValue> it = pvs.iterator();
+        assertFalse(it.hasNext());
+    }
 
-	@Test
-	public void streamContainsPropertyValue() {
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("foo", "bar");
+    @Test
+    public void streamContainsPropertyValue() {
+        MutablePropertyValues pvs = new MutablePropertyValues();
+        pvs.add("foo", "bar");
 
-		assertThat(pvs.stream(), notNullValue());
-		assertThat(pvs.stream().count(), is(1L));
-		assertThat(pvs.stream().anyMatch(pv -> "foo".equals(pv.getName()) && "bar".equals(pv.getValue())), is(true));
-		assertThat(pvs.stream().anyMatch(pv -> "bar".equals(pv.getName()) && "foo".equals(pv.getValue())), is(false));
-	}
+        assertThat(pvs.stream(), notNullValue());
+        assertThat(pvs.stream().count(), is(1L));
+        assertThat(pvs.stream().anyMatch(pv -> "foo".equals(pv.getName()) && "bar".equals(pv.getValue())), is(true));
+        assertThat(pvs.stream().anyMatch(pv -> "bar".equals(pv.getName()) && "foo".equals(pv.getValue())), is(false));
+    }
 
-	@Test
-	public void streamIsEmptyForEmptyValues() {
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		assertThat(pvs.stream(), notNullValue());
-		assertThat(pvs.stream().count(), is(0L));
-	}
+    @Test
+    public void streamIsEmptyForEmptyValues() {
+        MutablePropertyValues pvs = new MutablePropertyValues();
+        assertThat(pvs.stream(), notNullValue());
+        assertThat(pvs.stream().count(), is(0L));
+    }
 
 }

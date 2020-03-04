@@ -16,20 +16,21 @@
 
 package org.springframework.http.server;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.FileCopyUtils;
 
-import static org.junit.Assert.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma
@@ -38,65 +39,65 @@ import static org.junit.Assert.*;
  */
 public class ServletServerHttpResponseTests {
 
-	private ServletServerHttpResponse response;
+    private ServletServerHttpResponse response;
 
-	private MockHttpServletResponse mockResponse;
-
-
-	@Before
-	public void create() throws Exception {
-		mockResponse = new MockHttpServletResponse();
-		response = new ServletServerHttpResponse(mockResponse);
-	}
+    private MockHttpServletResponse mockResponse;
 
 
-	@Test
-	public void setStatusCode() throws Exception {
-		response.setStatusCode(HttpStatus.NOT_FOUND);
-		assertEquals("Invalid status code", 404, mockResponse.getStatus());
-	}
+    @Before
+    public void create() throws Exception {
+        mockResponse = new MockHttpServletResponse();
+        response = new ServletServerHttpResponse(mockResponse);
+    }
 
-	@Test
-	public void getHeaders() throws Exception {
-		HttpHeaders headers = response.getHeaders();
-		String headerName = "MyHeader";
-		String headerValue1 = "value1";
-		headers.add(headerName, headerValue1);
-		String headerValue2 = "value2";
-		headers.add(headerName, headerValue2);
-		headers.setContentType(new MediaType("text", "plain", StandardCharsets.UTF_8));
 
-		response.close();
-		assertTrue("Header not set", mockResponse.getHeaderNames().contains(headerName));
-		List<String> headerValues = mockResponse.getHeaders(headerName);
-		assertTrue("Header not set", headerValues.contains(headerValue1));
-		assertTrue("Header not set", headerValues.contains(headerValue2));
-		assertEquals("Invalid Content-Type", "text/plain;charset=UTF-8", mockResponse.getHeader("Content-Type"));
-		assertEquals("Invalid Content-Type", "text/plain;charset=UTF-8", mockResponse.getContentType());
-		assertEquals("Invalid Content-Type", "UTF-8", mockResponse.getCharacterEncoding());
-	}
+    @Test
+    public void setStatusCode() throws Exception {
+        response.setStatusCode(HttpStatus.NOT_FOUND);
+        assertEquals("Invalid status code", 404, mockResponse.getStatus());
+    }
 
-	@Test
-	public void preExistingHeadersFromHttpServletResponse() {
-		String headerName = "Access-Control-Allow-Origin";
-		String headerValue = "localhost:8080";
+    @Test
+    public void getHeaders() throws Exception {
+        HttpHeaders headers = response.getHeaders();
+        String headerName = "MyHeader";
+        String headerValue1 = "value1";
+        headers.add(headerName, headerValue1);
+        String headerValue2 = "value2";
+        headers.add(headerName, headerValue2);
+        headers.setContentType(new MediaType("text", "plain", StandardCharsets.UTF_8));
 
-		this.mockResponse.addHeader(headerName, headerValue);
-		this.response = new ServletServerHttpResponse(this.mockResponse);
+        response.close();
+        assertTrue("Header not set", mockResponse.getHeaderNames().contains(headerName));
+        List<String> headerValues = mockResponse.getHeaders(headerName);
+        assertTrue("Header not set", headerValues.contains(headerValue1));
+        assertTrue("Header not set", headerValues.contains(headerValue2));
+        assertEquals("Invalid Content-Type", "text/plain;charset=UTF-8", mockResponse.getHeader("Content-Type"));
+        assertEquals("Invalid Content-Type", "text/plain;charset=UTF-8", mockResponse.getContentType());
+        assertEquals("Invalid Content-Type", "UTF-8", mockResponse.getCharacterEncoding());
+    }
 
-		assertEquals(headerValue, this.response.getHeaders().getFirst(headerName));
-		assertEquals(Collections.singletonList(headerValue), this.response.getHeaders().get(headerName));
-		assertTrue(this.response.getHeaders().containsKey(headerName));
-		assertEquals(headerValue, this.response.getHeaders().getFirst(headerName));
-		assertEquals(headerValue, this.response.getHeaders().getAccessControlAllowOrigin());
-	}
+    @Test
+    public void preExistingHeadersFromHttpServletResponse() {
+        String headerName = "Access-Control-Allow-Origin";
+        String headerValue = "localhost:8080";
 
-	@Test
-	public void getBody() throws Exception {
-		byte[] content = "Hello World".getBytes("UTF-8");
-		FileCopyUtils.copy(content, response.getBody());
+        this.mockResponse.addHeader(headerName, headerValue);
+        this.response = new ServletServerHttpResponse(this.mockResponse);
 
-		assertArrayEquals("Invalid content written", content, mockResponse.getContentAsByteArray());
-	}
+        assertEquals(headerValue, this.response.getHeaders().getFirst(headerName));
+        assertEquals(Collections.singletonList(headerValue), this.response.getHeaders().get(headerName));
+        assertTrue(this.response.getHeaders().containsKey(headerName));
+        assertEquals(headerValue, this.response.getHeaders().getFirst(headerName));
+        assertEquals(headerValue, this.response.getHeaders().getAccessControlAllowOrigin());
+    }
+
+    @Test
+    public void getBody() throws Exception {
+        byte[] content = "Hello World".getBytes("UTF-8");
+        FileCopyUtils.copy(content, response.getBody());
+
+        assertArrayEquals("Invalid content written", content, mockResponse.getContentAsByteArray());
+    }
 
 }

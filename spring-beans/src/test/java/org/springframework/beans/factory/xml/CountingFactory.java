@@ -24,45 +24,44 @@ import org.springframework.tests.sample.beans.TestBean;
  */
 public class CountingFactory implements FactoryBean {
 
-	private static int factoryBeanInstanceCount = 0;
+    private static int factoryBeanInstanceCount = 0;
 
 
-	/**
-	 * Clear static state.
-	 */
-	public static void reset() {
-		factoryBeanInstanceCount = 0;
-	}
+    public CountingFactory() {
+        factoryBeanInstanceCount++;
+    }
 
-	public static int getFactoryBeanInstanceCount() {
-		return factoryBeanInstanceCount;
-	}
+    /**
+     * Clear static state.
+     */
+    public static void reset() {
+        factoryBeanInstanceCount = 0;
+    }
+
+    public static int getFactoryBeanInstanceCount() {
+        return factoryBeanInstanceCount;
+    }
+
+    public void setTestBean(TestBean tb) {
+        if (tb.getSpouse() == null) {
+            throw new IllegalStateException("TestBean needs to have spouse");
+        }
+    }
 
 
-	public CountingFactory() {
-		factoryBeanInstanceCount++;
-	}
+    @Override
+    public Object getObject() {
+        return "myString";
+    }
 
-	public void setTestBean(TestBean tb) {
-		if (tb.getSpouse() == null) {
-			throw new IllegalStateException("TestBean needs to have spouse");
-		}
-	}
+    @Override
+    public Class getObjectType() {
+        return String.class;
+    }
 
-
-	@Override
-	public Object getObject() {
-		return "myString";
-	}
-
-	@Override
-	public Class getObjectType() {
-		return String.class;
-	}
-
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
+    @Override
+    public boolean isSingleton() {
+        return true;
+    }
 
 }

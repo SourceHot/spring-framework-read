@@ -26,22 +26,22 @@ package org.springframework.web.bind.support;
  * annotation).
  *
  * @author Juergen Hoeller
- * @since 2.5
  * @see org.springframework.web.bind.annotation.RequestMapping
  * @see org.springframework.web.bind.annotation.SessionAttributes
+ * @since 2.5
  */
 public interface SessionStatus {
 
-	/**
-	 * Mark the current handler's session processing as complete, allowing for
-	 * cleanup of session attributes.
-	 */
-	void setComplete();
+    /**
+     * Mark the current handler's session processing as complete, allowing for
+     * cleanup of session attributes.
+     */
+    void setComplete();
 
-	/**
-	 * Return whether the current handler's session processing has been marked
-	 * as complete.
-	 */
-	boolean isComplete();
+    /**
+     * Return whether the current handler's session processing has been marked
+     * as complete.
+     */
+    boolean isComplete();
 
 }

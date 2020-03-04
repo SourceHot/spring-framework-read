@@ -16,10 +16,10 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.springframework.tests.sample.beans.TestBean;
+
 import java.util.Collections;
 import java.util.List;
-
-import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * Test class for Spring's ability to create objects using static
@@ -30,101 +30,99 @@ import org.springframework.tests.sample.beans.TestBean;
  */
 public class FactoryMethods {
 
-	public static FactoryMethods nullInstance() {
-		return null;
-	}
+    private int num = 0;
+    private String name = "default";
+    private TestBean tb;
+    private String stringValue;
 
-	public static FactoryMethods defaultInstance() {
-		TestBean tb = new TestBean();
-		tb.setName("defaultInstance");
-		return new FactoryMethods(tb, "default", 0);
-	}
+    /**
+     * Constructor is private: not for use outside this class,
+     * even by IoC container.
+     */
+    private FactoryMethods(TestBean tb, String name, int num) {
+        this.tb = tb;
+        this.name = name;
+        this.num = num;
+    }
 
-	/**
-	 * Note that overloaded methods are supported.
-	 */
-	public static FactoryMethods newInstance(TestBean tb) {
-		return new FactoryMethods(tb, "default", 0);
-	}
+    public static FactoryMethods nullInstance() {
+        return null;
+    }
 
-	protected static FactoryMethods newInstance(TestBean tb, int num, String name) {
-		if (name == null) {
-			throw new IllegalStateException("Should never be called with null value");
-		}
-		return new FactoryMethods(tb, name, num);
-	}
+    public static FactoryMethods defaultInstance() {
+        TestBean tb = new TestBean();
+        tb.setName("defaultInstance");
+        return new FactoryMethods(tb, "default", 0);
+    }
 
-	static ExtendedFactoryMethods newInstance(TestBean tb, int num, Integer something) {
-		if (something != null) {
-			throw new IllegalStateException("Should never be called with non-null value");
-		}
-		return new ExtendedFactoryMethods(tb, null, num);
-	}
+    /**
+     * Note that overloaded methods are supported.
+     */
+    public static FactoryMethods newInstance(TestBean tb) {
+        return new FactoryMethods(tb, "default", 0);
+    }
 
-	@SuppressWarnings("unused")
-	private static List listInstance() {
-		return Collections.EMPTY_LIST;
-	}
+    protected static FactoryMethods newInstance(TestBean tb, int num, String name) {
+        if (name == null) {
+            throw new IllegalStateException("Should never be called with null value");
+        }
+        return new FactoryMethods(tb, name, num);
+    }
 
+    static ExtendedFactoryMethods newInstance(TestBean tb, int num, Integer something) {
+        if (something != null) {
+            throw new IllegalStateException("Should never be called with non-null value");
+        }
+        return new ExtendedFactoryMethods(tb, null, num);
+    }
 
-	private int num = 0;
-	private String name = "default";
-	private TestBean tb;
-	private String stringValue;
+    @SuppressWarnings("unused")
+    private static List listInstance() {
+        return Collections.EMPTY_LIST;
+    }
 
+    public String getStringValue() {
+        return this.stringValue;
+    }
 
-	/**
-	 * Constructor is private: not for use outside this class,
-	 * even by IoC container.
-	 */
-	private FactoryMethods(TestBean tb, String name, int num) {
-		this.tb = tb;
-		this.name = name;
-		this.num = num;
-	}
+    public void setStringValue(String stringValue) {
+        this.stringValue = stringValue;
+    }
 
-	public void setStringValue(String stringValue) {
-		this.stringValue = stringValue;
-	}
+    public TestBean getTestBean() {
+        return this.tb;
+    }
 
-	public String getStringValue() {
-		return this.stringValue;
-	}
+    protected TestBean protectedGetTestBean() {
+        return this.tb;
+    }
 
-	public TestBean getTestBean() {
-		return this.tb;
-	}
+    @SuppressWarnings("unused")
+    private TestBean privateGetTestBean() {
+        return this.tb;
+    }
 
-	protected TestBean protectedGetTestBean() {
-		return this.tb;
-	}
+    public int getNum() {
+        return num;
+    }
 
-	@SuppressWarnings("unused")
-	private TestBean privateGetTestBean() {
-		return this.tb;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public int getNum() {
-		return num;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * Set via Setter Injection once instance is created.
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * Set via Setter Injection once instance is created.
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
 
-	public static class ExtendedFactoryMethods extends FactoryMethods {
+    public static class ExtendedFactoryMethods extends FactoryMethods {
 
-		ExtendedFactoryMethods(TestBean tb, String name, int num) {
-			super(tb, name, num);
-		}
-	}
+        ExtendedFactoryMethods(TestBean tb, String name, int num) {
+            super(tb, name, num);
+        }
+    }
 
 }

@@ -29,9 +29,9 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @ContextConfiguration(classes = Config.class)
 interface WebAppConfigurationTestInterface {
 
-	@Configuration
-	static class Config {
-		/* no user beans required for these tests */
-	}
+    @Configuration
+    static class Config {
+        /* no user beans required for these tests */
+    }
 
 }

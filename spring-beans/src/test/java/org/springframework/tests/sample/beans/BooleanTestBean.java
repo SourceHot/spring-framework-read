@@ -23,24 +23,24 @@ package org.springframework.tests.sample.beans;
  */
 public class BooleanTestBean {
 
-	private boolean bool1;
+    private boolean bool1;
 
-	private Boolean bool2;
+    private Boolean bool2;
 
-	public boolean isBool1() {
-		return bool1;
-	}
+    public boolean isBool1() {
+        return bool1;
+    }
 
-	public void setBool1(boolean bool1) {
-		this.bool1 = bool1;
-	}
+    public void setBool1(boolean bool1) {
+        this.bool1 = bool1;
+    }
 
-	public Boolean getBool2() {
-		return bool2;
-	}
+    public Boolean getBool2() {
+        return bool2;
+    }
 
-	public void setBool2(Boolean bool2) {
-		this.bool2 = bool2;
-	}
+    public void setBool2(Boolean bool2) {
+        this.bool2 = bool2;
+    }
 
 }

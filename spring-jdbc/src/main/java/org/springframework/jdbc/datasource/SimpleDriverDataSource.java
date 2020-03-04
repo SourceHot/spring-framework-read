@@ -16,14 +16,14 @@
 
 package org.springframework.jdbc.datasource;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Properties;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Simple implementation of the standard JDBC {@link javax.sql.DataSource} interface,
@@ -48,99 +48,103 @@ import org.springframework.util.Assert;
  * plus specific settings (such as minimal/maximal pool size etc).
  *
  * @author Juergen Hoeller
- * @since 2.5.5
  * @see DriverManagerDataSource
+ * @since 2.5.5
  */
 public class SimpleDriverDataSource extends AbstractDriverBasedDataSource {
 
-	@Nullable
-	private Driver driver;
+    @Nullable
+    private Driver driver;
 
 
-	/**
-	 * Constructor for bean-style configuration.
-	 */
-	public SimpleDriverDataSource() {
-	}
+    /**
+     * Constructor for bean-style configuration.
+     */
+    public SimpleDriverDataSource() {
+    }
 
-	/**
-	 * Create a new DriverManagerDataSource with the given standard Driver parameters.
-	 * @param driver the JDBC Driver object
-	 * @param url the JDBC URL to use for accessing the DriverManager
-	 * @see java.sql.Driver#connect(String, java.util.Properties)
-	 */
-	public SimpleDriverDataSource(Driver driver, String url) {
-		setDriver(driver);
-		setUrl(url);
-	}
+    /**
+     * Create a new DriverManagerDataSource with the given standard Driver parameters.
+     *
+     * @param driver the JDBC Driver object
+     * @param url    the JDBC URL to use for accessing the DriverManager
+     * @see java.sql.Driver#connect(String, java.util.Properties)
+     */
+    public SimpleDriverDataSource(Driver driver, String url) {
+        setDriver(driver);
+        setUrl(url);
+    }
 
-	/**
-	 * Create a new DriverManagerDataSource with the given standard Driver parameters.
-	 * @param driver the JDBC Driver object
-	 * @param url the JDBC URL to use for accessing the DriverManager
-	 * @param username the JDBC username to use for accessing the DriverManager
-	 * @param password the JDBC password to use for accessing the DriverManager
-	 * @see java.sql.Driver#connect(String, java.util.Properties)
-	 */
-	public SimpleDriverDataSource(Driver driver, String url, String username, String password) {
-		setDriver(driver);
-		setUrl(url);
-		setUsername(username);
-		setPassword(password);
-	}
+    /**
+     * Create a new DriverManagerDataSource with the given standard Driver parameters.
+     *
+     * @param driver   the JDBC Driver object
+     * @param url      the JDBC URL to use for accessing the DriverManager
+     * @param username the JDBC username to use for accessing the DriverManager
+     * @param password the JDBC password to use for accessing the DriverManager
+     * @see java.sql.Driver#connect(String, java.util.Properties)
+     */
+    public SimpleDriverDataSource(Driver driver, String url, String username, String password) {
+        setDriver(driver);
+        setUrl(url);
+        setUsername(username);
+        setPassword(password);
+    }
 
-	/**
-	 * Create a new DriverManagerDataSource with the given standard Driver parameters.
-	 * @param driver the JDBC Driver object
-	 * @param url the JDBC URL to use for accessing the DriverManager
-	 * @param conProps the JDBC connection properties
-	 * @see java.sql.Driver#connect(String, java.util.Properties)
-	 */
-	public SimpleDriverDataSource(Driver driver, String url, Properties conProps) {
-		setDriver(driver);
-		setUrl(url);
-		setConnectionProperties(conProps);
-	}
-
-
-	/**
-	 * Specify the JDBC Driver implementation class to use.
-	 * <p>An instance of this Driver class will be created and held
-	 * within the SimpleDriverDataSource.
-	 * @see #setDriver
-	 */
-	public void setDriverClass(Class<? extends Driver> driverClass) {
-		this.driver = BeanUtils.instantiateClass(driverClass);
-	}
-
-	/**
-	 * Specify the JDBC Driver instance to use.
-	 * <p>This allows for passing in a shared, possibly pre-configured
-	 * Driver instance.
-	 * @see #setDriverClass
-	 */
-	public void setDriver(@Nullable Driver driver) {
-		this.driver = driver;
-	}
-
-	/**
-	 * Return the JDBC Driver instance to use.
-	 */
-	@Nullable
-	public Driver getDriver() {
-		return this.driver;
-	}
+    /**
+     * Create a new DriverManagerDataSource with the given standard Driver parameters.
+     *
+     * @param driver   the JDBC Driver object
+     * @param url      the JDBC URL to use for accessing the DriverManager
+     * @param conProps the JDBC connection properties
+     * @see java.sql.Driver#connect(String, java.util.Properties)
+     */
+    public SimpleDriverDataSource(Driver driver, String url, Properties conProps) {
+        setDriver(driver);
+        setUrl(url);
+        setConnectionProperties(conProps);
+    }
 
 
-	@Override
-	protected Connection getConnectionFromDriver(Properties props) throws SQLException {
-		Driver driver = getDriver();
-		String url = getUrl();
-		Assert.notNull(driver, "Driver must not be null");
-		if (logger.isDebugEnabled()) {
-			logger.debug("Creating new JDBC Driver Connection to [" + url + "]");
-		}
-		return driver.connect(url, props);
-	}
+    /**
+     * Specify the JDBC Driver implementation class to use.
+     * <p>An instance of this Driver class will be created and held
+     * within the SimpleDriverDataSource.
+     *
+     * @see #setDriver
+     */
+    public void setDriverClass(Class<? extends Driver> driverClass) {
+        this.driver = BeanUtils.instantiateClass(driverClass);
+    }
+
+    /**
+     * Return the JDBC Driver instance to use.
+     */
+    @Nullable
+    public Driver getDriver() {
+        return this.driver;
+    }
+
+    /**
+     * Specify the JDBC Driver instance to use.
+     * <p>This allows for passing in a shared, possibly pre-configured
+     * Driver instance.
+     *
+     * @see #setDriverClass
+     */
+    public void setDriver(@Nullable Driver driver) {
+        this.driver = driver;
+    }
+
+    @Override
+    protected Connection getConnectionFromDriver(Properties props) throws SQLException {
+        Driver driver = getDriver();
+        String url = getUrl();
+        Assert.notNull(driver, "Driver must not be null");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Creating new JDBC Driver Connection to [" + url + "]");
+        }
+        return driver.connect(url, props);
+    }
 
 }

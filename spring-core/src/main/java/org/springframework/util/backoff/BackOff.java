@@ -35,21 +35,22 @@ package org.springframework.util.backoff;
  *     // retry operation
  * }
  * }</pre>
- *
+ * <p>
  * Once the underlying operation has completed successfully,
  * the execution instance can be simply discarded.
  *
  * @author Stephane Nicoll
- * @since 4.1
  * @see BackOffExecution
+ * @since 4.1
  */
 @FunctionalInterface
 public interface BackOff {
 
-	/**
-	 * Start a new back off execution.
-	 * @return a fresh {@link BackOffExecution} ready to be used
-	 */
-	BackOffExecution start();
+    /**
+     * Start a new back off execution.
+     *
+     * @return a fresh {@link BackOffExecution} ready to be used
+     */
+    BackOffExecution start();
 
 }

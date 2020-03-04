@@ -16,12 +16,12 @@
 
 package org.springframework.web.servlet.tags;
 
+import org.springframework.lang.Nullable;
+import org.springframework.validation.Errors;
+
 import javax.servlet.ServletException;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
-
-import org.springframework.lang.Nullable;
-import org.springframework.validation.Errors;
 
 /**
  * This {@code <hasBindErrors>} tag provides an {@link Errors} instance in case of
@@ -66,65 +66,62 @@ import org.springframework.validation.Errors;
 @SuppressWarnings("serial")
 public class BindErrorsTag extends HtmlEscapingAwareTag {
 
-	/**
-	 * Page context attribute containing {@link Errors}.
-	 */
-	public static final String ERRORS_VARIABLE_NAME = "errors";
+    /**
+     * Page context attribute containing {@link Errors}.
+     */
+    public static final String ERRORS_VARIABLE_NAME = "errors";
 
 
-	private String name = "";
+    private String name = "";
 
-	@Nullable
-	private Errors errors;
+    @Nullable
+    private Errors errors;
 
+    /**
+     * Return the name of the bean that this tag checks.
+     */
+    public String getName() {
+        return this.name;
+    }
 
-	/**
-	 * Set the name of the bean that this tag should check.
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * Set the name of the bean that this tag should check.
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * Return the name of the bean that this tag checks.
-	 */
-	public String getName() {
-		return this.name;
-	}
+    @Override
+    protected final int doStartTagInternal() throws ServletException, JspException {
+        this.errors = getRequestContext().getErrors(this.name, isHtmlEscape());
+        if (this.errors != null && this.errors.hasErrors()) {
+            this.pageContext.setAttribute(ERRORS_VARIABLE_NAME, this.errors, PageContext.REQUEST_SCOPE);
+            return EVAL_BODY_INCLUDE;
+        } else {
+            return SKIP_BODY;
+        }
+    }
 
+    @Override
+    public int doEndTag() {
+        this.pageContext.removeAttribute(ERRORS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+        return EVAL_PAGE;
+    }
 
-	@Override
-	protected final int doStartTagInternal() throws ServletException, JspException {
-		this.errors = getRequestContext().getErrors(this.name, isHtmlEscape());
-		if (this.errors != null && this.errors.hasErrors()) {
-			this.pageContext.setAttribute(ERRORS_VARIABLE_NAME, this.errors, PageContext.REQUEST_SCOPE);
-			return EVAL_BODY_INCLUDE;
-		}
-		else {
-			return SKIP_BODY;
-		}
-	}
-
-	@Override
-	public int doEndTag() {
-		this.pageContext.removeAttribute(ERRORS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
-		return EVAL_PAGE;
-	}
-
-	/**
-	 * Retrieve the Errors instance that this tag is currently bound to.
-	 * <p>Intended for cooperating nesting tags.
-	 */
-	@Nullable
-	public final Errors getErrors() {
-		return this.errors;
-	}
+    /**
+     * Retrieve the Errors instance that this tag is currently bound to.
+     * <p>Intended for cooperating nesting tags.
+     */
+    @Nullable
+    public final Errors getErrors() {
+        return this.errors;
+    }
 
 
-	@Override
-	public void doFinally() {
-		super.doFinally();
-		this.errors = null;
-	}
+    @Override
+    public void doFinally() {
+        super.doFinally();
+        this.errors = null;
+    }
 
 }

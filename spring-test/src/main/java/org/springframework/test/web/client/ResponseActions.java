@@ -25,16 +25,18 @@ package org.springframework.test.web.client;
  */
 public interface ResponseActions {
 
-	/**
-	 * Add a request expectation.
-	 * @return the expectation
-	 */
-	ResponseActions andExpect(RequestMatcher requestMatcher);
+    /**
+     * Add a request expectation.
+     *
+     * @return the expectation
+     */
+    ResponseActions andExpect(RequestMatcher requestMatcher);
 
-	/**
-	 * Define the response.
-	 * @param responseCreator the creator of the response
-	 */
-	void andRespond(ResponseCreator responseCreator);
+    /**
+     * Define the response.
+     *
+     * @param responseCreator the creator of the response
+     */
+    void andRespond(ResponseCreator responseCreator);
 
 }

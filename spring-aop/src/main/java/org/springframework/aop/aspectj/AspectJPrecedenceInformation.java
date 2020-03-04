@@ -23,36 +23,36 @@ import org.springframework.core.Ordered;
  * needed to sort advice/advisors by AspectJ's precedence rules.
  *
  * @author Adrian Colyer
- * @since 2.0
  * @see org.springframework.aop.aspectj.autoproxy.AspectJPrecedenceComparator
+ * @since 2.0
  */
 public interface AspectJPrecedenceInformation extends Ordered {
 
-	// Implementation note:
-	// We need the level of indirection this interface provides as otherwise the
-	// AspectJPrecedenceComparator must ask an Advisor for its Advice in all cases
-	// in order to sort advisors. This causes problems with the
-	// InstantiationModelAwarePointcutAdvisor which needs to delay creating
-	// its advice for aspects with non-singleton instantiation models.
+    // Implementation note:
+    // We need the level of indirection this interface provides as otherwise the
+    // AspectJPrecedenceComparator must ask an Advisor for its Advice in all cases
+    // in order to sort advisors. This causes problems with the
+    // InstantiationModelAwarePointcutAdvisor which needs to delay creating
+    // its advice for aspects with non-singleton instantiation models.
 
-	/**
-	 * Return the name of the aspect (bean) in which the advice was declared.
-	 */
-	String getAspectName();
+    /**
+     * Return the name of the aspect (bean) in which the advice was declared.
+     */
+    String getAspectName();
 
-	/**
-	 * Return the declaration order of the advice member within the aspect.
-	 */
-	int getDeclarationOrder();
+    /**
+     * Return the declaration order of the advice member within the aspect.
+     */
+    int getDeclarationOrder();
 
-	/**
-	 * Return whether this is a before advice.
-	 */
-	boolean isBeforeAdvice();
+    /**
+     * Return whether this is a before advice.
+     */
+    boolean isBeforeAdvice();
 
-	/**
-	 * Return whether this is an after advice.
-	 */
-	boolean isAfterAdvice();
+    /**
+     * Return whether this is an after advice.
+     */
+    boolean isAfterAdvice();
 
 }

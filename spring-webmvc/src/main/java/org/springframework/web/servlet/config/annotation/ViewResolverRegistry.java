@@ -16,11 +16,6 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
@@ -42,6 +37,11 @@ import org.springframework.web.servlet.view.script.ScriptTemplateConfigurer;
 import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Assist with the configuration of a chain of
@@ -95,8 +95,9 @@ public class ViewResolverRegistry {
      * media types requested by the client (e.g. in the Accept header).
      * <p>If invoked multiple times the provided default views will be added to
      * any other default views that may have been configured already.
-     *
+     * <p>
      * 启动视图解析器(默认的)
+     *
      * @see ContentNegotiatingViewResolver#setDefaultViews
      */
     public void enableContentNegotiation(View... defaultViews) {
@@ -119,7 +120,6 @@ public class ViewResolverRegistry {
     }
 
     /**
-     *
      * @param defaultViews
      * @return 内容协调器, 可以对不同类型的数据进行包装, 做不同的返回值, 如context-type=json，或者context-type=xml
      */
@@ -137,8 +137,7 @@ public class ViewResolverRegistry {
                 views.addAll(Arrays.asList(defaultViews));
                 this.contentNegotiatingResolver.setDefaultViews(views);
             }
-        }
-        else {
+        } else {
             this.contentNegotiatingResolver = new ContentNegotiatingViewResolver();
             this.contentNegotiatingResolver.setDefaultViews(Arrays.asList(defaultViews));
             this.contentNegotiatingResolver.setViewResolvers(this.viewResolvers);
@@ -157,7 +156,7 @@ public class ViewResolverRegistry {
      * if a JSP exists without forwarding to it, using multiple JSP-based view
      * resolvers only makes sense in combination with the "viewNames" property
      * on the resolver indicating which view names are handled by which resolver.
-     *
+     * <p>
      * jsp 视图解析器
      */
     public UrlBasedViewResolverRegistration jsp() {
@@ -263,7 +262,7 @@ public class ViewResolverRegistry {
      * configure a custom (or 3rd party) resolver implementation. It may also be
      * used as an alternative to other registration methods in this class when
      * they don't expose some more advanced property that needs to be set.
-     *
+     * <p>
      * 注冊视图
      */
     public void viewResolver(ViewResolver viewResolver) {
@@ -305,8 +304,7 @@ public class ViewResolverRegistry {
     protected List<ViewResolver> getViewResolvers() {
         if (this.contentNegotiatingResolver != null) {
             return Collections.singletonList(this.contentNegotiatingResolver);
-        }
-        else {
+        } else {
             return this.viewResolvers;
         }
     }

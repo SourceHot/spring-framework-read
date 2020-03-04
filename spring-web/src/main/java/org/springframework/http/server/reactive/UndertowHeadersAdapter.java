@@ -16,6 +16,12 @@
 
 package org.springframework.http.server.reactive;
 
+import io.undertow.util.HeaderMap;
+import io.undertow.util.HeaderValues;
+import io.undertow.util.HttpString;
+import org.springframework.lang.Nullable;
+import org.springframework.util.MultiValueMap;
+
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
@@ -25,13 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import io.undertow.util.HeaderMap;
-import io.undertow.util.HeaderValues;
-import io.undertow.util.HttpString;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.MultiValueMap;
-
 /**
  * {@code MultiValueMap} implementation for wrapping Undertow HTTP headers.
  *
@@ -40,189 +39,189 @@ import org.springframework.util.MultiValueMap;
  */
 class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 
-	private final HeaderMap headers;
+    private final HeaderMap headers;
 
 
-	UndertowHeadersAdapter(HeaderMap headers) {
-		this.headers = headers;
-	}
+    UndertowHeadersAdapter(HeaderMap headers) {
+        this.headers = headers;
+    }
 
 
-	@Override
-	public String getFirst(String key) {
-		return this.headers.getFirst(key);
-	}
+    @Override
+    public String getFirst(String key) {
+        return this.headers.getFirst(key);
+    }
 
-	@Override
-	public void add(String key, @Nullable String value) {
-		this.headers.add(HttpString.tryFromString(key), value);
-	}
+    @Override
+    public void add(String key, @Nullable String value) {
+        this.headers.add(HttpString.tryFromString(key), value);
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public void addAll(String key, List<? extends String> values) {
-		this.headers.addAll(HttpString.tryFromString(key), (List<String>) values);
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public void addAll(String key, List<? extends String> values) {
+        this.headers.addAll(HttpString.tryFromString(key), (List<String>) values);
+    }
 
-	@Override
-	public void addAll(MultiValueMap<String, String> values) {
-		values.forEach((key, list) -> this.headers.addAll(HttpString.tryFromString(key), list));
-	}
+    @Override
+    public void addAll(MultiValueMap<String, String> values) {
+        values.forEach((key, list) -> this.headers.addAll(HttpString.tryFromString(key), list));
+    }
 
-	@Override
-	public void set(String key, @Nullable String value) {
-		this.headers.put(HttpString.tryFromString(key), value);
-	}
+    @Override
+    public void set(String key, @Nullable String value) {
+        this.headers.put(HttpString.tryFromString(key), value);
+    }
 
-	@Override
-	public void setAll(Map<String, String> values) {
-		values.forEach((key, list) -> this.headers.put(HttpString.tryFromString(key), list));
-	}
+    @Override
+    public void setAll(Map<String, String> values) {
+        values.forEach((key, list) -> this.headers.put(HttpString.tryFromString(key), list));
+    }
 
-	@Override
-	public Map<String, String> toSingleValueMap() {
-		Map<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size());
-		this.headers.forEach(values ->
-				singleValueMap.put(values.getHeaderName().toString(), values.getFirst()));
-		return singleValueMap;
-	}
+    @Override
+    public Map<String, String> toSingleValueMap() {
+        Map<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size());
+        this.headers.forEach(values ->
+                singleValueMap.put(values.getHeaderName().toString(), values.getFirst()));
+        return singleValueMap;
+    }
 
-	@Override
-	public int size() {
-		return this.headers.size();
-	}
+    @Override
+    public int size() {
+        return this.headers.size();
+    }
 
-	@Override
-	public boolean isEmpty() {
-		return (this.headers.size() == 0);
-	}
+    @Override
+    public boolean isEmpty() {
+        return (this.headers.size() == 0);
+    }
 
-	@Override
-	public boolean containsKey(Object key) {
-		return (key instanceof String && this.headers.contains((String) key));
-	}
+    @Override
+    public boolean containsKey(Object key) {
+        return (key instanceof String && this.headers.contains((String) key));
+    }
 
-	@Override
-	public boolean containsValue(Object value) {
-		return (value instanceof String &&
-				this.headers.getHeaderNames().stream()
-						.map(this.headers::get)
-						.anyMatch(values -> values.contains(value)));
-	}
+    @Override
+    public boolean containsValue(Object value) {
+        return (value instanceof String &&
+                this.headers.getHeaderNames().stream()
+                        .map(this.headers::get)
+                        .anyMatch(values -> values.contains(value)));
+    }
 
-	@Override
-	@Nullable
-	public List<String> get(Object key) {
-		if (key instanceof String) {
-			return this.headers.get((String) key);
-		}
-		return null;
-	}
+    @Override
+    @Nullable
+    public List<String> get(Object key) {
+        if (key instanceof String) {
+            return this.headers.get((String) key);
+        }
+        return null;
+    }
 
-	@Override
-	@Nullable
-	public List<String> put(String key, List<String> value) {
-		HeaderValues previousValues = this.headers.get(key);
-		this.headers.putAll(HttpString.tryFromString(key), value);
-		return previousValues;
-	}
+    @Override
+    @Nullable
+    public List<String> put(String key, List<String> value) {
+        HeaderValues previousValues = this.headers.get(key);
+        this.headers.putAll(HttpString.tryFromString(key), value);
+        return previousValues;
+    }
 
-	@Override
-	@Nullable
-	public List<String> remove(Object key) {
-		if (key instanceof String) {
-			this.headers.remove((String) key);
-		}
-		return null;
-	}
+    @Override
+    @Nullable
+    public List<String> remove(Object key) {
+        if (key instanceof String) {
+            this.headers.remove((String) key);
+        }
+        return null;
+    }
 
-	@Override
-	public void putAll(Map<? extends String, ? extends List<String>> map) {
-		map.forEach((key, values) ->
-				this.headers.putAll(HttpString.tryFromString(key), values));
-	}
+    @Override
+    public void putAll(Map<? extends String, ? extends List<String>> map) {
+        map.forEach((key, values) ->
+                this.headers.putAll(HttpString.tryFromString(key), values));
+    }
 
-	@Override
-	public void clear() {
-		this.headers.clear();
-	}
+    @Override
+    public void clear() {
+        this.headers.clear();
+    }
 
-	@Override
-	public Set<String> keySet() {
-		return this.headers.getHeaderNames().stream()
-				.map(HttpString::toString)
-				.collect(Collectors.toSet());
-	}
+    @Override
+    public Set<String> keySet() {
+        return this.headers.getHeaderNames().stream()
+                .map(HttpString::toString)
+                .collect(Collectors.toSet());
+    }
 
-	@Override
-	public Collection<List<String>> values() {
-		return this.headers.getHeaderNames().stream()
-				.map(this.headers::get)
-				.collect(Collectors.toList());
-	}
+    @Override
+    public Collection<List<String>> values() {
+        return this.headers.getHeaderNames().stream()
+                .map(this.headers::get)
+                .collect(Collectors.toList());
+    }
 
-	@Override
-	public Set<Entry<String, List<String>>> entrySet() {
-		return new AbstractSet<Entry<String, List<String>>>() {
-			@Override
-			public Iterator<Entry<String, List<String>>> iterator() {
-				return new EntryIterator();
-			}
+    @Override
+    public Set<Entry<String, List<String>>> entrySet() {
+        return new AbstractSet<Entry<String, List<String>>>() {
+            @Override
+            public Iterator<Entry<String, List<String>>> iterator() {
+                return new EntryIterator();
+            }
 
-			@Override
-			public int size() {
-				return headers.size();
-			}
-		};
-	}
-
-
-	@Override
-	public String toString() {
-		return org.springframework.http.HttpHeaders.formatHeaders(this);
-	}
+            @Override
+            public int size() {
+                return headers.size();
+            }
+        };
+    }
 
 
-	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
-
-		private Iterator<HttpString> names = headers.getHeaderNames().iterator();
-
-		@Override
-		public boolean hasNext() {
-			return this.names.hasNext();
-		}
-
-		@Override
-		public Entry<String, List<String>> next() {
-			return new HeaderEntry(this.names.next());
-		}
-	}
+    @Override
+    public String toString() {
+        return org.springframework.http.HttpHeaders.formatHeaders(this);
+    }
 
 
-	private class HeaderEntry implements Entry<String, List<String>> {
+    private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
-		private final HttpString key;
+        private Iterator<HttpString> names = headers.getHeaderNames().iterator();
 
-		HeaderEntry(HttpString key) {
-			this.key = key;
-		}
+        @Override
+        public boolean hasNext() {
+            return this.names.hasNext();
+        }
 
-		@Override
-		public String getKey() {
-			return this.key.toString();
-		}
+        @Override
+        public Entry<String, List<String>> next() {
+            return new HeaderEntry(this.names.next());
+        }
+    }
 
-		@Override
-		public List<String> getValue() {
-			return headers.get(this.key);
-		}
 
-		@Override
-		public List<String> setValue(List<String> value) {
-			List<String> previousValues = headers.get(this.key);
-			headers.putAll(this.key, value);
-			return previousValues;
-		}
-	}
+    private class HeaderEntry implements Entry<String, List<String>> {
+
+        private final HttpString key;
+
+        HeaderEntry(HttpString key) {
+            this.key = key;
+        }
+
+        @Override
+        public String getKey() {
+            return this.key.toString();
+        }
+
+        @Override
+        public List<String> getValue() {
+            return headers.get(this.key);
+        }
+
+        @Override
+        public List<String> setValue(List<String> value) {
+            List<String> previousValues = headers.get(this.key);
+            headers.putAll(this.key, value);
+            return previousValues;
+        }
+    }
 
 }

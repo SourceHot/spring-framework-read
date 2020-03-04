@@ -16,11 +16,8 @@
 
 package org.springframework.transaction;
 
-import java.lang.reflect.Method;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -30,7 +27,12 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 
-import static org.junit.Assert.*;
+import java.lang.reflect.Method;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -38,67 +40,66 @@ import static org.junit.Assert.*;
  */
 public class TxNamespaceHandlerTests {
 
-	private ApplicationContext context;
+    private ApplicationContext context;
 
-	private Method getAgeMethod;
+    private Method getAgeMethod;
 
-	private Method setAgeMethod;
-
-
-	@Before
-	public void setup() throws Exception {
-		this.context = new ClassPathXmlApplicationContext("txNamespaceHandlerTests.xml", getClass());
-		this.getAgeMethod = ITestBean.class.getMethod("getAge");
-		this.setAgeMethod = ITestBean.class.getMethod("setAge", int.class);
-	}
+    private Method setAgeMethod;
 
 
-	@Test
-	public void isProxy() {
-		ITestBean bean = getTestBean();
-		assertTrue("testBean is not a proxy", AopUtils.isAopProxy(bean));
-	}
+    @Before
+    public void setup() throws Exception {
+        this.context = new ClassPathXmlApplicationContext("txNamespaceHandlerTests.xml", getClass());
+        this.getAgeMethod = ITestBean.class.getMethod("getAge");
+        this.setAgeMethod = ITestBean.class.getMethod("setAge", int.class);
+    }
 
-	@Test
-	public void invokeTransactional() {
-		ITestBean testBean = getTestBean();
-		CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
 
-		// try with transactional
-		assertEquals("Should not have any started transactions", 0, ptm.begun);
-		testBean.getName();
-		assertTrue(ptm.lastDefinition.isReadOnly());
-		assertEquals("Should have 1 started transaction", 1, ptm.begun);
-		assertEquals("Should have 1 committed transaction", 1, ptm.commits);
+    @Test
+    public void isProxy() {
+        ITestBean bean = getTestBean();
+        assertTrue("testBean is not a proxy", AopUtils.isAopProxy(bean));
+    }
 
-		// try with non-transaction
-		testBean.haveBirthday();
-		assertEquals("Should not have started another transaction", 1, ptm.begun);
+    @Test
+    public void invokeTransactional() {
+        ITestBean testBean = getTestBean();
+        CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
 
-		// try with exceptional
-		try {
-			testBean.exceptional(new IllegalArgumentException("foo"));
-			fail("Should NEVER get here");
-		}
-		catch (Throwable throwable) {
-			assertEquals("Should have another started transaction", 2, ptm.begun);
-			assertEquals("Should have 1 rolled back transaction", 1, ptm.rollbacks);
-		}
-	}
+        // try with transactional
+        assertEquals("Should not have any started transactions", 0, ptm.begun);
+        testBean.getName();
+        assertTrue(ptm.lastDefinition.isReadOnly());
+        assertEquals("Should have 1 started transaction", 1, ptm.begun);
+        assertEquals("Should have 1 committed transaction", 1, ptm.commits);
 
-	@Test
-	public void rollbackRules() {
-		TransactionInterceptor txInterceptor = (TransactionInterceptor) context.getBean("txRollbackAdvice");
-		TransactionAttributeSource txAttrSource = txInterceptor.getTransactionAttributeSource();
-		TransactionAttribute txAttr = txAttrSource.getTransactionAttribute(getAgeMethod,ITestBean.class);
-		assertTrue("should be configured to rollback on Exception",txAttr.rollbackOn(new Exception()));
+        // try with non-transaction
+        testBean.haveBirthday();
+        assertEquals("Should not have started another transaction", 1, ptm.begun);
 
-		txAttr = txAttrSource.getTransactionAttribute(setAgeMethod, ITestBean.class);
-		assertFalse("should not rollback on RuntimeException",txAttr.rollbackOn(new RuntimeException()));
-	}
+        // try with exceptional
+        try {
+            testBean.exceptional(new IllegalArgumentException("foo"));
+            fail("Should NEVER get here");
+        } catch (Throwable throwable) {
+            assertEquals("Should have another started transaction", 2, ptm.begun);
+            assertEquals("Should have 1 rolled back transaction", 1, ptm.rollbacks);
+        }
+    }
 
-	private ITestBean getTestBean() {
-		return (ITestBean) context.getBean("testBean");
-	}
+    @Test
+    public void rollbackRules() {
+        TransactionInterceptor txInterceptor = (TransactionInterceptor) context.getBean("txRollbackAdvice");
+        TransactionAttributeSource txAttrSource = txInterceptor.getTransactionAttributeSource();
+        TransactionAttribute txAttr = txAttrSource.getTransactionAttribute(getAgeMethod, ITestBean.class);
+        assertTrue("should be configured to rollback on Exception", txAttr.rollbackOn(new Exception()));
+
+        txAttr = txAttrSource.getTransactionAttribute(setAgeMethod, ITestBean.class);
+        assertFalse("should not rollback on RuntimeException", txAttr.rollbackOn(new RuntimeException()));
+    }
+
+    private ITestBean getTestBean() {
+        return (ITestBean) context.getBean("testBean");
+    }
 
 }

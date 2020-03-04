@@ -19,7 +19,6 @@ package org.springframework.test.context.junit4;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.runner.RunWith;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.Nullable;
@@ -73,7 +72,6 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * <p><strong>NOTE:</strong> As of Spring Framework 4.3, this class requires JUnit 4.12 or higher.
  *
  * @author Sam Brannen
- * @since 2.5
  * @see ContextConfiguration
  * @see TestContext
  * @see TestContextManager
@@ -84,33 +82,35 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * @see DirtiesContextTestExecutionListener
  * @see AbstractTransactionalJUnit4SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTestNGSpringContextTests
+ * @since 2.5
  */
 @RunWith(SpringRunner.class)
-@TestExecutionListeners({ ServletTestExecutionListener.class, DirtiesContextBeforeModesTestExecutionListener.class,
-	DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
+@TestExecutionListeners({ServletTestExecutionListener.class, DirtiesContextBeforeModesTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class})
 public abstract class AbstractJUnit4SpringContextTests implements ApplicationContextAware {
 
-	/**
-	 * Logger available to subclasses.
-	 */
-	protected final Log logger = LogFactory.getLog(getClass());
+    /**
+     * Logger available to subclasses.
+     */
+    protected final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * The {@link ApplicationContext} that was injected into this test instance
-	 * via {@link #setApplicationContext(ApplicationContext)}.
-	 */
-	@Nullable
-	protected ApplicationContext applicationContext;
+    /**
+     * The {@link ApplicationContext} that was injected into this test instance
+     * via {@link #setApplicationContext(ApplicationContext)}.
+     */
+    @Nullable
+    protected ApplicationContext applicationContext;
 
 
-	/**
-	 * Set the {@link ApplicationContext} to be used by this test instance,
-	 * provided via {@link ApplicationContextAware} semantics.
-	 * @param applicationContext the ApplicationContext that this test runs in
-	 */
-	@Override
-	public final void setApplicationContext(final ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
+    /**
+     * Set the {@link ApplicationContext} to be used by this test instance,
+     * provided via {@link ApplicationContextAware} semantics.
+     *
+     * @param applicationContext the ApplicationContext that this test runs in
+     */
+    @Override
+    public final void setApplicationContext(final ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
 }

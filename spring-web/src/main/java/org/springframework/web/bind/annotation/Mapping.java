@@ -25,8 +25,8 @@ import java.lang.annotation.Target;
  * Meta annotation that indicates a web mapping annotation.
  *
  * @author Juergen Hoeller
- * @since 3.0
  * @see RequestMapping
+ * @since 3.0
  */
 @Target({ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)

@@ -24,11 +24,11 @@ import org.springframework.test.context.ContextConfiguration;
  * application context.
  *
  * @author Sam Brannen
- * @since 2.5
  * @see SpringJUnit4ClassRunnerAppCtxTests
  * @see AbsolutePathSpringJUnit4ClassRunnerAppCtxTests
+ * @since 2.5
  */
-@ContextConfiguration(locations = { "SpringJUnit4ClassRunnerAppCtxTests-context.xml" })
+@ContextConfiguration(locations = {"SpringJUnit4ClassRunnerAppCtxTests-context.xml"})
 public class RelativePathSpringJUnit4ClassRunnerAppCtxTests extends SpringJUnit4ClassRunnerAppCtxTests {
-	/* all tests are in the parent class. */
+    /* all tests are in the parent class. */
 }

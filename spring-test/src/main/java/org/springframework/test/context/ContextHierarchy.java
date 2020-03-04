@@ -135,9 +135,9 @@ import java.lang.annotation.Target;
  * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
  *
  * @author Sam Brannen
- * @since 3.2.2
  * @see ContextConfiguration
  * @see org.springframework.context.ApplicationContext
+ * @since 3.2.2
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -145,15 +145,15 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface ContextHierarchy {
 
-	/**
-	 * A list of {@link ContextConfiguration @ContextConfiguration} instances,
-	 * each of which defines a level in the context hierarchy.
-	 * <p>If you need to merge or override the configuration for a given level
-	 * of the context hierarchy within a test class hierarchy, you must explicitly
-	 * name that level by supplying the same value to the {@link ContextConfiguration#name
-	 * name} attribute in {@code @ContextConfiguration} at each level in the
-	 * class hierarchy. See the class-level Javadoc for examples.
-	 */
-	ContextConfiguration[] value();
+    /**
+     * A list of {@link ContextConfiguration @ContextConfiguration} instances,
+     * each of which defines a level in the context hierarchy.
+     * <p>If you need to merge or override the configuration for a given level
+     * of the context hierarchy within a test class hierarchy, you must explicitly
+     * name that level by supplying the same value to the {@link ContextConfiguration#name
+     * name} attribute in {@code @ContextConfiguration} at each level in the
+     * class hierarchy. See the class-level Javadoc for examples.
+     */
+    ContextConfiguration[] value();
 
 }

@@ -16,18 +16,17 @@
 
 package org.springframework.core;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-import org.springframework.util.StringValueResolver;
 
 /**
  * Simple implementation of the {@link AliasRegistry} interface.
@@ -73,8 +72,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Alias definition '" + alias + "' ignored since it points to same name");
                 }
-            }
-            else {
+            } else {
                 // 不相同
                 // 从map对象中获取别名为alias的value
                 String registeredName = this.aliasMap.get(alias);
@@ -215,8 +213,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
                 String resolvedName = valueResolver.resolveStringValue(registeredName);
                 if (resolvedAlias == null || resolvedName == null || resolvedAlias.equals(resolvedName)) {
                     this.aliasMap.remove(alias);
-                }
-                else if (!resolvedAlias.equals(alias)) {
+                } else if (!resolvedAlias.equals(alias)) {
                     String existingName = this.aliasMap.get(resolvedAlias);
                     if (existingName != null) {
                         if (existingName.equals(resolvedName)) {
@@ -232,8 +229,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
                     checkForAliasCircle(resolvedName, resolvedAlias);
                     this.aliasMap.remove(alias);
                     this.aliasMap.put(resolvedAlias, resolvedName);
-                }
-                else if (!registeredName.equals(resolvedName)) {
+                } else if (!registeredName.equals(resolvedName)) {
                     this.aliasMap.put(alias, resolvedName);
                 }
             });

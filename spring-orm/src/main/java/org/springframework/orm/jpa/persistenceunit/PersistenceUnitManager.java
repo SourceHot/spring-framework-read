@@ -30,30 +30,32 @@ import javax.persistence.spi.PersistenceUnitInfo;
  * anymore once it has been obtained.
  *
  * @author Juergen Hoeller
- * @since 2.0
  * @see DefaultPersistenceUnitManager
  * @see org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean#setPersistenceUnitManager
+ * @since 2.0
  */
 public interface PersistenceUnitManager {
 
-	/**
-	 * Obtain the default PersistenceUnitInfo from this manager.
-	 * @return the PersistenceUnitInfo (never {@code null})
-	 * @throws IllegalStateException if there is no default PersistenceUnitInfo defined
-	 * or it has already been obtained
-	 */
-	PersistenceUnitInfo obtainDefaultPersistenceUnitInfo() throws IllegalStateException;
+    /**
+     * Obtain the default PersistenceUnitInfo from this manager.
+     *
+     * @return the PersistenceUnitInfo (never {@code null})
+     * @throws IllegalStateException if there is no default PersistenceUnitInfo defined
+     *                               or it has already been obtained
+     */
+    PersistenceUnitInfo obtainDefaultPersistenceUnitInfo() throws IllegalStateException;
 
-	/**
-	 * Obtain the specified PersistenceUnitInfo from this manager.
-	 * @param persistenceUnitName the name of the desired persistence unit
-	 * @return the PersistenceUnitInfo (never {@code null})
-	 * @throws IllegalArgumentException if no PersistenceUnitInfo with the given
-	 * name is defined
-	 * @throws IllegalStateException if the PersistenceUnitInfo with the given
-	 * name has already been obtained
-	 */
-	PersistenceUnitInfo obtainPersistenceUnitInfo(String persistenceUnitName)
-			throws IllegalArgumentException, IllegalStateException;
+    /**
+     * Obtain the specified PersistenceUnitInfo from this manager.
+     *
+     * @param persistenceUnitName the name of the desired persistence unit
+     * @return the PersistenceUnitInfo (never {@code null})
+     * @throws IllegalArgumentException if no PersistenceUnitInfo with the given
+     *                                  name is defined
+     * @throws IllegalStateException    if the PersistenceUnitInfo with the given
+     *                                  name has already been obtained
+     */
+    PersistenceUnitInfo obtainPersistenceUnitInfo(String persistenceUnitName)
+            throws IllegalArgumentException, IllegalStateException;
 
 }

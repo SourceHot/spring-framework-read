@@ -33,16 +33,17 @@ import java.util.Map;
 @FunctionalInterface
 public interface ParameterMapper {
 
-	/**
-	 * Create a Map of input parameters, keyed by name.
-	 * @param con a JDBC connection. This is useful (and the purpose of this interface)
-	 * if we need to do something RDBMS-specific with a proprietary Connection
-	 * implementation class. This class conceals such proprietary details. However,
-	 * it is best to avoid using such proprietary RDBMS features if possible.
-	 * @return a Map of input parameters, keyed by name (never {@code null})
-	 * @throws SQLException if a SQLException is encountered setting
-	 * parameter values (that is, there's no need to catch SQLException)
-	 */
-	Map<String, ?> createMap(Connection con) throws SQLException;
+    /**
+     * Create a Map of input parameters, keyed by name.
+     *
+     * @param con a JDBC connection. This is useful (and the purpose of this interface)
+     *            if we need to do something RDBMS-specific with a proprietary Connection
+     *            implementation class. This class conceals such proprietary details. However,
+     *            it is best to avoid using such proprietary RDBMS features if possible.
+     * @return a Map of input parameters, keyed by name (never {@code null})
+     * @throws SQLException if a SQLException is encountered setting
+     *                      parameter values (that is, there's no need to catch SQLException)
+     */
+    Map<String, ?> createMap(Connection con) throws SQLException;
 
 }

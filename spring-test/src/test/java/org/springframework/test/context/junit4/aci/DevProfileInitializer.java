@@ -25,8 +25,8 @@ import org.springframework.context.support.GenericApplicationContext;
  */
 public class DevProfileInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 
-	@Override
-	public void initialize(GenericApplicationContext applicationContext) {
-		applicationContext.getEnvironment().setActiveProfiles("dev");
-	}
+    @Override
+    public void initialize(GenericApplicationContext applicationContext) {
+        applicationContext.getEnvironment().setActiveProfiles("dev");
+    }
 }

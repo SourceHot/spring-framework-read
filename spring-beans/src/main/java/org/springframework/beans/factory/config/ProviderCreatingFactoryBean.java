@@ -16,14 +16,13 @@
 
 package org.springframework.beans.factory.config;
 
-import java.io.Serializable;
-
-import javax.inject.Provider;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.inject.Provider;
+import java.io.Serializable;
 
 /**
  * A {@link org.springframework.beans.factory.FactoryBean} implementation that
@@ -37,67 +36,67 @@ import org.springframework.util.Assert;
  * alternative to JSR-330's {@code @Inject} annotation-driven approach.
  *
  * @author Juergen Hoeller
- * @since 3.0.2
  * @see javax.inject.Provider
  * @see ObjectFactoryCreatingFactoryBean
+ * @since 3.0.2
  */
 public class ProviderCreatingFactoryBean extends AbstractFactoryBean<Provider<Object>> {
 
-	@Nullable
-	private String targetBeanName;
+    @Nullable
+    private String targetBeanName;
 
 
-	/**
-	 * Set the name of the target bean.
-	 * <p>The target does not <i>have</i> to be a non-singleton bean, but realistically
-	 * always will be (because if the target bean were a singleton, then said singleton
-	 * bean could simply be injected straight into the dependent object, thus obviating
-	 * the need for the extra level of indirection afforded by this factory approach).
-	 */
-	public void setTargetBeanName(String targetBeanName) {
-		this.targetBeanName = targetBeanName;
-	}
+    /**
+     * Set the name of the target bean.
+     * <p>The target does not <i>have</i> to be a non-singleton bean, but realistically
+     * always will be (because if the target bean were a singleton, then said singleton
+     * bean could simply be injected straight into the dependent object, thus obviating
+     * the need for the extra level of indirection afforded by this factory approach).
+     */
+    public void setTargetBeanName(String targetBeanName) {
+        this.targetBeanName = targetBeanName;
+    }
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		Assert.hasText(this.targetBeanName, "Property 'targetBeanName' is required");
-		super.afterPropertiesSet();
-	}
-
-
-	@Override
-	public Class<?> getObjectType() {
-		return Provider.class;
-	}
-
-	@Override
-	protected Provider<Object> createInstance() {
-		BeanFactory beanFactory = getBeanFactory();
-		Assert.state(beanFactory != null, "No BeanFactory available");
-		Assert.state(this.targetBeanName != null, "No target bean name specified");
-		return new TargetBeanProvider(beanFactory, this.targetBeanName);
-	}
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Assert.hasText(this.targetBeanName, "Property 'targetBeanName' is required");
+        super.afterPropertiesSet();
+    }
 
 
-	/**
-	 * Independent inner class - for serialization purposes.
-	 */
-	@SuppressWarnings("serial")
-	private static class TargetBeanProvider implements Provider<Object>, Serializable {
+    @Override
+    public Class<?> getObjectType() {
+        return Provider.class;
+    }
 
-		private final BeanFactory beanFactory;
+    @Override
+    protected Provider<Object> createInstance() {
+        BeanFactory beanFactory = getBeanFactory();
+        Assert.state(beanFactory != null, "No BeanFactory available");
+        Assert.state(this.targetBeanName != null, "No target bean name specified");
+        return new TargetBeanProvider(beanFactory, this.targetBeanName);
+    }
 
-		private final String targetBeanName;
 
-		public TargetBeanProvider(BeanFactory beanFactory, String targetBeanName) {
-			this.beanFactory = beanFactory;
-			this.targetBeanName = targetBeanName;
-		}
+    /**
+     * Independent inner class - for serialization purposes.
+     */
+    @SuppressWarnings("serial")
+    private static class TargetBeanProvider implements Provider<Object>, Serializable {
 
-		@Override
-		public Object get() throws BeansException {
-			return this.beanFactory.getBean(this.targetBeanName);
-		}
-	}
+        private final BeanFactory beanFactory;
+
+        private final String targetBeanName;
+
+        public TargetBeanProvider(BeanFactory beanFactory, String targetBeanName) {
+            this.beanFactory = beanFactory;
+            this.targetBeanName = targetBeanName;
+        }
+
+        @Override
+        public Object get() throws BeansException {
+            return this.beanFactory.getBean(this.targetBeanName);
+        }
+    }
 
 }

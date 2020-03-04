@@ -27,12 +27,12 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  */
 public class OxmNamespaceHandler extends NamespaceHandlerSupport {
 
-	@Override
-	@SuppressWarnings("deprecation")
-	public void init() {
-		registerBeanDefinitionParser("jaxb2-marshaller", new Jaxb2MarshallerBeanDefinitionParser());
-		registerBeanDefinitionParser("jibx-marshaller", new JibxMarshallerBeanDefinitionParser());
-		registerBeanDefinitionParser("castor-marshaller", new CastorMarshallerBeanDefinitionParser());
-	}
+    @Override
+    @SuppressWarnings("deprecation")
+    public void init() {
+        registerBeanDefinitionParser("jaxb2-marshaller", new Jaxb2MarshallerBeanDefinitionParser());
+        registerBeanDefinitionParser("jibx-marshaller", new JibxMarshallerBeanDefinitionParser());
+        registerBeanDefinitionParser("castor-marshaller", new CastorMarshallerBeanDefinitionParser());
+    }
 
 }

@@ -16,11 +16,8 @@
 
 package org.springframework.aop.support;
 
-import java.io.Serializable;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.junit.Test;
-
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
@@ -34,9 +31,15 @@ import org.springframework.tests.sample.beans.SerializablePerson;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import java.io.Serializable;
+
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Rod Johnson
@@ -45,267 +48,267 @@ import static org.mockito.BDDMockito.*;
  */
 public class DelegatingIntroductionInterceptorTests {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testNullTarget() throws Exception {
-		// Shouldn't accept null target
-		new DelegatingIntroductionInterceptor(null);
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullTarget() throws Exception {
+        // Shouldn't accept null target
+        new DelegatingIntroductionInterceptor(null);
+    }
 
-	@Test
-	public void testIntroductionInterceptorWithDelegation() throws Exception {
-		TestBean raw = new TestBean();
-		assertTrue(! (raw instanceof TimeStamped));
-		ProxyFactory factory = new ProxyFactory(raw);
+    @Test
+    public void testIntroductionInterceptorWithDelegation() throws Exception {
+        TestBean raw = new TestBean();
+        assertTrue(!(raw instanceof TimeStamped));
+        ProxyFactory factory = new ProxyFactory(raw);
 
-		TimeStamped ts = mock(TimeStamped.class);
-		long timestamp = 111L;
-		given(ts.getTimeStamp()).willReturn(timestamp);
+        TimeStamped ts = mock(TimeStamped.class);
+        long timestamp = 111L;
+        given(ts.getTimeStamp()).willReturn(timestamp);
 
-		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts)));
+        factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts)));
 
-		TimeStamped tsp = (TimeStamped) factory.getProxy();
-		assertTrue(tsp.getTimeStamp() == timestamp);
-	}
+        TimeStamped tsp = (TimeStamped) factory.getProxy();
+        assertTrue(tsp.getTimeStamp() == timestamp);
+    }
 
-	@Test
-	public void testIntroductionInterceptorWithInterfaceHierarchy() throws Exception {
-		TestBean raw = new TestBean();
-		assertTrue(! (raw instanceof SubTimeStamped));
-		ProxyFactory factory = new ProxyFactory(raw);
+    @Test
+    public void testIntroductionInterceptorWithInterfaceHierarchy() throws Exception {
+        TestBean raw = new TestBean();
+        assertTrue(!(raw instanceof SubTimeStamped));
+        ProxyFactory factory = new ProxyFactory(raw);
 
-		TimeStamped ts = mock(SubTimeStamped.class);
-		long timestamp = 111L;
-		given(ts.getTimeStamp()).willReturn(timestamp);
+        TimeStamped ts = mock(SubTimeStamped.class);
+        long timestamp = 111L;
+        given(ts.getTimeStamp()).willReturn(timestamp);
 
-		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts), SubTimeStamped.class));
+        factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts), SubTimeStamped.class));
 
-		SubTimeStamped tsp = (SubTimeStamped) factory.getProxy();
-		assertTrue(tsp.getTimeStamp() == timestamp);
-	}
+        SubTimeStamped tsp = (SubTimeStamped) factory.getProxy();
+        assertTrue(tsp.getTimeStamp() == timestamp);
+    }
 
-	@Test
-	public void testIntroductionInterceptorWithSuperInterface() throws Exception {
-		TestBean raw = new TestBean();
-		assertTrue(! (raw instanceof TimeStamped));
-		ProxyFactory factory = new ProxyFactory(raw);
+    @Test
+    public void testIntroductionInterceptorWithSuperInterface() throws Exception {
+        TestBean raw = new TestBean();
+        assertTrue(!(raw instanceof TimeStamped));
+        ProxyFactory factory = new ProxyFactory(raw);
 
-		TimeStamped ts = mock(SubTimeStamped.class);
-		long timestamp = 111L;
-		given(ts.getTimeStamp()).willReturn(timestamp);
+        TimeStamped ts = mock(SubTimeStamped.class);
+        long timestamp = 111L;
+        given(ts.getTimeStamp()).willReturn(timestamp);
 
-		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts), TimeStamped.class));
+        factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts), TimeStamped.class));
 
-		TimeStamped tsp = (TimeStamped) factory.getProxy();
-		assertTrue(!(tsp instanceof SubTimeStamped));
-		assertTrue(tsp.getTimeStamp() == timestamp);
-	}
+        TimeStamped tsp = (TimeStamped) factory.getProxy();
+        assertTrue(!(tsp instanceof SubTimeStamped));
+        assertTrue(tsp.getTimeStamp() == timestamp);
+    }
 
-	@Test
-	public void testAutomaticInterfaceRecognitionInDelegate() throws Exception {
-		final long t = 1001L;
-		class Tester implements TimeStamped, ITester {
-			@Override
-			public void foo() throws Exception {
-			}
-			@Override
-			public long getTimeStamp() {
-				return t;
-			}
-		}
+    @Test
+    public void testAutomaticInterfaceRecognitionInDelegate() throws Exception {
+        final long t = 1001L;
+        class Tester implements TimeStamped, ITester {
+            @Override
+            public void foo() throws Exception {
+            }
 
-		DelegatingIntroductionInterceptor ii = new DelegatingIntroductionInterceptor(new Tester());
+            @Override
+            public long getTimeStamp() {
+                return t;
+            }
+        }
 
-		TestBean target = new TestBean();
+        DelegatingIntroductionInterceptor ii = new DelegatingIntroductionInterceptor(new Tester());
 
-		ProxyFactory pf = new ProxyFactory(target);
-		pf.addAdvisor(0, new DefaultIntroductionAdvisor(ii));
+        TestBean target = new TestBean();
 
-		//assertTrue(Arrays.binarySearch(pf.getProxiedInterfaces(), TimeStamped.class) != -1);
-		TimeStamped ts = (TimeStamped) pf.getProxy();
+        ProxyFactory pf = new ProxyFactory(target);
+        pf.addAdvisor(0, new DefaultIntroductionAdvisor(ii));
 
-		assertTrue(ts.getTimeStamp() == t);
-		((ITester) ts).foo();
+        //assertTrue(Arrays.binarySearch(pf.getProxiedInterfaces(), TimeStamped.class) != -1);
+        TimeStamped ts = (TimeStamped) pf.getProxy();
 
-		((ITestBean) ts).getAge();
-	}
+        assertTrue(ts.getTimeStamp() == t);
+        ((ITester) ts).foo();
 
-
-	@Test
-	public void testAutomaticInterfaceRecognitionInSubclass() throws Exception {
-		final long t = 1001L;
-		@SuppressWarnings("serial")
-		class TestII extends DelegatingIntroductionInterceptor implements TimeStamped, ITester {
-			@Override
-			public void foo() throws Exception {
-			}
-			@Override
-			public long getTimeStamp() {
-				return t;
-			}
-		}
-
-		DelegatingIntroductionInterceptor ii = new TestII();
-
-		TestBean target = new TestBean();
-
-		ProxyFactory pf = new ProxyFactory(target);
-		IntroductionAdvisor ia = new DefaultIntroductionAdvisor(ii);
-		assertTrue(ia.isPerInstance());
-		pf.addAdvisor(0, ia);
-
-		//assertTrue(Arrays.binarySearch(pf.getProxiedInterfaces(), TimeStamped.class) != -1);
-		TimeStamped ts = (TimeStamped) pf.getProxy();
-
-		assertThat(ts, instanceOf(TimeStamped.class));
-		// Shouldn't proxy framework interfaces
-		assertTrue(!(ts instanceof MethodInterceptor));
-		assertTrue(!(ts instanceof IntroductionInterceptor));
-
-		assertTrue(ts.getTimeStamp() == t);
-		((ITester) ts).foo();
-		((ITestBean) ts).getAge();
-
-		// Test removal
-		ii.suppressInterface(TimeStamped.class);
-		// Note that we need to construct a new proxy factory,
-		// or suppress the interface on the proxy factory
-		pf = new ProxyFactory(target);
-		pf.addAdvisor(0, new DefaultIntroductionAdvisor(ii));
-		Object o = pf.getProxy();
-		assertTrue(!(o instanceof TimeStamped));
-	}
-
-	@SuppressWarnings("serial")
-	@Test
-	public void testIntroductionInterceptorDoesntReplaceToString() throws Exception {
-		TestBean raw = new TestBean();
-		assertTrue(! (raw instanceof TimeStamped));
-		ProxyFactory factory = new ProxyFactory(raw);
-
-		TimeStamped ts = new SerializableTimeStamped(0);
-
-		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts) {
-			@Override
-			public String toString() {
-				throw new UnsupportedOperationException("Shouldn't be invoked");
-			}
-		}));
-
-		TimeStamped tsp = (TimeStamped) factory.getProxy();
-		assertEquals(0, tsp.getTimeStamp());
-
-		assertEquals(raw.toString(), tsp.toString());
-	}
-
-	@Test
-	public void testDelegateReturnsThisIsMassagedToReturnProxy() {
-		NestedTestBean target = new NestedTestBean();
-		String company = "Interface21";
-		target.setCompany(company);
-		TestBean delegate = new TestBean() {
-			@Override
-			public ITestBean getSpouse() {
-				return this;
-			}
-		};
-		ProxyFactory pf = new ProxyFactory(target);
-		pf.addAdvice(new DelegatingIntroductionInterceptor(delegate));
-		INestedTestBean proxy = (INestedTestBean) pf.getProxy();
-
-		assertEquals(company, proxy.getCompany());
-		ITestBean introduction = (ITestBean) proxy;
-		assertSame("Introduced method returning delegate returns proxy", introduction, introduction.getSpouse());
-		assertTrue("Introduced method returning delegate returns proxy", AopUtils.isAopProxy(introduction.getSpouse()));
-	}
-
-	@Test
-	public void testSerializableDelegatingIntroductionInterceptorSerializable() throws Exception {
-		SerializablePerson serializableTarget = new SerializablePerson();
-		String name = "Tony";
-		serializableTarget.setName("Tony");
-
-		ProxyFactory factory = new ProxyFactory(serializableTarget);
-		factory.addInterface(Person.class);
-		long time = 1000;
-		TimeStamped ts = new SerializableTimeStamped(time);
-
-		factory.addAdvisor(new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts)));
-		factory.addAdvice(new SerializableNopInterceptor());
-
-		Person p = (Person) factory.getProxy();
-
-		assertEquals(name, p.getName());
-		assertEquals(time, ((TimeStamped) p).getTimeStamp());
-
-		Person p1 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
-		assertEquals(name, p1.getName());
-		assertEquals(time, ((TimeStamped) p1).getTimeStamp());
-	}
-
-	// Test when target implements the interface: should get interceptor by preference.
-	@Test
-	public void testIntroductionMasksTargetImplementation() throws Exception {
-		final long t = 1001L;
-		@SuppressWarnings("serial")
-		class TestII extends DelegatingIntroductionInterceptor implements TimeStamped {
-			@Override
-			public long getTimeStamp() {
-				return t;
-			}
-		}
-
-		DelegatingIntroductionInterceptor ii = new TestII();
-
-		// != t
-		TestBean target = new TargetClass(t + 1);
-
-		ProxyFactory pf = new ProxyFactory(target);
-		pf.addAdvisor(0, new DefaultIntroductionAdvisor(ii));
-
-		TimeStamped ts = (TimeStamped) pf.getProxy();
-		// From introduction interceptor, not target
-		assertTrue(ts.getTimeStamp() == t);
-	}
+        ((ITestBean) ts).getAge();
+    }
 
 
-	@SuppressWarnings("serial")
-	private static class SerializableTimeStamped implements TimeStamped, Serializable {
+    @Test
+    public void testAutomaticInterfaceRecognitionInSubclass() throws Exception {
+        final long t = 1001L;
+        @SuppressWarnings("serial")
+        class TestII extends DelegatingIntroductionInterceptor implements TimeStamped, ITester {
+            @Override
+            public void foo() throws Exception {
+            }
 
-		private final long ts;
+            @Override
+            public long getTimeStamp() {
+                return t;
+            }
+        }
 
-		public SerializableTimeStamped(long ts) {
-			this.ts = ts;
-		}
+        DelegatingIntroductionInterceptor ii = new TestII();
 
-		@Override
-		public long getTimeStamp() {
-			return ts;
-		}
-	}
+        TestBean target = new TestBean();
+
+        ProxyFactory pf = new ProxyFactory(target);
+        IntroductionAdvisor ia = new DefaultIntroductionAdvisor(ii);
+        assertTrue(ia.isPerInstance());
+        pf.addAdvisor(0, ia);
+
+        //assertTrue(Arrays.binarySearch(pf.getProxiedInterfaces(), TimeStamped.class) != -1);
+        TimeStamped ts = (TimeStamped) pf.getProxy();
+
+        assertThat(ts, instanceOf(TimeStamped.class));
+        // Shouldn't proxy framework interfaces
+        assertTrue(!(ts instanceof MethodInterceptor));
+        assertTrue(!(ts instanceof IntroductionInterceptor));
+
+        assertTrue(ts.getTimeStamp() == t);
+        ((ITester) ts).foo();
+        ((ITestBean) ts).getAge();
+
+        // Test removal
+        ii.suppressInterface(TimeStamped.class);
+        // Note that we need to construct a new proxy factory,
+        // or suppress the interface on the proxy factory
+        pf = new ProxyFactory(target);
+        pf.addAdvisor(0, new DefaultIntroductionAdvisor(ii));
+        Object o = pf.getProxy();
+        assertTrue(!(o instanceof TimeStamped));
+    }
+
+    @SuppressWarnings("serial")
+    @Test
+    public void testIntroductionInterceptorDoesntReplaceToString() throws Exception {
+        TestBean raw = new TestBean();
+        assertTrue(!(raw instanceof TimeStamped));
+        ProxyFactory factory = new ProxyFactory(raw);
+
+        TimeStamped ts = new SerializableTimeStamped(0);
+
+        factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts) {
+            @Override
+            public String toString() {
+                throw new UnsupportedOperationException("Shouldn't be invoked");
+            }
+        }));
+
+        TimeStamped tsp = (TimeStamped) factory.getProxy();
+        assertEquals(0, tsp.getTimeStamp());
+
+        assertEquals(raw.toString(), tsp.toString());
+    }
+
+    @Test
+    public void testDelegateReturnsThisIsMassagedToReturnProxy() {
+        NestedTestBean target = new NestedTestBean();
+        String company = "Interface21";
+        target.setCompany(company);
+        TestBean delegate = new TestBean() {
+            @Override
+            public ITestBean getSpouse() {
+                return this;
+            }
+        };
+        ProxyFactory pf = new ProxyFactory(target);
+        pf.addAdvice(new DelegatingIntroductionInterceptor(delegate));
+        INestedTestBean proxy = (INestedTestBean) pf.getProxy();
+
+        assertEquals(company, proxy.getCompany());
+        ITestBean introduction = (ITestBean) proxy;
+        assertSame("Introduced method returning delegate returns proxy", introduction, introduction.getSpouse());
+        assertTrue("Introduced method returning delegate returns proxy", AopUtils.isAopProxy(introduction.getSpouse()));
+    }
+
+    @Test
+    public void testSerializableDelegatingIntroductionInterceptorSerializable() throws Exception {
+        SerializablePerson serializableTarget = new SerializablePerson();
+        String name = "Tony";
+        serializableTarget.setName("Tony");
+
+        ProxyFactory factory = new ProxyFactory(serializableTarget);
+        factory.addInterface(Person.class);
+        long time = 1000;
+        TimeStamped ts = new SerializableTimeStamped(time);
+
+        factory.addAdvisor(new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts)));
+        factory.addAdvice(new SerializableNopInterceptor());
+
+        Person p = (Person) factory.getProxy();
+
+        assertEquals(name, p.getName());
+        assertEquals(time, ((TimeStamped) p).getTimeStamp());
+
+        Person p1 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+        assertEquals(name, p1.getName());
+        assertEquals(time, ((TimeStamped) p1).getTimeStamp());
+    }
+
+    // Test when target implements the interface: should get interceptor by preference.
+    @Test
+    public void testIntroductionMasksTargetImplementation() throws Exception {
+        final long t = 1001L;
+        @SuppressWarnings("serial")
+        class TestII extends DelegatingIntroductionInterceptor implements TimeStamped {
+            @Override
+            public long getTimeStamp() {
+                return t;
+            }
+        }
+
+        DelegatingIntroductionInterceptor ii = new TestII();
+
+        // != t
+        TestBean target = new TargetClass(t + 1);
+
+        ProxyFactory pf = new ProxyFactory(target);
+        pf.addAdvisor(0, new DefaultIntroductionAdvisor(ii));
+
+        TimeStamped ts = (TimeStamped) pf.getProxy();
+        // From introduction interceptor, not target
+        assertTrue(ts.getTimeStamp() == t);
+    }
 
 
-	public static class TargetClass extends TestBean implements TimeStamped {
+    public interface ITester {
 
-		long t;
-
-		public TargetClass(long t) {
-			this.t = t;
-		}
-
-		@Override
-		public long getTimeStamp() {
-			return t;
-		}
-	}
+        void foo() throws Exception;
+    }
 
 
-	public interface ITester {
+    private static interface SubTimeStamped extends TimeStamped {
+    }
 
-		void foo() throws Exception;
-	}
+    @SuppressWarnings("serial")
+    private static class SerializableTimeStamped implements TimeStamped, Serializable {
 
+        private final long ts;
 
-	private static interface SubTimeStamped extends TimeStamped {
-	}
+        public SerializableTimeStamped(long ts) {
+            this.ts = ts;
+        }
+
+        @Override
+        public long getTimeStamp() {
+            return ts;
+        }
+    }
+
+    public static class TargetClass extends TestBean implements TimeStamped {
+
+        long t;
+
+        public TargetClass(long t) {
+            this.t = t;
+        }
+
+        @Override
+        public long getTimeStamp() {
+            return t;
+        }
+    }
 
 }

@@ -45,7 +45,6 @@ import org.springframework.util.Assert;
  * In general, we strongly recommend any other message format (e.g. JSON) instead.
  *
  * @author Juergen Hoeller
- * @since 1.1
  * @see #setServiceInterface
  * @see #setServiceUrl
  * @see #setCodebaseUrl
@@ -53,36 +52,37 @@ import org.springframework.util.Assert;
  * @see HttpInvokerServiceExporter
  * @see org.springframework.remoting.rmi.RmiProxyFactoryBean
  * @see org.springframework.remoting.caucho.HessianProxyFactoryBean
+ * @since 1.1
  */
 public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor implements FactoryBean<Object> {
 
-	@Nullable
-	private Object serviceProxy;
+    @Nullable
+    private Object serviceProxy;
 
 
-	@Override
-	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
-		Class<?> ifc = getServiceInterface();
-		Assert.notNull(ifc, "Property 'serviceInterface' is required");
-		this.serviceProxy = new ProxyFactory(ifc, this).getProxy(getBeanClassLoader());
-	}
+    @Override
+    public void afterPropertiesSet() {
+        super.afterPropertiesSet();
+        Class<?> ifc = getServiceInterface();
+        Assert.notNull(ifc, "Property 'serviceInterface' is required");
+        this.serviceProxy = new ProxyFactory(ifc, this).getProxy(getBeanClassLoader());
+    }
 
 
-	@Override
-	@Nullable
-	public Object getObject() {
-		return this.serviceProxy;
-	}
+    @Override
+    @Nullable
+    public Object getObject() {
+        return this.serviceProxy;
+    }
 
-	@Override
-	public Class<?> getObjectType() {
-		return getServiceInterface();
-	}
+    @Override
+    public Class<?> getObjectType() {
+        return getServiceInterface();
+    }
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
+    @Override
+    public boolean isSingleton() {
+        return true;
+    }
 
 }

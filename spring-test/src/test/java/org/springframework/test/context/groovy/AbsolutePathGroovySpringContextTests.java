@@ -23,13 +23,13 @@ import org.springframework.test.context.ContextConfiguration;
  * script using an absolute path.
  *
  * @author Sam Brannen
- * @since 4.1
  * @see GroovySpringContextTests
  * @see RelativePathGroovySpringContextTests
+ * @since 4.1
  */
 @ContextConfiguration(locations = "/org/springframework/test/context/groovy/context.groovy", inheritLocations = false)
 public class AbsolutePathGroovySpringContextTests extends GroovySpringContextTests {
 
-	/* all tests are in the superclass */
+    /* all tests are in the superclass */
 
 }

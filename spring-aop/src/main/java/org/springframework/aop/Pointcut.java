@@ -32,22 +32,23 @@ package org.springframework.aop;
  */
 public interface Pointcut {
 
-	/**
-	 * Return the ClassFilter for this pointcut.
-	 * @return the ClassFilter (never {@code null})
-	 */
-	ClassFilter getClassFilter();
+    /**
+     * Canonical Pointcut instance that always matches.
+     */
+    Pointcut TRUE = TruePointcut.INSTANCE;
 
-	/**
-	 * Return the MethodMatcher for this pointcut.
-	 * @return the MethodMatcher (never {@code null})
-	 */
-	MethodMatcher getMethodMatcher();
+    /**
+     * Return the ClassFilter for this pointcut.
+     *
+     * @return the ClassFilter (never {@code null})
+     */
+    ClassFilter getClassFilter();
 
-
-	/**
-	 * Canonical Pointcut instance that always matches.
-	 */
-	Pointcut TRUE = TruePointcut.INSTANCE;
+    /**
+     * Return the MethodMatcher for this pointcut.
+     *
+     * @return the MethodMatcher (never {@code null})
+     */
+    MethodMatcher getMethodMatcher();
 
 }

@@ -16,9 +16,8 @@
 
 package org.springframework.test.web.servlet.setup;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.util.Assert;
+import org.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -27,9 +26,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.util.Assert;
-import org.springframework.web.util.UrlPathHelper;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A Filter that invokes a delegate {@link Filter} only if the request URL
@@ -41,101 +40,103 @@ import org.springframework.web.util.UrlPathHelper;
  */
 final class PatternMappingFilterProxy implements Filter {
 
-	private static final String EXTENSION_MAPPING_PATTERN = "*.";
+    private static final String EXTENSION_MAPPING_PATTERN = "*.";
 
-	private static final String PATH_MAPPING_PATTERN = "/*";
+    private static final String PATH_MAPPING_PATTERN = "/*";
 
-	private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
+    private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
-	private final Filter delegate;
+    private final Filter delegate;
 
-	/** Patterns that require an exact match, e.g. "/test" */
-	private final List<String> exactMatches = new ArrayList<>();
+    /**
+     * Patterns that require an exact match, e.g. "/test"
+     */
+    private final List<String> exactMatches = new ArrayList<>();
 
-	/** Patterns that require the URL to have a specific prefix, e.g. "/test/*" */
-	private final List<String> startsWithMatches = new ArrayList<>();
+    /**
+     * Patterns that require the URL to have a specific prefix, e.g. "/test/*"
+     */
+    private final List<String> startsWithMatches = new ArrayList<>();
 
-	/** Patterns that require the request URL to have a specific suffix, e.g. "*.html" */
-	private final List<String> endsWithMatches = new ArrayList<>();
-
-
-	/**
-	 * Creates a new instance.
-	 */
-	public PatternMappingFilterProxy(Filter delegate, String... urlPatterns) {
-		Assert.notNull(delegate, "A delegate Filter is required");
-		this.delegate = delegate;
-		for (String urlPattern : urlPatterns) {
-			addUrlPattern(urlPattern);
-		}
-	}
-
-	private void addUrlPattern(String urlPattern) {
-		Assert.notNull(urlPattern, "Found null URL Pattern");
-		if (urlPattern.startsWith(EXTENSION_MAPPING_PATTERN)) {
-			this.endsWithMatches.add(urlPattern.substring(1, urlPattern.length()));
-		}
-		else if (urlPattern.equals(PATH_MAPPING_PATTERN)) {
-			this.startsWithMatches.add("");
-		}
-		else if (urlPattern.endsWith(PATH_MAPPING_PATTERN)) {
-			this.startsWithMatches.add(urlPattern.substring(0, urlPattern.length() - 1));
-			this.exactMatches.add(urlPattern.substring(0, urlPattern.length() - 2));
-		}
-		else {
-			if ("".equals(urlPattern)) {
-				urlPattern = "/";
-			}
-			this.exactMatches.add(urlPattern);
-		}
-	}
+    /**
+     * Patterns that require the request URL to have a specific suffix, e.g. "*.html"
+     */
+    private final List<String> endsWithMatches = new ArrayList<>();
 
 
-	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
-			throws IOException, ServletException {
+    /**
+     * Creates a new instance.
+     */
+    public PatternMappingFilterProxy(Filter delegate, String... urlPatterns) {
+        Assert.notNull(delegate, "A delegate Filter is required");
+        this.delegate = delegate;
+        for (String urlPattern : urlPatterns) {
+            addUrlPattern(urlPattern);
+        }
+    }
 
-		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		String requestPath = urlPathHelper.getPathWithinApplication(httpRequest);
+    private void addUrlPattern(String urlPattern) {
+        Assert.notNull(urlPattern, "Found null URL Pattern");
+        if (urlPattern.startsWith(EXTENSION_MAPPING_PATTERN)) {
+            this.endsWithMatches.add(urlPattern.substring(1, urlPattern.length()));
+        } else if (urlPattern.equals(PATH_MAPPING_PATTERN)) {
+            this.startsWithMatches.add("");
+        } else if (urlPattern.endsWith(PATH_MAPPING_PATTERN)) {
+            this.startsWithMatches.add(urlPattern.substring(0, urlPattern.length() - 1));
+            this.exactMatches.add(urlPattern.substring(0, urlPattern.length() - 2));
+        } else {
+            if ("".equals(urlPattern)) {
+                urlPattern = "/";
+            }
+            this.exactMatches.add(urlPattern);
+        }
+    }
 
-		if (matches(requestPath)) {
-			this.delegate.doFilter(request, response, filterChain);
-		}
-		else {
-			filterChain.doFilter(request, response);
-		}
-	}
 
-	private boolean matches(String requestPath) {
-		for (String pattern : this.exactMatches) {
-			if (pattern.equals(requestPath)) {
-				return true;
-			}
-		}
-		if (!requestPath.startsWith("/")) {
-			return false;
-		}
-		for (String pattern : this.endsWithMatches) {
-			if (requestPath.endsWith(pattern)) {
-				return true;
-			}
-		}
-		for (String pattern : this.startsWithMatches) {
-			if (requestPath.startsWith(pattern)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
+            throws IOException, ServletException {
 
-	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		this.delegate.init(filterConfig);
-	}
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        String requestPath = urlPathHelper.getPathWithinApplication(httpRequest);
 
-	@Override
-	public void destroy() {
-		this.delegate.destroy();
-	}
+        if (matches(requestPath)) {
+            this.delegate.doFilter(request, response, filterChain);
+        } else {
+            filterChain.doFilter(request, response);
+        }
+    }
+
+    private boolean matches(String requestPath) {
+        for (String pattern : this.exactMatches) {
+            if (pattern.equals(requestPath)) {
+                return true;
+            }
+        }
+        if (!requestPath.startsWith("/")) {
+            return false;
+        }
+        for (String pattern : this.endsWithMatches) {
+            if (requestPath.endsWith(pattern)) {
+                return true;
+            }
+        }
+        for (String pattern : this.startsWithMatches) {
+            if (requestPath.startsWith(pattern)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        this.delegate.init(filterConfig);
+    }
+
+    @Override
+    public void destroy() {
+        this.delegate.destroy();
+    }
 
 }

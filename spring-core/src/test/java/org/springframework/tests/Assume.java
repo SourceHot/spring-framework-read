@@ -16,12 +16,12 @@
 
 package org.springframework.tests;
 
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.junit.AssumptionViolatedException;
 
-import static org.junit.Assume.*;
+import java.util.Set;
+
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Provides utility methods that allow JUnit tests to {@link org.junit.Assume} certain
@@ -41,76 +41,78 @@ import static org.junit.Assume.*;
  * @author Rob Winch
  * @author Phillip Webb
  * @author Sam Brannen
- * @since 3.2
  * @see #group(TestGroup)
  * @see #group(TestGroup, Executable)
+ * @since 3.2
  */
 public abstract class Assume {
 
-	static final String TEST_GROUPS_SYSTEM_PROPERTY = "testGroups";
+    static final String TEST_GROUPS_SYSTEM_PROPERTY = "testGroups";
 
 
-	/**
-	 * Assume that a particular {@link TestGroup} has been specified.
-	 * @param group the group that must be specified
-	 * @throws AssumptionViolatedException if the assumption fails
-	 */
-	public static void group(TestGroup group) {
-		Set<TestGroup> testGroups = loadTestGroups();
-		if (!testGroups.contains(group)) {
-			throw new AssumptionViolatedException("Requires unspecified group " + group + " from " + testGroups);
-		}
-	}
+    /**
+     * Assume that a particular {@link TestGroup} has been specified.
+     *
+     * @param group the group that must be specified
+     * @throws AssumptionViolatedException if the assumption fails
+     */
+    public static void group(TestGroup group) {
+        Set<TestGroup> testGroups = loadTestGroups();
+        if (!testGroups.contains(group)) {
+            throw new AssumptionViolatedException("Requires unspecified group " + group + " from " + testGroups);
+        }
+    }
 
-	/**
-	 * Assume that a particular {@link TestGroup} has been specified before
-	 * executing the supplied {@link Executable}.
-	 * <p>If the assumption fails, the executable will not be executed, but
-	 * no {@link AssumptionViolatedException} will be thrown.
-	 * @param group the group that must be specified
-	 * @param executable the executable to execute if the test group is active
-	 * @since 4.2
-	 */
-	public static void group(TestGroup group, Executable executable) throws Exception {
-		Set<TestGroup> testGroups = loadTestGroups();
-		if (testGroups.contains(group)) {
-			executable.execute();
-		}
-	}
+    /**
+     * Assume that a particular {@link TestGroup} has been specified before
+     * executing the supplied {@link Executable}.
+     * <p>If the assumption fails, the executable will not be executed, but
+     * no {@link AssumptionViolatedException} will be thrown.
+     *
+     * @param group      the group that must be specified
+     * @param executable the executable to execute if the test group is active
+     * @since 4.2
+     */
+    public static void group(TestGroup group, Executable executable) throws Exception {
+        Set<TestGroup> testGroups = loadTestGroups();
+        if (testGroups.contains(group)) {
+            executable.execute();
+        }
+    }
 
-	/**
-	 * Assume that the specified log is not set to Trace or Debug.
-	 * @param log the log to test
-	 * @throws AssumptionViolatedException if the assumption fails
-	 */
-	public static void notLogging(Log log) {
-		assumeFalse(log.isTraceEnabled());
-		assumeFalse(log.isDebugEnabled());
-	}
+    /**
+     * Assume that the specified log is not set to Trace or Debug.
+     *
+     * @param log the log to test
+     * @throws AssumptionViolatedException if the assumption fails
+     */
+    public static void notLogging(Log log) {
+        assumeFalse(log.isTraceEnabled());
+        assumeFalse(log.isDebugEnabled());
+    }
 
-	/**
-	 * Load test groups dynamically instead of during static
-	 * initialization in order to avoid a {@link NoClassDefFoundError}
-	 * being thrown while attempting to load the {@code Assume} class.
-	 */
-	private static Set<TestGroup> loadTestGroups() {
-		try {
-			return TestGroup.parse(System.getProperty(TEST_GROUPS_SYSTEM_PROPERTY));
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException("Failed to parse '" + TEST_GROUPS_SYSTEM_PROPERTY
-					+ "' system property: " + ex.getMessage(), ex);
-		}
-	}
+    /**
+     * Load test groups dynamically instead of during static
+     * initialization in order to avoid a {@link NoClassDefFoundError}
+     * being thrown while attempting to load the {@code Assume} class.
+     */
+    private static Set<TestGroup> loadTestGroups() {
+        try {
+            return TestGroup.parse(System.getProperty(TEST_GROUPS_SYSTEM_PROPERTY));
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to parse '" + TEST_GROUPS_SYSTEM_PROPERTY
+                    + "' system property: " + ex.getMessage(), ex);
+        }
+    }
 
 
-	/**
-	 * @since 4.2
-	 */
-	@FunctionalInterface
-	public interface Executable {
+    /**
+     * @since 4.2
+     */
+    @FunctionalInterface
+    public interface Executable {
 
-		void execute() throws Exception;
-	}
+        void execute() throws Exception;
+    }
 
 }

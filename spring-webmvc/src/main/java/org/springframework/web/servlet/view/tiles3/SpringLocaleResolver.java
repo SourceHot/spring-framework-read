@@ -16,16 +16,14 @@
 
 package org.springframework.web.servlet.view.tiles3;
 
-import java.util.Locale;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.tiles.locale.impl.DefaultLocaleResolver;
 import org.apache.tiles.request.Request;
 import org.apache.tiles.request.servlet.NotAServletEnvironmentException;
 import org.apache.tiles.request.servlet.ServletUtil;
-
 import org.springframework.web.servlet.support.RequestContextUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Locale;
 
 /**
  * Tiles LocaleResolver adapter that delegates to a Spring
@@ -35,23 +33,22 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * <p>This adapter gets automatically registered by {@link TilesConfigurer}.
  *
  * @author Nicolas Le Bas
- * @since 3.2
  * @see org.apache.tiles.definition.UrlDefinitionsFactory#LOCALE_RESOLVER_IMPL_PROPERTY
+ * @since 3.2
  */
 public class SpringLocaleResolver extends DefaultLocaleResolver {
 
-	@Override
-	public Locale resolveLocale(Request request) {
-		try {
-			HttpServletRequest servletRequest = ServletUtil.getServletRequest(request).getRequest();
-			if (servletRequest != null) {
-				return RequestContextUtils.getLocale(servletRequest);
-			}
-		}
-		catch (NotAServletEnvironmentException ex) {
-			// ignore
-		}
-		return super.resolveLocale(request);
-	}
+    @Override
+    public Locale resolveLocale(Request request) {
+        try {
+            HttpServletRequest servletRequest = ServletUtil.getServletRequest(request).getRequest();
+            if (servletRequest != null) {
+                return RequestContextUtils.getLocale(servletRequest);
+            }
+        } catch (NotAServletEnvironmentException ex) {
+            // ignore
+        }
+        return super.resolveLocale(request);
+    }
 
 }

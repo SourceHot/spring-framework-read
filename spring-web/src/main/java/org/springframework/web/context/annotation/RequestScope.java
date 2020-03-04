@@ -16,16 +16,16 @@
 
 package org.springframework.web.context.annotation;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.web.context.WebApplicationContext;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * {@code @RequestScope} is a specialization of {@link Scope @Scope} for a
@@ -39,7 +39,6 @@ import org.springframework.web.context.WebApplicationContext;
  * composed annotations.
  *
  * @author Sam Brannen
- * @since 4.3
  * @see SessionScope
  * @see ApplicationScope
  * @see org.springframework.context.annotation.Scope
@@ -47,6 +46,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @see org.springframework.web.context.request.RequestScope
  * @see org.springframework.stereotype.Component
  * @see org.springframework.context.annotation.Bean
+ * @since 4.3
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -54,11 +54,11 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(WebApplicationContext.SCOPE_REQUEST)
 public @interface RequestScope {
 
-	/**
-	 * Alias for {@link Scope#proxyMode}.
-	 * <p>Defaults to {@link ScopedProxyMode#TARGET_CLASS}.
-	 */
-	@AliasFor(annotation = Scope.class)
-	ScopedProxyMode proxyMode() default ScopedProxyMode.TARGET_CLASS;
+    /**
+     * Alias for {@link Scope#proxyMode}.
+     * <p>Defaults to {@link ScopedProxyMode#TARGET_CLASS}.
+     */
+    @AliasFor(annotation = Scope.class)
+    ScopedProxyMode proxyMode() default ScopedProxyMode.TARGET_CLASS;
 
 }

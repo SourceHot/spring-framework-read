@@ -20,7 +20,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ScopedProxyUtils}.
@@ -30,45 +33,45 @@ import static org.junit.Assert.*;
  */
 public class ScopedProxyUtilsTests {
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
 
 
-	@Test
-	public void getTargetBeanNameAndIsScopedTarget() {
-		String originalBeanName = "myBean";
-		String targetBeanName = ScopedProxyUtils.getTargetBeanName(originalBeanName);
+    @Test
+    public void getTargetBeanNameAndIsScopedTarget() {
+        String originalBeanName = "myBean";
+        String targetBeanName = ScopedProxyUtils.getTargetBeanName(originalBeanName);
 
-		assertNotEquals(originalBeanName, targetBeanName);
-		assertTrue(targetBeanName.endsWith(originalBeanName));
-		assertTrue(ScopedProxyUtils.isScopedTarget(targetBeanName));
-		assertFalse(ScopedProxyUtils.isScopedTarget(originalBeanName));
-	}
+        assertNotEquals(originalBeanName, targetBeanName);
+        assertTrue(targetBeanName.endsWith(originalBeanName));
+        assertTrue(ScopedProxyUtils.isScopedTarget(targetBeanName));
+        assertFalse(ScopedProxyUtils.isScopedTarget(originalBeanName));
+    }
 
-	@Test
-	public void getOriginalBeanNameAndIsScopedTarget() {
-		String originalBeanName = "myBean";
-		String targetBeanName = ScopedProxyUtils.getTargetBeanName(originalBeanName);
-		String parsedOriginalBeanName = ScopedProxyUtils.getOriginalBeanName(targetBeanName);
+    @Test
+    public void getOriginalBeanNameAndIsScopedTarget() {
+        String originalBeanName = "myBean";
+        String targetBeanName = ScopedProxyUtils.getTargetBeanName(originalBeanName);
+        String parsedOriginalBeanName = ScopedProxyUtils.getOriginalBeanName(targetBeanName);
 
-		assertNotEquals(targetBeanName, parsedOriginalBeanName);
-		assertEquals(originalBeanName, parsedOriginalBeanName);
-		assertTrue(ScopedProxyUtils.isScopedTarget(targetBeanName));
-		assertFalse(ScopedProxyUtils.isScopedTarget(parsedOriginalBeanName));
-	}
+        assertNotEquals(targetBeanName, parsedOriginalBeanName);
+        assertEquals(originalBeanName, parsedOriginalBeanName);
+        assertTrue(ScopedProxyUtils.isScopedTarget(targetBeanName));
+        assertFalse(ScopedProxyUtils.isScopedTarget(parsedOriginalBeanName));
+    }
 
-	@Test
-	public void getOriginalBeanNameForNullTargetBean() {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage("bean name 'null' does not refer to the target of a scoped proxy");
-		ScopedProxyUtils.getOriginalBeanName(null);
-	}
+    @Test
+    public void getOriginalBeanNameForNullTargetBean() {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("bean name 'null' does not refer to the target of a scoped proxy");
+        ScopedProxyUtils.getOriginalBeanName(null);
+    }
 
-	@Test
-	public void getOriginalBeanNameForNonScopedTarget() {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage("bean name 'myBean' does not refer to the target of a scoped proxy");
-		ScopedProxyUtils.getOriginalBeanName("myBean");
-	}
+    @Test
+    public void getOriginalBeanNameForNonScopedTarget() {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("bean name 'myBean' does not refer to the target of a scoped proxy");
+        ScopedProxyUtils.getOriginalBeanName("myBean");
+    }
 
 }

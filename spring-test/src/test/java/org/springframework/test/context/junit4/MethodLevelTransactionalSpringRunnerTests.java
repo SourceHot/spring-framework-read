@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.junit4;
 
-import javax.sql.DataSource;
-
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,8 +30,10 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.transaction.TransactionTestUtils.*;
+import javax.sql.DataSource;
+
+import static org.junit.Assert.assertEquals;
+import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 /**
  * JUnit 4 based integration test which verifies support of Spring's
@@ -53,55 +53,54 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
  * at the <strong>method level</strong>.
  *
  * @author Sam Brannen
- * @since 2.5
  * @see ClassLevelTransactionalSpringRunnerTests
+ * @since 2.5
  */
-@TestExecutionListeners({ DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-	TransactionalTestExecutionListener.class })
+@TestExecutionListeners({DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
+        TransactionalTestExecutionListener.class})
 public class MethodLevelTransactionalSpringRunnerTests extends AbstractTransactionalSpringRunnerTests {
 
-	protected static JdbcTemplate jdbcTemplate;
+    protected static JdbcTemplate jdbcTemplate;
 
+    @AfterClass
+    public static void verifyFinalTestData() {
+        assertEquals("Verifying the final number of rows in the person table after all tests.", 4,
+                countRowsInPersonTable(jdbcTemplate));
+    }
 
-	@Autowired
-	@Qualifier("dataSource2")
-	public void setDataSource(DataSource dataSource) {
-		jdbcTemplate = new JdbcTemplate(dataSource);
-	}
+    @Autowired
+    @Qualifier("dataSource2")
+    public void setDataSource(DataSource dataSource) {
+        jdbcTemplate = new JdbcTemplate(dataSource);
+    }
 
-	@AfterClass
-	public static void verifyFinalTestData() {
-		assertEquals("Verifying the final number of rows in the person table after all tests.", 4,
-			countRowsInPersonTable(jdbcTemplate));
-	}
+    @Before
+    public void verifyInitialTestData() {
+        clearPersonTable(jdbcTemplate);
+        assertEquals("Adding bob", 1, addPerson(jdbcTemplate, BOB));
+        assertEquals("Verifying the initial number of rows in the person table.", 1,
+                countRowsInPersonTable(jdbcTemplate));
+    }
 
-	@Before
-	public void verifyInitialTestData() {
-		clearPersonTable(jdbcTemplate);
-		assertEquals("Adding bob", 1, addPerson(jdbcTemplate, BOB));
-		assertEquals("Verifying the initial number of rows in the person table.", 1,
-			countRowsInPersonTable(jdbcTemplate));
-	}
+    @Test
+    @Transactional("transactionManager2")
+    public void modifyTestDataWithinTransaction() {
+        assertInTransaction(true);
+        assertEquals("Deleting bob", 1, deletePerson(jdbcTemplate, BOB));
+        assertEquals("Adding jane", 1, addPerson(jdbcTemplate, JANE));
+        assertEquals("Adding sue", 1, addPerson(jdbcTemplate, SUE));
+        assertEquals("Verifying the number of rows in the person table within a transaction.", 2,
+                countRowsInPersonTable(jdbcTemplate));
+    }
 
-	@Test
-	@Transactional("transactionManager2")
-	public void modifyTestDataWithinTransaction() {
-		assertInTransaction(true);
-		assertEquals("Deleting bob", 1, deletePerson(jdbcTemplate, BOB));
-		assertEquals("Adding jane", 1, addPerson(jdbcTemplate, JANE));
-		assertEquals("Adding sue", 1, addPerson(jdbcTemplate, SUE));
-		assertEquals("Verifying the number of rows in the person table within a transaction.", 2,
-			countRowsInPersonTable(jdbcTemplate));
-	}
-
-	@Test
-	public void modifyTestDataWithoutTransaction() {
-		assertInTransaction(false);
-		assertEquals("Adding luke", 1, addPerson(jdbcTemplate, LUKE));
-		assertEquals("Adding leia", 1, addPerson(jdbcTemplate, LEIA));
-		assertEquals("Adding yoda", 1, addPerson(jdbcTemplate, YODA));
-		assertEquals("Verifying the number of rows in the person table without a transaction.", 4,
-			countRowsInPersonTable(jdbcTemplate));
-	}
+    @Test
+    public void modifyTestDataWithoutTransaction() {
+        assertInTransaction(false);
+        assertEquals("Adding luke", 1, addPerson(jdbcTemplate, LUKE));
+        assertEquals("Adding leia", 1, addPerson(jdbcTemplate, LEIA));
+        assertEquals("Adding yoda", 1, addPerson(jdbcTemplate, YODA));
+        assertEquals("Verifying the number of rows in the person table without a transaction.", 4,
+                countRowsInPersonTable(jdbcTemplate));
+    }
 
 }

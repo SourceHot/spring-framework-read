@@ -40,46 +40,49 @@ import org.springframework.ui.ModelMap;
  * generic request interceptors as minimal as feasible.
  *
  * @author Juergen Hoeller
- * @since 2.0
  * @see ServletWebRequest
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping#setInterceptors
  * @see org.springframework.web.servlet.HandlerInterceptor
+ * @since 2.0
  */
 public interface WebRequestInterceptor {
 
-	/**
-	 * Intercept the execution of a request handler <i>before</i> its invocation.
-	 * <p>Allows for preparing context resources (such as a Hibernate Session)
-	 * and expose them as request attributes or as thread-local objects.
-	 * @param request the current web request
-	 * @throws Exception in case of errors
-	 */
-	void preHandle(WebRequest request) throws Exception;
+    /**
+     * Intercept the execution of a request handler <i>before</i> its invocation.
+     * <p>Allows for preparing context resources (such as a Hibernate Session)
+     * and expose them as request attributes or as thread-local objects.
+     *
+     * @param request the current web request
+     * @throws Exception in case of errors
+     */
+    void preHandle(WebRequest request) throws Exception;
 
-	/**
-	 * Intercept the execution of a request handler <i>after</i> its successful
-	 * invocation, right before view rendering (if any).
-	 * <p>Allows for modifying context resources after successful handler
-	 * execution (for example, flushing a Hibernate Session).
-	 * @param request the current web request
-	 * @param model the map of model objects that will be exposed to the view
-	 * (may be {@code null}). Can be used to analyze the exposed model
-	 * and/or to add further model attributes, if desired.
-	 * @throws Exception in case of errors
-	 */
-	void postHandle(WebRequest request, @Nullable ModelMap model) throws Exception;
+    /**
+     * Intercept the execution of a request handler <i>after</i> its successful
+     * invocation, right before view rendering (if any).
+     * <p>Allows for modifying context resources after successful handler
+     * execution (for example, flushing a Hibernate Session).
+     *
+     * @param request the current web request
+     * @param model   the map of model objects that will be exposed to the view
+     *                (may be {@code null}). Can be used to analyze the exposed model
+     *                and/or to add further model attributes, if desired.
+     * @throws Exception in case of errors
+     */
+    void postHandle(WebRequest request, @Nullable ModelMap model) throws Exception;
 
-	/**
-	 * Callback after completion of request processing, that is, after rendering
-	 * the view. Will be called on any outcome of handler execution, thus allows
-	 * for proper resource cleanup.
-	 * <p>Note: Will only be called if this interceptor's {@code preHandle}
-	 * method has successfully completed!
-	 * @param request the current web request
-	 * @param ex exception thrown on handler execution, if any
-	 * @throws Exception in case of errors
-	 */
-	void afterCompletion(WebRequest request, @Nullable Exception ex) throws Exception;
+    /**
+     * Callback after completion of request processing, that is, after rendering
+     * the view. Will be called on any outcome of handler execution, thus allows
+     * for proper resource cleanup.
+     * <p>Note: Will only be called if this interceptor's {@code preHandle}
+     * method has successfully completed!
+     *
+     * @param request the current web request
+     * @param ex      exception thrown on handler execution, if any
+     * @throws Exception in case of errors
+     */
+    void afterCompletion(WebRequest request, @Nullable Exception ex) throws Exception;
 
 }

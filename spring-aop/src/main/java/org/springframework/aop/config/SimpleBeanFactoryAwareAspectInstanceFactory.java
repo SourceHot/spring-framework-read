@@ -35,58 +35,58 @@ import org.springframework.util.ClassUtils;
  */
 public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstanceFactory, BeanFactoryAware {
 
-	@Nullable
-	private String aspectBeanName;
+    @Nullable
+    private String aspectBeanName;
 
-	@Nullable
-	private BeanFactory beanFactory;
-
-
-	/**
-	 * Set the name of the aspect bean. This is the bean that is returned when calling
-	 * {@link #getAspectInstance()}.
-	 */
-	public void setAspectBeanName(String aspectBeanName) {
-		this.aspectBeanName = aspectBeanName;
-	}
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
-		Assert.notNull(this.aspectBeanName, "'aspectBeanName' is required");
-	}
+    @Nullable
+    private BeanFactory beanFactory;
 
 
-	/**
-	 * Look up the aspect bean from the {@link BeanFactory} and returns it.
-	 * @see #setAspectBeanName
-	 */
-	@Override
-	public Object getAspectInstance() {
-		Assert.state(this.beanFactory != null, "No BeanFactory set");
-		Assert.state(this.aspectBeanName != null, "No 'aspectBeanName' set");
-		return this.beanFactory.getBean(this.aspectBeanName);
-	}
+    /**
+     * Set the name of the aspect bean. This is the bean that is returned when calling
+     * {@link #getAspectInstance()}.
+     */
+    public void setAspectBeanName(String aspectBeanName) {
+        this.aspectBeanName = aspectBeanName;
+    }
 
-	@Override
-	@Nullable
-	public ClassLoader getAspectClassLoader() {
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
-		}
-		else {
-			return ClassUtils.getDefaultClassLoader();
-		}
-	}
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
+        Assert.notNull(this.aspectBeanName, "'aspectBeanName' is required");
+    }
 
-	@Override
-	public int getOrder() {
-		if (this.beanFactory != null && this.aspectBeanName != null &&
-				this.beanFactory.isSingleton(this.aspectBeanName) &&
-				this.beanFactory.isTypeMatch(this.aspectBeanName, Ordered.class)) {
-			return ((Ordered) this.beanFactory.getBean(this.aspectBeanName)).getOrder();
-		}
-		return Ordered.LOWEST_PRECEDENCE;
-	}
+
+    /**
+     * Look up the aspect bean from the {@link BeanFactory} and returns it.
+     *
+     * @see #setAspectBeanName
+     */
+    @Override
+    public Object getAspectInstance() {
+        Assert.state(this.beanFactory != null, "No BeanFactory set");
+        Assert.state(this.aspectBeanName != null, "No 'aspectBeanName' set");
+        return this.beanFactory.getBean(this.aspectBeanName);
+    }
+
+    @Override
+    @Nullable
+    public ClassLoader getAspectClassLoader() {
+        if (this.beanFactory instanceof ConfigurableBeanFactory) {
+            return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
+        } else {
+            return ClassUtils.getDefaultClassLoader();
+        }
+    }
+
+    @Override
+    public int getOrder() {
+        if (this.beanFactory != null && this.aspectBeanName != null &&
+                this.beanFactory.isSingleton(this.aspectBeanName) &&
+                this.beanFactory.isTypeMatch(this.aspectBeanName, Ordered.class)) {
+            return ((Ordered) this.beanFactory.getBean(this.aspectBeanName)).getOrder();
+        }
+        return Ordered.LOWEST_PRECEDENCE;
+    }
 
 }

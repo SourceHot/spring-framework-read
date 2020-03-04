@@ -19,7 +19,6 @@ package org.springframework.test.context.web;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-
 import org.springframework.test.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -34,9 +33,9 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(Suite.class)
 // Note: the following 'multi-line' layout is for enhanced code readability.
 @SuiteClasses({//
-BasicXmlWacTests.class,//
-	BasicAnnotationConfigWacTests.class,//
-	RequestAndSessionScopedBeansWacTests.class //
+        BasicXmlWacTests.class,//
+        BasicAnnotationConfigWacTests.class,//
+        RequestAndSessionScopedBeansWacTests.class //
 })
 public class WebContextLoaderTestSuite {
 }

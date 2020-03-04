@@ -16,9 +16,9 @@
 
 package org.springframework.transaction;
 
-import java.sql.Connection;
-
 import org.springframework.lang.Nullable;
+
+import java.sql.Connection;
 
 /**
  * Interface that defines Spring-compliant transaction properties.
@@ -36,13 +36,14 @@ import org.springframework.lang.Nullable;
  * whether backed by an actual resource transaction or operating non-transactionally
  * at the resource level. In the latter case, the flag will only apply to managed
  * resources within the application, such as a Hibernate {@code Session}.
- *
+ * <p>
  * Spring 事务传播属性定义
+ *
  * @author Juergen Hoeller
- * @since 08.05.2003
  * @see PlatformTransactionManager#getTransaction(TransactionDefinition)
  * @see org.springframework.transaction.support.DefaultTransactionDefinition
  * @see org.springframework.transaction.interceptor.TransactionAttribute
+ * @since 08.05.2003
  */
 public interface TransactionDefinition {
 
@@ -51,8 +52,8 @@ public interface TransactionDefinition {
      * Analogous to the EJB transaction attribute of the same name.
      * <p>This is typically the default setting of a transaction definition,
      * and typically defines a transaction synchronization scope.
-     *
-     *
+     * <p>
+     * <p>
      * 支持当前事务，如果当前没有事务，就新建一个事务。这是最常见的选择，也是Spring默认的事务的传播。
      */
     int PROPAGATION_REQUIRED = 0;
@@ -73,8 +74,9 @@ public interface TransactionDefinition {
      * synchronization conflicts at runtime). If such nesting is unavoidable, make sure
      * to configure your transaction manager appropriately (typically switching to
      * "synchronization on actual transaction").
-     *
+     * <p>
      * 支持当前事务，如果当前没有事务，就以非事务方式执行。
+     *
      * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#setTransactionSynchronization
      * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#SYNCHRONIZATION_ON_ACTUAL_TRANSACTION
      */
@@ -100,9 +102,10 @@ public interface TransactionDefinition {
      * <p>A {@code PROPAGATION_REQUIRES_NEW} scope always defines its own
      * transaction synchronizations. Existing synchronizations will be suspended
      * and resumed appropriately.
-     *
-     *
+     * <p>
+     * <p>
      * 新建事务，如果当前存在事务，把当前事务挂起。新建的事务将和被挂起的事务没有任何关系，是两个独立的事务，外层事务失败回滚之后，不能回滚内层事务执行的结果，内层事务失败抛出异常，外层事务捕获，也可以不处理回滚操作
+     *
      * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
      */
     int PROPAGATION_REQUIRES_NEW = 3;
@@ -118,10 +121,11 @@ public interface TransactionDefinition {
      * <p>Note that transaction synchronization is <i>not</i> available within a
      * {@code PROPAGATION_NOT_SUPPORTED} scope. Existing synchronizations
      * will be suspended and resumed appropriately.
-     *
-     *
-     *
+     * <p>
+     * <p>
+     * <p>
      * 以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。
+     *
      * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
      */
     int PROPAGATION_NOT_SUPPORTED = 4;
@@ -130,7 +134,7 @@ public interface TransactionDefinition {
      * Do not support a current transaction; throw an exception if a current transaction
      * exists. Analogous to the EJB transaction attribute of the same name.
      * <p>Note that transaction synchronization is <i>not</i> available within a
-     *
+     * <p>
      * 以非事务方式执行，如果当前存在事务，则抛出异常。
      * {@code PROPAGATION_NEVER} scope.
      */
@@ -145,10 +149,11 @@ public interface TransactionDefinition {
      * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}
      * when working on a JDBC 3.0 driver. Some JTA providers might support
      * nested transactions as well.
-     *
-     *
-     *
+     * <p>
+     * <p>
+     * <p>
      * 如果一个活动的事务存在，则运行在一个嵌套的事务中。如果没有活动事务，则按REQUIRED属性执行。它使用了一个单独的事务，这个事务拥有多个可以回滚的保存点。内部事务的回滚不会对外部事务造成影响。它只对DataSourceTransactionManager事务管理器起效。
+     *
      * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
      */
     int PROPAGATION_NESTED = 6;
@@ -157,10 +162,11 @@ public interface TransactionDefinition {
     /**
      * Use the default isolation level of the underlying datastore.
      * All other levels correspond to the JDBC isolation levels.
-     *
-     *
-     *
+     * <p>
+     * <p>
+     * <p>
      * 这是个PlatfromTransactionManager默认的隔离级别，使用数据库默认的事务隔离级别。另外四个与JDBC的隔离级别相对应。
+     *
      * @see java.sql.Connection
      */
     int ISOLATION_DEFAULT = -1;
@@ -172,9 +178,10 @@ public interface TransactionDefinition {
      * transaction before any changes in that row have been committed (a "dirty read").
      * If any of the changes are rolled back, the second transaction will have
      * retrieved an invalid row.
-     *
-     *
+     * <p>
+     * <p>
      * 这是事务最低的隔离级别，它充许另外一个事务可以看到这个事务未提交的数据。这种隔离级别会产生脏读，不可重复读和幻像读。
+     *
      * @see java.sql.Connection#TRANSACTION_READ_UNCOMMITTED
      */
     int ISOLATION_READ_UNCOMMITTED = Connection.TRANSACTION_READ_UNCOMMITTED;
@@ -184,9 +191,10 @@ public interface TransactionDefinition {
      * phantom reads can occur.
      * <p>This level only prohibits a transaction from reading a row
      * with uncommitted changes in it.
-     *
-     *
+     * <p>
+     * <p>
      * 保证一个事务修改的数据提交后才能被另外一个事务读取。另外一个事务不能读取该事务未提交的数据。
+     *
      * @see java.sql.Connection#TRANSACTION_READ_COMMITTED
      */
     int ISOLATION_READ_COMMITTED = Connection.TRANSACTION_READ_COMMITTED;
@@ -198,9 +206,10 @@ public interface TransactionDefinition {
      * in it, and it also prohibits the situation where one transaction reads a row,
      * a second transaction alters the row, and the first transaction re-reads the row,
      * getting different values the second time (a "non-repeatable read").
-     *
-     *
+     * <p>
+     * <p>
      * 这种事务隔离级别可以防止脏读，不可重复读。但是可能出现幻像读。
+     *
      * @see java.sql.Connection#TRANSACTION_REPEATABLE_READ
      */
     int ISOLATION_REPEATABLE_READ = Connection.TRANSACTION_REPEATABLE_READ;
@@ -214,9 +223,10 @@ public interface TransactionDefinition {
      * that satisfies that {@code WHERE} condition, and the first transaction
      * re-reads for the same condition, retrieving the additional "phantom" row
      * in the second read.
-     *
-     *
+     * <p>
+     * <p>
      * 这是花费最高代价但是最可靠的事务隔离级别。事务被处理为顺序执行。
+     *
      * @see java.sql.Connection#TRANSACTION_SERIALIZABLE
      */
     int ISOLATION_SERIALIZABLE = Connection.TRANSACTION_SERIALIZABLE;

@@ -16,11 +16,11 @@
 
 package org.springframework.remoting.jaxws;
 
-import javax.xml.ws.Service;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
+
+import javax.xml.ws.Service;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} for locally
@@ -31,37 +31,37 @@ import org.springframework.lang.Nullable;
  * in the JNDI environment of the Java EE container.
  *
  * @author Juergen Hoeller
- * @since 2.5
  * @see javax.xml.ws.Service
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see JaxWsPortProxyFactoryBean
+ * @since 2.5
  */
 public class LocalJaxWsServiceFactoryBean extends LocalJaxWsServiceFactory
-		implements FactoryBean<Service>, InitializingBean {
+        implements FactoryBean<Service>, InitializingBean {
 
-	@Nullable
-	private Service service;
+    @Nullable
+    private Service service;
 
 
-	@Override
-	public void afterPropertiesSet() {
-		this.service = createJaxWsService();
-	}
+    @Override
+    public void afterPropertiesSet() {
+        this.service = createJaxWsService();
+    }
 
-	@Override
-	@Nullable
-	public Service getObject() {
-		return this.service;
-	}
+    @Override
+    @Nullable
+    public Service getObject() {
+        return this.service;
+    }
 
-	@Override
-	public Class<? extends Service> getObjectType() {
-		return (this.service != null ? this.service.getClass() : Service.class);
-	}
+    @Override
+    public Class<? extends Service> getObjectType() {
+        return (this.service != null ? this.service.getClass() : Service.class);
+    }
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
+    @Override
+    public boolean isSingleton() {
+        return true;
+    }
 
 }

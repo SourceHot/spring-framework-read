@@ -16,13 +16,8 @@
 
 package org.springframework.orm.jpa.support;
 
-import java.util.concurrent.Callable;
-
-import javax.persistence.EntityManagerFactory;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -31,10 +26,13 @@ import org.springframework.web.context.request.async.CallableProcessingIntercept
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 
+import javax.persistence.EntityManagerFactory;
+import java.util.concurrent.Callable;
+
 /**
  * An interceptor with asynchronous web requests used in OpenSessionInViewFilter and
  * OpenSessionInViewInterceptor.
- *
+ * <p>
  * Ensures the following:
  * 1) The session is bound/unbound when "callable processing" is started
  * 2) The session is closed if an async request times out or an error occurred
@@ -44,81 +42,81 @@ import org.springframework.web.context.request.async.DeferredResultProcessingInt
  */
 class AsyncRequestInterceptor implements CallableProcessingInterceptor, DeferredResultProcessingInterceptor {
 
-	private static final Log logger = LogFactory.getLog(AsyncRequestInterceptor.class);
+    private static final Log logger = LogFactory.getLog(AsyncRequestInterceptor.class);
 
-	private final EntityManagerFactory emFactory;
+    private final EntityManagerFactory emFactory;
 
-	private final EntityManagerHolder emHolder;
+    private final EntityManagerHolder emHolder;
 
-	private volatile boolean timeoutInProgress;
+    private volatile boolean timeoutInProgress;
 
-	private volatile boolean errorInProgress;
-
-
-	public AsyncRequestInterceptor(EntityManagerFactory emFactory, EntityManagerHolder emHolder) {
-		this.emFactory = emFactory;
-		this.emHolder = emHolder;
-	}
+    private volatile boolean errorInProgress;
 
 
-	@Override
-	public <T> void preProcess(NativeWebRequest request, Callable<T> task) {
-		bindEntityManager();
-	}
-
-	public void bindEntityManager() {
-		this.timeoutInProgress = false;
-		this.errorInProgress = false;
-		TransactionSynchronizationManager.bindResource(this.emFactory, this.emHolder);
-	}
-
-	@Override
-	public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object concurrentResult) {
-		TransactionSynchronizationManager.unbindResource(this.emFactory);
-	}
-
-	@Override
-	public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) {
-		this.timeoutInProgress = true;
-		return RESULT_NONE;  // give other interceptors a chance to handle the timeout
-	}
-
-	@Override
-	public <T> Object handleError(NativeWebRequest request, Callable<T> task, Throwable t) {
-		this.errorInProgress = true;
-		return RESULT_NONE;  // give other interceptors a chance to handle the error
-	}
-
-	@Override
-	public <T> void afterCompletion(NativeWebRequest request, Callable<T> task) throws Exception {
-		closeEntityManager();
-	}
-
-	private void closeEntityManager() {
-		if (this.timeoutInProgress || this.errorInProgress) {
-			logger.debug("Closing JPA EntityManager after async request timeout/error");
-			EntityManagerFactoryUtils.closeEntityManager(this.emHolder.getEntityManager());
-		}
-	}
+    public AsyncRequestInterceptor(EntityManagerFactory emFactory, EntityManagerHolder emHolder) {
+        this.emFactory = emFactory;
+        this.emHolder = emHolder;
+    }
 
 
-	// Implementation of DeferredResultProcessingInterceptor methods
+    @Override
+    public <T> void preProcess(NativeWebRequest request, Callable<T> task) {
+        bindEntityManager();
+    }
 
-	@Override
-	public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) {
-		this.timeoutInProgress = true;
-		return true;  // give other interceptors a chance to handle the timeout
-	}
+    public void bindEntityManager() {
+        this.timeoutInProgress = false;
+        this.errorInProgress = false;
+        TransactionSynchronizationManager.bindResource(this.emFactory, this.emHolder);
+    }
 
-	@Override
-	public <T> boolean handleError(NativeWebRequest request, DeferredResult<T> deferredResult, Throwable t) {
-		this.errorInProgress = true;
-		return true;  // give other interceptors a chance to handle the error
-	}
+    @Override
+    public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object concurrentResult) {
+        TransactionSynchronizationManager.unbindResource(this.emFactory);
+    }
 
-	@Override
-	public <T> void afterCompletion(NativeWebRequest request, DeferredResult<T> deferredResult) {
-		closeEntityManager();
-	}
+    @Override
+    public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) {
+        this.timeoutInProgress = true;
+        return RESULT_NONE;  // give other interceptors a chance to handle the timeout
+    }
+
+    @Override
+    public <T> Object handleError(NativeWebRequest request, Callable<T> task, Throwable t) {
+        this.errorInProgress = true;
+        return RESULT_NONE;  // give other interceptors a chance to handle the error
+    }
+
+    @Override
+    public <T> void afterCompletion(NativeWebRequest request, Callable<T> task) throws Exception {
+        closeEntityManager();
+    }
+
+    private void closeEntityManager() {
+        if (this.timeoutInProgress || this.errorInProgress) {
+            logger.debug("Closing JPA EntityManager after async request timeout/error");
+            EntityManagerFactoryUtils.closeEntityManager(this.emHolder.getEntityManager());
+        }
+    }
+
+
+    // Implementation of DeferredResultProcessingInterceptor methods
+
+    @Override
+    public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) {
+        this.timeoutInProgress = true;
+        return true;  // give other interceptors a chance to handle the timeout
+    }
+
+    @Override
+    public <T> boolean handleError(NativeWebRequest request, DeferredResult<T> deferredResult, Throwable t) {
+        this.errorInProgress = true;
+        return true;  // give other interceptors a chance to handle the error
+    }
+
+    @Override
+    public <T> void afterCompletion(NativeWebRequest request, DeferredResult<T> deferredResult) {
+        closeEntityManager();
+    }
 
 }

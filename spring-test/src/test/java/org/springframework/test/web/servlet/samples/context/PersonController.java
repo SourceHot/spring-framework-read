@@ -26,16 +26,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/person")
 public class PersonController {
 
-	private final PersonDao personDao;
+    private final PersonDao personDao;
 
 
-	PersonController(PersonDao personDao) {
-		this.personDao = personDao;
-	}
+    PersonController(PersonDao personDao) {
+        this.personDao = personDao;
+    }
 
-	@GetMapping("/{id}")
-	public Person getPerson(@PathVariable long id) {
-		return this.personDao.getPerson(id);
-	}
+    @GetMapping("/{id}")
+    public Person getPerson(@PathVariable long id) {
+        return this.personDao.getPerson(id);
+    }
 
 }

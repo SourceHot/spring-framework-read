@@ -28,23 +28,23 @@ package org.springframework.beans.factory;
  * bean lifecycle methods, see the {@link BeanFactory BeanFactory javadocs}.
  *
  * @author Juergen Hoeller
- * @since 12.08.2003
  * @see InitializingBean
  * @see org.springframework.beans.factory.support.RootBeanDefinition#getDestroyMethodName()
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#destroySingletons()
  * @see org.springframework.context.ConfigurableApplicationContext#close()
+ * @since 12.08.2003
  */
 public interface DisposableBean {
 
-	/**
-	 * Invoked by the containing {@code BeanFactory} on destruction of a bean.
-	 * <p>
-	 * 销毁bean
-	 *
-	 * @throws Exception in case of shutdown errors. Exceptions will get logged
-	 *                   but not rethrown to allow other beans to release their resources as well.
-	 */
+    /**
+     * Invoked by the containing {@code BeanFactory} on destruction of a bean.
+     * <p>
+     * 销毁bean
+     *
+     * @throws Exception in case of shutdown errors. Exceptions will get logged
+     *                   but not rethrown to allow other beans to release their resources as well.
+     */
 
-	void destroy() throws Exception;
+    void destroy() throws Exception;
 
 }

@@ -16,15 +16,15 @@
 
 package org.springframework.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Colin Sampaleanu
@@ -34,278 +34,275 @@ import static org.junit.Assert.*;
  */
 public class MethodInvokerTests {
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
 
 
-	@Test
-	public void plainMethodInvoker() throws Exception {
-		// sanity check: singleton, non-static should work
-		TestClass1 tc1 = new TestClass1();
-		MethodInvoker mi = new MethodInvoker();
-		mi.setTargetObject(tc1);
-		mi.setTargetMethod("method1");
-		mi.prepare();
-		Integer i = (Integer) mi.invoke();
-		assertEquals(1, i.intValue());
+    @Test
+    public void plainMethodInvoker() throws Exception {
+        // sanity check: singleton, non-static should work
+        TestClass1 tc1 = new TestClass1();
+        MethodInvoker mi = new MethodInvoker();
+        mi.setTargetObject(tc1);
+        mi.setTargetMethod("method1");
+        mi.prepare();
+        Integer i = (Integer) mi.invoke();
+        assertEquals(1, i.intValue());
 
-		// defensive check: singleton, non-static should work with null array
-		tc1 = new TestClass1();
-		mi = new MethodInvoker();
-		mi.setTargetObject(tc1);
-		mi.setTargetMethod("method1");
-		mi.setArguments((Object[]) null);
-		mi.prepare();
-		i = (Integer) mi.invoke();
-		assertEquals(1, i.intValue());
+        // defensive check: singleton, non-static should work with null array
+        tc1 = new TestClass1();
+        mi = new MethodInvoker();
+        mi.setTargetObject(tc1);
+        mi.setTargetMethod("method1");
+        mi.setArguments((Object[]) null);
+        mi.prepare();
+        i = (Integer) mi.invoke();
+        assertEquals(1, i.intValue());
 
-		// sanity check: check that argument count matching works
-		mi = new MethodInvoker();
-		mi.setTargetClass(TestClass1.class);
-		mi.setTargetMethod("supertypes");
-		mi.setArguments(new ArrayList<>(), new ArrayList<>(), "hello");
-		mi.prepare();
-		assertEquals("hello", mi.invoke());
+        // sanity check: check that argument count matching works
+        mi = new MethodInvoker();
+        mi.setTargetClass(TestClass1.class);
+        mi.setTargetMethod("supertypes");
+        mi.setArguments(new ArrayList<>(), new ArrayList<>(), "hello");
+        mi.prepare();
+        assertEquals("hello", mi.invoke());
 
-		mi = new MethodInvoker();
-		mi.setTargetClass(TestClass1.class);
-		mi.setTargetMethod("supertypes2");
-		mi.setArguments(new ArrayList<>(), new ArrayList<>(), "hello", "bogus");
-		mi.prepare();
-		assertEquals("hello", mi.invoke());
+        mi = new MethodInvoker();
+        mi.setTargetClass(TestClass1.class);
+        mi.setTargetMethod("supertypes2");
+        mi.setArguments(new ArrayList<>(), new ArrayList<>(), "hello", "bogus");
+        mi.prepare();
+        assertEquals("hello", mi.invoke());
 
-		// Sanity check: check that argument conversion doesn't work with plain MethodInvoker
-		mi = new MethodInvoker();
-		mi.setTargetClass(TestClass1.class);
-		mi.setTargetMethod("supertypes2");
-		mi.setArguments(new ArrayList<>(), new ArrayList<>(), "hello", Boolean.TRUE);
+        // Sanity check: check that argument conversion doesn't work with plain MethodInvoker
+        mi = new MethodInvoker();
+        mi.setTargetClass(TestClass1.class);
+        mi.setTargetMethod("supertypes2");
+        mi.setArguments(new ArrayList<>(), new ArrayList<>(), "hello", Boolean.TRUE);
 
-		exception.expect(NoSuchMethodException.class);
-		mi.prepare();
-	}
+        exception.expect(NoSuchMethodException.class);
+        mi.prepare();
+    }
 
-	@Test
-	public void stringWithMethodInvoker() throws Exception {
-		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetObject(new Greeter());
-		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments("no match");
+    @Test
+    public void stringWithMethodInvoker() throws Exception {
+        MethodInvoker methodInvoker = new MethodInvoker();
+        methodInvoker.setTargetObject(new Greeter());
+        methodInvoker.setTargetMethod("greet");
+        methodInvoker.setArguments("no match");
 
-		exception.expect(NoSuchMethodException.class);
-		methodInvoker.prepare();
-	}
+        exception.expect(NoSuchMethodException.class);
+        methodInvoker.prepare();
+    }
 
-	@Test
-	public void purchaserWithMethodInvoker() throws Exception {
-		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetObject(new Greeter());
-		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Purchaser());
-		methodInvoker.prepare();
-		String greeting = (String) methodInvoker.invoke();
-		assertEquals("purchaser: hello", greeting);
-	}
+    @Test
+    public void purchaserWithMethodInvoker() throws Exception {
+        MethodInvoker methodInvoker = new MethodInvoker();
+        methodInvoker.setTargetObject(new Greeter());
+        methodInvoker.setTargetMethod("greet");
+        methodInvoker.setArguments(new Purchaser());
+        methodInvoker.prepare();
+        String greeting = (String) methodInvoker.invoke();
+        assertEquals("purchaser: hello", greeting);
+    }
 
-	@Test
-	public void shopperWithMethodInvoker() throws Exception {
-		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetObject(new Greeter());
-		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Shopper());
-		methodInvoker.prepare();
-		String greeting = (String) methodInvoker.invoke();
-		assertEquals("purchaser: may I help you?", greeting);
-	}
+    @Test
+    public void shopperWithMethodInvoker() throws Exception {
+        MethodInvoker methodInvoker = new MethodInvoker();
+        methodInvoker.setTargetObject(new Greeter());
+        methodInvoker.setTargetMethod("greet");
+        methodInvoker.setArguments(new Shopper());
+        methodInvoker.prepare();
+        String greeting = (String) methodInvoker.invoke();
+        assertEquals("purchaser: may I help you?", greeting);
+    }
 
-	@Test
-	public void salesmanWithMethodInvoker() throws Exception {
-		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetObject(new Greeter());
-		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Salesman());
-		methodInvoker.prepare();
-		String greeting = (String) methodInvoker.invoke();
-		assertEquals("greetable: how are sales?", greeting);
-	}
+    @Test
+    public void salesmanWithMethodInvoker() throws Exception {
+        MethodInvoker methodInvoker = new MethodInvoker();
+        methodInvoker.setTargetObject(new Greeter());
+        methodInvoker.setTargetMethod("greet");
+        methodInvoker.setArguments(new Salesman());
+        methodInvoker.prepare();
+        String greeting = (String) methodInvoker.invoke();
+        assertEquals("greetable: how are sales?", greeting);
+    }
 
-	@Test
-	public void customerWithMethodInvoker() throws Exception {
-		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetObject(new Greeter());
-		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Customer());
-		methodInvoker.prepare();
-		String greeting = (String) methodInvoker.invoke();
-		assertEquals("customer: good day", greeting);
-	}
+    @Test
+    public void customerWithMethodInvoker() throws Exception {
+        MethodInvoker methodInvoker = new MethodInvoker();
+        methodInvoker.setTargetObject(new Greeter());
+        methodInvoker.setTargetMethod("greet");
+        methodInvoker.setArguments(new Customer());
+        methodInvoker.prepare();
+        String greeting = (String) methodInvoker.invoke();
+        assertEquals("customer: good day", greeting);
+    }
 
-	@Test
-	public void regularWithMethodInvoker() throws Exception {
-		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetObject(new Greeter());
-		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Regular("Kotter"));
-		methodInvoker.prepare();
-		String greeting = (String) methodInvoker.invoke();
-		assertEquals("regular: welcome back Kotter", greeting);
-	}
+    @Test
+    public void regularWithMethodInvoker() throws Exception {
+        MethodInvoker methodInvoker = new MethodInvoker();
+        methodInvoker.setTargetObject(new Greeter());
+        methodInvoker.setTargetMethod("greet");
+        methodInvoker.setArguments(new Regular("Kotter"));
+        methodInvoker.prepare();
+        String greeting = (String) methodInvoker.invoke();
+        assertEquals("regular: welcome back Kotter", greeting);
+    }
 
-	@Test
-	public void vipWithMethodInvoker() throws Exception {
-		MethodInvoker methodInvoker = new MethodInvoker();
-		methodInvoker.setTargetObject(new Greeter());
-		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new VIP("Fonzie"));
-		methodInvoker.prepare();
-		String greeting = (String) methodInvoker.invoke();
-		assertEquals("regular: whassup dude?", greeting);
-	}
-
-
-	public static class TestClass1 {
-
-		public static int _staticField1;
-
-		public int _field1 = 0;
-
-		public int method1() {
-			return ++_field1;
-		}
-
-		public static int staticMethod1() {
-			return ++TestClass1._staticField1;
-		}
-
-		public static void voidRetvalMethod() {
-		}
-
-		public static void nullArgument(Object arg) {
-		}
-
-		public static void intArgument(int arg) {
-		}
-
-		public static void intArguments(int[] arg) {
-		}
-
-		public static String supertypes(Collection<?> c, Integer i) {
-			return i.toString();
-		}
-
-		public static String supertypes(Collection<?> c, List<?> l, String s) {
-			return s;
-		}
-
-		public static String supertypes2(Collection<?> c, List<?> l, Integer i) {
-			return i.toString();
-		}
-
-		public static String supertypes2(Collection<?> c, List<?> l, String s, Integer i) {
-			return s;
-		}
-
-		public static String supertypes2(Collection<?> c, List<?> l, String s, String s2) {
-			return s;
-		}
-	}
+    @Test
+    public void vipWithMethodInvoker() throws Exception {
+        MethodInvoker methodInvoker = new MethodInvoker();
+        methodInvoker.setTargetObject(new Greeter());
+        methodInvoker.setTargetMethod("greet");
+        methodInvoker.setArguments(new VIP("Fonzie"));
+        methodInvoker.prepare();
+        String greeting = (String) methodInvoker.invoke();
+        assertEquals("regular: whassup dude?", greeting);
+    }
 
 
-	@SuppressWarnings("unused")
-	public static class Greeter {
+    private interface Greetable {
 
-		// should handle Salesman (only interface)
-		public String greet(Greetable greetable) {
-			return "greetable: " + greetable.getGreeting();
-		}
-
-		// should handle Shopper (beats Greetable since it is a class)
-		protected String greet(Purchaser purchaser) {
-			return "purchaser: " + purchaser.getGreeting();
-		}
-
-		// should handle Customer (exact match)
-		String greet(Customer customer) {
-			return "customer: " + customer.getGreeting();
-		}
-
-		// should handle Regular (exact) and VIP (closest match)
-		private String greet(Regular regular) {
-			return "regular: " + regular.getGreeting();
-		}
-	}
+        String getGreeting();
+    }
 
 
-	private interface Greetable {
+    private interface Person extends Greetable {
+    }
 
-		String getGreeting();
-	}
+    public static class TestClass1 {
+
+        public static int _staticField1;
+
+        public int _field1 = 0;
+
+        public static int staticMethod1() {
+            return ++TestClass1._staticField1;
+        }
+
+        public static void voidRetvalMethod() {
+        }
+
+        public static void nullArgument(Object arg) {
+        }
+
+        public static void intArgument(int arg) {
+        }
+
+        public static void intArguments(int[] arg) {
+        }
+
+        public static String supertypes(Collection<?> c, Integer i) {
+            return i.toString();
+        }
+
+        public static String supertypes(Collection<?> c, List<?> l, String s) {
+            return s;
+        }
+
+        public static String supertypes2(Collection<?> c, List<?> l, Integer i) {
+            return i.toString();
+        }
+
+        public static String supertypes2(Collection<?> c, List<?> l, String s, Integer i) {
+            return s;
+        }
+
+        public static String supertypes2(Collection<?> c, List<?> l, String s, String s2) {
+            return s;
+        }
+
+        public int method1() {
+            return ++_field1;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static class Greeter {
+
+        // should handle Salesman (only interface)
+        public String greet(Greetable greetable) {
+            return "greetable: " + greetable.getGreeting();
+        }
+
+        // should handle Shopper (beats Greetable since it is a class)
+        protected String greet(Purchaser purchaser) {
+            return "purchaser: " + purchaser.getGreeting();
+        }
+
+        // should handle Customer (exact match)
+        String greet(Customer customer) {
+            return "customer: " + customer.getGreeting();
+        }
+
+        // should handle Regular (exact) and VIP (closest match)
+        private String greet(Regular regular) {
+            return "regular: " + regular.getGreeting();
+        }
+    }
+
+    private static class Purchaser implements Greetable {
+
+        @Override
+        public String getGreeting() {
+            return "hello";
+        }
+    }
 
 
-	private interface Person extends Greetable {
-	}
+    private static class Shopper extends Purchaser implements Person {
+
+        @Override
+        public String getGreeting() {
+            return "may I help you?";
+        }
+    }
 
 
-	private static class Purchaser implements Greetable {
+    private static class Salesman implements Person {
 
-		@Override
-		public String getGreeting() {
-			return "hello";
-		}
-	}
-
-
-	private static class Shopper extends Purchaser implements Person {
-
-		@Override
-		public String getGreeting() {
-			return "may I help you?";
-		}
-	}
+        @Override
+        public String getGreeting() {
+            return "how are sales?";
+        }
+    }
 
 
-	private static class Salesman implements Person {
+    private static class Customer extends Shopper {
 
-		@Override
-		public String getGreeting() {
-			return "how are sales?";
-		}
-	}
-
-
-	private static class Customer extends Shopper {
-
-		@Override
-		public String getGreeting() {
-			return "good day";
-		}
-	}
+        @Override
+        public String getGreeting() {
+            return "good day";
+        }
+    }
 
 
-	private static class Regular extends Customer {
+    private static class Regular extends Customer {
 
-		private String name;
+        private String name;
 
-		public Regular(String name) {
-			this.name = name;
-		}
+        public Regular(String name) {
+            this.name = name;
+        }
 
-		@Override
-		public String getGreeting() {
-			return "welcome back " + name ;
-		}
-	}
+        @Override
+        public String getGreeting() {
+            return "welcome back " + name;
+        }
+    }
 
 
-	private static class VIP extends Regular {
+    private static class VIP extends Regular {
 
-		public VIP(String name) {
-			super(name);
-		}
+        public VIP(String name) {
+            super(name);
+        }
 
-		@Override
-		public String getGreeting() {
-			return "whassup dude?";
-		}
-	}
+        @Override
+        public String getGreeting() {
+            return "whassup dude?";
+        }
+    }
 
 }

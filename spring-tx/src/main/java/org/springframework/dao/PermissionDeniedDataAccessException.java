@@ -26,14 +26,15 @@ package org.springframework.dao;
 @SuppressWarnings("serial")
 public class PermissionDeniedDataAccessException extends NonTransientDataAccessException {
 
-	/**
-	 * Constructor for PermissionDeniedDataAccessException.
-	 * @param msg the detail message
-	 * @param cause the root cause from the underlying data access API,
-	 * such as JDBC
-	 */
-	public PermissionDeniedDataAccessException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Constructor for PermissionDeniedDataAccessException.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause from the underlying data access API,
+     *              such as JDBC
+     */
+    public PermissionDeniedDataAccessException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

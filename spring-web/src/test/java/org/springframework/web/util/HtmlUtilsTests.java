@@ -18,7 +18,7 @@ package org.springframework.web.util;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alef Arendsen
@@ -27,112 +27,112 @@ import static org.junit.Assert.*;
  */
 public class HtmlUtilsTests {
 
-	@Test
-	public void testHtmlEscape() {
-		String unescaped = "\"This is a quote'";
-		String escaped = HtmlUtils.htmlEscape(unescaped);
-		assertEquals("&quot;This is a quote&#39;", escaped);
-		escaped = HtmlUtils.htmlEscapeDecimal(unescaped);
-		assertEquals("&#34;This is a quote&#39;", escaped);
-		escaped = HtmlUtils.htmlEscapeHex(unescaped);
-		assertEquals("&#x22;This is a quote&#x27;", escaped);
-	}
+    @Test
+    public void testHtmlEscape() {
+        String unescaped = "\"This is a quote'";
+        String escaped = HtmlUtils.htmlEscape(unescaped);
+        assertEquals("&quot;This is a quote&#39;", escaped);
+        escaped = HtmlUtils.htmlEscapeDecimal(unescaped);
+        assertEquals("&#34;This is a quote&#39;", escaped);
+        escaped = HtmlUtils.htmlEscapeHex(unescaped);
+        assertEquals("&#x22;This is a quote&#x27;", escaped);
+    }
 
-	@Test
-	public void testHtmlUnescape() {
-		String escaped = "&quot;This is a quote&#39;";
-		String unescaped = HtmlUtils.htmlUnescape(escaped);
-		assertEquals("\"This is a quote'", unescaped);
-	}
+    @Test
+    public void testHtmlUnescape() {
+        String escaped = "&quot;This is a quote&#39;";
+        String unescaped = HtmlUtils.htmlUnescape(escaped);
+        assertEquals("\"This is a quote'", unescaped);
+    }
 
-	@Test
-	public void testEncodeIntoHtmlCharacterSet() {
-		assertEquals("An empty string should be converted to an empty string",
-				"", HtmlUtils.htmlEscape(""));
-		assertEquals("A string containing no special characters should not be affected",
-				"A sentence containing no special characters.",
-				HtmlUtils.htmlEscape("A sentence containing no special characters."));
+    @Test
+    public void testEncodeIntoHtmlCharacterSet() {
+        assertEquals("An empty string should be converted to an empty string",
+                "", HtmlUtils.htmlEscape(""));
+        assertEquals("A string containing no special characters should not be affected",
+                "A sentence containing no special characters.",
+                HtmlUtils.htmlEscape("A sentence containing no special characters."));
 
-		assertEquals("'< >' should be encoded to '&lt; &gt;'",
-				"&lt; &gt;", HtmlUtils.htmlEscape("< >"));
-		assertEquals("'< >' should be encoded to '&#60; &#62;'",
-				"&#60; &#62;", HtmlUtils.htmlEscapeDecimal("< >"));
+        assertEquals("'< >' should be encoded to '&lt; &gt;'",
+                "&lt; &gt;", HtmlUtils.htmlEscape("< >"));
+        assertEquals("'< >' should be encoded to '&#60; &#62;'",
+                "&#60; &#62;", HtmlUtils.htmlEscapeDecimal("< >"));
 
-		assertEquals("The special character 8709 should be encoded to '&empty;'",
-				"&empty;", HtmlUtils.htmlEscape("" + (char) 8709));
-		assertEquals("The special character 8709 should be encoded to '&#8709;'",
-				"&#8709;", HtmlUtils.htmlEscapeDecimal("" + (char) 8709));
+        assertEquals("The special character 8709 should be encoded to '&empty;'",
+                "&empty;", HtmlUtils.htmlEscape("" + (char) 8709));
+        assertEquals("The special character 8709 should be encoded to '&#8709;'",
+                "&#8709;", HtmlUtils.htmlEscapeDecimal("" + (char) 8709));
 
-		assertEquals("The special character 977 should be encoded to '&thetasym;'",
-				"&thetasym;", HtmlUtils.htmlEscape("" + (char) 977));
-		assertEquals("The special character 977 should be encoded to '&#977;'",
-				"&#977;", HtmlUtils.htmlEscapeDecimal("" + (char) 977));
-	}
+        assertEquals("The special character 977 should be encoded to '&thetasym;'",
+                "&thetasym;", HtmlUtils.htmlEscape("" + (char) 977));
+        assertEquals("The special character 977 should be encoded to '&#977;'",
+                "&#977;", HtmlUtils.htmlEscapeDecimal("" + (char) 977));
+    }
 
-	// SPR-9293
-	@Test
-	public void testEncodeIntoHtmlCharacterSetFromUtf8() {
-		String utf8 = ("UTF-8");
-		assertEquals("An empty string should be converted to an empty string",
-				"", HtmlUtils.htmlEscape("", utf8));
-		assertEquals("A string containing no special characters should not be affected",
-				"A sentence containing no special characters.",
-				HtmlUtils.htmlEscape("A sentence containing no special characters."));
+    // SPR-9293
+    @Test
+    public void testEncodeIntoHtmlCharacterSetFromUtf8() {
+        String utf8 = ("UTF-8");
+        assertEquals("An empty string should be converted to an empty string",
+                "", HtmlUtils.htmlEscape("", utf8));
+        assertEquals("A string containing no special characters should not be affected",
+                "A sentence containing no special characters.",
+                HtmlUtils.htmlEscape("A sentence containing no special characters."));
 
-		assertEquals("'< >' should be encoded to '&lt; &gt;'",
-				"&lt; &gt;", HtmlUtils.htmlEscape("< >", utf8));
-		assertEquals("'< >' should be encoded to '&#60; &#62;'",
-				"&#60; &#62;", HtmlUtils.htmlEscapeDecimal("< >", utf8));
+        assertEquals("'< >' should be encoded to '&lt; &gt;'",
+                "&lt; &gt;", HtmlUtils.htmlEscape("< >", utf8));
+        assertEquals("'< >' should be encoded to '&#60; &#62;'",
+                "&#60; &#62;", HtmlUtils.htmlEscapeDecimal("< >", utf8));
 
-		assertEquals("UTF-8 supported chars should not be escaped",
-				"Μερικοί Ελληνικοί &quot;χαρακτήρες&quot;",
-				HtmlUtils.htmlEscape("Μερικοί Ελληνικοί \"χαρακτήρες\"", utf8));
-	}
+        assertEquals("UTF-8 supported chars should not be escaped",
+                "Μερικοί Ελληνικοί &quot;χαρακτήρες&quot;",
+                HtmlUtils.htmlEscape("Μερικοί Ελληνικοί \"χαρακτήρες\"", utf8));
+    }
 
-	@Test
-	public void testDecodeFromHtmlCharacterSet() {
-		assertEquals("An empty string should be converted to an empty string",
-				"", HtmlUtils.htmlUnescape(""));
-		assertEquals("A string containing no special characters should not be affected",
-				"This is a sentence containing no special characters.",
-				HtmlUtils.htmlUnescape("This is a sentence containing no special characters."));
+    @Test
+    public void testDecodeFromHtmlCharacterSet() {
+        assertEquals("An empty string should be converted to an empty string",
+                "", HtmlUtils.htmlUnescape(""));
+        assertEquals("A string containing no special characters should not be affected",
+                "This is a sentence containing no special characters.",
+                HtmlUtils.htmlUnescape("This is a sentence containing no special characters."));
 
-		assertEquals("'A&nbsp;B' should be decoded to 'A B'",
-				"A" + (char) 160 + "B", HtmlUtils.htmlUnescape("A&nbsp;B"));
+        assertEquals("'A&nbsp;B' should be decoded to 'A B'",
+                "A" + (char) 160 + "B", HtmlUtils.htmlUnescape("A&nbsp;B"));
 
-		assertEquals("'&lt; &gt;' should be decoded to '< >'",
-				"< >", HtmlUtils.htmlUnescape("&lt; &gt;"));
-		assertEquals("'&#60; &#62;' should be decoded to '< >'",
-				"< >", HtmlUtils.htmlUnescape("&#60; &#62;"));
+        assertEquals("'&lt; &gt;' should be decoded to '< >'",
+                "< >", HtmlUtils.htmlUnescape("&lt; &gt;"));
+        assertEquals("'&#60; &#62;' should be decoded to '< >'",
+                "< >", HtmlUtils.htmlUnescape("&#60; &#62;"));
 
-		assertEquals("'&#x41;&#X42;&#x43;' should be decoded to 'ABC'",
-				"ABC", HtmlUtils.htmlUnescape("&#x41;&#X42;&#x43;"));
+        assertEquals("'&#x41;&#X42;&#x43;' should be decoded to 'ABC'",
+                "ABC", HtmlUtils.htmlUnescape("&#x41;&#X42;&#x43;"));
 
-		assertEquals("'&phi;' should be decoded to uni-code character 966",
-				"" + (char) 966, HtmlUtils.htmlUnescape("&phi;"));
+        assertEquals("'&phi;' should be decoded to uni-code character 966",
+                "" + (char) 966, HtmlUtils.htmlUnescape("&phi;"));
 
-		assertEquals("'&Prime;' should be decoded to uni-code character 8243",
-				"" + (char) 8243, HtmlUtils.htmlUnescape("&Prime;"));
+        assertEquals("'&Prime;' should be decoded to uni-code character 8243",
+                "" + (char) 8243, HtmlUtils.htmlUnescape("&Prime;"));
 
-		assertEquals("A not supported named reference leads should be ignored",
-				"&prIme;", HtmlUtils.htmlUnescape("&prIme;"));
+        assertEquals("A not supported named reference leads should be ignored",
+                "&prIme;", HtmlUtils.htmlUnescape("&prIme;"));
 
-		assertEquals("An empty reference '&;' should be survive the decoding",
-				"&;", HtmlUtils.htmlUnescape("&;"));
+        assertEquals("An empty reference '&;' should be survive the decoding",
+                "&;", HtmlUtils.htmlUnescape("&;"));
 
-		assertEquals("The longest character entity reference '&thetasym;' should be processable",
-				"" + (char) 977, HtmlUtils.htmlUnescape("&thetasym;"));
+        assertEquals("The longest character entity reference '&thetasym;' should be processable",
+                "" + (char) 977, HtmlUtils.htmlUnescape("&thetasym;"));
 
-		assertEquals("A malformed decimal reference should survive the decoding",
-				"&#notADecimalNumber;", HtmlUtils.htmlUnescape("&#notADecimalNumber;"));
-		assertEquals("A malformed hex reference should survive the decoding",
-				"&#XnotAHexNumber;", HtmlUtils.htmlUnescape("&#XnotAHexNumber;"));
+        assertEquals("A malformed decimal reference should survive the decoding",
+                "&#notADecimalNumber;", HtmlUtils.htmlUnescape("&#notADecimalNumber;"));
+        assertEquals("A malformed hex reference should survive the decoding",
+                "&#XnotAHexNumber;", HtmlUtils.htmlUnescape("&#XnotAHexNumber;"));
 
-		assertEquals("The numerical reference '&#1;' should be converted to char 1",
-				"" + (char) 1, HtmlUtils.htmlUnescape("&#1;"));
+        assertEquals("The numerical reference '&#1;' should be converted to char 1",
+                "" + (char) 1, HtmlUtils.htmlUnescape("&#1;"));
 
-		assertEquals("The malformed hex reference '&#x;' should remain '&#x;'",
-				"&#x;", HtmlUtils.htmlUnescape("&#x;"));
-	}
+        assertEquals("The malformed hex reference '&#x;' should remain '&#x;'",
+                "&#x;", HtmlUtils.htmlUnescape("&#x;"));
+    }
 
 }

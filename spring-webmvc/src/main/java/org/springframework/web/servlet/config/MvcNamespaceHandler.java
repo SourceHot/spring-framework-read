@@ -29,35 +29,35 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  */
 public class MvcNamespaceHandler extends NamespaceHandlerSupport {
 
-	/**
-	 * 初始化一些SpringMvc 的解析类
-	 */
-	@Override
-	public void init() {
-		// 注解驱动
-		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
-		// 默认的 servlet 处理器
-		registerBeanDefinitionParser("default-servlet-handler", new DefaultServletHandlerBeanDefinitionParser());
-		// 拦截器
-		registerBeanDefinitionParser("interceptors", new InterceptorsBeanDefinitionParser());
-		// 资源
-		registerBeanDefinitionParser("resources", new ResourcesBeanDefinitionParser());
-		// 视图控制器
-		registerBeanDefinitionParser("view-controller", new ViewControllerBeanDefinitionParser());
-		// 重定向视图控制器
-		registerBeanDefinitionParser("redirect-view-controller", new ViewControllerBeanDefinitionParser());
-		registerBeanDefinitionParser("status-controller", new ViewControllerBeanDefinitionParser());
-		// 视图解析器
-		registerBeanDefinitionParser("view-resolvers", new ViewResolversBeanDefinitionParser());
-		// tiles 处理器
-		registerBeanDefinitionParser("tiles-configurer", new TilesConfigurerBeanDefinitionParser());
+    /**
+     * 初始化一些SpringMvc 的解析类
+     */
+    @Override
+    public void init() {
+        // 注解驱动
+        registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
+        // 默认的 servlet 处理器
+        registerBeanDefinitionParser("default-servlet-handler", new DefaultServletHandlerBeanDefinitionParser());
+        // 拦截器
+        registerBeanDefinitionParser("interceptors", new InterceptorsBeanDefinitionParser());
+        // 资源
+        registerBeanDefinitionParser("resources", new ResourcesBeanDefinitionParser());
+        // 视图控制器
+        registerBeanDefinitionParser("view-controller", new ViewControllerBeanDefinitionParser());
+        // 重定向视图控制器
+        registerBeanDefinitionParser("redirect-view-controller", new ViewControllerBeanDefinitionParser());
+        registerBeanDefinitionParser("status-controller", new ViewControllerBeanDefinitionParser());
+        // 视图解析器
+        registerBeanDefinitionParser("view-resolvers", new ViewResolversBeanDefinitionParser());
+        // tiles 处理器
+        registerBeanDefinitionParser("tiles-configurer", new TilesConfigurerBeanDefinitionParser());
 
-		registerBeanDefinitionParser("freemarker-configurer", new FreeMarkerConfigurerBeanDefinitionParser());
-		registerBeanDefinitionParser("groovy-configurer", new GroovyMarkupConfigurerBeanDefinitionParser());
+        registerBeanDefinitionParser("freemarker-configurer", new FreeMarkerConfigurerBeanDefinitionParser());
+        registerBeanDefinitionParser("groovy-configurer", new GroovyMarkupConfigurerBeanDefinitionParser());
 
-		registerBeanDefinitionParser("script-template-configurer", new ScriptTemplateConfigurerBeanDefinitionParser());
-		// 跨域处理
-		registerBeanDefinitionParser("cors", new CorsBeanDefinitionParser());
-	}
+        registerBeanDefinitionParser("script-template-configurer", new ScriptTemplateConfigurerBeanDefinitionParser());
+        // 跨域处理
+        registerBeanDefinitionParser("cors", new CorsBeanDefinitionParser());
+    }
 
 }

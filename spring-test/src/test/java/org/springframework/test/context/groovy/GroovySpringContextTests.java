@@ -16,11 +16,8 @@
 
 package org.springframework.test.context.groovy;
 
-import javax.annotation.Resource;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +27,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.tests.sample.beans.Pet;
 
-import static org.junit.Assert.*;
+import javax.annotation.Resource;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for loading an {@code ApplicationContext} from a
@@ -43,82 +45,77 @@ import static org.junit.Assert.*;
 @ContextConfiguration("context.groovy")
 public class GroovySpringContextTests implements BeanNameAware, InitializingBean {
 
-	private Employee employee;
+    @Autowired(required = false)
+    protected Long nonrequiredLong;
+    @Resource
+    protected String foo;
+    protected String bar;
+    private Employee employee;
+    @Autowired
+    private Pet pet;
+    @Autowired
+    private ApplicationContext applicationContext;
 
-	@Autowired
-	private Pet pet;
+    private String beanName;
 
-	@Autowired(required = false)
-	protected Long nonrequiredLong;
-
-	@Resource
-	protected String foo;
-
-	protected String bar;
-
-	@Autowired
-	private ApplicationContext applicationContext;
-
-	private String beanName;
-
-	private boolean beanInitialized = false;
+    private boolean beanInitialized = false;
 
 
-	@Autowired
-	protected void setEmployee(Employee employee) {
-		this.employee = employee;
-	}
+    @Autowired
+    protected void setEmployee(Employee employee) {
+        this.employee = employee;
+    }
 
-	@Resource
-	protected void setBar(String bar) {
-		this.bar = bar;
-	}
+    @Resource
+    protected void setBar(String bar) {
+        this.bar = bar;
+    }
 
-	@Override
-	public void setBeanName(String beanName) {
-		this.beanName = beanName;
-	}
+    @Override
+    public void setBeanName(String beanName) {
+        this.beanName = beanName;
+    }
 
-	@Override
-	public void afterPropertiesSet() {
-		this.beanInitialized = true;
-	}
+    @Override
+    public void afterPropertiesSet() {
+        this.beanInitialized = true;
+    }
 
 
-	@Test
-	public void verifyBeanNameSet() {
-		assertTrue("The bean name of this test instance should have been set to the fully qualified class name " +
-				"due to BeanNameAware semantics.", this.beanName.startsWith(getClass().getName()));
-	}
+    @Test
+    public void verifyBeanNameSet() {
+        assertTrue("The bean name of this test instance should have been set to the fully qualified class name " +
+                "due to BeanNameAware semantics.", this.beanName.startsWith(getClass().getName()));
+    }
 
-	@Test
-	public void verifyBeanInitialized() {
-		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
-				this.beanInitialized);
-	}
+    @Test
+    public void verifyBeanInitialized() {
+        assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
+                this.beanInitialized);
+    }
 
-	@Test
-	public void verifyAnnotationAutowiredFields() {
-		assertNull("The nonrequiredLong property should NOT have been autowired.", this.nonrequiredLong);
-		assertNotNull("The application context should have been autowired.", this.applicationContext);
-		assertNotNull("The pet field should have been autowired.", this.pet);
-		assertEquals("Dogbert", this.pet.getName());
-	}
+    @Test
+    public void verifyAnnotationAutowiredFields() {
+        assertNull("The nonrequiredLong property should NOT have been autowired.", this.nonrequiredLong);
+        assertNotNull("The application context should have been autowired.", this.applicationContext);
+        assertNotNull("The pet field should have been autowired.", this.pet);
+        assertEquals("Dogbert", this.pet.getName());
+    }
 
-	@Test
-	public void verifyAnnotationAutowiredMethods() {
-		assertNotNull("The employee setter method should have been autowired.", this.employee);
-		assertEquals("Dilbert", this.employee.getName());
-	}
+    @Test
+    public void verifyAnnotationAutowiredMethods() {
+        assertNotNull("The employee setter method should have been autowired.", this.employee);
+        assertEquals("Dilbert", this.employee.getName());
+    }
 
-	@Test
-	public void verifyResourceAnnotationWiredFields() {
-		assertEquals("The foo field should have been wired via @Resource.", "Foo", this.foo);
-	}
+    @Test
+    public void verifyResourceAnnotationWiredFields() {
+        assertEquals("The foo field should have been wired via @Resource.", "Foo", this.foo);
+    }
 
-	@Test
-	public void verifyResourceAnnotationWiredMethods() {
-		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
-	}
+    @Test
+    public void verifyResourceAnnotationWiredMethods() {
+        assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
+    }
 
 }

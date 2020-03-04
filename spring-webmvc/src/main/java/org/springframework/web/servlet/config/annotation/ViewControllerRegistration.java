@@ -61,8 +61,9 @@ public class ViewControllerRegistration {
      * view name in which case the configured {@link RequestToViewNameTranslator}
      * will select the view name. The {@code DefaultRequestToViewNameTranslator}
      * for example translates "/foo/bar" to "foo/bar".
-     *
+     * <p>
      * 设置视图名称
+     *
      * @see org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator
      */
     public void setViewName(String viewName) {

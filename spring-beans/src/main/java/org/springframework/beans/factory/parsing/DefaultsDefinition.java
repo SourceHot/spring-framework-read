@@ -26,9 +26,9 @@ import org.springframework.beans.BeanMetadataElement;
  * for example specified at the root tag level within an XML document.
  *
  * @author Juergen Hoeller
- * @since 2.0.2
  * @see org.springframework.beans.factory.xml.DocumentDefaultsDefinition
  * @see ReaderEventListener#defaultsRegistered(DefaultsDefinition)
+ * @since 2.0.2
  */
 public interface DefaultsDefinition extends BeanMetadataElement {
 

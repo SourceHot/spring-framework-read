@@ -71,10 +71,10 @@ import java.lang.annotation.Target;
  *
  * @author Sam Brannen
  * @author Rod Johnson
- * @since 2.0
  * @see org.springframework.test.context.ContextConfiguration
  * @see org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
  * @see org.springframework.test.context.support.DirtiesContextTestExecutionListener
+ * @since 2.0
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -82,125 +82,131 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface DirtiesContext {
 
-	/**
-	 * The <i>mode</i> to use when a test method is annotated with
-	 * {@code @DirtiesContext}.
-	 * <p>Defaults to {@link MethodMode#AFTER_METHOD AFTER_METHOD}.
-	 * <p>Setting the method mode on an annotated test class has no meaning.
-	 * For class-level control, use {@link #classMode} instead.
-	 * @since 4.2
-	 */
-	MethodMode methodMode() default MethodMode.AFTER_METHOD;
+    /**
+     * The <i>mode</i> to use when a test method is annotated with
+     * {@code @DirtiesContext}.
+     * <p>Defaults to {@link MethodMode#AFTER_METHOD AFTER_METHOD}.
+     * <p>Setting the method mode on an annotated test class has no meaning.
+     * For class-level control, use {@link #classMode} instead.
+     *
+     * @since 4.2
+     */
+    MethodMode methodMode() default MethodMode.AFTER_METHOD;
 
-	/**
-	 * The <i>mode</i> to use when a test class is annotated with
-	 * {@code @DirtiesContext}.
-	 * <p>Defaults to {@link ClassMode#AFTER_CLASS AFTER_CLASS}.
-	 * <p>Setting the class mode on an annotated test method has no meaning.
-	 * For method-level control, use {@link #methodMode} instead.
-	 * @since 3.0
-	 */
-	ClassMode classMode() default ClassMode.AFTER_CLASS;
+    /**
+     * The <i>mode</i> to use when a test class is annotated with
+     * {@code @DirtiesContext}.
+     * <p>Defaults to {@link ClassMode#AFTER_CLASS AFTER_CLASS}.
+     * <p>Setting the class mode on an annotated test method has no meaning.
+     * For method-level control, use {@link #methodMode} instead.
+     *
+     * @since 3.0
+     */
+    ClassMode classMode() default ClassMode.AFTER_CLASS;
 
-	/**
-	 * The context cache clearing <em>mode</em> to use when a context is
-	 * configured as part of a hierarchy via
-	 * {@link org.springframework.test.context.ContextHierarchy @ContextHierarchy}.
-	 * <p>Defaults to {@link HierarchyMode#EXHAUSTIVE EXHAUSTIVE}.
-	 * @since 3.2.2
-	 */
-	HierarchyMode hierarchyMode() default HierarchyMode.EXHAUSTIVE;
-
-
-	/**
-	 * Defines <i>modes</i> which determine how {@code @DirtiesContext} is
-	 * interpreted when used to annotate a test method.
-	 * @since 4.2
-	 */
-	enum MethodMode {
-
-		/**
-		 * The associated {@code ApplicationContext} will be marked as
-		 * <em>dirty</em> before the corresponding test method.
-		 */
-		BEFORE_METHOD,
-
-		/**
-		 * The associated {@code ApplicationContext} will be marked as
-		 * <em>dirty</em> after the corresponding test method.
-		 */
-		AFTER_METHOD;
-	}
+    /**
+     * The context cache clearing <em>mode</em> to use when a context is
+     * configured as part of a hierarchy via
+     * {@link org.springframework.test.context.ContextHierarchy @ContextHierarchy}.
+     * <p>Defaults to {@link HierarchyMode#EXHAUSTIVE EXHAUSTIVE}.
+     *
+     * @since 3.2.2
+     */
+    HierarchyMode hierarchyMode() default HierarchyMode.EXHAUSTIVE;
 
 
-	/**
-	 * Defines <i>modes</i> which determine how {@code @DirtiesContext} is
-	 * interpreted when used to annotate a test class.
-	 * @since 3.0
-	 */
-	enum ClassMode {
+    /**
+     * Defines <i>modes</i> which determine how {@code @DirtiesContext} is
+     * interpreted when used to annotate a test method.
+     *
+     * @since 4.2
+     */
+    enum MethodMode {
 
-		/**
-		 * The associated {@code ApplicationContext} will be marked as
-		 * <em>dirty</em> before the test class.
-		 *
-		 * @since 4.2
-		 */
-		BEFORE_CLASS,
+        /**
+         * The associated {@code ApplicationContext} will be marked as
+         * <em>dirty</em> before the corresponding test method.
+         */
+        BEFORE_METHOD,
 
-		/**
-		 * The associated {@code ApplicationContext} will be marked as
-		 * <em>dirty</em> before each test method in the class.
-		 *
-		 * @since 4.2
-		 */
-		BEFORE_EACH_TEST_METHOD,
-
-		/**
-		 * The associated {@code ApplicationContext} will be marked as
-		 * <em>dirty</em> after each test method in the class.
-		 */
-		AFTER_EACH_TEST_METHOD,
-
-		/**
-		 * The associated {@code ApplicationContext} will be marked as
-		 * <em>dirty</em> after the test class.
-		 */
-		AFTER_CLASS;
-	}
+        /**
+         * The associated {@code ApplicationContext} will be marked as
+         * <em>dirty</em> after the corresponding test method.
+         */
+        AFTER_METHOD;
+    }
 
 
-	/**
-	 * Defines <i>modes</i> which determine how the context cache is cleared
-	 * when {@code @DirtiesContext} is used in a test whose context is
-	 * configured as part of a hierarchy via
-	 * {@link org.springframework.test.context.ContextHierarchy @ContextHierarchy}.
-	 * @since 3.2.2
-	 */
-	enum HierarchyMode {
+    /**
+     * Defines <i>modes</i> which determine how {@code @DirtiesContext} is
+     * interpreted when used to annotate a test class.
+     *
+     * @since 3.0
+     */
+    enum ClassMode {
 
-		/**
-		 * The context cache will be cleared using an <em>exhaustive</em> algorithm
-		 * that includes not only the {@linkplain HierarchyMode#CURRENT_LEVEL current level}
-		 * but also all other context hierarchies that share an ancestor context
-		 * common to the current test.
-		 *
-		 * <p>All {@code ApplicationContexts} that reside in a subhierarchy of
-		 * the common ancestor context will be removed from the context cache and
-		 * closed.
-		 */
-		EXHAUSTIVE,
+        /**
+         * The associated {@code ApplicationContext} will be marked as
+         * <em>dirty</em> before the test class.
+         *
+         * @since 4.2
+         */
+        BEFORE_CLASS,
 
-		/**
-		 * The {@code ApplicationContext} for the <em>current level</em> in the
-		 * context hierarchy and all contexts in subhierarchies of the current
-		 * level will be removed from the context cache and closed.
-		 *
-		 * <p>The <em>current level</em> refers to the {@code ApplicationContext}
-		 * at the lowest level in the context hierarchy that is visible from the
-		 * current test.
-		 */
-		CURRENT_LEVEL;
-	}
+        /**
+         * The associated {@code ApplicationContext} will be marked as
+         * <em>dirty</em> before each test method in the class.
+         *
+         * @since 4.2
+         */
+        BEFORE_EACH_TEST_METHOD,
+
+        /**
+         * The associated {@code ApplicationContext} will be marked as
+         * <em>dirty</em> after each test method in the class.
+         */
+        AFTER_EACH_TEST_METHOD,
+
+        /**
+         * The associated {@code ApplicationContext} will be marked as
+         * <em>dirty</em> after the test class.
+         */
+        AFTER_CLASS;
+    }
+
+
+    /**
+     * Defines <i>modes</i> which determine how the context cache is cleared
+     * when {@code @DirtiesContext} is used in a test whose context is
+     * configured as part of a hierarchy via
+     * {@link org.springframework.test.context.ContextHierarchy @ContextHierarchy}.
+     *
+     * @since 3.2.2
+     */
+    enum HierarchyMode {
+
+        /**
+         * The context cache will be cleared using an <em>exhaustive</em> algorithm
+         * that includes not only the {@linkplain HierarchyMode#CURRENT_LEVEL current level}
+         * but also all other context hierarchies that share an ancestor context
+         * common to the current test.
+         *
+         * <p>All {@code ApplicationContexts} that reside in a subhierarchy of
+         * the common ancestor context will be removed from the context cache and
+         * closed.
+         */
+        EXHAUSTIVE,
+
+        /**
+         * The {@code ApplicationContext} for the <em>current level</em> in the
+         * context hierarchy and all contexts in subhierarchies of the current
+         * level will be removed from the context cache and closed.
+         *
+         * <p>The <em>current level</em> refers to the {@code ApplicationContext}
+         * at the lowest level in the context hierarchy that is visible from the
+         * current test.
+         */
+        CURRENT_LEVEL;
+    }
 
 }

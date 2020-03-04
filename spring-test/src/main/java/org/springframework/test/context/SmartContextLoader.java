@@ -64,63 +64,65 @@ import org.springframework.context.ApplicationContext;
  * </ul>
  *
  * @author Sam Brannen
- * @since 3.1
  * @see ContextConfiguration
  * @see ActiveProfiles
  * @see ContextConfigurationAttributes
  * @see MergedContextConfiguration
+ * @since 3.1
  */
 public interface SmartContextLoader extends ContextLoader {
 
-	/**
-	 * Processes the {@link ContextConfigurationAttributes} for a given test class.
-	 * <p>Concrete implementations may choose to <em>modify</em> the {@code locations}
-	 * or {@code classes} in the supplied {@link ContextConfigurationAttributes},
-	 * <em>generate</em> default configuration locations, or <em>detect</em>
-	 * default configuration classes if the supplied values are {@code null}
-	 * or empty.
-	 * <p><b>Note</b>: in contrast to a standard {@code ContextLoader}, a
-	 * {@code SmartContextLoader} <b>must</b> <em>preemptively</em> verify that
-	 * a generated or detected default actually exists before setting the corresponding
-	 * {@code locations} or {@code classes} property in the supplied
-	 * {@link ContextConfigurationAttributes}. Consequently, leaving the
-	 * {@code locations} or {@code classes} property empty signals that
-	 * this {@code SmartContextLoader} was not able to generate or detect defaults.
-	 * @param configAttributes the context configuration attributes to process
-	 */
-	void processContextConfiguration(ContextConfigurationAttributes configAttributes);
+    /**
+     * Processes the {@link ContextConfigurationAttributes} for a given test class.
+     * <p>Concrete implementations may choose to <em>modify</em> the {@code locations}
+     * or {@code classes} in the supplied {@link ContextConfigurationAttributes},
+     * <em>generate</em> default configuration locations, or <em>detect</em>
+     * default configuration classes if the supplied values are {@code null}
+     * or empty.
+     * <p><b>Note</b>: in contrast to a standard {@code ContextLoader}, a
+     * {@code SmartContextLoader} <b>must</b> <em>preemptively</em> verify that
+     * a generated or detected default actually exists before setting the corresponding
+     * {@code locations} or {@code classes} property in the supplied
+     * {@link ContextConfigurationAttributes}. Consequently, leaving the
+     * {@code locations} or {@code classes} property empty signals that
+     * this {@code SmartContextLoader} was not able to generate or detect defaults.
+     *
+     * @param configAttributes the context configuration attributes to process
+     */
+    void processContextConfiguration(ContextConfigurationAttributes configAttributes);
 
-	/**
-	 * Loads a new {@link ApplicationContext context} based on the supplied
-	 * {@link MergedContextConfiguration merged context configuration},
-	 * configures the context, and finally returns the context in a fully
-	 * <em>refreshed</em> state.
-	 * <p>Concrete implementations should register annotation configuration
-	 * processors with bean factories of
-	 * {@link ApplicationContext application contexts} loaded by this
-	 * {@code SmartContextLoader}. Beans will therefore automatically be
-	 * candidates for annotation-based dependency injection using
-	 * {@link org.springframework.beans.factory.annotation.Autowired @Autowired},
-	 * {@link javax.annotation.Resource @Resource}, and
-	 * {@link javax.inject.Inject @Inject}. In addition, concrete implementations
-	 * should set the active bean definition profiles in the context's
-	 * {@link org.springframework.core.env.Environment Environment}.
-	 * <p>Any {@code ApplicationContext} loaded by a
-	 * {@code SmartContextLoader} <strong>must</strong> register a JVM
-	 * shutdown hook for itself. Unless the context gets closed early, all context
-	 * instances will be automatically closed on JVM shutdown. This allows for
-	 * freeing of external resources held by beans within the context (e.g.,
-	 * temporary files).
-	 * @param mergedConfig the merged context configuration to use to load the
-	 * application context
-	 * @return a new application context
-	 * @throws Exception if context loading failed
-	 * @see #processContextConfiguration(ContextConfigurationAttributes)
-	 * @see org.springframework.context.annotation.AnnotationConfigUtils
-	 * #registerAnnotationConfigProcessors(org.springframework.beans.factory.support.BeanDefinitionRegistry)
-	 * @see MergedContextConfiguration#getActiveProfiles()
-	 * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment()
-	 */
-	ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception;
+    /**
+     * Loads a new {@link ApplicationContext context} based on the supplied
+     * {@link MergedContextConfiguration merged context configuration},
+     * configures the context, and finally returns the context in a fully
+     * <em>refreshed</em> state.
+     * <p>Concrete implementations should register annotation configuration
+     * processors with bean factories of
+     * {@link ApplicationContext application contexts} loaded by this
+     * {@code SmartContextLoader}. Beans will therefore automatically be
+     * candidates for annotation-based dependency injection using
+     * {@link org.springframework.beans.factory.annotation.Autowired @Autowired},
+     * {@link javax.annotation.Resource @Resource}, and
+     * {@link javax.inject.Inject @Inject}. In addition, concrete implementations
+     * should set the active bean definition profiles in the context's
+     * {@link org.springframework.core.env.Environment Environment}.
+     * <p>Any {@code ApplicationContext} loaded by a
+     * {@code SmartContextLoader} <strong>must</strong> register a JVM
+     * shutdown hook for itself. Unless the context gets closed early, all context
+     * instances will be automatically closed on JVM shutdown. This allows for
+     * freeing of external resources held by beans within the context (e.g.,
+     * temporary files).
+     *
+     * @param mergedConfig the merged context configuration to use to load the
+     *                     application context
+     * @return a new application context
+     * @throws Exception if context loading failed
+     * @see #processContextConfiguration(ContextConfigurationAttributes)
+     * @see org.springframework.context.annotation.AnnotationConfigUtils
+     * #registerAnnotationConfigProcessors(org.springframework.beans.factory.support.BeanDefinitionRegistry)
+     * @see MergedContextConfiguration#getActiveProfiles()
+     * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment()
+     */
+    ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception;
 
 }

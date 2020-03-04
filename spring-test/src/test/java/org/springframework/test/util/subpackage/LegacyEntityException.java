@@ -25,8 +25,8 @@ package org.springframework.test.util.subpackage;
 @SuppressWarnings("serial")
 public class LegacyEntityException extends RuntimeException {
 
-	public LegacyEntityException(String message) {
-		super(message);
-	}
+    public LegacyEntityException(String message) {
+        super(message);
+    }
 
 }

@@ -16,14 +16,7 @@
 
 package org.springframework.http.codec;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.function.Consumer;
-
 import org.junit.Test;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -34,72 +27,80 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import static org.junit.Assert.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.function.Consumer;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
  */
 public class FormHttpMessageWriterTests extends AbstractLeakCheckingTestCase {
 
-	private final FormHttpMessageWriter writer = new FormHttpMessageWriter();
+    private final FormHttpMessageWriter writer = new FormHttpMessageWriter();
 
 
-	@Test
-	public void canWrite() {
-		assertTrue(this.writer.canWrite(
-				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
-				MediaType.APPLICATION_FORM_URLENCODED));
+    @Test
+    public void canWrite() {
+        assertTrue(this.writer.canWrite(
+                ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
+                MediaType.APPLICATION_FORM_URLENCODED));
 
-		// No generic information
-		assertTrue(this.writer.canWrite(
-				ResolvableType.forInstance(new LinkedMultiValueMap<String, String>()),
-				MediaType.APPLICATION_FORM_URLENCODED));
+        // No generic information
+        assertTrue(this.writer.canWrite(
+                ResolvableType.forInstance(new LinkedMultiValueMap<String, String>()),
+                MediaType.APPLICATION_FORM_URLENCODED));
 
-		assertFalse(this.writer.canWrite(
-				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
-				null));
+        assertFalse(this.writer.canWrite(
+                ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
+                null));
 
-		assertFalse(this.writer.canWrite(
-				ResolvableType.forClassWithGenerics(MultiValueMap.class, Object.class, String.class),
-				null));
+        assertFalse(this.writer.canWrite(
+                ResolvableType.forClassWithGenerics(MultiValueMap.class, Object.class, String.class),
+                null));
 
-		assertFalse(this.writer.canWrite(
-				ResolvableType.forClassWithGenerics(Map.class, String.class, String.class),
-				MediaType.APPLICATION_FORM_URLENCODED));
+        assertFalse(this.writer.canWrite(
+                ResolvableType.forClassWithGenerics(Map.class, String.class, String.class),
+                MediaType.APPLICATION_FORM_URLENCODED));
 
-		assertFalse(this.writer.canWrite(
-				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
-				MediaType.MULTIPART_FORM_DATA));
-	}
+        assertFalse(this.writer.canWrite(
+                ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
+                MediaType.MULTIPART_FORM_DATA));
+    }
 
-	@Test
-	public void writeForm() {
-		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-		body.set("name 1", "value 1");
-		body.add("name 2", "value 2+1");
-		body.add("name 2", "value 2+2");
-		body.add("name 3", null);
-		MockServerHttpResponse response = new MockServerHttpResponse(this.bufferFactory);
-		this.writer.write(Mono.just(body), null, MediaType.APPLICATION_FORM_URLENCODED, response, null).block();
+    @Test
+    public void writeForm() {
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.set("name 1", "value 1");
+        body.add("name 2", "value 2+1");
+        body.add("name 2", "value 2+2");
+        body.add("name 3", null);
+        MockServerHttpResponse response = new MockServerHttpResponse(this.bufferFactory);
+        this.writer.write(Mono.just(body), null, MediaType.APPLICATION_FORM_URLENCODED, response, null).block();
 
-		String expected = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
-		StepVerifier.create(response.getBody())
-				.consumeNextWith(stringConsumer(expected))
-				.expectComplete()
-				.verify();
-		HttpHeaders headers = response.getHeaders();
-		assertEquals("application/x-www-form-urlencoded;charset=UTF-8", headers.getContentType().toString());
-		assertEquals(expected.length(), headers.getContentLength());
-	}
+        String expected = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
+        StepVerifier.create(response.getBody())
+                .consumeNextWith(stringConsumer(expected))
+                .expectComplete()
+                .verify();
+        HttpHeaders headers = response.getHeaders();
+        assertEquals("application/x-www-form-urlencoded;charset=UTF-8", headers.getContentType().toString());
+        assertEquals(expected.length(), headers.getContentLength());
+    }
 
-	private Consumer<DataBuffer> stringConsumer(String expected) {
-		return dataBuffer -> {
-			String value = DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
-			DataBufferUtils.release(dataBuffer);
-			assertEquals(expected, value);
-		};
-	}
+    private Consumer<DataBuffer> stringConsumer(String expected) {
+        return dataBuffer -> {
+            String value = DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
+            DataBufferUtils.release(dataBuffer);
+            assertEquals(expected, value);
+        };
+    }
 
 
 }

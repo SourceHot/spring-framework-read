@@ -30,12 +30,13 @@ import java.lang.reflect.Constructor;
  */
 public interface ConstructorInvocation extends Invocation {
 
-	/**
-	 * Get the constructor being called.
-	 * <p>This method is a friendly implementation of the
-	 * {@link Joinpoint#getStaticPart()} method (same result).
-	 * @return the constructor being called
-	 */
-	Constructor<?> getConstructor();
+    /**
+     * Get the constructor being called.
+     * <p>This method is a friendly implementation of the
+     * {@link Joinpoint#getStaticPart()} method (same result).
+     *
+     * @return the constructor being called
+     */
+    Constructor<?> getConstructor();
 
 }

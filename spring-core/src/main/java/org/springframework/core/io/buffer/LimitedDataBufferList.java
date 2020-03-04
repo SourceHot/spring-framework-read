@@ -15,12 +15,12 @@
  */
 package org.springframework.core.io.buffer;
 
+import reactor.core.publisher.Flux;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
-
-import reactor.core.publisher.Flux;
 
 /**
  * Custom {@link List} to collect data buffers with and enforce a
@@ -42,116 +42,114 @@ import reactor.core.publisher.Flux;
 @SuppressWarnings("serial")
 public class LimitedDataBufferList extends ArrayList<DataBuffer> {
 
-	private final int maxByteCount;
+    private final int maxByteCount;
 
-	private int byteCount;
-
-
-	public LimitedDataBufferList(int maxByteCount) {
-		this.maxByteCount = maxByteCount;
-	}
+    private int byteCount;
 
 
-	@Override
-	public boolean add(DataBuffer buffer) {
-		boolean result = super.add(buffer);
-		if (result) {
-			updateCount(buffer.readableByteCount());
-		}
-		return result;
-	}
+    public LimitedDataBufferList(int maxByteCount) {
+        this.maxByteCount = maxByteCount;
+    }
 
-	@Override
-	public void add(int index, DataBuffer buffer) {
-		super.add(index, buffer);
-		updateCount(buffer.readableByteCount());
-	}
 
-	@Override
-	public boolean addAll(Collection<? extends DataBuffer> collection) {
-		boolean result = super.addAll(collection);
-		collection.forEach(buffer -> updateCount(buffer.readableByteCount()));
-		return result;
-	}
+    @Override
+    public boolean add(DataBuffer buffer) {
+        boolean result = super.add(buffer);
+        if (result) {
+            updateCount(buffer.readableByteCount());
+        }
+        return result;
+    }
 
-	@Override
-	public boolean addAll(int index, Collection<? extends DataBuffer> collection) {
-		boolean result = super.addAll(index, collection);
-		collection.forEach(buffer -> updateCount(buffer.readableByteCount()));
-		return result;
-	}
+    @Override
+    public void add(int index, DataBuffer buffer) {
+        super.add(index, buffer);
+        updateCount(buffer.readableByteCount());
+    }
 
-	private void updateCount(int bytesToAdd) {
-		if (this.maxByteCount < 0) {
-			return;
-		}
-		if (bytesToAdd > Integer.MAX_VALUE - this.byteCount) {
-			raiseLimitException();
-		}
-		else {
-			this.byteCount += bytesToAdd;
-			if (this.byteCount > this.maxByteCount) {
-				raiseLimitException();
-			}
-		}
-	}
+    @Override
+    public boolean addAll(Collection<? extends DataBuffer> collection) {
+        boolean result = super.addAll(collection);
+        collection.forEach(buffer -> updateCount(buffer.readableByteCount()));
+        return result;
+    }
 
-	private void raiseLimitException() {
-		// Do not release here, it's likely down via doOnDiscard..
-		throw new DataBufferLimitException(
-				"Exceeded limit on max bytes to buffer : " + this.maxByteCount);
-	}
+    @Override
+    public boolean addAll(int index, Collection<? extends DataBuffer> collection) {
+        boolean result = super.addAll(index, collection);
+        collection.forEach(buffer -> updateCount(buffer.readableByteCount()));
+        return result;
+    }
 
-	@Override
-	public DataBuffer remove(int index) {
-		throw new UnsupportedOperationException();
-	}
+    private void updateCount(int bytesToAdd) {
+        if (this.maxByteCount < 0) {
+            return;
+        }
+        if (bytesToAdd > Integer.MAX_VALUE - this.byteCount) {
+            raiseLimitException();
+        } else {
+            this.byteCount += bytesToAdd;
+            if (this.byteCount > this.maxByteCount) {
+                raiseLimitException();
+            }
+        }
+    }
 
-	@Override
-	public boolean remove(Object o) {
-		throw new UnsupportedOperationException();
-	}
+    private void raiseLimitException() {
+        // Do not release here, it's likely down via doOnDiscard..
+        throw new DataBufferLimitException(
+                "Exceeded limit on max bytes to buffer : " + this.maxByteCount);
+    }
 
-	@Override
-	protected void removeRange(int fromIndex, int toIndex) {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public DataBuffer remove(int index) {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public boolean removeAll(Collection<?> c) {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public boolean remove(Object o) {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public boolean removeIf(Predicate<? super DataBuffer> filter) {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    protected void removeRange(int fromIndex, int toIndex) {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public DataBuffer set(int index, DataBuffer element) {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public void clear() {
-		this.byteCount = 0;
-		super.clear();
-	}
+    @Override
+    public boolean removeIf(Predicate<? super DataBuffer> filter) {
+        throw new UnsupportedOperationException();
+    }
 
-	/**
-	 * Shortcut to {@link DataBufferUtils#release release} all data buffers and
-	 * then {@link #clear()}.
-	 */
-	public void releaseAndClear() {
-		forEach(buf -> {
-			try {
-				DataBufferUtils.release(buf);
-			}
-			catch (Throwable ex) {
-				// Keep going..
-			}
-		});
-		clear();
-	}
+    @Override
+    public DataBuffer set(int index, DataBuffer element) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void clear() {
+        this.byteCount = 0;
+        super.clear();
+    }
+
+    /**
+     * Shortcut to {@link DataBufferUtils#release release} all data buffers and
+     * then {@link #clear()}.
+     */
+    public void releaseAndClear() {
+        forEach(buf -> {
+            try {
+                DataBufferUtils.release(buf);
+            } catch (Throwable ex) {
+                // Keep going..
+            }
+        });
+        clear();
+    }
 
 }

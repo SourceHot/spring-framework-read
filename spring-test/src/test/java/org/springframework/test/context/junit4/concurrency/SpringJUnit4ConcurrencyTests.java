@@ -16,14 +16,10 @@
 
 package org.springframework.test.context.junit4.concurrency;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.ParallelComputer;
-
 import org.springframework.test.context.hierarchies.web.DispatcherWacRootWacEarTests;
 import org.springframework.test.context.junit4.InheritedConfigSpringJUnit4ClassRunnerAppCtxTests;
 import org.springframework.test.context.junit4.MethodLevelTransactionalSpringRunnerTests;
@@ -44,8 +40,11 @@ import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.util.ReflectionUtils;
 
-import static org.springframework.core.annotation.AnnotatedElementUtils.*;
-import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+
+import static org.springframework.core.annotation.AnnotatedElementUtils.hasAnnotation;
+import static org.springframework.test.context.junit4.JUnitTestingUtils.runTestsAndAssertCounters;
 
 /**
  * Concurrency tests for the {@link SpringRunner}, {@link SpringClassRule}, and
@@ -69,54 +68,54 @@ import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
  * LONG_RUNNING} test group is enabled.
  *
  * @author Sam Brannen
- * @since 5.0
  * @see org.springframework.test.context.TestContextConcurrencyTests
+ * @since 5.0
  */
 public class SpringJUnit4ConcurrencyTests {
 
-	private final Class<?>[] testClasses = new Class<?>[] {
-		// Basics
-			SpringJUnit4ClassRunnerAppCtxTests.class,
-			InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,
-			SpringJUnit47ClassRunnerRuleTests.class,
-			BaseAppCtxRuleTests.class,
-		// Transactional
-			MethodLevelTransactionalSpringRunnerTests.class,
-			TimedTransactionalSpringRunnerTests.class,
-		// Web and Scopes
-			DispatcherWacRootWacEarTests.class,
-			BasicAnnotationConfigWacSpringRuleTests.class,
-			RequestAndSessionScopedBeansWacTests.class,
-			WebSocketServletServerContainerFactoryBeanTests.class,
-		// Spring MVC Test
-			JavaConfigTests.class,
-			WebAppResourceTests.class,
-			SampleTests.class
-	};
+    private final Class<?>[] testClasses = new Class<?>[]{
+            // Basics
+            SpringJUnit4ClassRunnerAppCtxTests.class,
+            InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,
+            SpringJUnit47ClassRunnerRuleTests.class,
+            BaseAppCtxRuleTests.class,
+            // Transactional
+            MethodLevelTransactionalSpringRunnerTests.class,
+            TimedTransactionalSpringRunnerTests.class,
+            // Web and Scopes
+            DispatcherWacRootWacEarTests.class,
+            BasicAnnotationConfigWacSpringRuleTests.class,
+            RequestAndSessionScopedBeansWacTests.class,
+            WebSocketServletServerContainerFactoryBeanTests.class,
+            // Spring MVC Test
+            JavaConfigTests.class,
+            WebAppResourceTests.class,
+            SampleTests.class
+    };
 
 
-	@BeforeClass
-	public static void abortIfLongRunningTestGroupIsNotEnabled() {
-		Assume.group(TestGroup.LONG_RUNNING);
-	}
+    @BeforeClass
+    public static void abortIfLongRunningTestGroupIsNotEnabled() {
+        Assume.group(TestGroup.LONG_RUNNING);
+    }
 
-	@Test
-	public void runAllTestsConcurrently() throws Exception {
-		final int FAILED = 0;
-		final int ABORTED = 0;
-		final int IGNORED = countAnnotatedMethods(Ignore.class);
-		final int TESTS = countAnnotatedMethods(Test.class) - IGNORED;
+    @Test
+    public void runAllTestsConcurrently() throws Exception {
+        final int FAILED = 0;
+        final int ABORTED = 0;
+        final int IGNORED = countAnnotatedMethods(Ignore.class);
+        final int TESTS = countAnnotatedMethods(Test.class) - IGNORED;
 
-		runTestsAndAssertCounters(new ParallelComputer(true, true), TESTS, FAILED, TESTS, IGNORED, ABORTED,
-				this.testClasses);
-	}
+        runTestsAndAssertCounters(new ParallelComputer(true, true), TESTS, FAILED, TESTS, IGNORED, ABORTED,
+                this.testClasses);
+    }
 
-	private int countAnnotatedMethods(Class<? extends Annotation> annotationType) {
-		return (int) Arrays.stream(this.testClasses)
-				.map(ReflectionUtils::getUniqueDeclaredMethods)
-				.flatMap(Arrays::stream)
-				.filter(method -> hasAnnotation(method, annotationType))
-				.count();
-	}
+    private int countAnnotatedMethods(Class<? extends Annotation> annotationType) {
+        return (int) Arrays.stream(this.testClasses)
+                .map(ReflectionUtils::getUniqueDeclaredMethods)
+                .flatMap(Arrays::stream)
+                .filter(method -> hasAnnotation(method, annotationType))
+                .count();
+    }
 
 }

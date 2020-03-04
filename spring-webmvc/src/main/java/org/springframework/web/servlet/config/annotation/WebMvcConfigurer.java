@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.List;
-
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
@@ -30,6 +28,8 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+
+import java.util.List;
 
 /**
  * Defines callback methods to customize the Java-based configuration for
@@ -63,7 +63,6 @@ public interface WebMvcConfigurer {
 
     /**
      * Configure content negotiation options.
-     *
      */
     default void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
     }
@@ -95,7 +94,7 @@ public interface WebMvcConfigurer {
      * controller method invocations and resource handler requests.
      * Interceptors can be registered to apply to all requests or be limited
      * to a subset of URL patterns.
-     *
+     * <p>
      * 添加拦截器
      */
     default void addInterceptors(InterceptorRegistry registry) {
@@ -105,7 +104,7 @@ public interface WebMvcConfigurer {
      * Add handlers to serve static resources such as images, js, and, css
      * files from specific locations under web application root, the classpath,
      * and others.
-     *
+     * <p>
      * 添加资源处理器(静态资源)
      */
     default void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -125,7 +124,7 @@ public interface WebMvcConfigurer {
      * cases where there is no need for custom controller logic -- e.g. render a
      * home page, perform simple site URL redirects, return a 404 status with
      * HTML content, a 204 with no content, and more.
-     *
+     * <p>
      * 添加视图控制器
      */
     default void addViewControllers(ViewControllerRegistry registry) {
@@ -135,8 +134,9 @@ public interface WebMvcConfigurer {
      * Configure view resolvers to translate String-based view names returned from
      * controllers into concrete {@link org.springframework.web.servlet.View}
      * implementations to perform rendering with.
-     *
+     * <p>
      * 配置视图解析器
+     *
      * @since 4.1
      */
     default void configureViewResolvers(ViewResolverRegistry registry) {
@@ -147,8 +147,9 @@ public interface WebMvcConfigurer {
      * <p>This does not override the built-in support for resolving handler
      * method arguments. To customize the built-in support for argument
      * resolution, configure {@link RequestMappingHandlerAdapter} directly.
-     *
+     * <p>
      * 添加参数解析器
+     *
      * @param resolvers initially an empty list
      */
     default void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
@@ -159,8 +160,9 @@ public interface WebMvcConfigurer {
      * <p>Using this option does not override the built-in support for handling
      * return values. To customize the built-in support for handling return
      * values, configure RequestMappingHandlerAdapter directly.
-     *
+     * <p>
      * 添加返回值处理器
+     *
      * @param handlers initially an empty list
      */
     default void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> handlers) {
@@ -174,8 +176,9 @@ public interface WebMvcConfigurer {
      * default converter registration. To simply add a converter without impacting
      * default registration, consider using the method
      * {@link #extendMessageConverters(java.util.List)} instead.
-     *
+     * <p>
      * 配置消息转换器
+     *
      * @param converters initially an empty list of converters
      */
     default void configureMessageConverters(List<HttpMessageConverter<?>> converters) {

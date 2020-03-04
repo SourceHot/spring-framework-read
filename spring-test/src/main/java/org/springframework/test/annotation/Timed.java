@@ -38,21 +38,21 @@ import java.lang.annotation.Target;
  *
  * @author Rod Johnson
  * @author Sam Brannen
- * @since 2.0
  * @see org.springframework.test.annotation.Repeat
  * @see org.springframework.test.context.junit4.SpringJUnit4ClassRunner
  * @see org.springframework.test.context.junit4.rules.SpringMethodRule
  * @see org.springframework.test.context.junit4.statements.SpringFailOnTimeout
+ * @since 2.0
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Timed {
 
-	/**
-	 * The maximum amount of time (in milliseconds) that a test execution can
-	 * take without being marked as failed due to taking too long.
-	 */
-	long millis();
+    /**
+     * The maximum amount of time (in milliseconds) that a test execution can
+     * take without being marked as failed due to taking too long.
+     */
+    long millis();
 
 }

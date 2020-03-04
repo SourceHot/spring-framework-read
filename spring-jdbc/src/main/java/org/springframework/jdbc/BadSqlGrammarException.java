@@ -16,9 +16,9 @@
 
 package org.springframework.jdbc;
 
-import java.sql.SQLException;
-
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
+
+import java.sql.SQLException;
 
 /**
  * Exception thrown when SQL specified is invalid. Such exceptions always have
@@ -34,33 +34,34 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 @SuppressWarnings("serial")
 public class BadSqlGrammarException extends InvalidDataAccessResourceUsageException {
 
-	private final String sql;
+    private final String sql;
 
 
-	/**
-	 * Constructor for BadSqlGrammarException.
-	 * @param task name of current task
-	 * @param sql the offending SQL statement
-	 * @param ex the root cause
-	 */
-	public BadSqlGrammarException(String task, String sql, SQLException ex) {
-		super(task + "; bad SQL grammar [" + sql + "]", ex);
-		this.sql = sql;
-	}
+    /**
+     * Constructor for BadSqlGrammarException.
+     *
+     * @param task name of current task
+     * @param sql  the offending SQL statement
+     * @param ex   the root cause
+     */
+    public BadSqlGrammarException(String task, String sql, SQLException ex) {
+        super(task + "; bad SQL grammar [" + sql + "]", ex);
+        this.sql = sql;
+    }
 
 
-	/**
-	 * Return the wrapped SQLException.
-	 */
-	public SQLException getSQLException() {
-		return (SQLException) getCause();
-	}
+    /**
+     * Return the wrapped SQLException.
+     */
+    public SQLException getSQLException() {
+        return (SQLException) getCause();
+    }
 
-	/**
-	 * Return the SQL that caused the problem.
-	 */
-	public String getSql() {
-		return this.sql;
-	}
+    /**
+     * Return the SQL that caused the problem.
+     */
+    public String getSql() {
+        return this.sql;
+    }
 
 }

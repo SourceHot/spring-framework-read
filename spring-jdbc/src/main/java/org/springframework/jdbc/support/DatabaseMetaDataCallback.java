@@ -31,17 +31,18 @@ import java.sql.SQLException;
 @FunctionalInterface
 public interface DatabaseMetaDataCallback {
 
-	/**
-	 * Implementations must implement this method to process the meta-data
-	 * passed in. Exactly what the implementation chooses to do is up to it.
-	 * @param dbmd the DatabaseMetaData to process
-	 * @return a result object extracted from the meta-data
-	 * (can be an arbitrary object, as needed by the implementation)
-	 * @throws SQLException if a SQLException is encountered getting
-	 * column values (that is, there's no need to catch SQLException)
-	 * @throws MetaDataAccessException in case of other failures while
-	 * extracting meta-data (for example, reflection failure)
-	 */
-	Object processMetaData(DatabaseMetaData dbmd) throws SQLException, MetaDataAccessException;
+    /**
+     * Implementations must implement this method to process the meta-data
+     * passed in. Exactly what the implementation chooses to do is up to it.
+     *
+     * @param dbmd the DatabaseMetaData to process
+     * @return a result object extracted from the meta-data
+     * (can be an arbitrary object, as needed by the implementation)
+     * @throws SQLException            if a SQLException is encountered getting
+     *                                 column values (that is, there's no need to catch SQLException)
+     * @throws MetaDataAccessException in case of other failures while
+     *                                 extracting meta-data (for example, reflection failure)
+     */
+    Object processMetaData(DatabaseMetaData dbmd) throws SQLException, MetaDataAccessException;
 
 }

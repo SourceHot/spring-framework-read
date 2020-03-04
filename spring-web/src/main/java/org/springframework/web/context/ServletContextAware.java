@@ -16,9 +16,9 @@
 
 package org.springframework.web.context;
 
-import javax.servlet.ServletContext;
-
 import org.springframework.beans.factory.Aware;
+
+import javax.servlet.ServletContext;
 
 /**
  * Interface to be implemented by any object that wishes to be notified of the
@@ -27,21 +27,22 @@ import org.springframework.beans.factory.Aware;
  *
  * @author Juergen Hoeller
  * @author Chris Beams
- * @since 12.03.2004
  * @see ServletConfigAware
+ * @since 12.03.2004
  */
 public interface ServletContextAware extends Aware {
 
-	/**
-	 * Set the {@link ServletContext} that this object runs in.
-	 * <p>Invoked after population of normal bean properties but before an init
-	 * callback like InitializingBean's {@code afterPropertiesSet} or a
-	 * custom init-method. Invoked after ApplicationContextAware's
-	 * {@code setApplicationContext}.
-	 * @param servletContext the ServletContext object to be used by this object
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
-	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext
-	 */
-	void setServletContext(ServletContext servletContext);
+    /**
+     * Set the {@link ServletContext} that this object runs in.
+     * <p>Invoked after population of normal bean properties but before an init
+     * callback like InitializingBean's {@code afterPropertiesSet} or a
+     * custom init-method. Invoked after ApplicationContextAware's
+     * {@code setApplicationContext}.
+     *
+     * @param servletContext the ServletContext object to be used by this object
+     * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
+     * @see org.springframework.context.ApplicationContextAware#setApplicationContext
+     */
+    void setServletContext(ServletContext servletContext);
 
 }

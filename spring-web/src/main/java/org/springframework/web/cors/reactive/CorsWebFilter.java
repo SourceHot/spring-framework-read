@@ -16,14 +16,13 @@
 
 package org.springframework.web.cors.reactive;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
 
 /**
@@ -38,53 +37,55 @@ import org.springframework.web.server.WebFilterChain;
  * mostly useful for applications using the functional API.
  *
  * @author Sebastien Deleuze
- * @since 5.0
  * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+ * @since 5.0
  */
 public class CorsWebFilter implements WebFilter {
 
-	private final CorsConfigurationSource configSource;
+    private final CorsConfigurationSource configSource;
 
-	private final CorsProcessor processor;
-
-
-	/**
-	 * Constructor accepting a {@link CorsConfigurationSource} used by the filter
-	 * to find the {@link CorsConfiguration} to use for each incoming request.
-	 * @see UrlBasedCorsConfigurationSource
-	 */
-	public CorsWebFilter(CorsConfigurationSource configSource) {
-		this(configSource, new DefaultCorsProcessor());
-	}
-
-	/**
-	 * Constructor accepting a {@link CorsConfigurationSource} used by the filter
-	 * to find the {@link CorsConfiguration} to use for each incoming request and a
-	 * custom {@link CorsProcessor} to use to apply the matched
-	 * {@link CorsConfiguration} for a request.
-	 * @see UrlBasedCorsConfigurationSource
-	 */
-	public CorsWebFilter(CorsConfigurationSource configSource, CorsProcessor processor) {
-		Assert.notNull(configSource, "CorsConfigurationSource must not be null");
-		Assert.notNull(processor, "CorsProcessor must not be null");
-		this.configSource = configSource;
-		this.processor = processor;
-	}
+    private final CorsProcessor processor;
 
 
-	@Override
-	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-		ServerHttpRequest request = exchange.getRequest();
-		if (CorsUtils.isCorsRequest(request)) {
-			CorsConfiguration corsConfiguration = this.configSource.getCorsConfiguration(exchange);
-			if (corsConfiguration != null) {
-				boolean isValid = this.processor.process(corsConfiguration, exchange);
-				if (!isValid || CorsUtils.isPreFlightRequest(request)) {
-					return Mono.empty();
-				}
-			}
-		}
-		return chain.filter(exchange);
-	}
+    /**
+     * Constructor accepting a {@link CorsConfigurationSource} used by the filter
+     * to find the {@link CorsConfiguration} to use for each incoming request.
+     *
+     * @see UrlBasedCorsConfigurationSource
+     */
+    public CorsWebFilter(CorsConfigurationSource configSource) {
+        this(configSource, new DefaultCorsProcessor());
+    }
+
+    /**
+     * Constructor accepting a {@link CorsConfigurationSource} used by the filter
+     * to find the {@link CorsConfiguration} to use for each incoming request and a
+     * custom {@link CorsProcessor} to use to apply the matched
+     * {@link CorsConfiguration} for a request.
+     *
+     * @see UrlBasedCorsConfigurationSource
+     */
+    public CorsWebFilter(CorsConfigurationSource configSource, CorsProcessor processor) {
+        Assert.notNull(configSource, "CorsConfigurationSource must not be null");
+        Assert.notNull(processor, "CorsProcessor must not be null");
+        this.configSource = configSource;
+        this.processor = processor;
+    }
+
+
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        ServerHttpRequest request = exchange.getRequest();
+        if (CorsUtils.isCorsRequest(request)) {
+            CorsConfiguration corsConfiguration = this.configSource.getCorsConfiguration(exchange);
+            if (corsConfiguration != null) {
+                boolean isValid = this.processor.process(corsConfiguration, exchange);
+                if (!isValid || CorsUtils.isPreFlightRequest(request)) {
+                    return Mono.empty();
+                }
+            }
+        }
+        return chain.filter(exchange);
+    }
 
 }

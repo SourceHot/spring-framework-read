@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.view;
 
-import java.util.Locale;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -32,6 +30,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.View;
+
+import java.util.Locale;
 
 /**
  * A {@link org.springframework.web.servlet.ViewResolver} implementation that uses
@@ -50,128 +50,132 @@ import org.springframework.web.servlet.View;
  * a {@link UrlBasedViewResolver}.
  *
  * @author Juergen Hoeller
- * @since 18.06.2003
  * @see org.springframework.context.ApplicationContext#getResource
  * @see ResourceBundleViewResolver
  * @see UrlBasedViewResolver
+ * @since 18.06.2003
  */
 public class XmlViewResolver extends AbstractCachingViewResolver
-		implements Ordered, InitializingBean, DisposableBean {
+        implements Ordered, InitializingBean, DisposableBean {
 
-	/** Default if no other location is supplied. */
-	public static final String DEFAULT_LOCATION = "/WEB-INF/views.xml";
-
-
-	@Nullable
-	private Resource location;
-
-	@Nullable
-	private ConfigurableApplicationContext cachedFactory;
-
-	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
+    /**
+     * Default if no other location is supplied.
+     */
+    public static final String DEFAULT_LOCATION = "/WEB-INF/views.xml";
 
 
-	/**
-	 * Set the location of the XML file that defines the view beans.
-	 * <p>The default is "/WEB-INF/views.xml".
-	 * @param location the location of the XML file.
-	 */
-	public void setLocation(Resource location) {
-		this.location = location;
-	}
+    @Nullable
+    private Resource location;
 
-	/**
-	 * Specify the order value for this ViewResolver bean.
-	 * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
-	 * @see org.springframework.core.Ordered#getOrder()
-	 */
-	public void setOrder(int order) {
-		this.order = order;
-	}
+    @Nullable
+    private ConfigurableApplicationContext cachedFactory;
 
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
-
-	/**
-	 * Pre-initialize the factory from the XML file.
-	 * Only effective if caching is enabled.
-	 */
-	@Override
-	public void afterPropertiesSet() throws BeansException {
-		if (isCache()) {
-			initFactory();
-		}
-	}
+    private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
 
-	/**
-	 * This implementation returns just the view name,
-	 * as XmlViewResolver doesn't support localized resolution.
-	 */
-	@Override
-	protected Object getCacheKey(String viewName, Locale locale) {
-		return viewName;
-	}
+    /**
+     * Set the location of the XML file that defines the view beans.
+     * <p>The default is "/WEB-INF/views.xml".
+     *
+     * @param location the location of the XML file.
+     */
+    public void setLocation(Resource location) {
+        this.location = location;
+    }
 
-	@Override
-	protected View loadView(String viewName, Locale locale) throws BeansException {
-		BeanFactory factory = initFactory();
-		try {
-			return factory.getBean(viewName, View.class);
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Allow for ViewResolver chaining...
-			return null;
-		}
-	}
+    @Override
+    public int getOrder() {
+        return this.order;
+    }
 
-	/**
-	 * Initialize the view bean factory from the XML file.
-	 * Synchronized because of access by parallel threads.
-	 * @throws BeansException in case of initialization errors
-	 */
-	protected synchronized BeanFactory initFactory() throws BeansException {
-		if (this.cachedFactory != null) {
-			return this.cachedFactory;
-		}
+    /**
+     * Specify the order value for this ViewResolver bean.
+     * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
+     *
+     * @see org.springframework.core.Ordered#getOrder()
+     */
+    public void setOrder(int order) {
+        this.order = order;
+    }
 
-		ApplicationContext applicationContext = obtainApplicationContext();
-
-		Resource actualLocation = this.location;
-		if (actualLocation == null) {
-			actualLocation = applicationContext.getResource(DEFAULT_LOCATION);
-		}
-
-		// Create child ApplicationContext for views.
-		GenericWebApplicationContext factory = new GenericWebApplicationContext();
-		factory.setParent(applicationContext);
-		factory.setServletContext(getServletContext());
-
-		// Load XML resource with context-aware entity resolver.
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
-		reader.setEnvironment(applicationContext.getEnvironment());
-		reader.setEntityResolver(new ResourceEntityResolver(applicationContext));
-		reader.loadBeanDefinitions(actualLocation);
-
-		factory.refresh();
-
-		if (isCache()) {
-			this.cachedFactory = factory;
-		}
-		return factory;
-	}
+    /**
+     * Pre-initialize the factory from the XML file.
+     * Only effective if caching is enabled.
+     */
+    @Override
+    public void afterPropertiesSet() throws BeansException {
+        if (isCache()) {
+            initFactory();
+        }
+    }
 
 
-	/**
-	 * Close the view bean factory on context shutdown.
-	 */
-	@Override
-	public void destroy() throws BeansException {
-		if (this.cachedFactory != null) {
-			this.cachedFactory.close();
-		}
-	}
+    /**
+     * This implementation returns just the view name,
+     * as XmlViewResolver doesn't support localized resolution.
+     */
+    @Override
+    protected Object getCacheKey(String viewName, Locale locale) {
+        return viewName;
+    }
+
+    @Override
+    protected View loadView(String viewName, Locale locale) throws BeansException {
+        BeanFactory factory = initFactory();
+        try {
+            return factory.getBean(viewName, View.class);
+        } catch (NoSuchBeanDefinitionException ex) {
+            // Allow for ViewResolver chaining...
+            return null;
+        }
+    }
+
+    /**
+     * Initialize the view bean factory from the XML file.
+     * Synchronized because of access by parallel threads.
+     *
+     * @throws BeansException in case of initialization errors
+     */
+    protected synchronized BeanFactory initFactory() throws BeansException {
+        if (this.cachedFactory != null) {
+            return this.cachedFactory;
+        }
+
+        ApplicationContext applicationContext = obtainApplicationContext();
+
+        Resource actualLocation = this.location;
+        if (actualLocation == null) {
+            actualLocation = applicationContext.getResource(DEFAULT_LOCATION);
+        }
+
+        // Create child ApplicationContext for views.
+        GenericWebApplicationContext factory = new GenericWebApplicationContext();
+        factory.setParent(applicationContext);
+        factory.setServletContext(getServletContext());
+
+        // Load XML resource with context-aware entity resolver.
+        XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+        reader.setEnvironment(applicationContext.getEnvironment());
+        reader.setEntityResolver(new ResourceEntityResolver(applicationContext));
+        reader.loadBeanDefinitions(actualLocation);
+
+        factory.refresh();
+
+        if (isCache()) {
+            this.cachedFactory = factory;
+        }
+        return factory;
+    }
+
+
+    /**
+     * Close the view bean factory on context shutdown.
+     */
+    @Override
+    public void destroy() throws BeansException {
+        if (this.cachedFactory != null) {
+            this.cachedFactory.close();
+        }
+    }
 
 }

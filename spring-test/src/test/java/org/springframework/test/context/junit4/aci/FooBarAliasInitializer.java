@@ -25,8 +25,8 @@ import org.springframework.context.support.GenericApplicationContext;
  */
 public class FooBarAliasInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 
-	@Override
-	public void initialize(GenericApplicationContext applicationContext) {
-		applicationContext.registerAlias("foo", "bar");
-	}
+    @Override
+    public void initialize(GenericApplicationContext applicationContext) {
+        applicationContext.registerAlias("foo", "bar");
+    }
 }

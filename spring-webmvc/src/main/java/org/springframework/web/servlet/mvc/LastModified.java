@@ -42,18 +42,19 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface LastModified {
 
-	/**
-	 * Same contract as for HttpServlet's {@code getLastModified} method.
-	 * Invoked <b>before</b> request processing.
-	 * <p>The return value will be sent to the HTTP client as Last-Modified header,
-	 * and compared with If-Modified-Since headers that the client sends back.
-	 * The content will only get regenerated if there has been a modification.
-	 * @param request current HTTP request
-	 * @return the time the underlying resource was last modified, or -1
-	 * meaning that the content must always be regenerated
-	 * @see org.springframework.web.servlet.HandlerAdapter#getLastModified
-	 * @see javax.servlet.http.HttpServlet#getLastModified
-	 */
-	long getLastModified(HttpServletRequest request);
+    /**
+     * Same contract as for HttpServlet's {@code getLastModified} method.
+     * Invoked <b>before</b> request processing.
+     * <p>The return value will be sent to the HTTP client as Last-Modified header,
+     * and compared with If-Modified-Since headers that the client sends back.
+     * The content will only get regenerated if there has been a modification.
+     *
+     * @param request current HTTP request
+     * @return the time the underlying resource was last modified, or -1
+     * meaning that the content must always be regenerated
+     * @see org.springframework.web.servlet.HandlerAdapter#getLastModified
+     * @see javax.servlet.http.HttpServlet#getLastModified
+     */
+    long getLastModified(HttpServletRequest request);
 
 }

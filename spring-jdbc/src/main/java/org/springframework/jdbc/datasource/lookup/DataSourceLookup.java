@@ -26,18 +26,19 @@ import javax.sql.DataSource;
  *
  * @author Costin Leau
  * @author Juergen Hoeller
- * @since 2.0
  * @see org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager#setDataSourceLookup
+ * @since 2.0
  */
 @FunctionalInterface
 public interface DataSourceLookup {
 
-	/**
-	 * Retrieve the DataSource identified by the given name.
-	 * @param dataSourceName the name of the DataSource
-	 * @return the DataSource (never {@code null})
-	 * @throws DataSourceLookupFailureException if the lookup failed
-	 */
-	DataSource getDataSource(String dataSourceName) throws DataSourceLookupFailureException;
+    /**
+     * Retrieve the DataSource identified by the given name.
+     *
+     * @param dataSourceName the name of the DataSource
+     * @return the DataSource (never {@code null})
+     * @throws DataSourceLookupFailureException if the lookup failed
+     */
+    DataSource getDataSource(String dataSourceName) throws DataSourceLookupFailureException;
 
 }

@@ -16,16 +16,16 @@
 
 package org.springframework.core.type;
 
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.MultiValueMap;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.lang.Nullable;
-import org.springframework.util.MultiValueMap;
 
 /**
  * {@link AnnotationMetadata} implementation that uses standard reflection
@@ -47,6 +47,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 
     /**
      * Create a new {@code StandardAnnotationMetadata} wrapper for the given Class.
+     *
      * @param introspectedClass the Class to introspect
      * @see #StandardAnnotationMetadata(Class, boolean)
      */
@@ -60,10 +61,11 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
      * form of {@link org.springframework.core.annotation.AnnotationAttributes} instead
      * of actual {@link Annotation} instances.
      * 注解相关
-     * @param introspectedClass the Class to introspect
+     *
+     * @param introspectedClass      the Class to introspect
      * @param nestedAnnotationsAsMap return nested annotations and annotation arrays as
-     * {@link org.springframework.core.annotation.AnnotationAttributes} for compatibility
-     * with ASM-based {@link AnnotationMetadata} implementations
+     *                               {@link org.springframework.core.annotation.AnnotationAttributes} for compatibility
+     *                               with ASM-based {@link AnnotationMetadata} implementations
      * @since 3.1.1
      */
     public StandardAnnotationMetadata(Class<?> introspectedClass, boolean nestedAnnotationsAsMap) {
@@ -147,8 +149,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
                 }
             }
             return false;
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             throw new IllegalStateException("Failed to introspect annotated methods on " + getIntrospectedClass(), ex);
         }
     }
@@ -165,8 +166,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
                 }
             }
             return annotatedMethods;
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             throw new IllegalStateException("Failed to introspect annotated methods on " + getIntrospectedClass(), ex);
         }
     }

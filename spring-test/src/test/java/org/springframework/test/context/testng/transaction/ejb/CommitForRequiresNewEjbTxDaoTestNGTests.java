@@ -20,7 +20,6 @@ import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.context.transaction.ejb.dao.RequiresNewEjbTxTestEntityDao;
-
 import org.testng.annotations.Test;
 
 /**
@@ -37,6 +36,6 @@ import org.testng.annotations.Test;
 @Commit
 public class CommitForRequiresNewEjbTxDaoTestNGTests extends AbstractEjbTxDaoTestNGTests {
 
-	/* test methods in superclass */
+    /* test methods in superclass */
 
 }

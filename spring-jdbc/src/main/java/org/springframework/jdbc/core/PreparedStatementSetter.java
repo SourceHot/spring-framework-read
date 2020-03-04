@@ -36,19 +36,20 @@ import java.sql.SQLException;
  * The JdbcTemplate class will catch and handle SQLExceptions appropriately.
  *
  * @author Rod Johnson
- * @since March 2, 2003
  * @see JdbcTemplate#update(String, PreparedStatementSetter)
  * @see JdbcTemplate#query(String, PreparedStatementSetter, ResultSetExtractor)
+ * @since March 2, 2003
  */
 @FunctionalInterface
 public interface PreparedStatementSetter {
 
-	/**
-	 * Set parameter values on the given PreparedStatement.
-	 * @param ps the PreparedStatement to invoke setter methods on
-	 * @throws SQLException if a SQLException is encountered
-	 * (i.e. there is no need to catch SQLException)
-	 */
-	void setValues(PreparedStatement ps) throws SQLException;
+    /**
+     * Set parameter values on the given PreparedStatement.
+     *
+     * @param ps the PreparedStatement to invoke setter methods on
+     * @throws SQLException if a SQLException is encountered
+     *                      (i.e. there is no need to catch SQLException)
+     */
+    void setValues(PreparedStatement ps) throws SQLException;
 
 }

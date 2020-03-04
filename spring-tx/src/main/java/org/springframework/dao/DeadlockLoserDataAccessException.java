@@ -25,13 +25,14 @@ package org.springframework.dao;
 @SuppressWarnings("serial")
 public class DeadlockLoserDataAccessException extends PessimisticLockingFailureException {
 
-	/**
-	 * Constructor for DeadlockLoserDataAccessException.
-	 * @param msg the detail message
-	 * @param cause the root cause from the data access API in use
-	 */
-	public DeadlockLoserDataAccessException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Constructor for DeadlockLoserDataAccessException.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause from the data access API in use
+     */
+    public DeadlockLoserDataAccessException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

@@ -34,16 +34,16 @@ import javax.sql.DataSource;
  */
 public interface DataSourceFactory {
 
-	/**
-	 * Get the {@linkplain ConnectionProperties connection properties} of the
-	 * {@link #getDataSource DataSource} to be configured.
-	 */
-	ConnectionProperties getConnectionProperties();
+    /**
+     * Get the {@linkplain ConnectionProperties connection properties} of the
+     * {@link #getDataSource DataSource} to be configured.
+     */
+    ConnectionProperties getConnectionProperties();
 
-	/**
-	 * Get the {@link DataSource} with the {@linkplain #getConnectionProperties
-	 * connection properties} applied.
-	 */
-	DataSource getDataSource();
+    /**
+     * Get the {@link DataSource} with the {@linkplain #getConnectionProperties
+     * connection properties} applied.
+     */
+    DataSource getDataSource();
 
 }

@@ -111,9 +111,10 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 
     /**
      * Return the alias names for the bean, as specified directly for the bean definition.
+     * <p>
+     * 获取这个bean的别名
      *
-	 * 获取这个bean的别名
-	 * @return the array of alias names, or {@code null} if none
+     * @return the array of alias names, or {@code null} if none
      */
     @Nullable
     public String[] getAliases() {

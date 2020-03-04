@@ -26,9 +26,9 @@ import org.springframework.test.context.ActiveProfilesResolver;
 @ActiveProfiles(resolver = DevProfileResolverXmlConfigTests.class, inheritProfiles = false)
 public class DevProfileResolverXmlConfigTests extends DevProfileXmlConfigTests implements ActiveProfilesResolver {
 
-	@Override
-	public String[] resolve(Class<?> testClass) {
-		return new String[] { "dev" };
-	}
+    @Override
+    public String[] resolve(Class<?> testClass) {
+        return new String[]{"dev"};
+    }
 
 }

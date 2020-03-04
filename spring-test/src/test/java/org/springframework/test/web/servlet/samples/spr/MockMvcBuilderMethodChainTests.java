@@ -18,7 +18,6 @@ package org.springframework.test.web.servlet.samples.spr;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -42,21 +41,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ContextConfiguration
 public class MockMvcBuilderMethodChainTests {
 
-	@Autowired
-	private WebApplicationContext wac;
+    @Autowired
+    private WebApplicationContext wac;
 
-	@Test
-	public void chainMultiple() {
-		MockMvcBuilders
-				.webAppContextSetup(wac)
-				.addFilter(new CharacterEncodingFilter() )
-				.defaultRequest(get("/").contextPath("/mywebapp"))
-				.build();
-	}
+    @Test
+    public void chainMultiple() {
+        MockMvcBuilders
+                .webAppContextSetup(wac)
+                .addFilter(new CharacterEncodingFilter())
+                .defaultRequest(get("/").contextPath("/mywebapp"))
+                .build();
+    }
 
-	@Configuration
-	@EnableWebMvc
-	static class WebConfig implements WebMvcConfigurer {
-	}
+    @Configuration
+    @EnableWebMvc
+    static class WebConfig implements WebMvcConfigurer {
+    }
 
 }

@@ -21,23 +21,23 @@ import java.util.List;
 
 public class Flights {
 
-	private List<Flight> flights = new ArrayList<>();
+    private List<Flight> flights = new ArrayList<>();
 
-	private List<String> strings = new ArrayList<>();
+    private List<String> strings = new ArrayList<>();
 
-	public List<Flight> getFlights() {
-		return flights;
-	}
+    public List<Flight> getFlights() {
+        return flights;
+    }
 
-	public void setFlights(List<Flight> flights) {
-		this.flights = flights;
-	}
+    public void setFlights(List<Flight> flights) {
+        this.flights = flights;
+    }
 
-	public List<String> getStrings() {
-		return strings;
-	}
+    public List<String> getStrings() {
+        return strings;
+    }
 
-	public void setStrings(List<String> strings) {
-		this.strings = strings;
-	}
+    public void setStrings(List<String> strings) {
+        this.strings = strings;
+    }
 }

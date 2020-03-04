@@ -16,10 +16,7 @@
 
 package org.springframework.test.context.junit4.spr9051;
 
-import javax.sql.DataSource;
-
 import org.junit.Before;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -28,59 +25,60 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.Assert.*;
+import javax.sql.DataSource;
+
+import static org.junit.Assert.assertSame;
 
 /**
  * Concrete implementation of {@link AbstractTransactionalAnnotatedConfigClassTests}
  * that uses a true {@link Configuration @Configuration class}.
  *
  * @author Sam Brannen
- * @since 3.2
  * @see TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests
+ * @since 3.2
  */
 @ContextConfiguration
 public class TransactionalAnnotatedConfigClassWithAtConfigurationTests extends
-		AbstractTransactionalAnnotatedConfigClassTests {
+        AbstractTransactionalAnnotatedConfigClassTests {
 
-	/**
-	 * This is <b>intentionally</b> annotated with {@code @Configuration}.
-	 *
-	 * <p>Consequently, this class contains standard singleton bean methods
-	 * instead of <i>annotated factory bean methods</i>.
-	 */
-	@Configuration
-	static class Config {
+    @Before
+    public void compareDataSources() throws Exception {
+        // NOTE: the two DataSource instances ARE the same!
+        assertSame(dataSourceFromTxManager, dataSourceViaInjection);
+    }
 
-		@Bean
-		public Employee employee() {
-			Employee employee = new Employee();
-			employee.setName("John Smith");
-			employee.setAge(42);
-			employee.setCompany("Acme Widgets, Inc.");
-			return employee;
-		}
+    /**
+     * This is <b>intentionally</b> annotated with {@code @Configuration}.
+     *
+     * <p>Consequently, this class contains standard singleton bean methods
+     * instead of <i>annotated factory bean methods</i>.
+     */
+    @Configuration
+    static class Config {
 
-		@Bean
-		public PlatformTransactionManager transactionManager() {
-			return new DataSourceTransactionManager(dataSource());
-		}
+        @Bean
+        public Employee employee() {
+            Employee employee = new Employee();
+            employee.setName("John Smith");
+            employee.setAge(42);
+            employee.setCompany("Acme Widgets, Inc.");
+            return employee;
+        }
 
-		@Bean
-		public DataSource dataSource() {
-			return new EmbeddedDatabaseBuilder()//
-			.addScript("classpath:/org/springframework/test/jdbc/schema.sql")//
-			// Ensure that this in-memory database is only used by this class:
-			.setName(getClass().getName())//
-			.build();
-		}
+        @Bean
+        public PlatformTransactionManager transactionManager() {
+            return new DataSourceTransactionManager(dataSource());
+        }
 
-	}
+        @Bean
+        public DataSource dataSource() {
+            return new EmbeddedDatabaseBuilder()//
+                    .addScript("classpath:/org/springframework/test/jdbc/schema.sql")//
+                    // Ensure that this in-memory database is only used by this class:
+                    .setName(getClass().getName())//
+                    .build();
+        }
 
-
-	@Before
-	public void compareDataSources() throws Exception {
-		// NOTE: the two DataSource instances ARE the same!
-		assertSame(dataSourceFromTxManager, dataSourceViaInjection);
-	}
+    }
 
 }

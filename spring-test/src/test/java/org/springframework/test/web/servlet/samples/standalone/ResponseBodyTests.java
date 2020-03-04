@@ -17,7 +17,6 @@
 package org.springframework.test.web.servlet.samples.standalone;
 
 import org.junit.Test;
-
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
@@ -25,9 +24,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
  * Response written from {@code @ResponseBody} method.
@@ -36,24 +37,24 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
  */
 public class ResponseBodyTests {
 
-	@Test
-	public void json() throws Exception {
-		standaloneSetup(new PersonController()).build()
-				.perform(get("/person/Lee").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType("application/json;charset=UTF-8"))
-				.andExpect(jsonPath("$.name").value("Lee"));
-	}
+    @Test
+    public void json() throws Exception {
+        standaloneSetup(new PersonController()).build()
+                .perform(get("/person/Lee").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.name").value("Lee"));
+    }
 
 
-	@Controller
-	private class PersonController {
+    @Controller
+    private class PersonController {
 
-		@RequestMapping(value="/person/{name}")
-		@ResponseBody
-		public Person get(@PathVariable String name) {
-			return new Person(name);
-		}
-	}
+        @RequestMapping(value = "/person/{name}")
+        @ResponseBody
+        public Person get(@PathVariable String name) {
+            return new Person(name);
+        }
+    }
 
 }

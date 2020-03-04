@@ -16,15 +16,15 @@
 
 package org.springframework.core.env;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
 
 /**
  * Composite {@link PropertySource} implementation that iterates over a set of
@@ -42,86 +42,90 @@ import org.springframework.util.StringUtils;
  */
 public class CompositePropertySource extends EnumerablePropertySource<Object> {
 
-	private final Set<PropertySource<?>> propertySources = new LinkedHashSet<>();
+    private final Set<PropertySource<?>> propertySources = new LinkedHashSet<>();
 
 
-	/**
-	 * Create a new {@code CompositePropertySource}.
-	 * @param name the name of the property source
-	 */
-	public CompositePropertySource(String name) {
-		super(name);
-	}
+    /**
+     * Create a new {@code CompositePropertySource}.
+     *
+     * @param name the name of the property source
+     */
+    public CompositePropertySource(String name) {
+        super(name);
+    }
 
 
-	@Override
-	@Nullable
-	public Object getProperty(String name) {
-		for (PropertySource<?> propertySource : this.propertySources) {
-			Object candidate = propertySource.getProperty(name);
-			if (candidate != null) {
-				return candidate;
-			}
-		}
-		return null;
-	}
+    @Override
+    @Nullable
+    public Object getProperty(String name) {
+        for (PropertySource<?> propertySource : this.propertySources) {
+            Object candidate = propertySource.getProperty(name);
+            if (candidate != null) {
+                return candidate;
+            }
+        }
+        return null;
+    }
 
-	@Override
-	public boolean containsProperty(String name) {
-		for (PropertySource<?> propertySource : this.propertySources) {
-			if (propertySource.containsProperty(name)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    @Override
+    public boolean containsProperty(String name) {
+        for (PropertySource<?> propertySource : this.propertySources) {
+            if (propertySource.containsProperty(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	@Override
-	public String[] getPropertyNames() {
-		Set<String> names = new LinkedHashSet<>();
-		for (PropertySource<?> propertySource : this.propertySources) {
-			if (!(propertySource instanceof EnumerablePropertySource)) {
-				throw new IllegalStateException(
-						"Failed to enumerate property names due to non-enumerable property source: " + propertySource);
-			}
-			names.addAll(Arrays.asList(((EnumerablePropertySource<?>) propertySource).getPropertyNames()));
-		}
-		return StringUtils.toStringArray(names);
-	}
-
-
-	/**
-	 * Add the given {@link PropertySource} to the end of the chain.
-	 * @param propertySource the PropertySource to add
-	 */
-	public void addPropertySource(PropertySource<?> propertySource) {
-		this.propertySources.add(propertySource);
-	}
-
-	/**
-	 * Add the given {@link PropertySource} to the start of the chain.
-	 * @param propertySource the PropertySource to add
-	 * @since 4.1
-	 */
-	public void addFirstPropertySource(PropertySource<?> propertySource) {
-		List<PropertySource<?>> existing = new ArrayList<>(this.propertySources);
-		this.propertySources.clear();
-		this.propertySources.add(propertySource);
-		this.propertySources.addAll(existing);
-	}
-
-	/**
-	 * Return all property sources that this composite source holds.
-	 * @since 4.1.1
-	 */
-	public Collection<PropertySource<?>> getPropertySources() {
-		return this.propertySources;
-	}
+    @Override
+    public String[] getPropertyNames() {
+        Set<String> names = new LinkedHashSet<>();
+        for (PropertySource<?> propertySource : this.propertySources) {
+            if (!(propertySource instanceof EnumerablePropertySource)) {
+                throw new IllegalStateException(
+                        "Failed to enumerate property names due to non-enumerable property source: " + propertySource);
+            }
+            names.addAll(Arrays.asList(((EnumerablePropertySource<?>) propertySource).getPropertyNames()));
+        }
+        return StringUtils.toStringArray(names);
+    }
 
 
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + " {name='" + this.name + "', propertySources=" + this.propertySources + "}";
-	}
+    /**
+     * Add the given {@link PropertySource} to the end of the chain.
+     *
+     * @param propertySource the PropertySource to add
+     */
+    public void addPropertySource(PropertySource<?> propertySource) {
+        this.propertySources.add(propertySource);
+    }
+
+    /**
+     * Add the given {@link PropertySource} to the start of the chain.
+     *
+     * @param propertySource the PropertySource to add
+     * @since 4.1
+     */
+    public void addFirstPropertySource(PropertySource<?> propertySource) {
+        List<PropertySource<?>> existing = new ArrayList<>(this.propertySources);
+        this.propertySources.clear();
+        this.propertySources.add(propertySource);
+        this.propertySources.addAll(existing);
+    }
+
+    /**
+     * Return all property sources that this composite source holds.
+     *
+     * @since 4.1.1
+     */
+    public Collection<PropertySource<?>> getPropertySources() {
+        return this.propertySources;
+    }
+
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " {name='" + this.name + "', propertySources=" + this.propertySources + "}";
+    }
 
 }

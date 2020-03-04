@@ -18,7 +18,6 @@ package org.springframework.test.context.junit.jupiter.nested;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,59 +36,58 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
  *
  * @author Sam Brannen
- * @since 5.0
  * @see NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTests
  * @see org.springframework.test.context.junit4.nested.NestedTestsWithSpringRulesTests
+ * @since 5.0
  */
 @SpringJUnitConfig(TopLevelConfig.class)
 class NestedTestsWithSpringAndJUnitJupiterTests {
 
-	@Autowired
-	String foo;
+    @Autowired
+    String foo;
 
 
-	@Test
-	void topLevelTest() {
-		assertEquals("foo", foo);
-	}
+    @Test
+    void topLevelTest() {
+        assertEquals("foo", foo);
+    }
+
+    @Configuration
+    static class TopLevelConfig {
+
+        @Bean
+        String foo() {
+            return "foo";
+        }
+    }
+
+    // -------------------------------------------------------------------------
+
+    @Configuration
+    static class NestedConfig {
+
+        @Bean
+        String bar() {
+            return "bar";
+        }
+    }
+
+    @Nested
+    @SpringJUnitConfig(NestedConfig.class)
+    class NestedTests {
+
+        @Autowired
+        String bar;
 
 
-	@Nested
-	@SpringJUnitConfig(NestedConfig.class)
-	class NestedTests {
-
-		@Autowired
-		String bar;
-
-
-		@Test
-		void nestedTest() throws Exception {
-			// In contrast to nested test classes running in JUnit 4, the foo
-			// field in the outer instance should have been injected from the
-			// test ApplicationContext for the outer instance.
-			assertEquals("foo", foo);
-			assertEquals("bar", bar);
-		}
-	}
-
-	// -------------------------------------------------------------------------
-
-	@Configuration
-	static class TopLevelConfig {
-
-		@Bean
-		String foo() {
-			return "foo";
-		}
-	}
-
-	@Configuration
-	static class NestedConfig {
-
-		@Bean
-		String bar() {
-			return "bar";
-		}
-	}
+        @Test
+        void nestedTest() throws Exception {
+            // In contrast to nested test classes running in JUnit 4, the foo
+            // field in the outer instance should have been injected from the
+            // test ApplicationContext for the outer instance.
+            assertEquals("foo", foo);
+            assertEquals("bar", bar);
+        }
+    }
 
 }

@@ -16,9 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.w3c.dom.Node;
-
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.w3c.dom.Node;
 
 /**
  * Interface used by the {@link DefaultBeanDefinitionDocumentReader}
@@ -51,22 +50,22 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
  * {@link NamespaceHandler} for the namespace in which the custom tag resides.
  *
  * @author Rob Harrop
- * @since 2.0
  * @see NamespaceHandler
  * @see BeanDefinitionParser
+ * @since 2.0
  */
 public interface BeanDefinitionDecorator {
 
-	/**
-	 * Parse the specified {@link Node} (either an element or an attribute) and decorate
-	 * the supplied {@link org.springframework.beans.factory.config.BeanDefinition},
-	 * returning the decorated definition.
-	 * <p>Implementations may choose to return a completely new definition, which will
-	 * replace the original definition in the resulting
-	 * {@link org.springframework.beans.factory.BeanFactory}.
-	 * <p>The supplied {@link ParserContext} can be used to register any additional
-	 * beans needed to support the main definition.
-	 */
-	BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext);
+    /**
+     * Parse the specified {@link Node} (either an element or an attribute) and decorate
+     * the supplied {@link org.springframework.beans.factory.config.BeanDefinition},
+     * returning the decorated definition.
+     * <p>Implementations may choose to return a completely new definition, which will
+     * replace the original definition in the resulting
+     * {@link org.springframework.beans.factory.BeanFactory}.
+     * <p>The supplied {@link ParserContext} can be used to register any additional
+     * beans needed to support the main definition.
+     */
+    BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext);
 
 }

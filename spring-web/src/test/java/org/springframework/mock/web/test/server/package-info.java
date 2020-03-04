@@ -1,4 +1,3 @@
-
 // For @NonNull annotations on implementation classes
 
 @NonNullApi

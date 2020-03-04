@@ -52,7 +52,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *   &lt;/property&gt;
  *   &lt;property name="defaultTargetDataSource" ref="myDefaultDataSource"/&gt;
  * &lt;/bean&gt;</pre>
- *
+ * <p>
  * Alternatively, the keyed values can also be data source names, to be resolved
  * through a {@link #setDataSourceLookup DataSourceLookup}: by default, JNDI
  * names for a standard JNDI lookup. This allows for a single concise definition
@@ -68,7 +68,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *   &lt;/property&gt;
  *   &lt;property name="defaultTargetDataSource" value="java:comp/env/jdbc/mydefds"/&gt;
  * &lt;/bean&gt;</pre>
- *
+ * <p>
  * Note: If you are using this router in combination with Spring's
  * {@link org.springframework.transaction.jta.JtaTransactionManager},
  * don't forget to switch the "allowCustomIsolationLevels" flag to "true".
@@ -81,7 +81,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
- * @since 2.0.1
  * @see #setTargetDataSources
  * @see #setDefaultTargetDataSource
  * @see org.springframework.transaction.TransactionDefinition#ISOLATION_READ_UNCOMMITTED
@@ -89,40 +88,41 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.springframework.transaction.TransactionDefinition#ISOLATION_REPEATABLE_READ
  * @see org.springframework.transaction.TransactionDefinition#ISOLATION_SERIALIZABLE
  * @see org.springframework.transaction.jta.JtaTransactionManager
+ * @since 2.0.1
  */
 public class IsolationLevelDataSourceRouter extends AbstractRoutingDataSource {
 
-	/** Constants instance for TransactionDefinition. */
-	private static final Constants constants = new Constants(TransactionDefinition.class);
+    /**
+     * Constants instance for TransactionDefinition.
+     */
+    private static final Constants constants = new Constants(TransactionDefinition.class);
 
 
-	/**
-	 * Supports Integer values for the isolation level constants
-	 * as well as isolation level names as defined on the
-	 * {@link org.springframework.transaction.TransactionDefinition TransactionDefinition interface}.
-	 */
-	@Override
-	protected Object resolveSpecifiedLookupKey(Object lookupKey) {
-		if (lookupKey instanceof Integer) {
-			return lookupKey;
-		}
-		else if (lookupKey instanceof String) {
-			String constantName = (String) lookupKey;
-			if (!constantName.startsWith(DefaultTransactionDefinition.PREFIX_ISOLATION)) {
-				throw new IllegalArgumentException("Only isolation constants allowed");
-			}
-			return constants.asNumber(constantName);
-		}
-		else {
-			throw new IllegalArgumentException(
-					"Invalid lookup key - needs to be isolation level Integer or isolation level name String: " + lookupKey);
-		}
-	}
+    /**
+     * Supports Integer values for the isolation level constants
+     * as well as isolation level names as defined on the
+     * {@link org.springframework.transaction.TransactionDefinition TransactionDefinition interface}.
+     */
+    @Override
+    protected Object resolveSpecifiedLookupKey(Object lookupKey) {
+        if (lookupKey instanceof Integer) {
+            return lookupKey;
+        } else if (lookupKey instanceof String) {
+            String constantName = (String) lookupKey;
+            if (!constantName.startsWith(DefaultTransactionDefinition.PREFIX_ISOLATION)) {
+                throw new IllegalArgumentException("Only isolation constants allowed");
+            }
+            return constants.asNumber(constantName);
+        } else {
+            throw new IllegalArgumentException(
+                    "Invalid lookup key - needs to be isolation level Integer or isolation level name String: " + lookupKey);
+        }
+    }
 
-	@Override
-	@Nullable
-	protected Object determineCurrentLookupKey() {
-		return TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
-	}
+    @Override
+    @Nullable
+    protected Object determineCurrentLookupKey() {
+        return TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
+    }
 
 }

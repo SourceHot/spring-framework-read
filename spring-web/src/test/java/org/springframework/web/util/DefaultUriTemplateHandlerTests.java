@@ -16,13 +16,13 @@
 
 package org.springframework.web.util;
 
+import org.junit.Test;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link DefaultUriTemplateHandler}.
@@ -32,120 +32,120 @@ import static org.junit.Assert.*;
 @SuppressWarnings("deprecation")
 public class DefaultUriTemplateHandlerTests {
 
-	private final DefaultUriTemplateHandler handler = new DefaultUriTemplateHandler();
+    private final DefaultUriTemplateHandler handler = new DefaultUriTemplateHandler();
 
 
-	@Test
-	public void baseUrlWithoutPath() throws Exception {
-		this.handler.setBaseUrl("http://localhost:8080");
-		URI actual = this.handler.expand("/myapiresource");
+    @Test
+    public void baseUrlWithoutPath() throws Exception {
+        this.handler.setBaseUrl("http://localhost:8080");
+        URI actual = this.handler.expand("/myapiresource");
 
-		assertEquals("http://localhost:8080/myapiresource", actual.toString());
-	}
+        assertEquals("http://localhost:8080/myapiresource", actual.toString());
+    }
 
-	@Test
-	public void baseUrlWithPath() throws Exception {
-		this.handler.setBaseUrl("http://localhost:8080/context");
-		URI actual = this.handler.expand("/myapiresource");
+    @Test
+    public void baseUrlWithPath() throws Exception {
+        this.handler.setBaseUrl("http://localhost:8080/context");
+        URI actual = this.handler.expand("/myapiresource");
 
-		assertEquals("http://localhost:8080/context/myapiresource", actual.toString());
-	}
+        assertEquals("http://localhost:8080/context/myapiresource", actual.toString());
+    }
 
-	@Test	// SPR-14147
-	public void defaultUriVariables() throws Exception {
-		Map<String, String> defaultVars = new HashMap<>(2);
-		defaultVars.put("host", "api.example.com");
-		defaultVars.put("port", "443");
-		this.handler.setDefaultUriVariables(defaultVars);
+    @Test    // SPR-14147
+    public void defaultUriVariables() throws Exception {
+        Map<String, String> defaultVars = new HashMap<>(2);
+        defaultVars.put("host", "api.example.com");
+        defaultVars.put("port", "443");
+        this.handler.setDefaultUriVariables(defaultVars);
 
-		Map<String, Object> vars = new HashMap<>(1);
-		vars.put("id", 123L);
+        Map<String, Object> vars = new HashMap<>(1);
+        vars.put("id", 123L);
 
-		String template = "https://{host}:{port}/v42/customers/{id}";
-		URI actual = this.handler.expand(template, vars);
+        String template = "https://{host}:{port}/v42/customers/{id}";
+        URI actual = this.handler.expand(template, vars);
 
-		assertEquals("https://api.example.com:443/v42/customers/123", actual.toString());
-	}
+        assertEquals("https://api.example.com:443/v42/customers/123", actual.toString());
+    }
 
-	@Test
-	public void parsePathIsOff() throws Exception {
-		this.handler.setParsePath(false);
-		Map<String, String> vars = new HashMap<>(2);
-		vars.put("hotel", "1");
-		vars.put("publicpath", "pics/logo.png");
-		String template = "https://example.com/hotels/{hotel}/pic/{publicpath}";
-		URI actual = this.handler.expand(template, vars);
+    @Test
+    public void parsePathIsOff() throws Exception {
+        this.handler.setParsePath(false);
+        Map<String, String> vars = new HashMap<>(2);
+        vars.put("hotel", "1");
+        vars.put("publicpath", "pics/logo.png");
+        String template = "https://example.com/hotels/{hotel}/pic/{publicpath}";
+        URI actual = this.handler.expand(template, vars);
 
-		assertEquals("https://example.com/hotels/1/pic/pics/logo.png", actual.toString());
-	}
+        assertEquals("https://example.com/hotels/1/pic/pics/logo.png", actual.toString());
+    }
 
-	@Test
-	public void parsePathIsOn() throws Exception {
-		this.handler.setParsePath(true);
-		Map<String, String> vars = new HashMap<>(2);
-		vars.put("hotel", "1");
-		vars.put("publicpath", "pics/logo.png");
-		vars.put("scale", "150x150");
-		String template = "https://example.com/hotels/{hotel}/pic/{publicpath}/size/{scale}";
-		URI actual = this.handler.expand(template, vars);
+    @Test
+    public void parsePathIsOn() throws Exception {
+        this.handler.setParsePath(true);
+        Map<String, String> vars = new HashMap<>(2);
+        vars.put("hotel", "1");
+        vars.put("publicpath", "pics/logo.png");
+        vars.put("scale", "150x150");
+        String template = "https://example.com/hotels/{hotel}/pic/{publicpath}/size/{scale}";
+        URI actual = this.handler.expand(template, vars);
 
-		assertEquals("https://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150", actual.toString());
-	}
+        assertEquals("https://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150", actual.toString());
+    }
 
-	@Test
-	public void strictEncodingIsOffWithMap() throws Exception {
-		this.handler.setStrictEncoding(false);
-		Map<String, String> vars = new HashMap<>(2);
-		vars.put("userId", "john;doe");
-		String template = "https://www.example.com/user/{userId}/dashboard";
-		URI actual = this.handler.expand(template, vars);
+    @Test
+    public void strictEncodingIsOffWithMap() throws Exception {
+        this.handler.setStrictEncoding(false);
+        Map<String, String> vars = new HashMap<>(2);
+        vars.put("userId", "john;doe");
+        String template = "https://www.example.com/user/{userId}/dashboard";
+        URI actual = this.handler.expand(template, vars);
 
-		assertEquals("https://www.example.com/user/john;doe/dashboard", actual.toString());
-	}
+        assertEquals("https://www.example.com/user/john;doe/dashboard", actual.toString());
+    }
 
-	@Test
-	public void strictEncodingOffWithArray() throws Exception {
-		this.handler.setStrictEncoding(false);
-		String template = "https://www.example.com/user/{userId}/dashboard";
-		URI actual = this.handler.expand(template, "john;doe");
+    @Test
+    public void strictEncodingOffWithArray() throws Exception {
+        this.handler.setStrictEncoding(false);
+        String template = "https://www.example.com/user/{userId}/dashboard";
+        URI actual = this.handler.expand(template, "john;doe");
 
-		assertEquals("https://www.example.com/user/john;doe/dashboard", actual.toString());
-	}
+        assertEquals("https://www.example.com/user/john;doe/dashboard", actual.toString());
+    }
 
-	@Test
-	public void strictEncodingOnWithMap() throws Exception {
-		this.handler.setStrictEncoding(true);
-		Map<String, String> vars = new HashMap<>(2);
-		vars.put("userId", "john;doe");
-		String template = "https://www.example.com/user/{userId}/dashboard";
-		URI actual = this.handler.expand(template, vars);
+    @Test
+    public void strictEncodingOnWithMap() throws Exception {
+        this.handler.setStrictEncoding(true);
+        Map<String, String> vars = new HashMap<>(2);
+        vars.put("userId", "john;doe");
+        String template = "https://www.example.com/user/{userId}/dashboard";
+        URI actual = this.handler.expand(template, vars);
 
-		assertEquals("https://www.example.com/user/john%3Bdoe/dashboard", actual.toString());
-	}
+        assertEquals("https://www.example.com/user/john%3Bdoe/dashboard", actual.toString());
+    }
 
-	@Test
-	public void strictEncodingOnWithArray() throws Exception {
-		this.handler.setStrictEncoding(true);
-		String template = "https://www.example.com/user/{userId}/dashboard";
-		URI actual = this.handler.expand(template, "john;doe");
+    @Test
+    public void strictEncodingOnWithArray() throws Exception {
+        this.handler.setStrictEncoding(true);
+        String template = "https://www.example.com/user/{userId}/dashboard";
+        URI actual = this.handler.expand(template, "john;doe");
 
-		assertEquals("https://www.example.com/user/john%3Bdoe/dashboard", actual.toString());
-	}
+        assertEquals("https://www.example.com/user/john%3Bdoe/dashboard", actual.toString());
+    }
 
-	@Test	// SPR-14147
-	public void strictEncodingAndDefaultUriVariables() throws Exception {
-		Map<String, String> defaultVars = new HashMap<>(1);
-		defaultVars.put("host", "www.example.com");
-		this.handler.setDefaultUriVariables(defaultVars);
-		this.handler.setStrictEncoding(true);
+    @Test    // SPR-14147
+    public void strictEncodingAndDefaultUriVariables() throws Exception {
+        Map<String, String> defaultVars = new HashMap<>(1);
+        defaultVars.put("host", "www.example.com");
+        this.handler.setDefaultUriVariables(defaultVars);
+        this.handler.setStrictEncoding(true);
 
-		Map<String, Object> vars = new HashMap<>(1);
-		vars.put("userId", "john;doe");
+        Map<String, Object> vars = new HashMap<>(1);
+        vars.put("userId", "john;doe");
 
-		String template = "https://{host}/user/{userId}/dashboard";
-		URI actual = this.handler.expand(template, vars);
+        String template = "https://{host}/user/{userId}/dashboard";
+        URI actual = this.handler.expand(template, vars);
 
-		assertEquals("https://www.example.com/user/john%3Bdoe/dashboard", actual.toString());
-	}
+        assertEquals("https://www.example.com/user/john%3Bdoe/dashboard", actual.toString());
+    }
 
 }

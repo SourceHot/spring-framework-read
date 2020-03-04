@@ -18,7 +18,6 @@ package org.springframework.test.context.junit4.annotation;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +26,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DelegatingSmartContextLoader;
 import org.springframework.tests.sample.beans.Employee;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Integration tests that verify support for configuration classes in
@@ -35,35 +35,33 @@ import static org.junit.Assert.*;
  * {@link DelegatingSmartContextLoader}.
  *
  * @author Sam Brannen
- * @since 3.1
  * @see DefaultConfigClassesBaseTests
+ * @since 3.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 public class DefaultLoaderDefaultConfigClassesBaseTests {
 
-	@Configuration
-	static class Config {
+    @Autowired
+    protected Employee employee;
 
-		@Bean
-		public Employee employee() {
-			Employee employee = new Employee();
-			employee.setName("John Smith");
-			employee.setAge(42);
-			employee.setCompany("Acme Widgets, Inc.");
-			return employee;
-		}
-	}
+    @Test
+    public void verifyEmployeeSetFromBaseContextConfig() {
+        assertNotNull("The employee field should have been autowired.", this.employee);
+        assertEquals("John Smith", this.employee.getName());
+    }
 
+    @Configuration
+    static class Config {
 
-	@Autowired
-	protected Employee employee;
-
-
-	@Test
-	public void verifyEmployeeSetFromBaseContextConfig() {
-		assertNotNull("The employee field should have been autowired.", this.employee);
-		assertEquals("John Smith", this.employee.getName());
-	}
+        @Bean
+        public Employee employee() {
+            Employee employee = new Employee();
+            employee.setName("John Smith");
+            employee.setAge(42);
+            employee.setCompany("Acme Widgets, Inc.");
+            return employee;
+        }
+    }
 
 }

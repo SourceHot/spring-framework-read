@@ -27,10 +27,11 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Scope {
 
-	/**
-	 * Specifies the scope to use for instances of the annotated class.
-	 * @return the desired scope
-	 */
-	String value() default "singleton";
+    /**
+     * Specifies the scope to use for instances of the annotated class.
+     *
+     * @return the desired scope
+     */
+    String value() default "singleton";
 
 }

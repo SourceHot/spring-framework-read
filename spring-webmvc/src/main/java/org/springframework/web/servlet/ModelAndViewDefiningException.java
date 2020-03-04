@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet;
 
-import javax.servlet.ServletException;
-
 import org.springframework.util.Assert;
+
+import javax.servlet.ServletException;
 
 /**
  * Exception to be thrown on error conditions that should forward
@@ -35,24 +35,25 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class ModelAndViewDefiningException extends ServletException {
 
-	private final ModelAndView modelAndView;
+    private final ModelAndView modelAndView;
 
 
-	/**
-	 * Create new ModelAndViewDefiningException with the given ModelAndView,
-	 * typically representing a specific error page.
-	 * @param modelAndView the ModelAndView with view to forward to and model to expose
-	 */
-	public ModelAndViewDefiningException(ModelAndView modelAndView) {
-		Assert.notNull(modelAndView, "ModelAndView must not be null in ModelAndViewDefiningException");
-		this.modelAndView = modelAndView;
-	}
+    /**
+     * Create new ModelAndViewDefiningException with the given ModelAndView,
+     * typically representing a specific error page.
+     *
+     * @param modelAndView the ModelAndView with view to forward to and model to expose
+     */
+    public ModelAndViewDefiningException(ModelAndView modelAndView) {
+        Assert.notNull(modelAndView, "ModelAndView must not be null in ModelAndViewDefiningException");
+        this.modelAndView = modelAndView;
+    }
 
-	/**
-	 * Return the ModelAndView that this exception contains for forwarding to.
-	 */
-	public ModelAndView getModelAndView() {
-		return this.modelAndView;
-	}
+    /**
+     * Return the ModelAndView that this exception contains for forwarding to.
+     */
+    public ModelAndView getModelAndView() {
+        return this.modelAndView;
+    }
 
 }

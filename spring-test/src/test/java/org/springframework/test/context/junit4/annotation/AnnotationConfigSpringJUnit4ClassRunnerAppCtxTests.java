@@ -35,5 +35,5 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunnerAppCtxTest
  */
 @ContextConfiguration(classes = PojoAndStringConfig.class, inheritLocations = false)
 public class AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests extends SpringJUnit4ClassRunnerAppCtxTests {
-	/* all tests are in the parent class. */
+    /* all tests are in the parent class. */
 }

@@ -21,24 +21,24 @@ import org.springframework.tests.TimeStamped;
 
 @SuppressWarnings("serial")
 public class TimestampIntroductionInterceptor extends DelegatingIntroductionInterceptor
-		implements TimeStamped {
+        implements TimeStamped {
 
-	private long ts;
+    private long ts;
 
-	public TimestampIntroductionInterceptor() {
-	}
+    public TimestampIntroductionInterceptor() {
+    }
 
-	public TimestampIntroductionInterceptor(long ts) {
-		this.ts = ts;
-	}
+    public TimestampIntroductionInterceptor(long ts) {
+        this.ts = ts;
+    }
 
-	public void setTime(long ts) {
-		this.ts = ts;
-	}
+    public void setTime(long ts) {
+        this.ts = ts;
+    }
 
-	@Override
-	public long getTimeStamp() {
-		return ts;
-	}
+    @Override
+    public long getTimeStamp() {
+        return ts;
+    }
 
 }

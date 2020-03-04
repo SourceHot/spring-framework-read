@@ -31,7 +31,7 @@ import javax.sql.DataSource;
  * <pre class="code">create table tab (id int not null primary key, text varchar(100));
  * create table tab_sequence (value identity);
  * insert into tab_sequence values(0);</pre>
- *
+ * <p>
  * If "cacheSize" is set, the intermediate values are served without querying the
  * database. If the server or your application is stopped or crashes or a transaction
  * is rolled back, the unused values will never be served. The maximum hole size in
@@ -47,34 +47,36 @@ import javax.sql.DataSource;
  */
 public class HsqlMaxValueIncrementer extends AbstractIdentityColumnMaxValueIncrementer {
 
-	/**
-	 * Default constructor for bean property style usage.
-	 * @see #setDataSource
-	 * @see #setIncrementerName
-	 * @see #setColumnName
-	 */
-	public HsqlMaxValueIncrementer() {
-	}
+    /**
+     * Default constructor for bean property style usage.
+     *
+     * @see #setDataSource
+     * @see #setIncrementerName
+     * @see #setColumnName
+     */
+    public HsqlMaxValueIncrementer() {
+    }
 
-	/**
-	 * Convenience constructor.
-	 * @param dataSource the DataSource to use
-	 * @param incrementerName the name of the sequence/table to use
-	 * @param columnName the name of the column in the sequence table to use
-	 */
-	public HsqlMaxValueIncrementer(DataSource dataSource, String incrementerName, String columnName) {
-		super(dataSource, incrementerName, columnName);
-	}
+    /**
+     * Convenience constructor.
+     *
+     * @param dataSource      the DataSource to use
+     * @param incrementerName the name of the sequence/table to use
+     * @param columnName      the name of the column in the sequence table to use
+     */
+    public HsqlMaxValueIncrementer(DataSource dataSource, String incrementerName, String columnName) {
+        super(dataSource, incrementerName, columnName);
+    }
 
 
-	@Override
-	protected String getIncrementStatement() {
-		return "insert into " + getIncrementerName() + " values(null)";
-	}
+    @Override
+    protected String getIncrementStatement() {
+        return "insert into " + getIncrementerName() + " values(null)";
+    }
 
-	@Override
-	protected String getIdentityStatement() {
-		return "select max(identity()) from " + getIncrementerName();
-	}
+    @Override
+    protected String getIdentityStatement() {
+        return "select max(identity()) from " + getIncrementerName();
+    }
 
 }

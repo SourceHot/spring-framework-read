@@ -16,6 +16,10 @@
 
 package org.springframework.remoting.httpinvoker;
 
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.remoting.support.RemoteInvocationResult;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,10 +28,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Locale;
 import java.util.zip.GZIPInputStream;
-
-import org.springframework.context.i18n.LocaleContext;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.remoting.support.RemoteInvocationResult;
 
 /**
  * {@link org.springframework.remoting.httpinvoker.HttpInvokerRequestExecutor} implementation
@@ -39,8 +39,8 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * The standard {@link HttpURLConnection} class is rather limited in its capabilities.
  *
  * @author Juergen Hoeller
- * @since 1.1
  * @see java.net.HttpURLConnection
+ * @since 1.1
  */
 public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequestExecutor {
 
@@ -171,9 +171,10 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
      * <p>The default implementation simply write the serialized invocation to the
      * HttpURLConnection's OutputStream. This can be overridden, for example, to write
      * a specific encoding and potentially set appropriate HTTP request headers.
-     *
-     *
+     * <p>
+     * <p>
      * 写请求体
+     *
      * @param config the HTTP invoker configuration that specifies the target service
      * @param con    the HttpURLConnection to write the request body to
      * @param baos   the ByteArrayOutputStream that contains the serialized
@@ -194,8 +195,9 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
      * throwing an exception if it does not correspond to a successful HTTP response.
      * <p>Default implementation rejects any HTTP status code beyond 2xx, to avoid
      * parsing the response body and trying to deserialize from a corrupted stream.
-     *
+     * <p>
      * 验证请求结果
+     *
      * @param config the HTTP invoker configuration that specifies the target service
      * @param con    the HttpURLConnection to validate
      * @throws IOException if validation failed
@@ -217,7 +219,7 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
      * <p>The default implementation simply reads the serialized invocation
      * from the HttpURLConnection's InputStream. If the response is recognized
      * as GZIP response, the InputStream will get wrapped in a GZIPInputStream.
-     *
+     * <p>
      * 获取结果
      *
      * @param config the HTTP invoker configuration that specifies the target service
@@ -237,8 +239,7 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
         if (isGzipResponse(con)) {
             // GZIP response found - need to unzip.
             return new GZIPInputStream(con.getInputStream());
-        }
-        else {
+        } else {
             // Plain response found.
             return con.getInputStream();
         }
@@ -248,8 +249,9 @@ public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequest
      * Determine whether the given response is a GZIP response.
      * <p>Default implementation checks whether the HTTP "Content-Encoding"
      * header contains "gzip" (in any casing).
-     *
+     * <p>
      * Content-Encoding 是否为GZIP
+     *
      * @param con the HttpURLConnection to check
      */
     protected boolean isGzipResponse(HttpURLConnection con) {

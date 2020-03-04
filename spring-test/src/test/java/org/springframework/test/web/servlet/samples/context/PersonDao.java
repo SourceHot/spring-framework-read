@@ -20,6 +20,6 @@ import org.springframework.test.web.Person;
 
 public interface PersonDao {
 
-	Person getPerson(Long id);
+    Person getPerson(Long id);
 
 }

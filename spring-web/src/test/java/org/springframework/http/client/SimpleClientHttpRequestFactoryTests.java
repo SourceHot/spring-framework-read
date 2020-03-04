@@ -16,26 +16,27 @@
 
 package org.springframework.http.client;
 
-import java.net.HttpURLConnection;
-
 import org.junit.Test;
-
 import org.springframework.http.HttpHeaders;
 
-import static org.mockito.Mockito.*;
+import java.net.HttpURLConnection;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Stephane Nicoll
  */
 public class SimpleClientHttpRequestFactoryTests {
 
-	@Test  // SPR-13225
-	public void headerWithNullValue() {
-		HttpURLConnection urlConnection = mock(HttpURLConnection.class);
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("foo", null);
-		SimpleBufferingClientHttpRequest.addHeaders(urlConnection, headers);
-		verify(urlConnection, times(1)).addRequestProperty("foo", "");
-	}
+    @Test  // SPR-13225
+    public void headerWithNullValue() {
+        HttpURLConnection urlConnection = mock(HttpURLConnection.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("foo", null);
+        SimpleBufferingClientHttpRequest.addHeaders(urlConnection, headers);
+        verify(urlConnection, times(1)).addRequestProperty("foo", "");
+    }
 
 }

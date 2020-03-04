@@ -27,28 +27,27 @@ import org.springframework.lang.Nullable;
  */
 final class TransactionContextHolder {
 
-	private static final ThreadLocal<TransactionContext> currentTransactionContext =
-			new NamedInheritableThreadLocal<>("Test Transaction Context");
+    private static final ThreadLocal<TransactionContext> currentTransactionContext =
+            new NamedInheritableThreadLocal<>("Test Transaction Context");
 
 
-	private TransactionContextHolder() {
-	}
+    private TransactionContextHolder() {
+    }
 
+    @Nullable
+    static TransactionContext getCurrentTransactionContext() {
+        return currentTransactionContext.get();
+    }
 
-	static void setCurrentTransactionContext(TransactionContext transactionContext) {
-		currentTransactionContext.set(transactionContext);
-	}
+    static void setCurrentTransactionContext(TransactionContext transactionContext) {
+        currentTransactionContext.set(transactionContext);
+    }
 
-	@Nullable
-	static TransactionContext getCurrentTransactionContext() {
-		return currentTransactionContext.get();
-	}
-
-	@Nullable
-	static TransactionContext removeCurrentTransactionContext() {
-		TransactionContext transactionContext = currentTransactionContext.get();
-		currentTransactionContext.remove();
-		return transactionContext;
-	}
+    @Nullable
+    static TransactionContext removeCurrentTransactionContext() {
+        TransactionContext transactionContext = currentTransactionContext.get();
+        currentTransactionContext.remove();
+        return transactionContext;
+    }
 
 }

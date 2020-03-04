@@ -31,13 +31,13 @@ import org.springframework.lang.Nullable;
  */
 public class NullSourceExtractor implements SourceExtractor {
 
-	/**
-	 * This implementation simply returns {@code null} for any input.
-	 */
-	@Override
-	@Nullable
-	public Object extractSource(Object sourceCandidate, @Nullable Resource definitionResource) {
-		return null;
-	}
+    /**
+     * This implementation simply returns {@code null} for any input.
+     */
+    @Override
+    @Nullable
+    public Object extractSource(Object sourceCandidate, @Nullable Resource definitionResource) {
+        return null;
+    }
 
 }

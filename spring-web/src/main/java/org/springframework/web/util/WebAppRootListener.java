@@ -45,20 +45,20 @@ import javax.servlet.ServletContextListener;
  * this listener in such an environment!
  *
  * @author Juergen Hoeller
- * @since 18.04.2003
  * @see WebUtils#setWebAppRootSystemProperty
  * @see System#getProperty
+ * @since 18.04.2003
  */
 public class WebAppRootListener implements ServletContextListener {
 
-	@Override
-	public void contextInitialized(ServletContextEvent event) {
-		WebUtils.setWebAppRootSystemProperty(event.getServletContext());
-	}
+    @Override
+    public void contextInitialized(ServletContextEvent event) {
+        WebUtils.setWebAppRootSystemProperty(event.getServletContext());
+    }
 
-	@Override
-	public void contextDestroyed(ServletContextEvent event) {
-		WebUtils.removeWebAppRootSystemProperty(event.getServletContext());
-	}
+    @Override
+    public void contextDestroyed(ServletContextEvent event) {
+        WebUtils.removeWebAppRootSystemProperty(event.getServletContext());
+    }
 
 }

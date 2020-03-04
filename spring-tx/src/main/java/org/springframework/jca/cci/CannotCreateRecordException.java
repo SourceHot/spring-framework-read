@@ -16,9 +16,9 @@
 
 package org.springframework.jca.cci;
 
-import javax.resource.ResourceException;
-
 import org.springframework.dao.DataAccessResourceFailureException;
+
+import javax.resource.ResourceException;
 
 /**
  * Exception thrown when the creating of a CCI Record failed
@@ -30,13 +30,14 @@ import org.springframework.dao.DataAccessResourceFailureException;
 @SuppressWarnings("serial")
 public class CannotCreateRecordException extends DataAccessResourceFailureException {
 
-	/**
-	 * Constructor for CannotCreateRecordException.
-	 * @param msg message
-	 * @param ex the root ResourceException cause
-	 */
-	public CannotCreateRecordException(String msg, ResourceException ex) {
-		super(msg, ex);
-	}
+    /**
+     * Constructor for CannotCreateRecordException.
+     *
+     * @param msg message
+     * @param ex  the root ResourceException cause
+     */
+    public CannotCreateRecordException(String msg, ResourceException ex) {
+        super(msg, ex);
+    }
 
 }

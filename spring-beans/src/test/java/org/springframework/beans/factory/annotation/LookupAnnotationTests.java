@@ -18,12 +18,14 @@ package org.springframework.beans.factory.annotation;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 /**
  * @author Karl Pietrzak
@@ -31,108 +33,107 @@ import static org.junit.Assert.*;
  */
 public class LookupAnnotationTests {
 
-	private DefaultListableBeanFactory beanFactory;
+    private DefaultListableBeanFactory beanFactory;
 
 
-	@Before
-	public void setUp() {
-		beanFactory = new DefaultListableBeanFactory();
-		AutowiredAnnotationBeanPostProcessor aabpp = new AutowiredAnnotationBeanPostProcessor();
-		aabpp.setBeanFactory(beanFactory);
-		beanFactory.addBeanPostProcessor(aabpp);
-		beanFactory.registerBeanDefinition("abstractBean", new RootBeanDefinition(AbstractBean.class));
-		beanFactory.registerBeanDefinition("beanConsumer", new RootBeanDefinition(BeanConsumer.class));
-		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class);
-		tbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
-		beanFactory.registerBeanDefinition("testBean", tbd);
-	}
+    @Before
+    public void setUp() {
+        beanFactory = new DefaultListableBeanFactory();
+        AutowiredAnnotationBeanPostProcessor aabpp = new AutowiredAnnotationBeanPostProcessor();
+        aabpp.setBeanFactory(beanFactory);
+        beanFactory.addBeanPostProcessor(aabpp);
+        beanFactory.registerBeanDefinition("abstractBean", new RootBeanDefinition(AbstractBean.class));
+        beanFactory.registerBeanDefinition("beanConsumer", new RootBeanDefinition(BeanConsumer.class));
+        RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class);
+        tbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+        beanFactory.registerBeanDefinition("testBean", tbd);
+    }
 
 
-	@Test
-	public void testWithoutConstructorArg() {
-		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
-		Object expected = bean.get();
-		assertEquals(TestBean.class, expected.getClass());
-		assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
-	}
+    @Test
+    public void testWithoutConstructorArg() {
+        AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
+        assertNotNull(bean);
+        Object expected = bean.get();
+        assertEquals(TestBean.class, expected.getClass());
+        assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
+    }
 
-	@Test
-	public void testWithOverloadedArg() {
-		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
-		TestBean expected = bean.get("haha");
-		assertEquals(TestBean.class, expected.getClass());
-		assertEquals("haha", expected.getName());
-		assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
-	}
+    @Test
+    public void testWithOverloadedArg() {
+        AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
+        assertNotNull(bean);
+        TestBean expected = bean.get("haha");
+        assertEquals(TestBean.class, expected.getClass());
+        assertEquals("haha", expected.getName());
+        assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
+    }
 
-	@Test
-	public void testWithOneConstructorArg() {
-		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
-		TestBean expected = bean.getOneArgument("haha");
-		assertEquals(TestBean.class, expected.getClass());
-		assertEquals("haha", expected.getName());
-		assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
-	}
+    @Test
+    public void testWithOneConstructorArg() {
+        AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
+        assertNotNull(bean);
+        TestBean expected = bean.getOneArgument("haha");
+        assertEquals(TestBean.class, expected.getClass());
+        assertEquals("haha", expected.getName());
+        assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
+    }
 
-	@Test
-	public void testWithTwoConstructorArg() {
-		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
-		TestBean expected = bean.getTwoArguments("haha", 72);
-		assertEquals(TestBean.class, expected.getClass());
-		assertEquals("haha", expected.getName());
-		assertEquals(72, expected.getAge());
-		assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
-	}
+    @Test
+    public void testWithTwoConstructorArg() {
+        AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
+        assertNotNull(bean);
+        TestBean expected = bean.getTwoArguments("haha", 72);
+        assertEquals(TestBean.class, expected.getClass());
+        assertEquals("haha", expected.getName());
+        assertEquals(72, expected.getAge());
+        assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
+    }
 
-	@Test
-	public void testWithThreeArgsShouldFail() {
-		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
-		try {
-			bean.getThreeArguments("name", 1, 2);
-			fail("TestBean does not have a three arg constructor so this should not have worked");
-		}
-		catch (AbstractMethodError ex) {
-		}
-		assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
-	}
+    @Test
+    public void testWithThreeArgsShouldFail() {
+        AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
+        assertNotNull(bean);
+        try {
+            bean.getThreeArguments("name", 1, 2);
+            fail("TestBean does not have a three arg constructor so this should not have worked");
+        } catch (AbstractMethodError ex) {
+        }
+        assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
+    }
 
-	@Test
-	public void testWithEarlyInjection() {
-		AbstractBean bean = beanFactory.getBean("beanConsumer", BeanConsumer.class).abstractBean;
-		assertNotNull(bean);
-		Object expected = bean.get();
-		assertEquals(TestBean.class, expected.getClass());
-		assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
-	}
-
-
-	public static abstract class AbstractBean {
-
-		@Lookup
-		public abstract TestBean get();
-
-		@Lookup
-		public abstract TestBean get(String name);  // overloaded
-
-		@Lookup
-		public abstract TestBean getOneArgument(String name);
-
-		@Lookup
-		public abstract TestBean getTwoArguments(String name, int age);
-
-		public abstract TestBean getThreeArguments(String name, int age, int anotherArg);
-	}
+    @Test
+    public void testWithEarlyInjection() {
+        AbstractBean bean = beanFactory.getBean("beanConsumer", BeanConsumer.class).abstractBean;
+        assertNotNull(bean);
+        Object expected = bean.get();
+        assertEquals(TestBean.class, expected.getClass());
+        assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
+    }
 
 
-	public static class BeanConsumer {
+    public static abstract class AbstractBean {
 
-		@Autowired
-		AbstractBean abstractBean;
-	}
+        @Lookup
+        public abstract TestBean get();
+
+        @Lookup
+        public abstract TestBean get(String name);  // overloaded
+
+        @Lookup
+        public abstract TestBean getOneArgument(String name);
+
+        @Lookup
+        public abstract TestBean getTwoArguments(String name, int age);
+
+        public abstract TestBean getThreeArguments(String name, int age, int anotherArg);
+    }
+
+
+    public static class BeanConsumer {
+
+        @Autowired
+        AbstractBean abstractBean;
+    }
 
 }

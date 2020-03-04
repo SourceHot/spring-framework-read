@@ -16,13 +16,7 @@
 
 package org.springframework.web.server.adapter;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-
 import org.junit.Test;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,171 +31,179 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import static java.time.Duration.*;
-import static org.junit.Assert.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+
+import static java.time.Duration.ofMillis;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link WebHttpHandlerBuilder}.
+ *
  * @author Rossen Stoyanchev
  */
 public class WebHttpHandlerBuilderTests {
 
-	@Test  // SPR-15074
-	public void orderedWebFilterBeans() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(OrderedWebFilterBeanConfig.class);
-		context.refresh();
+    private static Mono<Void> writeToResponse(ServerWebExchange exchange, String value) {
+        byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+        DataBuffer buffer = new DefaultDataBufferFactory().wrap(bytes);
+        return exchange.getResponse().writeWith(Flux.just(buffer));
+    }
 
-		HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(context).build();
-		assertTrue(httpHandler instanceof HttpWebHandlerAdapter);
-		assertSame(context, ((HttpWebHandlerAdapter) httpHandler).getApplicationContext());
+    @Test  // SPR-15074
+    public void orderedWebFilterBeans() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.register(OrderedWebFilterBeanConfig.class);
+        context.refresh();
 
-		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		httpHandler.handle(request, response).block(ofMillis(5000));
+        HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(context).build();
+        assertTrue(httpHandler instanceof HttpWebHandlerAdapter);
+        assertSame(context, ((HttpWebHandlerAdapter) httpHandler).getApplicationContext());
 
-		assertEquals("FilterB::FilterA", response.getBodyAsString().block(ofMillis(5000)));
-	}
+        MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
+        MockServerHttpResponse response = new MockServerHttpResponse();
+        httpHandler.handle(request, response).block(ofMillis(5000));
 
-	@Test
-	public void forwardedHeaderFilter() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(ForwardedHeaderFilterConfig.class);
-		context.refresh();
+        assertEquals("FilterB::FilterA", response.getBodyAsString().block(ofMillis(5000)));
+    }
 
-		WebHttpHandlerBuilder builder = WebHttpHandlerBuilder.applicationContext(context);
-		builder.filters(filters -> assertEquals(Collections.emptyList(), filters));
-		assertTrue(builder.hasForwardedHeaderTransformer());
-	}
+    @Test
+    public void forwardedHeaderFilter() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.register(ForwardedHeaderFilterConfig.class);
+        context.refresh();
 
-	@Test  // SPR-15074
-	public void orderedWebExceptionHandlerBeans() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(OrderedExceptionHandlerBeanConfig.class);
-		context.refresh();
+        WebHttpHandlerBuilder builder = WebHttpHandlerBuilder.applicationContext(context);
+        builder.filters(filters -> assertEquals(Collections.emptyList(), filters));
+        assertTrue(builder.hasForwardedHeaderTransformer());
+    }
 
-		HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(context).build();
-		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		httpHandler.handle(request, response).block(ofMillis(5000));
+    @Test  // SPR-15074
+    public void orderedWebExceptionHandlerBeans() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.register(OrderedExceptionHandlerBeanConfig.class);
+        context.refresh();
 
-		assertEquals("ExceptionHandlerB", response.getBodyAsString().block(ofMillis(5000)));
-	}
+        HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(context).build();
+        MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
+        MockServerHttpResponse response = new MockServerHttpResponse();
+        httpHandler.handle(request, response).block(ofMillis(5000));
 
-	@Test
-	public void configWithoutFilters() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(NoFilterConfig.class);
-		context.refresh();
+        assertEquals("ExceptionHandlerB", response.getBodyAsString().block(ofMillis(5000)));
+    }
 
-		HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(context).build();
-		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		httpHandler.handle(request, response).block(ofMillis(5000));
+    @Test
+    public void configWithoutFilters() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.register(NoFilterConfig.class);
+        context.refresh();
 
-		assertEquals("handled", response.getBodyAsString().block(ofMillis(5000)));
-	}
+        HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(context).build();
+        MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
+        MockServerHttpResponse response = new MockServerHttpResponse();
+        httpHandler.handle(request, response).block(ofMillis(5000));
 
-	@Test  // SPR-16972
-	public void cloneWithApplicationContext() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(NoFilterConfig.class);
-		context.refresh();
+        assertEquals("handled", response.getBodyAsString().block(ofMillis(5000)));
+    }
 
-		WebHttpHandlerBuilder builder = WebHttpHandlerBuilder.applicationContext(context);
-		assertSame(context, ((HttpWebHandlerAdapter) builder.build()).getApplicationContext());
-		assertSame(context, ((HttpWebHandlerAdapter) builder.clone().build()).getApplicationContext());
-	}
+    @Test  // SPR-16972
+    public void cloneWithApplicationContext() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.register(NoFilterConfig.class);
+        context.refresh();
 
+        WebHttpHandlerBuilder builder = WebHttpHandlerBuilder.applicationContext(context);
+        assertSame(context, ((HttpWebHandlerAdapter) builder.build()).getApplicationContext());
+        assertSame(context, ((HttpWebHandlerAdapter) builder.clone().build()).getApplicationContext());
+    }
 
-	private static Mono<Void> writeToResponse(ServerWebExchange exchange, String value) {
-		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-		DataBuffer buffer = new DefaultDataBufferFactory().wrap(bytes);
-		return exchange.getResponse().writeWith(Flux.just(buffer));
-	}
+    @Configuration
+    @SuppressWarnings("unused")
+    static class OrderedWebFilterBeanConfig {
 
+        private static final String ATTRIBUTE = "attr";
 
-	@Configuration
-	@SuppressWarnings("unused")
-	static class OrderedWebFilterBeanConfig {
+        @Bean
+        @Order(2)
+        public WebFilter filterA() {
+            return createFilter("FilterA");
+        }
 
-		private static final String ATTRIBUTE = "attr";
+        @Bean
+        @Order(1)
+        public WebFilter filterB() {
+            return createFilter("FilterB");
+        }
 
-		@Bean @Order(2)
-		public WebFilter filterA() {
-			return createFilter("FilterA");
-		}
+        private WebFilter createFilter(String name) {
+            return (exchange, chain) -> {
+                String value = exchange.getAttribute(ATTRIBUTE);
+                value = (value != null ? value + "::" + name : name);
+                exchange.getAttributes().put(ATTRIBUTE, value);
+                return chain.filter(exchange);
+            };
+        }
 
-		@Bean @Order(1)
-		public WebFilter filterB() {
-			return createFilter("FilterB");
-		}
-
-		private WebFilter createFilter(String name) {
-			return (exchange, chain) -> {
-				String value = exchange.getAttribute(ATTRIBUTE);
-				value = (value != null ? value + "::" + name : name);
-				exchange.getAttributes().put(ATTRIBUTE, value);
-				return chain.filter(exchange);
-			};
-		}
-
-		@Bean
-		public WebHandler webHandler() {
-			return exchange -> {
-				String value = exchange.getAttributeOrDefault(ATTRIBUTE, "none");
-				return writeToResponse(exchange, value);
-			};
-		}
-	}
+        @Bean
+        public WebHandler webHandler() {
+            return exchange -> {
+                String value = exchange.getAttributeOrDefault(ATTRIBUTE, "none");
+                return writeToResponse(exchange, value);
+            };
+        }
+    }
 
 
-	@Configuration
-	@SuppressWarnings("unused")
-	static class OrderedExceptionHandlerBeanConfig {
+    @Configuration
+    @SuppressWarnings("unused")
+    static class OrderedExceptionHandlerBeanConfig {
 
-		@Bean
-		@Order(2)
-		public WebExceptionHandler exceptionHandlerA() {
-			return (exchange, ex) -> writeToResponse(exchange, "ExceptionHandlerA");
-		}
+        @Bean
+        @Order(2)
+        public WebExceptionHandler exceptionHandlerA() {
+            return (exchange, ex) -> writeToResponse(exchange, "ExceptionHandlerA");
+        }
 
-		@Bean
-		@Order(1)
-		public WebExceptionHandler exceptionHandlerB() {
-			return (exchange, ex) -> writeToResponse(exchange, "ExceptionHandlerB");
-		}
+        @Bean
+        @Order(1)
+        public WebExceptionHandler exceptionHandlerB() {
+            return (exchange, ex) -> writeToResponse(exchange, "ExceptionHandlerB");
+        }
 
-		@Bean
-		public WebHandler webHandler() {
-			return exchange -> Mono.error(new Exception());
-		}
-	}
+        @Bean
+        public WebHandler webHandler() {
+            return exchange -> Mono.error(new Exception());
+        }
+    }
 
-	@Configuration
-	@SuppressWarnings({"unused", "deprecation"})
-	static class ForwardedHeaderFilterConfig {
+    @Configuration
+    @SuppressWarnings({"unused", "deprecation"})
+    static class ForwardedHeaderFilterConfig {
 
-		@Bean
-		public ForwardedHeaderFilter forwardedHeaderFilter() {
-			return new ForwardedHeaderFilter();
-		}
+        @Bean
+        public ForwardedHeaderFilter forwardedHeaderFilter() {
+            return new ForwardedHeaderFilter();
+        }
 
-		@Bean
-		public WebHandler webHandler() {
-			return exchange -> Mono.error(new Exception());
-		}
-	}
+        @Bean
+        public WebHandler webHandler() {
+            return exchange -> Mono.error(new Exception());
+        }
+    }
 
-	@Configuration
-	@SuppressWarnings("unused")
-	static class NoFilterConfig {
+    @Configuration
+    @SuppressWarnings("unused")
+    static class NoFilterConfig {
 
-		@Bean
-		public WebHandler webHandler() {
-			return exchange -> writeToResponse(exchange, "handled");
-		}
-	}
+        @Bean
+        public WebHandler webHandler() {
+            return exchange -> writeToResponse(exchange, "handled");
+        }
+    }
 
 }

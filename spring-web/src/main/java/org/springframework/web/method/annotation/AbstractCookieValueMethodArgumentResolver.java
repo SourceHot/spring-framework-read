@@ -42,40 +42,41 @@ import org.springframework.web.bind.annotation.CookieValue;
  */
 public abstract class AbstractCookieValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
-	/**
-	 * Crate a new {@link AbstractCookieValueMethodArgumentResolver} instance.
-	 * @param beanFactory a bean factory to use for resolving  ${...}
-	 * placeholder and #{...} SpEL expressions in default values;
-	 * or {@code null} if default values are not expected to contain expressions
-	 */
-	public AbstractCookieValueMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory) {
-		super(beanFactory);
-	}
+    /**
+     * Crate a new {@link AbstractCookieValueMethodArgumentResolver} instance.
+     *
+     * @param beanFactory a bean factory to use for resolving  ${...}
+     *                    placeholder and #{...} SpEL expressions in default values;
+     *                    or {@code null} if default values are not expected to contain expressions
+     */
+    public AbstractCookieValueMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory) {
+        super(beanFactory);
+    }
 
 
-	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.hasParameterAnnotation(CookieValue.class);
-	}
+    @Override
+    public boolean supportsParameter(MethodParameter parameter) {
+        return parameter.hasParameterAnnotation(CookieValue.class);
+    }
 
-	@Override
-	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		CookieValue annotation = parameter.getParameterAnnotation(CookieValue.class);
-		Assert.state(annotation != null, "No CookieValue annotation");
-		return new CookieValueNamedValueInfo(annotation);
-	}
+    @Override
+    protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
+        CookieValue annotation = parameter.getParameterAnnotation(CookieValue.class);
+        Assert.state(annotation != null, "No CookieValue annotation");
+        return new CookieValueNamedValueInfo(annotation);
+    }
 
-	@Override
-	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
-		throw new MissingRequestCookieException(name, parameter);
-	}
+    @Override
+    protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
+        throw new MissingRequestCookieException(name, parameter);
+    }
 
 
-	private static final class CookieValueNamedValueInfo extends NamedValueInfo {
+    private static final class CookieValueNamedValueInfo extends NamedValueInfo {
 
-		private CookieValueNamedValueInfo(CookieValue annotation) {
-			super(annotation.name(), annotation.required(), annotation.defaultValue());
-		}
-	}
+        private CookieValueNamedValueInfo(CookieValue annotation) {
+            super(annotation.name(), annotation.required(), annotation.defaultValue());
+        }
+    }
 
 }

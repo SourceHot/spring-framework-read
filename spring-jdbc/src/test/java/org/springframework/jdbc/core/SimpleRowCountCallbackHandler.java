@@ -28,16 +28,16 @@ import java.sql.SQLException;
  */
 public class SimpleRowCountCallbackHandler implements RowCallbackHandler {
 
-	private int count;
+    private int count;
 
 
-	@Override
-	public void processRow(ResultSet rs) throws SQLException {
-		count++;
-	}
+    @Override
+    public void processRow(ResultSet rs) throws SQLException {
+        count++;
+    }
 
-	public int getCount() {
-		return count;
-	}
+    public int getCount() {
+        return count;
+    }
 
 }

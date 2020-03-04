@@ -26,14 +26,14 @@ import java.util.Map;
  */
 public interface MessageContentsDelegate {
 
-	void handleMessage(CharSequence message);
+    void handleMessage(CharSequence message);
 
-	void handleMessage(Map<String, Object>  message);
+    void handleMessage(Map<String, Object> message);
 
-	void handleMessage(byte[] message);
+    void handleMessage(byte[] message);
 
-	void handleMessage(Number message);
+    void handleMessage(Number message);
 
-	void handleMessage(Object message);
+    void handleMessage(Object message);
 
 }

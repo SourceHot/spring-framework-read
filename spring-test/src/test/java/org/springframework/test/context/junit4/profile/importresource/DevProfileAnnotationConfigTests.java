@@ -17,10 +17,10 @@
 package org.springframework.test.context.junit4.profile.importresource;
 
 import org.junit.Test;
-
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Juergen Hoeller
@@ -29,11 +29,11 @@ import static org.junit.Assert.*;
 @ActiveProfiles("dev")
 public class DevProfileAnnotationConfigTests extends DefaultProfileAnnotationConfigTests {
 
-	@Test
-	@Override
-	public void employee() {
-		assertNotNull("employee bean should be loaded for the 'dev' profile", employee);
-		assertEquals("John Smith", employee.getName());
-	}
+    @Test
+    @Override
+    public void employee() {
+        assertNotNull("employee bean should be loaded for the 'dev' profile", employee);
+        assertEquals("John Smith", employee.getName());
+    }
 
 }

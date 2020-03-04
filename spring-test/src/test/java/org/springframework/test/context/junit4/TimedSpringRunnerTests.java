@@ -16,19 +16,18 @@
 
 package org.springframework.test.context.junit4;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runner.Runner;
 import org.junit.runners.JUnit4;
-
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestExecutionListeners;
 
-import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import static org.springframework.test.context.junit4.JUnitTestingUtils.runTestsAndAssertCounters;
 
 /**
  * Verifies proper handling of the following in conjunction with the
@@ -44,81 +43,81 @@ import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
 @RunWith(JUnit4.class)
 public class TimedSpringRunnerTests {
 
-	protected Class<?> getTestCase() {
-		return TimedSpringRunnerTestCase.class;
-	}
+    protected Class<?> getTestCase() {
+        return TimedSpringRunnerTestCase.class;
+    }
 
-	protected Class<? extends Runner> getRunnerClass() {
-		return SpringRunner.class;
-	}
+    protected Class<? extends Runner> getRunnerClass() {
+        return SpringRunner.class;
+    }
 
-	@Test
-	public void timedTests() throws Exception {
-		runTestsAndAssertCounters(getRunnerClass(), getTestCase(), 7, 5, 7, 0, 0);
-	}
+    @Test
+    public void timedTests() throws Exception {
+        runTestsAndAssertCounters(getRunnerClass(), getTestCase(), 7, 5, 7, 0, 0);
+    }
 
 
-	@Ignore("TestCase classes are run manually by the enclosing test class")
-	@TestExecutionListeners({})
-	public static class TimedSpringRunnerTestCase {
+    @Timed(millis = 100)
+    @Retention(RetentionPolicy.RUNTIME)
+    private static @interface MetaTimed {
+    }
 
-		// Should Pass.
-		@Test(timeout = 2000)
-		public void jUnitTimeoutWithNoOp() {
-			/* no-op */
-		}
+    @Timed(millis = 1000)
+    @Retention(RetentionPolicy.RUNTIME)
+    private static @interface MetaTimedWithOverride {
+        long millis() default 1000;
+    }
 
-		// Should Pass.
-		@Test
-		@Timed(millis = 2000)
-		public void springTimeoutWithNoOp() {
-			/* no-op */
-		}
+    @Ignore("TestCase classes are run manually by the enclosing test class")
+    @TestExecutionListeners({})
+    public static class TimedSpringRunnerTestCase {
 
-		// Should Fail due to timeout.
-		@Test(timeout = 100)
-		public void jUnitTimeoutWithSleep() throws Exception {
-			Thread.sleep(200);
-		}
+        // Should Pass.
+        @Test(timeout = 2000)
+        public void jUnitTimeoutWithNoOp() {
+            /* no-op */
+        }
 
-		// Should Fail due to timeout.
-		@Test
-		@Timed(millis = 100)
-		public void springTimeoutWithSleep() throws Exception {
-			Thread.sleep(200);
-		}
+        // Should Pass.
+        @Test
+        @Timed(millis = 2000)
+        public void springTimeoutWithNoOp() {
+            /* no-op */
+        }
 
-		// Should Fail due to timeout.
-		@Test
-		@MetaTimed
-		public void springTimeoutWithSleepAndMetaAnnotation() throws Exception {
-			Thread.sleep(200);
-		}
+        // Should Fail due to timeout.
+        @Test(timeout = 100)
+        public void jUnitTimeoutWithSleep() throws Exception {
+            Thread.sleep(200);
+        }
 
-		// Should Fail due to timeout.
-		@Test
-		@MetaTimedWithOverride(millis = 100)
-		public void springTimeoutWithSleepAndMetaAnnotationAndOverride() throws Exception {
-			Thread.sleep(200);
-		}
+        // Should Fail due to timeout.
+        @Test
+        @Timed(millis = 100)
+        public void springTimeoutWithSleep() throws Exception {
+            Thread.sleep(200);
+        }
 
-		// Should Fail due to duplicate configuration.
-		@Test(timeout = 200)
-		@Timed(millis = 200)
-		public void springAndJUnitTimeouts() {
-			/* no-op */
-		}
-	}
+        // Should Fail due to timeout.
+        @Test
+        @MetaTimed
+        public void springTimeoutWithSleepAndMetaAnnotation() throws Exception {
+            Thread.sleep(200);
+        }
 
-	@Timed(millis = 100)
-	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaTimed {
-	}
+        // Should Fail due to timeout.
+        @Test
+        @MetaTimedWithOverride(millis = 100)
+        public void springTimeoutWithSleepAndMetaAnnotationAndOverride() throws Exception {
+            Thread.sleep(200);
+        }
 
-	@Timed(millis = 1000)
-	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaTimedWithOverride {
-		long millis() default 1000;
-	}
+        // Should Fail due to duplicate configuration.
+        @Test(timeout = 200)
+        @Timed(millis = 200)
+        public void springAndJUnitTimeouts() {
+            /* no-op */
+        }
+    }
 
 }

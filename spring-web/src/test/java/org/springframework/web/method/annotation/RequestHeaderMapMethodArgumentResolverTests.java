@@ -16,13 +16,8 @@
 
 package org.springframework.web.method.annotation;
 
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpHeaders;
@@ -34,7 +29,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
-import static org.junit.Assert.*;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Text fixture with {@link RequestHeaderMapMethodArgumentResolver}.
@@ -44,99 +45,99 @@ import static org.junit.Assert.*;
  */
 public class RequestHeaderMapMethodArgumentResolverTests {
 
-	private RequestHeaderMapMethodArgumentResolver resolver;
+    private RequestHeaderMapMethodArgumentResolver resolver;
 
-	private MethodParameter paramMap;
+    private MethodParameter paramMap;
 
-	private MethodParameter paramMultiValueMap;
+    private MethodParameter paramMultiValueMap;
 
-	private MethodParameter paramHttpHeaders;
+    private MethodParameter paramHttpHeaders;
 
-	private MethodParameter paramUnsupported;
+    private MethodParameter paramUnsupported;
 
-	private NativeWebRequest webRequest;
+    private NativeWebRequest webRequest;
 
-	private MockHttpServletRequest request;
-
-
-	@Before
-	public void setup() throws Exception {
-		resolver = new RequestHeaderMapMethodArgumentResolver();
-
-		Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, HttpHeaders.class, Map.class);
-		paramMap = new SynthesizingMethodParameter(method, 0);
-		paramMultiValueMap = new SynthesizingMethodParameter(method, 1);
-		paramHttpHeaders = new SynthesizingMethodParameter(method, 2);
-		paramUnsupported = new SynthesizingMethodParameter(method, 3);
-
-		request = new MockHttpServletRequest();
-		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
-	}
+    private MockHttpServletRequest request;
 
 
-	@Test
-	public void supportsParameter() {
-		assertTrue("Map parameter not supported", resolver.supportsParameter(paramMap));
-		assertTrue("MultiValueMap parameter not supported", resolver.supportsParameter(paramMultiValueMap));
-		assertTrue("HttpHeaders parameter not supported", resolver.supportsParameter(paramHttpHeaders));
-		assertFalse("non-@RequestParam map supported", resolver.supportsParameter(paramUnsupported));
-	}
+    @Before
+    public void setup() throws Exception {
+        resolver = new RequestHeaderMapMethodArgumentResolver();
 
-	@Test
-	public void resolveMapArgument() throws Exception {
-		String name = "foo";
-		String value = "bar";
-		Map<String, String> expected = Collections.singletonMap(name, value);
-		request.addHeader(name, value);
+        Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, HttpHeaders.class, Map.class);
+        paramMap = new SynthesizingMethodParameter(method, 0);
+        paramMultiValueMap = new SynthesizingMethodParameter(method, 1);
+        paramHttpHeaders = new SynthesizingMethodParameter(method, 2);
+        paramUnsupported = new SynthesizingMethodParameter(method, 3);
 
-		Object result = resolver.resolveArgument(paramMap, null, webRequest, null);
-
-		assertTrue(result instanceof Map);
-		assertEquals("Invalid result", expected, result);
-	}
-
-	@Test
-	public void resolveMultiValueMapArgument() throws Exception {
-		String name = "foo";
-		String value1 = "bar";
-		String value2 = "baz";
-
-		request.addHeader(name, value1);
-		request.addHeader(name, value2);
-
-		MultiValueMap<String, String> expected = new LinkedMultiValueMap<>(1);
-		expected.add(name, value1);
-		expected.add(name, value2);
-
-		Object result = resolver.resolveArgument(paramMultiValueMap, null, webRequest, null);
-
-		assertTrue(result instanceof MultiValueMap);
-		assertEquals("Invalid result", expected, result);
-	}
-
-	@Test
-	public void resolveHttpHeadersArgument() throws Exception {
-		String name = "foo";
-		String value1 = "bar";
-		String value2 = "baz";
-
-		request.addHeader(name, value1);
-		request.addHeader(name, value2);
-
-		HttpHeaders expected = new HttpHeaders();
-		expected.add(name, value1);
-		expected.add(name, value2);
-
-		Object result = resolver.resolveArgument(paramHttpHeaders, null, webRequest, null);
-
-		assertTrue(result instanceof HttpHeaders);
-		assertEquals("Invalid result", expected, result);
-	}
+        request = new MockHttpServletRequest();
+        webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
+    }
 
 
-	public void params(@RequestHeader Map<?, ?> param1,
-			@RequestHeader MultiValueMap<?, ?> param2, @RequestHeader HttpHeaders param3,
-			Map<?, ?> unsupported) {
-	}
+    @Test
+    public void supportsParameter() {
+        assertTrue("Map parameter not supported", resolver.supportsParameter(paramMap));
+        assertTrue("MultiValueMap parameter not supported", resolver.supportsParameter(paramMultiValueMap));
+        assertTrue("HttpHeaders parameter not supported", resolver.supportsParameter(paramHttpHeaders));
+        assertFalse("non-@RequestParam map supported", resolver.supportsParameter(paramUnsupported));
+    }
+
+    @Test
+    public void resolveMapArgument() throws Exception {
+        String name = "foo";
+        String value = "bar";
+        Map<String, String> expected = Collections.singletonMap(name, value);
+        request.addHeader(name, value);
+
+        Object result = resolver.resolveArgument(paramMap, null, webRequest, null);
+
+        assertTrue(result instanceof Map);
+        assertEquals("Invalid result", expected, result);
+    }
+
+    @Test
+    public void resolveMultiValueMapArgument() throws Exception {
+        String name = "foo";
+        String value1 = "bar";
+        String value2 = "baz";
+
+        request.addHeader(name, value1);
+        request.addHeader(name, value2);
+
+        MultiValueMap<String, String> expected = new LinkedMultiValueMap<>(1);
+        expected.add(name, value1);
+        expected.add(name, value2);
+
+        Object result = resolver.resolveArgument(paramMultiValueMap, null, webRequest, null);
+
+        assertTrue(result instanceof MultiValueMap);
+        assertEquals("Invalid result", expected, result);
+    }
+
+    @Test
+    public void resolveHttpHeadersArgument() throws Exception {
+        String name = "foo";
+        String value1 = "bar";
+        String value2 = "baz";
+
+        request.addHeader(name, value1);
+        request.addHeader(name, value2);
+
+        HttpHeaders expected = new HttpHeaders();
+        expected.add(name, value1);
+        expected.add(name, value2);
+
+        Object result = resolver.resolveArgument(paramHttpHeaders, null, webRequest, null);
+
+        assertTrue(result instanceof HttpHeaders);
+        assertEquals("Invalid result", expected, result);
+    }
+
+
+    public void params(@RequestHeader Map<?, ?> param1,
+                       @RequestHeader MultiValueMap<?, ?> param2, @RequestHeader HttpHeaders param3,
+                       Map<?, ?> unsupported) {
+    }
 
 }

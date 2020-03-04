@@ -16,17 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeMap;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
@@ -38,7 +29,18 @@ import org.springframework.tests.sample.beans.CustomEnum;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
-import static org.junit.Assert.*;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rob Harrop
@@ -47,346 +49,346 @@ import static org.junit.Assert.*;
  */
 public class UtilNamespaceHandlerTests {
 
-	private DefaultListableBeanFactory beanFactory;
+    private DefaultListableBeanFactory beanFactory;
 
-	private CollectingReaderEventListener listener = new CollectingReaderEventListener();
-
-
-	@Before
-	public void setUp() {
-		this.beanFactory = new DefaultListableBeanFactory();
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
-		reader.setEventListener(this.listener);
-		reader.loadBeanDefinitions(new ClassPathResource("testUtilNamespace.xml", getClass()));
-	}
+    private CollectingReaderEventListener listener = new CollectingReaderEventListener();
 
 
-	@Test
-	public void testConstant() {
-		Integer min = (Integer) this.beanFactory.getBean("min");
-		assertEquals(Integer.MIN_VALUE, min.intValue());
-	}
+    @Before
+    public void setUp() {
+        this.beanFactory = new DefaultListableBeanFactory();
+        XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
+        reader.setEventListener(this.listener);
+        reader.loadBeanDefinitions(new ClassPathResource("testUtilNamespace.xml", getClass()));
+    }
 
-	@Test
-	public void testConstantWithDefaultName() {
-		Integer max = (Integer) this.beanFactory.getBean("java.lang.Integer.MAX_VALUE");
-		assertEquals(Integer.MAX_VALUE, max.intValue());
-	}
 
-	@Test
-	public void testEvents() {
-		ComponentDefinition propertiesComponent = this.listener.getComponentDefinition("myProperties");
-		assertNotNull("Event for 'myProperties' not sent", propertiesComponent);
-		AbstractBeanDefinition propertiesBean = (AbstractBeanDefinition) propertiesComponent.getBeanDefinitions()[0];
-		assertEquals("Incorrect BeanDefinition", PropertiesFactoryBean.class, propertiesBean.getBeanClass());
+    @Test
+    public void testConstant() {
+        Integer min = (Integer) this.beanFactory.getBean("min");
+        assertEquals(Integer.MIN_VALUE, min.intValue());
+    }
 
-		ComponentDefinition constantComponent = this.listener.getComponentDefinition("min");
-		assertNotNull("Event for 'min' not sent", propertiesComponent);
-		AbstractBeanDefinition constantBean = (AbstractBeanDefinition) constantComponent.getBeanDefinitions()[0];
-		assertEquals("Incorrect BeanDefinition", FieldRetrievingFactoryBean.class, constantBean.getBeanClass());
-	}
+    @Test
+    public void testConstantWithDefaultName() {
+        Integer max = (Integer) this.beanFactory.getBean("java.lang.Integer.MAX_VALUE");
+        assertEquals(Integer.MAX_VALUE, max.intValue());
+    }
 
-	@Test
-	public void testNestedProperties() {
-		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
-		Properties props = bean.getSomeProperties();
-		assertEquals("Incorrect property value", "bar", props.get("foo"));
-	}
+    @Test
+    public void testEvents() {
+        ComponentDefinition propertiesComponent = this.listener.getComponentDefinition("myProperties");
+        assertNotNull("Event for 'myProperties' not sent", propertiesComponent);
+        AbstractBeanDefinition propertiesBean = (AbstractBeanDefinition) propertiesComponent.getBeanDefinitions()[0];
+        assertEquals("Incorrect BeanDefinition", PropertiesFactoryBean.class, propertiesBean.getBeanClass());
 
-	@Test
-	public void testPropertyPath() {
-		String name = (String) this.beanFactory.getBean("name");
-		assertEquals("Rob Harrop", name);
-	}
+        ComponentDefinition constantComponent = this.listener.getComponentDefinition("min");
+        assertNotNull("Event for 'min' not sent", propertiesComponent);
+        AbstractBeanDefinition constantBean = (AbstractBeanDefinition) constantComponent.getBeanDefinitions()[0];
+        assertEquals("Incorrect BeanDefinition", FieldRetrievingFactoryBean.class, constantBean.getBeanClass());
+    }
 
-	@Test
-	public void testNestedPropertyPath() {
-		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
-		assertEquals("Rob Harrop", bean.getName());
-	}
+    @Test
+    public void testNestedProperties() {
+        TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
+        Properties props = bean.getSomeProperties();
+        assertEquals("Incorrect property value", "bar", props.get("foo"));
+    }
 
-	@Test
-	public void testSimpleMap() {
-		Map map = (Map) this.beanFactory.getBean("simpleMap");
-		assertEquals("bar", map.get("foo"));
-		Map map2 = (Map) this.beanFactory.getBean("simpleMap");
-		assertTrue(map == map2);
-	}
+    @Test
+    public void testPropertyPath() {
+        String name = (String) this.beanFactory.getBean("name");
+        assertEquals("Rob Harrop", name);
+    }
 
-	@Test
-	public void testScopedMap() {
-		Map map = (Map) this.beanFactory.getBean("scopedMap");
-		assertEquals("bar", map.get("foo"));
-		Map map2 = (Map) this.beanFactory.getBean("scopedMap");
-		assertEquals("bar", map2.get("foo"));
-		assertTrue(map != map2);
-	}
+    @Test
+    public void testNestedPropertyPath() {
+        TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
+        assertEquals("Rob Harrop", bean.getName());
+    }
 
-	@Test
-	public void testSimpleList() {
-		List list = (List) this.beanFactory.getBean("simpleList");
-		assertEquals("Rob Harrop", list.get(0));
-		List list2 = (List) this.beanFactory.getBean("simpleList");
-		assertTrue(list == list2);
-	}
+    @Test
+    public void testSimpleMap() {
+        Map map = (Map) this.beanFactory.getBean("simpleMap");
+        assertEquals("bar", map.get("foo"));
+        Map map2 = (Map) this.beanFactory.getBean("simpleMap");
+        assertTrue(map == map2);
+    }
 
-	@Test
-	public void testScopedList() {
-		List list = (List) this.beanFactory.getBean("scopedList");
-		assertEquals("Rob Harrop", list.get(0));
-		List list2 = (List) this.beanFactory.getBean("scopedList");
-		assertEquals("Rob Harrop", list2.get(0));
-		assertTrue(list != list2);
-	}
+    @Test
+    public void testScopedMap() {
+        Map map = (Map) this.beanFactory.getBean("scopedMap");
+        assertEquals("bar", map.get("foo"));
+        Map map2 = (Map) this.beanFactory.getBean("scopedMap");
+        assertEquals("bar", map2.get("foo"));
+        assertTrue(map != map2);
+    }
 
-	@Test
-	public void testSimpleSet() {
-		Set set = (Set) this.beanFactory.getBean("simpleSet");
-		assertTrue(set.contains("Rob Harrop"));
-		Set set2 = (Set) this.beanFactory.getBean("simpleSet");
-		assertTrue(set == set2);
-	}
+    @Test
+    public void testSimpleList() {
+        List list = (List) this.beanFactory.getBean("simpleList");
+        assertEquals("Rob Harrop", list.get(0));
+        List list2 = (List) this.beanFactory.getBean("simpleList");
+        assertTrue(list == list2);
+    }
 
-	@Test
-	public void testScopedSet() {
-		Set set = (Set) this.beanFactory.getBean("scopedSet");
-		assertTrue(set.contains("Rob Harrop"));
-		Set set2 = (Set) this.beanFactory.getBean("scopedSet");
-		assertTrue(set2.contains("Rob Harrop"));
-		assertTrue(set != set2);
-	}
+    @Test
+    public void testScopedList() {
+        List list = (List) this.beanFactory.getBean("scopedList");
+        assertEquals("Rob Harrop", list.get(0));
+        List list2 = (List) this.beanFactory.getBean("scopedList");
+        assertEquals("Rob Harrop", list2.get(0));
+        assertTrue(list != list2);
+    }
 
-	@Test
-	public void testMapWithRef() {
-		Map map = (Map) this.beanFactory.getBean("mapWithRef");
-		assertTrue(map instanceof TreeMap);
-		assertEquals(this.beanFactory.getBean("testBean"), map.get("bean"));
-	}
+    @Test
+    public void testSimpleSet() {
+        Set set = (Set) this.beanFactory.getBean("simpleSet");
+        assertTrue(set.contains("Rob Harrop"));
+        Set set2 = (Set) this.beanFactory.getBean("simpleSet");
+        assertTrue(set == set2);
+    }
 
-	@Test
-	public void testMapWithTypes() {
-		Map map = (Map) this.beanFactory.getBean("mapWithTypes");
-		assertTrue(map instanceof LinkedCaseInsensitiveMap);
-		assertEquals(this.beanFactory.getBean("testBean"), map.get("bean"));
-	}
+    @Test
+    public void testScopedSet() {
+        Set set = (Set) this.beanFactory.getBean("scopedSet");
+        assertTrue(set.contains("Rob Harrop"));
+        Set set2 = (Set) this.beanFactory.getBean("scopedSet");
+        assertTrue(set2.contains("Rob Harrop"));
+        assertTrue(set != set2);
+    }
 
-	@Test
-	public void testNestedCollections() {
-		TestBean bean = (TestBean) this.beanFactory.getBean("nestedCollectionsBean");
+    @Test
+    public void testMapWithRef() {
+        Map map = (Map) this.beanFactory.getBean("mapWithRef");
+        assertTrue(map instanceof TreeMap);
+        assertEquals(this.beanFactory.getBean("testBean"), map.get("bean"));
+    }
 
-		List list = bean.getSomeList();
-		assertEquals(1, list.size());
-		assertEquals("foo", list.get(0));
+    @Test
+    public void testMapWithTypes() {
+        Map map = (Map) this.beanFactory.getBean("mapWithTypes");
+        assertTrue(map instanceof LinkedCaseInsensitiveMap);
+        assertEquals(this.beanFactory.getBean("testBean"), map.get("bean"));
+    }
 
-		Set set = bean.getSomeSet();
-		assertEquals(1, set.size());
-		assertTrue(set.contains("bar"));
+    @Test
+    public void testNestedCollections() {
+        TestBean bean = (TestBean) this.beanFactory.getBean("nestedCollectionsBean");
 
-		Map map = bean.getSomeMap();
-		assertEquals(1, map.size());
-		assertTrue(map.get("foo") instanceof Set);
-		Set innerSet = (Set) map.get("foo");
-		assertEquals(1, innerSet.size());
-		assertTrue(innerSet.contains("bar"));
+        List list = bean.getSomeList();
+        assertEquals(1, list.size());
+        assertEquals("foo", list.get(0));
 
-		TestBean bean2 = (TestBean) this.beanFactory.getBean("nestedCollectionsBean");
-		assertEquals(list, bean2.getSomeList());
-		assertEquals(set, bean2.getSomeSet());
-		assertEquals(map, bean2.getSomeMap());
-		assertFalse(list == bean2.getSomeList());
-		assertFalse(set == bean2.getSomeSet());
-		assertFalse(map == bean2.getSomeMap());
-	}
+        Set set = bean.getSomeSet();
+        assertEquals(1, set.size());
+        assertTrue(set.contains("bar"));
 
-	@Test
-	public void testNestedShortcutCollections() {
-		TestBean bean = (TestBean) this.beanFactory.getBean("nestedShortcutCollections");
+        Map map = bean.getSomeMap();
+        assertEquals(1, map.size());
+        assertTrue(map.get("foo") instanceof Set);
+        Set innerSet = (Set) map.get("foo");
+        assertEquals(1, innerSet.size());
+        assertTrue(innerSet.contains("bar"));
 
-		assertEquals(1, bean.getStringArray().length);
-		assertEquals("fooStr", bean.getStringArray()[0]);
+        TestBean bean2 = (TestBean) this.beanFactory.getBean("nestedCollectionsBean");
+        assertEquals(list, bean2.getSomeList());
+        assertEquals(set, bean2.getSomeSet());
+        assertEquals(map, bean2.getSomeMap());
+        assertFalse(list == bean2.getSomeList());
+        assertFalse(set == bean2.getSomeSet());
+        assertFalse(map == bean2.getSomeMap());
+    }
 
-		List list = bean.getSomeList();
-		assertEquals(1, list.size());
-		assertEquals("foo", list.get(0));
+    @Test
+    public void testNestedShortcutCollections() {
+        TestBean bean = (TestBean) this.beanFactory.getBean("nestedShortcutCollections");
 
-		Set set = bean.getSomeSet();
-		assertEquals(1, set.size());
-		assertTrue(set.contains("bar"));
+        assertEquals(1, bean.getStringArray().length);
+        assertEquals("fooStr", bean.getStringArray()[0]);
 
-		TestBean bean2 = (TestBean) this.beanFactory.getBean("nestedShortcutCollections");
-		assertTrue(Arrays.equals(bean.getStringArray(), bean2.getStringArray()));
-		assertFalse(bean.getStringArray() == bean2.getStringArray());
-		assertEquals(list, bean2.getSomeList());
-		assertEquals(set, bean2.getSomeSet());
-		assertFalse(list == bean2.getSomeList());
-		assertFalse(set == bean2.getSomeSet());
-	}
+        List list = bean.getSomeList();
+        assertEquals(1, list.size());
+        assertEquals("foo", list.get(0));
 
-	@Test
-	public void testNestedInCollections() {
-		TestBean bean = (TestBean) this.beanFactory.getBean("nestedCustomTagBean");
+        Set set = bean.getSomeSet();
+        assertEquals(1, set.size());
+        assertTrue(set.contains("bar"));
 
-		List list = bean.getSomeList();
-		assertEquals(1, list.size());
-		assertEquals(Integer.MIN_VALUE, list.get(0));
+        TestBean bean2 = (TestBean) this.beanFactory.getBean("nestedShortcutCollections");
+        assertTrue(Arrays.equals(bean.getStringArray(), bean2.getStringArray()));
+        assertFalse(bean.getStringArray() == bean2.getStringArray());
+        assertEquals(list, bean2.getSomeList());
+        assertEquals(set, bean2.getSomeSet());
+        assertFalse(list == bean2.getSomeList());
+        assertFalse(set == bean2.getSomeSet());
+    }
 
-		Set set = bean.getSomeSet();
-		assertEquals(2, set.size());
-		assertTrue(set.contains(Thread.State.NEW));
-		assertTrue(set.contains(Thread.State.RUNNABLE));
+    @Test
+    public void testNestedInCollections() {
+        TestBean bean = (TestBean) this.beanFactory.getBean("nestedCustomTagBean");
 
-		Map map = bean.getSomeMap();
-		assertEquals(1, map.size());
-		assertEquals(CustomEnum.VALUE_1, map.get("min"));
+        List list = bean.getSomeList();
+        assertEquals(1, list.size());
+        assertEquals(Integer.MIN_VALUE, list.get(0));
 
-		TestBean bean2 = (TestBean) this.beanFactory.getBean("nestedCustomTagBean");
-		assertEquals(list, bean2.getSomeList());
-		assertEquals(set, bean2.getSomeSet());
-		assertEquals(map, bean2.getSomeMap());
-		assertFalse(list == bean2.getSomeList());
-		assertFalse(set == bean2.getSomeSet());
-		assertFalse(map == bean2.getSomeMap());
-	}
+        Set set = bean.getSomeSet();
+        assertEquals(2, set.size());
+        assertTrue(set.contains(Thread.State.NEW));
+        assertTrue(set.contains(Thread.State.RUNNABLE));
 
-	@Test
-	public void testCircularCollections() {
-		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionsBean");
+        Map map = bean.getSomeMap();
+        assertEquals(1, map.size());
+        assertEquals(CustomEnum.VALUE_1, map.get("min"));
 
-		List list = bean.getSomeList();
-		assertEquals(1, list.size());
-		assertEquals(bean, list.get(0));
+        TestBean bean2 = (TestBean) this.beanFactory.getBean("nestedCustomTagBean");
+        assertEquals(list, bean2.getSomeList());
+        assertEquals(set, bean2.getSomeSet());
+        assertEquals(map, bean2.getSomeMap());
+        assertFalse(list == bean2.getSomeList());
+        assertFalse(set == bean2.getSomeSet());
+        assertFalse(map == bean2.getSomeMap());
+    }
 
-		Set set = bean.getSomeSet();
-		assertEquals(1, set.size());
-		assertTrue(set.contains(bean));
+    @Test
+    public void testCircularCollections() {
+        TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionsBean");
 
-		Map map = bean.getSomeMap();
-		assertEquals(1, map.size());
-		assertEquals(bean, map.get("foo"));
-	}
+        List list = bean.getSomeList();
+        assertEquals(1, list.size());
+        assertEquals(bean, list.get(0));
 
-	@Test
-	public void testCircularCollectionBeansStartingWithList() {
-		this.beanFactory.getBean("circularList");
-		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
+        Set set = bean.getSomeSet();
+        assertEquals(1, set.size());
+        assertTrue(set.contains(bean));
 
-		List list = bean.getSomeList();
-		assertTrue(Proxy.isProxyClass(list.getClass()));
-		assertEquals(1, list.size());
-		assertEquals(bean, list.get(0));
+        Map map = bean.getSomeMap();
+        assertEquals(1, map.size());
+        assertEquals(bean, map.get("foo"));
+    }
 
-		Set set = bean.getSomeSet();
-		assertFalse(Proxy.isProxyClass(set.getClass()));
-		assertEquals(1, set.size());
-		assertTrue(set.contains(bean));
+    @Test
+    public void testCircularCollectionBeansStartingWithList() {
+        this.beanFactory.getBean("circularList");
+        TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
 
-		Map map = bean.getSomeMap();
-		assertFalse(Proxy.isProxyClass(map.getClass()));
-		assertEquals(1, map.size());
-		assertEquals(bean, map.get("foo"));
-	}
+        List list = bean.getSomeList();
+        assertTrue(Proxy.isProxyClass(list.getClass()));
+        assertEquals(1, list.size());
+        assertEquals(bean, list.get(0));
 
-	@Test
-	public void testCircularCollectionBeansStartingWithSet() {
-		this.beanFactory.getBean("circularSet");
-		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
+        Set set = bean.getSomeSet();
+        assertFalse(Proxy.isProxyClass(set.getClass()));
+        assertEquals(1, set.size());
+        assertTrue(set.contains(bean));
 
-		List list = bean.getSomeList();
-		assertFalse(Proxy.isProxyClass(list.getClass()));
-		assertEquals(1, list.size());
-		assertEquals(bean, list.get(0));
+        Map map = bean.getSomeMap();
+        assertFalse(Proxy.isProxyClass(map.getClass()));
+        assertEquals(1, map.size());
+        assertEquals(bean, map.get("foo"));
+    }
 
-		Set set = bean.getSomeSet();
-		assertTrue(Proxy.isProxyClass(set.getClass()));
-		assertEquals(1, set.size());
-		assertTrue(set.contains(bean));
+    @Test
+    public void testCircularCollectionBeansStartingWithSet() {
+        this.beanFactory.getBean("circularSet");
+        TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
 
-		Map map = bean.getSomeMap();
-		assertFalse(Proxy.isProxyClass(map.getClass()));
-		assertEquals(1, map.size());
-		assertEquals(bean, map.get("foo"));
-	}
+        List list = bean.getSomeList();
+        assertFalse(Proxy.isProxyClass(list.getClass()));
+        assertEquals(1, list.size());
+        assertEquals(bean, list.get(0));
 
-	@Test
-	public void testCircularCollectionBeansStartingWithMap() {
-		this.beanFactory.getBean("circularMap");
-		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
+        Set set = bean.getSomeSet();
+        assertTrue(Proxy.isProxyClass(set.getClass()));
+        assertEquals(1, set.size());
+        assertTrue(set.contains(bean));
 
-		List list = bean.getSomeList();
-		assertFalse(Proxy.isProxyClass(list.getClass()));
-		assertEquals(1, list.size());
-		assertEquals(bean, list.get(0));
+        Map map = bean.getSomeMap();
+        assertFalse(Proxy.isProxyClass(map.getClass()));
+        assertEquals(1, map.size());
+        assertEquals(bean, map.get("foo"));
+    }
 
-		Set set = bean.getSomeSet();
-		assertFalse(Proxy.isProxyClass(set.getClass()));
-		assertEquals(1, set.size());
-		assertTrue(set.contains(bean));
+    @Test
+    public void testCircularCollectionBeansStartingWithMap() {
+        this.beanFactory.getBean("circularMap");
+        TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
 
-		Map map = bean.getSomeMap();
-		assertTrue(Proxy.isProxyClass(map.getClass()));
-		assertEquals(1, map.size());
-		assertEquals(bean, map.get("foo"));
-	}
+        List list = bean.getSomeList();
+        assertFalse(Proxy.isProxyClass(list.getClass()));
+        assertEquals(1, list.size());
+        assertEquals(bean, list.get(0));
 
-	@Test
-	public void testNestedInConstructor() {
-		TestBean bean = (TestBean) this.beanFactory.getBean("constructedTestBean");
-		assertEquals("Rob Harrop", bean.getName());
-	}
+        Set set = bean.getSomeSet();
+        assertFalse(Proxy.isProxyClass(set.getClass()));
+        assertEquals(1, set.size());
+        assertTrue(set.contains(bean));
 
-	@Test
-	public void testLoadProperties() {
-		Properties props = (Properties) this.beanFactory.getBean("myProperties");
-		assertEquals("Incorrect property value", "bar", props.get("foo"));
-		assertEquals("Incorrect property value", null, props.get("foo2"));
-		Properties props2 = (Properties) this.beanFactory.getBean("myProperties");
-		assertTrue(props == props2);
-	}
+        Map map = bean.getSomeMap();
+        assertTrue(Proxy.isProxyClass(map.getClass()));
+        assertEquals(1, map.size());
+        assertEquals(bean, map.get("foo"));
+    }
 
-	@Test
-	public void testScopedProperties() {
-		Properties props = (Properties) this.beanFactory.getBean("myScopedProperties");
-		assertEquals("Incorrect property value", "bar", props.get("foo"));
-		assertEquals("Incorrect property value", null, props.get("foo2"));
-		Properties props2 = (Properties) this.beanFactory.getBean("myScopedProperties");
-		assertEquals("Incorrect property value", "bar", props.get("foo"));
-		assertEquals("Incorrect property value", null, props.get("foo2"));
-		assertTrue(props != props2);
-	}
+    @Test
+    public void testNestedInConstructor() {
+        TestBean bean = (TestBean) this.beanFactory.getBean("constructedTestBean");
+        assertEquals("Rob Harrop", bean.getName());
+    }
 
-	@Test
-	public void testLocalProperties() {
-		Properties props = (Properties) this.beanFactory.getBean("myLocalProperties");
-		assertEquals("Incorrect property value", null, props.get("foo"));
-		assertEquals("Incorrect property value", "bar2", props.get("foo2"));
-	}
+    @Test
+    public void testLoadProperties() {
+        Properties props = (Properties) this.beanFactory.getBean("myProperties");
+        assertEquals("Incorrect property value", "bar", props.get("foo"));
+        assertEquals("Incorrect property value", null, props.get("foo2"));
+        Properties props2 = (Properties) this.beanFactory.getBean("myProperties");
+        assertTrue(props == props2);
+    }
 
-	@Test
-	public void testMergedProperties() {
-		Properties props = (Properties) this.beanFactory.getBean("myMergedProperties");
-		assertEquals("Incorrect property value", "bar", props.get("foo"));
-		assertEquals("Incorrect property value", "bar2", props.get("foo2"));
-	}
+    @Test
+    public void testScopedProperties() {
+        Properties props = (Properties) this.beanFactory.getBean("myScopedProperties");
+        assertEquals("Incorrect property value", "bar", props.get("foo"));
+        assertEquals("Incorrect property value", null, props.get("foo2"));
+        Properties props2 = (Properties) this.beanFactory.getBean("myScopedProperties");
+        assertEquals("Incorrect property value", "bar", props.get("foo"));
+        assertEquals("Incorrect property value", null, props.get("foo2"));
+        assertTrue(props != props2);
+    }
 
-	@Test
-	public void testLocalOverrideDefault() {
-		Properties props = (Properties) this.beanFactory.getBean("defaultLocalOverrideProperties");
-		assertEquals("Incorrect property value", "bar", props.get("foo"));
-		assertEquals("Incorrect property value", "local2", props.get("foo2"));
-	}
+    @Test
+    public void testLocalProperties() {
+        Properties props = (Properties) this.beanFactory.getBean("myLocalProperties");
+        assertEquals("Incorrect property value", null, props.get("foo"));
+        assertEquals("Incorrect property value", "bar2", props.get("foo2"));
+    }
 
-	@Test
-	public void testLocalOverrideFalse() {
-		Properties props = (Properties) this.beanFactory.getBean("falseLocalOverrideProperties");
-		assertEquals("Incorrect property value", "bar", props.get("foo"));
-		assertEquals("Incorrect property value", "local2", props.get("foo2"));
-	}
+    @Test
+    public void testMergedProperties() {
+        Properties props = (Properties) this.beanFactory.getBean("myMergedProperties");
+        assertEquals("Incorrect property value", "bar", props.get("foo"));
+        assertEquals("Incorrect property value", "bar2", props.get("foo2"));
+    }
 
-	@Test
-	public void testLocalOverrideTrue() {
-		Properties props = (Properties) this.beanFactory.getBean("trueLocalOverrideProperties");
-		assertEquals("Incorrect property value", "local", props.get("foo"));
-		assertEquals("Incorrect property value", "local2", props.get("foo2"));
-	}
+    @Test
+    public void testLocalOverrideDefault() {
+        Properties props = (Properties) this.beanFactory.getBean("defaultLocalOverrideProperties");
+        assertEquals("Incorrect property value", "bar", props.get("foo"));
+        assertEquals("Incorrect property value", "local2", props.get("foo2"));
+    }
+
+    @Test
+    public void testLocalOverrideFalse() {
+        Properties props = (Properties) this.beanFactory.getBean("falseLocalOverrideProperties");
+        assertEquals("Incorrect property value", "bar", props.get("foo"));
+        assertEquals("Incorrect property value", "local2", props.get("foo2"));
+    }
+
+    @Test
+    public void testLocalOverrideTrue() {
+        Properties props = (Properties) this.beanFactory.getBean("trueLocalOverrideProperties");
+        assertEquals("Incorrect property value", "local", props.get("foo"));
+        assertEquals("Incorrect property value", "local2", props.get("foo2"));
+    }
 
 }

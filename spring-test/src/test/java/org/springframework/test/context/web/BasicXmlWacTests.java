@@ -17,10 +17,9 @@
 package org.springframework.test.context.web;
 
 import org.junit.Test;
-
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Sam Brannen
@@ -29,9 +28,9 @@ import static org.junit.Assert.*;
 @ContextConfiguration
 public class BasicXmlWacTests extends AbstractBasicWacTests {
 
-	@Test
-	public void fooBarAutowired() {
-		assertEquals("bar", foo);
-	}
+    @Test
+    public void fooBarAutowired() {
+        assertEquals("bar", foo);
+    }
 
 }

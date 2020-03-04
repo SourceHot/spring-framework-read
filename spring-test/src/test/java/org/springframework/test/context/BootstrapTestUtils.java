@@ -27,17 +27,17 @@ import org.springframework.test.context.support.DefaultBootstrapContext;
  */
 public abstract class BootstrapTestUtils {
 
-	private BootstrapTestUtils() {
-		/* no-op */
-	}
+    private BootstrapTestUtils() {
+        /* no-op */
+    }
 
-	public static BootstrapContext buildBootstrapContext(Class<?> testClass,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
-		return new DefaultBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
-	}
+    public static BootstrapContext buildBootstrapContext(Class<?> testClass,
+                                                         CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
+        return new DefaultBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
+    }
 
-	public static TestContextBootstrapper resolveTestContextBootstrapper(BootstrapContext bootstrapContext) {
-		return BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
-	}
+    public static TestContextBootstrapper resolveTestContextBootstrapper(BootstrapContext bootstrapContext) {
+        return BootstrapUtils.resolveTestContextBootstrapper(bootstrapContext);
+    }
 
 }

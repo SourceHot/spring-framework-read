@@ -28,27 +28,29 @@ import javax.sql.DataSource;
  */
 public class HanaSequenceMaxValueIncrementer extends AbstractSequenceMaxValueIncrementer {
 
-	/**
-	 * Default constructor for bean property style usage.
-	 * @see #setDataSource
-	 * @see #setIncrementerName
-	 */
-	public HanaSequenceMaxValueIncrementer() {
-	}
+    /**
+     * Default constructor for bean property style usage.
+     *
+     * @see #setDataSource
+     * @see #setIncrementerName
+     */
+    public HanaSequenceMaxValueIncrementer() {
+    }
 
-	/**
-	 * Convenience constructor.
-	 * @param dataSource the DataSource to use
-	 * @param incrementerName the name of the sequence/table to use
-	 */
-	public HanaSequenceMaxValueIncrementer(DataSource dataSource, String incrementerName) {
-		super(dataSource, incrementerName);
-	}
+    /**
+     * Convenience constructor.
+     *
+     * @param dataSource      the DataSource to use
+     * @param incrementerName the name of the sequence/table to use
+     */
+    public HanaSequenceMaxValueIncrementer(DataSource dataSource, String incrementerName) {
+        super(dataSource, incrementerName);
+    }
 
 
-	@Override
-	protected String getSequenceQuery() {
-		return "select " + getIncrementerName() + ".nextval from dummy";
-	}
+    @Override
+    protected String getSequenceQuery() {
+        return "select " + getIncrementerName() + ".nextval from dummy";
+    }
 
 }

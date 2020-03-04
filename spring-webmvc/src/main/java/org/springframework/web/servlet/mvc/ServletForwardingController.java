@@ -16,17 +16,17 @@
 
 package org.springframework.web.servlet.mvc;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Spring Controller implementation that forwards to a named servlet,
@@ -81,10 +81,10 @@ import org.springframework.web.util.WebUtils;
  * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
- * @since 1.1.1
  * @see ServletWrappingController
  * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor
  * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter
+ * @since 1.1.1
  */
 public class ServletForwardingController extends AbstractController implements BeanNameAware {
 
@@ -140,8 +140,7 @@ public class ServletForwardingController extends AbstractController implements B
                 logger.trace("Included servlet [" + this.servletName +
                         "] in ServletForwardingController '" + this.beanName + "'");
             }
-        }
-        else {
+        } else {
             // 请求转发
             rd.forward(request, response);
             if (logger.isTraceEnabled()) {
@@ -159,8 +158,9 @@ public class ServletForwardingController extends AbstractController implements B
      * <p>Performs a check whether an include URI attribute is found in the request,
      * indicating an include request, and whether the response has already been committed.
      * In both cases, an include will be performed, as a forward is not possible anymore.
-     *
+     * <p>
      * 是否为 include 请求
+     *
      * @param request  current HTTP request
      * @param response current HTTP response
      * @return {@code true} for include, {@code false} for forward

@@ -27,7 +27,6 @@ import org.springframework.util.NumberUtils;
  * delegates to {@link NumberUtils#parseNumber(String, Class)} to perform the conversion.
  *
  * @author Keith Donald
- * @since 3.0
  * @see java.lang.Byte
  * @see java.lang.Short
  * @see java.lang.Integer
@@ -37,30 +36,31 @@ import org.springframework.util.NumberUtils;
  * @see java.lang.Double
  * @see java.math.BigDecimal
  * @see NumberUtils
+ * @since 3.0
  */
 final class StringToNumberConverterFactory implements ConverterFactory<String, Number> {
 
-	@Override
-	public <T extends Number> Converter<String, T> getConverter(Class<T> targetType) {
-		return new StringToNumber<>(targetType);
-	}
+    @Override
+    public <T extends Number> Converter<String, T> getConverter(Class<T> targetType) {
+        return new StringToNumber<>(targetType);
+    }
 
 
-	private static final class StringToNumber<T extends Number> implements Converter<String, T> {
+    private static final class StringToNumber<T extends Number> implements Converter<String, T> {
 
-		private final Class<T> targetType;
+        private final Class<T> targetType;
 
-		public StringToNumber(Class<T> targetType) {
-			this.targetType = targetType;
-		}
+        public StringToNumber(Class<T> targetType) {
+            this.targetType = targetType;
+        }
 
-		@Override
-		public T convert(String source) {
-			if (source.isEmpty()) {
-				return null;
-			}
-			return NumberUtils.parseNumber(source, this.targetType);
-		}
-	}
+        @Override
+        public T convert(String source) {
+            if (source.isEmpty()) {
+                return null;
+            }
+            return NumberUtils.parseNumber(source, this.targetType);
+        }
+    }
 
 }

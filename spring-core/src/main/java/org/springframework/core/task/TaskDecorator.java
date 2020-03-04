@@ -28,19 +28,20 @@ package org.springframework.core.task;
  * invocation, or to provide some monitoring/statistics for task execution.
  *
  * @author Juergen Hoeller
- * @since 4.3
  * @see TaskExecutor#execute(Runnable)
  * @see SimpleAsyncTaskExecutor#setTaskDecorator
+ * @since 4.3
  */
 @FunctionalInterface
 public interface TaskDecorator {
 
-	/**
-	 * Decorate the given {@code Runnable}, returning a potentially wrapped
-	 * {@code Runnable} for actual execution.
-	 * @param runnable the original {@code Runnable}
-	 * @return the decorated {@code Runnable}
-	 */
-	Runnable decorate(Runnable runnable);
+    /**
+     * Decorate the given {@code Runnable}, returning a potentially wrapped
+     * {@code Runnable} for actual execution.
+     *
+     * @param runnable the original {@code Runnable}
+     * @return the decorated {@code Runnable}
+     */
+    Runnable decorate(Runnable runnable);
 
 }

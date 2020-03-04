@@ -16,13 +16,13 @@
 
 package org.springframework.jca.cci.object;
 
-import javax.resource.cci.ConnectionFactory;
-import javax.resource.cci.InteractionSpec;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jca.cci.core.CciTemplate;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.resource.cci.ConnectionFactory;
+import javax.resource.cci.InteractionSpec;
 
 /**
  * Base class for EIS operation objects that work with the CCI API.
@@ -32,65 +32,64 @@ import org.springframework.util.Assert;
  * are an alternative to working with a CciTemplate directly.
  *
  * @author Juergen Hoeller
- * @since 1.2
  * @see #setConnectionFactory
  * @see #setInteractionSpec
+ * @since 1.2
  */
 public abstract class EisOperation implements InitializingBean {
 
-	private CciTemplate cciTemplate = new CciTemplate();
+    private CciTemplate cciTemplate = new CciTemplate();
 
-	@Nullable
-	private InteractionSpec interactionSpec;
+    @Nullable
+    private InteractionSpec interactionSpec;
 
+    /**
+     * Return the CciTemplate used by this operation.
+     */
+    public CciTemplate getCciTemplate() {
+        return this.cciTemplate;
+    }
 
-	/**
-	 * Set the CciTemplate to be used by this operation.
-	 * Alternatively, specify a CCI ConnectionFactory.
-	 * @see #setConnectionFactory
-	 */
-	public void setCciTemplate(CciTemplate cciTemplate) {
-		Assert.notNull(cciTemplate, "CciTemplate must not be null");
-		this.cciTemplate = cciTemplate;
-	}
+    /**
+     * Set the CciTemplate to be used by this operation.
+     * Alternatively, specify a CCI ConnectionFactory.
+     *
+     * @see #setConnectionFactory
+     */
+    public void setCciTemplate(CciTemplate cciTemplate) {
+        Assert.notNull(cciTemplate, "CciTemplate must not be null");
+        this.cciTemplate = cciTemplate;
+    }
 
-	/**
-	 * Return the CciTemplate used by this operation.
-	 */
-	public CciTemplate getCciTemplate() {
-		return this.cciTemplate;
-	}
+    /**
+     * Set the CCI ConnectionFactory to be used by this operation.
+     */
+    public void setConnectionFactory(ConnectionFactory connectionFactory) {
+        this.cciTemplate.setConnectionFactory(connectionFactory);
+    }
 
-	/**
-	 * Set the CCI ConnectionFactory to be used by this operation.
-	 */
-	public void setConnectionFactory(ConnectionFactory connectionFactory) {
-		this.cciTemplate.setConnectionFactory(connectionFactory);
-	}
+    /**
+     * Return the CCI InteractionSpec for this operation.
+     */
+    @Nullable
+    public InteractionSpec getInteractionSpec() {
+        return this.interactionSpec;
+    }
 
-	/**
-	 * Set the CCI InteractionSpec for this operation.
-	 */
-	public void setInteractionSpec(@Nullable InteractionSpec interactionSpec) {
-		this.interactionSpec = interactionSpec;
-	}
+    /**
+     * Set the CCI InteractionSpec for this operation.
+     */
+    public void setInteractionSpec(@Nullable InteractionSpec interactionSpec) {
+        this.interactionSpec = interactionSpec;
+    }
 
-	/**
-	 * Return the CCI InteractionSpec for this operation.
-	 */
-	@Nullable
-	public InteractionSpec getInteractionSpec() {
-		return this.interactionSpec;
-	}
+    @Override
+    public void afterPropertiesSet() {
+        this.cciTemplate.afterPropertiesSet();
 
-
-	@Override
-	public void afterPropertiesSet() {
-		this.cciTemplate.afterPropertiesSet();
-
-		if (this.interactionSpec == null) {
-			throw new IllegalArgumentException("InteractionSpec is required");
-		}
-	}
+        if (this.interactionSpec == null) {
+            throw new IllegalArgumentException("InteractionSpec is required");
+        }
+    }
 
 }

@@ -29,14 +29,15 @@ import org.springframework.oxm.XmlMappingException;
 @SuppressWarnings("serial")
 public class CastorMappingException extends XmlMappingException {
 
-	/**
-	 * Construct a {@code CastorMappingException} with the specified detail message
-	 * and nested exception.
-	 * @param msg the detail message
-	 * @param cause the nested exception
-	 */
-	public CastorMappingException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Construct a {@code CastorMappingException} with the specified detail message
+     * and nested exception.
+     *
+     * @param msg   the detail message
+     * @param cause the nested exception
+     */
+    public CastorMappingException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

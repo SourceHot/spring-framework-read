@@ -45,9 +45,9 @@ import java.lang.annotation.Target;
  * same test class is unsupported and may lead to unpredictable results.
  *
  * @author Sam Brannen
- * @since 4.2
  * @see Rollback
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
+ * @since 4.2
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

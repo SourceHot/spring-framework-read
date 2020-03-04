@@ -16,12 +16,12 @@
 
 package org.springframework.transaction.event;
 
-import java.lang.reflect.Method;
-
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.EventListenerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+
+import java.lang.reflect.Method;
 
 /**
  * {@link EventListenerFactory} implementation that handles {@link TransactionalEventListener}
@@ -32,27 +32,25 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
  */
 public class TransactionalEventListenerFactory implements EventListenerFactory, Ordered {
 
-	private int order = 50;
+    private int order = 50;
 
+    @Override
+    public int getOrder() {
+        return this.order;
+    }
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
+    public void setOrder(int order) {
+        this.order = order;
+    }
 
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
+    @Override
+    public boolean supportsMethod(Method method) {
+        return AnnotatedElementUtils.hasAnnotation(method, TransactionalEventListener.class);
+    }
 
-
-	@Override
-	public boolean supportsMethod(Method method) {
-		return AnnotatedElementUtils.hasAnnotation(method, TransactionalEventListener.class);
-	}
-
-	@Override
-	public ApplicationListener<?> createApplicationListener(String beanName, Class<?> type, Method method) {
-		return new ApplicationListenerMethodTransactionalAdapter(beanName, type, method);
-	}
+    @Override
+    public ApplicationListener<?> createApplicationListener(String beanName, Class<?> type, Method method) {
+        return new ApplicationListenerMethodTransactionalAdapter(beanName, type, method);
+    }
 
 }

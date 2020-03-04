@@ -16,15 +16,14 @@
 
 package org.springframework.test.context.junit.jupiter;
 
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.core.annotation.AliasFor;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import org.springframework.core.annotation.AliasFor;
 
 /**
  * {@code @EnabledIf} is used to signal that the annotated test class or test
@@ -51,10 +50,10 @@ import org.springframework.core.annotation.AliasFor;
  * </pre>
  *
  * @author Sam Brannen
- * @since 5.0
  * @see SpringExtension
  * @see DisabledIf
  * @see org.junit.jupiter.api.Disabled
+ * @since 5.0
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -62,66 +61,66 @@ import org.springframework.core.annotation.AliasFor;
 @ExtendWith(EnabledIfCondition.class)
 public @interface EnabledIf {
 
-	/**
-	 * Alias for {@link #expression}; only intended to be used if {@link #reason}
-	 * and {@link #loadContext} are not specified.
-	 *
-	 * @see #expression
-	 */
-	@AliasFor("expression")
-	String value() default "";
+    /**
+     * Alias for {@link #expression}; only intended to be used if {@link #reason}
+     * and {@link #loadContext} are not specified.
+     *
+     * @see #expression
+     */
+    @AliasFor("expression")
+    String value() default "";
 
-	/**
-	 * The expression that will be evaluated to determine if the annotated test
-	 * class or test method is <em>enabled</em>.
-	 *
-	 * <p>If the expression evaluates to {@link Boolean#TRUE} or a {@link String}
-	 * equal to {@code "true"} (ignoring case), the test will be enabled.
-	 *
-	 * <p>Expressions can be any of the following.
-	 *
-	 * <ul>
-	 * <li>Spring Expression Language (SpEL) expression &mdash; for example:
-	 * <pre style="code">@EnabledIf("#{systemProperties['os.name'].toLowerCase().contains('mac')}")</pre>
-	 * <li>Placeholder for a property available in the Spring
-	 * {@link org.springframework.core.env.Environment Environment} &mdash; for example:
-	 * <pre style="code">@EnabledIf("${smoke.tests.enabled}")</pre>
-	 * <li>Text literal &mdash; for example:
-	 * <pre style="code">@EnabledIf("true")</pre>
-	 * </ul>
-	 *
-	 * <p>Note, however, that a <em>text literal</em> which is not the result of
-	 * dynamic resolution of a property placeholder is of zero practical value
-	 * since {@code @EnabledIf("false")} is equivalent to {@code @Disabled}
-	 * and {@code @EnabledIf("true")} is logically meaningless.
-	 *
-	 * @see #reason
-	 * @see #loadContext
-	 * @see #value
-	 */
-	@AliasFor("value")
-	String expression() default "";
+    /**
+     * The expression that will be evaluated to determine if the annotated test
+     * class or test method is <em>enabled</em>.
+     *
+     * <p>If the expression evaluates to {@link Boolean#TRUE} or a {@link String}
+     * equal to {@code "true"} (ignoring case), the test will be enabled.
+     *
+     * <p>Expressions can be any of the following.
+     *
+     * <ul>
+     * <li>Spring Expression Language (SpEL) expression &mdash; for example:
+     * <pre style="code">@EnabledIf("#{systemProperties['os.name'].toLowerCase().contains('mac')}")</pre>
+     * <li>Placeholder for a property available in the Spring
+     * {@link org.springframework.core.env.Environment Environment} &mdash; for example:
+     * <pre style="code">@EnabledIf("${smoke.tests.enabled}")</pre>
+     * <li>Text literal &mdash; for example:
+     * <pre style="code">@EnabledIf("true")</pre>
+     * </ul>
+     *
+     * <p>Note, however, that a <em>text literal</em> which is not the result of
+     * dynamic resolution of a property placeholder is of zero practical value
+     * since {@code @EnabledIf("false")} is equivalent to {@code @Disabled}
+     * and {@code @EnabledIf("true")} is logically meaningless.
+     *
+     * @see #reason
+     * @see #loadContext
+     * @see #value
+     */
+    @AliasFor("value")
+    String expression() default "";
 
-	/**
-	 * The reason this test is enabled.
-	 *
-	 * @see #expression
-	 */
-	String reason() default "";
+    /**
+     * The reason this test is enabled.
+     *
+     * @see #expression
+     */
+    String reason() default "";
 
-	/**
-	 * Whether the {@code ApplicationContext} associated with the current test
-	 * should be eagerly loaded in order to evaluate the {@link #expression}.
-	 *
-	 * <p>Defaults to {@code false} so that test application contexts are not
-	 * eagerly loaded unnecessarily. If an expression is based solely on system
-	 * properties or environment variables or does not interact with beans in
-	 * the test's application context, there is no need to load the context
-	 * prematurely since doing so would be a waste of time if the test ends up
-	 * being disabled.
-	 *
-	 * @see #expression
-	 */
-	boolean loadContext() default false;
+    /**
+     * Whether the {@code ApplicationContext} associated with the current test
+     * should be eagerly loaded in order to evaluate the {@link #expression}.
+     *
+     * <p>Defaults to {@code false} so that test application contexts are not
+     * eagerly loaded unnecessarily. If an expression is based solely on system
+     * properties or environment variables or does not interact with beans in
+     * the test's application context, there is no need to load the context
+     * prematurely since doing so would be a waste of time if the test ends up
+     * being disabled.
+     *
+     * @see #expression
+     */
+    boolean loadContext() default false;
 
 }

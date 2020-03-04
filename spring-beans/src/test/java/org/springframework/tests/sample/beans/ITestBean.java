@@ -29,55 +29,56 @@ import java.io.IOException;
  */
 public interface ITestBean extends AgeHolder {
 
-	String getName();
+    String getName();
 
-	void setName(String name);
+    void setName(String name);
 
-	ITestBean getSpouse();
+    ITestBean getSpouse();
 
-	void setSpouse(ITestBean spouse);
+    void setSpouse(ITestBean spouse);
 
-	ITestBean[] getSpouses();
+    ITestBean[] getSpouses();
 
-	String[] getStringArray();
+    String[] getStringArray();
 
-	void setStringArray(String[] stringArray);
+    void setStringArray(String[] stringArray);
 
-	Integer[][] getNestedIntegerArray();
+    Integer[][] getNestedIntegerArray();
 
-	Integer[] getSomeIntegerArray();
+    void setNestedIntegerArray(Integer[][] nestedIntegerArray);
 
-	void setSomeIntegerArray(Integer[] someIntegerArray);
+    Integer[] getSomeIntegerArray();
 
-	void setNestedIntegerArray(Integer[][] nestedIntegerArray);
+    void setSomeIntegerArray(Integer[] someIntegerArray);
 
-	int[] getSomeIntArray();
+    int[] getSomeIntArray();
 
-	void setSomeIntArray(int[] someIntArray);
+    void setSomeIntArray(int[] someIntArray);
 
-	int[][] getNestedIntArray();
+    int[][] getNestedIntArray();
 
-	void setNestedIntArray(int[][] someNestedArray);
+    void setNestedIntArray(int[][] someNestedArray);
 
-	/**
-	 * Throws a given (non-null) exception.
-	 */
-	void exceptional(Throwable t) throws Throwable;
+    /**
+     * Throws a given (non-null) exception.
+     */
+    void exceptional(Throwable t) throws Throwable;
 
-	Object returnsThis();
+    Object returnsThis();
 
-	INestedTestBean getDoctor();
+    INestedTestBean getDoctor();
 
-	INestedTestBean getLawyer();
+    INestedTestBean getLawyer();
 
-	IndexedTestBean getNestedIndexedBean();
+    IndexedTestBean getNestedIndexedBean();
 
-	/**
-	 * Increment the age by one.
-	 * @return the previous age
-	 */
-	int haveBirthday();
+    /**
+     * Increment the age by one.
+     *
+     * @return the previous age
+     */
+    int haveBirthday();
 
-	void unreliableFileOperation() throws IOException;
+    void unreliableFileOperation() throws IOException;
 
 }

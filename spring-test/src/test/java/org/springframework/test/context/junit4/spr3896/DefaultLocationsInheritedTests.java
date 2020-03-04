@@ -17,12 +17,12 @@
 package org.springframework.test.context.junit4.spr3896;
 
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.tests.sample.beans.Pet;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * JUnit 4 based integration test for verifying support for the
@@ -37,13 +37,13 @@ import static org.junit.Assert.*;
 @ContextConfiguration
 public class DefaultLocationsInheritedTests extends DefaultLocationsBaseTests {
 
-	@Autowired
-	private Pet pet;
+    @Autowired
+    private Pet pet;
 
 
-	@Test
-	public void verifyPetSetFromExtendedContextConfig() {
-		assertNotNull("The pet should have been autowired.", this.pet);
-		assertEquals("Fido", this.pet.getName());
-	}
+    @Test
+    public void verifyPetSetFromExtendedContextConfig() {
+        assertNotNull("The pet should have been autowired.", this.pet);
+        assertEquals("Fido", this.pet.getName());
+    }
 }

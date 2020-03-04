@@ -16,13 +16,13 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.BodyContent;
-import javax.servlet.jsp.tagext.BodyTag;
-
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.util.TagUtils;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.BodyContent;
+import javax.servlet.jsp.tagext.BodyTag;
 
 /**
  * The {@code <option>} tag renders a single HTML 'option'. Sets 'selected' as
@@ -199,203 +199,199 @@ import org.springframework.web.util.TagUtils;
 @SuppressWarnings("serial")
 public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
-	/**
-	 * The name of the JSP variable used to expose the value for this tag.
-	 */
-	public static final String VALUE_VARIABLE_NAME = "value";
+    /**
+     * The name of the JSP variable used to expose the value for this tag.
+     */
+    public static final String VALUE_VARIABLE_NAME = "value";
 
-	/**
-	 * The name of the JSP variable used to expose the display value for this tag.
-	 */
-	public static final String DISPLAY_VALUE_VARIABLE_NAME = "displayValue";
+    /**
+     * The name of the JSP variable used to expose the display value for this tag.
+     */
+    public static final String DISPLAY_VALUE_VARIABLE_NAME = "displayValue";
 
-	/**
-	 * The name of the '{@code selected}' attribute.
-	 */
-	private static final String SELECTED_ATTRIBUTE = "selected";
+    /**
+     * The name of the '{@code selected}' attribute.
+     */
+    private static final String SELECTED_ATTRIBUTE = "selected";
 
-	/**
-	 * The name of the '{@code value}' attribute.
-	 */
-	private static final String VALUE_ATTRIBUTE = VALUE_VARIABLE_NAME;
+    /**
+     * The name of the '{@code value}' attribute.
+     */
+    private static final String VALUE_ATTRIBUTE = VALUE_VARIABLE_NAME;
 
-	/**
-	 * The name of the '{@code disabled}' attribute.
-	 */
-	private static final String DISABLED_ATTRIBUTE = "disabled";
-
-
-	/**
-	 * The 'value' attribute of the rendered HTML {@code <option>} tag.
-	 */
-	@Nullable
-	private Object value;
-
-	/**
-	 * The text body of the rendered HTML {@code <option>} tag.
-	 */
-	@Nullable
-	private String label;
-
-	@Nullable
-	private Object oldValue;
-
-	@Nullable
-	private Object oldDisplayValue;
-
-	private boolean disabled;
+    /**
+     * The name of the '{@code disabled}' attribute.
+     */
+    private static final String DISABLED_ATTRIBUTE = "disabled";
 
 
-	/**
-	 * Set the 'value' attribute of the rendered HTML {@code <option>} tag.
-	 */
-	public void setValue(Object value) {
-		this.value = value;
-	}
+    /**
+     * The 'value' attribute of the rendered HTML {@code <option>} tag.
+     */
+    @Nullable
+    private Object value;
 
-	/**
-	 * Get the 'value' attribute of the rendered HTML {@code <option>} tag.
-	 */
-	@Nullable
-	protected Object getValue() {
-		return this.value;
-	}
+    /**
+     * The text body of the rendered HTML {@code <option>} tag.
+     */
+    @Nullable
+    private String label;
 
-	/**
-	 * Set the value of the '{@code disabled}' attribute.
-	 */
-	public void setDisabled(boolean disabled) {
-		this.disabled = disabled;
-	}
+    @Nullable
+    private Object oldValue;
 
-	/**
-	 * Get the value of the '{@code disabled}' attribute.
-	 */
-	protected boolean isDisabled() {
-		return this.disabled;
-	}
+    @Nullable
+    private Object oldDisplayValue;
 
-	/**
-	 * Set the text body of the rendered HTML {@code <option>} tag.
-	 * <p>May be a runtime expression.
-	 */
-	public void setLabel(String label) {
-		this.label = label;
-	}
+    private boolean disabled;
 
-	/**
-	 * Get the text body of the rendered HTML {@code <option>} tag.
-	 */
-	@Nullable
-	protected String getLabel() {
-		return this.label;
-	}
+    /**
+     * Get the 'value' attribute of the rendered HTML {@code <option>} tag.
+     */
+    @Nullable
+    protected Object getValue() {
+        return this.value;
+    }
 
+    /**
+     * Set the 'value' attribute of the rendered HTML {@code <option>} tag.
+     */
+    public void setValue(Object value) {
+        this.value = value;
+    }
 
-	@Override
-	protected void renderDefaultContent(TagWriter tagWriter) throws JspException {
-		Object value = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
-		String label = getLabelValue(value);
-		renderOption(value, label, tagWriter);
-	}
+    /**
+     * Get the value of the '{@code disabled}' attribute.
+     */
+    protected boolean isDisabled() {
+        return this.disabled;
+    }
 
-	@Override
-	protected void renderFromBodyContent(BodyContent bodyContent, TagWriter tagWriter) throws JspException {
-		Object value = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
-		String label = bodyContent.getString();
-		renderOption(value, label, tagWriter);
-	}
+    /**
+     * Set the value of the '{@code disabled}' attribute.
+     */
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
 
-	/**
-	 * Make sure we are under a '{@code select}' tag before proceeding.
-	 */
-	@Override
-	protected void onWriteTagContent() {
-		assertUnderSelectTag();
-	}
+    /**
+     * Get the text body of the rendered HTML {@code <option>} tag.
+     */
+    @Nullable
+    protected String getLabel() {
+        return this.label;
+    }
 
-	@Override
-	protected void exposeAttributes() throws JspException {
-		Object value = resolveValue();
-		this.oldValue = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
-		this.pageContext.setAttribute(VALUE_VARIABLE_NAME, value);
-		this.oldDisplayValue = this.pageContext.getAttribute(DISPLAY_VALUE_VARIABLE_NAME);
-		this.pageContext.setAttribute(DISPLAY_VALUE_VARIABLE_NAME, getDisplayString(value, getBindStatus().getEditor()));
-	}
+    /**
+     * Set the text body of the rendered HTML {@code <option>} tag.
+     * <p>May be a runtime expression.
+     */
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
-	@Override
-	protected BindStatus getBindStatus() {
-		return (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
-	}
+    @Override
+    protected void renderDefaultContent(TagWriter tagWriter) throws JspException {
+        Object value = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
+        String label = getLabelValue(value);
+        renderOption(value, label, tagWriter);
+    }
 
-	@Override
-	protected void removeAttributes() {
-		if (this.oldValue != null) {
-			this.pageContext.setAttribute(VALUE_ATTRIBUTE, this.oldValue);
-			this.oldValue = null;
-		}
-		else {
-			this.pageContext.removeAttribute(VALUE_VARIABLE_NAME);
-		}
+    @Override
+    protected void renderFromBodyContent(BodyContent bodyContent, TagWriter tagWriter) throws JspException {
+        Object value = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
+        String label = bodyContent.getString();
+        renderOption(value, label, tagWriter);
+    }
 
-		if (this.oldDisplayValue != null) {
-			this.pageContext.setAttribute(DISPLAY_VALUE_VARIABLE_NAME, this.oldDisplayValue);
-			this.oldDisplayValue = null;
-		}
-		else {
-			this.pageContext.removeAttribute(DISPLAY_VALUE_VARIABLE_NAME);
-		}
-	}
+    /**
+     * Make sure we are under a '{@code select}' tag before proceeding.
+     */
+    @Override
+    protected void onWriteTagContent() {
+        assertUnderSelectTag();
+    }
 
-	private void renderOption(Object value, String label, TagWriter tagWriter) throws JspException {
-		tagWriter.startTag("option");
-		writeOptionalAttribute(tagWriter, "id", resolveId());
-		writeOptionalAttributes(tagWriter);
-		String renderedValue = getDisplayString(value, getBindStatus().getEditor());
-		renderedValue = processFieldValue(getSelectTag().getName(), renderedValue, "option");
-		tagWriter.writeAttribute(VALUE_ATTRIBUTE, renderedValue);
-		if (isSelected(value)) {
-			tagWriter.writeAttribute(SELECTED_ATTRIBUTE, SELECTED_ATTRIBUTE);
-		}
-		if (isDisabled()) {
-			tagWriter.writeAttribute(DISABLED_ATTRIBUTE, "disabled");
-		}
-		tagWriter.appendValue(label);
-		tagWriter.endTag();
-	}
+    @Override
+    protected void exposeAttributes() throws JspException {
+        Object value = resolveValue();
+        this.oldValue = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
+        this.pageContext.setAttribute(VALUE_VARIABLE_NAME, value);
+        this.oldDisplayValue = this.pageContext.getAttribute(DISPLAY_VALUE_VARIABLE_NAME);
+        this.pageContext.setAttribute(DISPLAY_VALUE_VARIABLE_NAME, getDisplayString(value, getBindStatus().getEditor()));
+    }
 
-	@Override
-	protected String autogenerateId() throws JspException {
-		return null;
-	}
+    @Override
+    protected BindStatus getBindStatus() {
+        return (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
+    }
 
-	/**
-	 * Return the value of the label for this '{@code option}' element.
-	 * <p>If the {@link #setLabel label} property is set then the resolved value
-	 * of that property is used, otherwise the value of the {@code resolvedValue}
-	 * argument is used.
-	 */
-	private String getLabelValue(Object resolvedValue) throws JspException {
-		String label = getLabel();
-		Object labelObj = (label == null ? resolvedValue : evaluate("label", label));
-		return getDisplayString(labelObj, getBindStatus().getEditor());
-	}
+    @Override
+    protected void removeAttributes() {
+        if (this.oldValue != null) {
+            this.pageContext.setAttribute(VALUE_ATTRIBUTE, this.oldValue);
+            this.oldValue = null;
+        } else {
+            this.pageContext.removeAttribute(VALUE_VARIABLE_NAME);
+        }
 
-	private void assertUnderSelectTag() {
-		TagUtils.assertHasAncestorOfType(this, SelectTag.class, "option", "select");
-	}
+        if (this.oldDisplayValue != null) {
+            this.pageContext.setAttribute(DISPLAY_VALUE_VARIABLE_NAME, this.oldDisplayValue);
+            this.oldDisplayValue = null;
+        } else {
+            this.pageContext.removeAttribute(DISPLAY_VALUE_VARIABLE_NAME);
+        }
+    }
 
-	private SelectTag getSelectTag() {
-		return (SelectTag) findAncestorWithClass(this, SelectTag.class);
-	}
+    private void renderOption(Object value, String label, TagWriter tagWriter) throws JspException {
+        tagWriter.startTag("option");
+        writeOptionalAttribute(tagWriter, "id", resolveId());
+        writeOptionalAttributes(tagWriter);
+        String renderedValue = getDisplayString(value, getBindStatus().getEditor());
+        renderedValue = processFieldValue(getSelectTag().getName(), renderedValue, "option");
+        tagWriter.writeAttribute(VALUE_ATTRIBUTE, renderedValue);
+        if (isSelected(value)) {
+            tagWriter.writeAttribute(SELECTED_ATTRIBUTE, SELECTED_ATTRIBUTE);
+        }
+        if (isDisabled()) {
+            tagWriter.writeAttribute(DISABLED_ATTRIBUTE, "disabled");
+        }
+        tagWriter.appendValue(label);
+        tagWriter.endTag();
+    }
 
-	private boolean isSelected(Object resolvedValue) {
-		return SelectedValueComparator.isSelected(getBindStatus(), resolvedValue);
-	}
+    @Override
+    protected String autogenerateId() throws JspException {
+        return null;
+    }
 
-	@Nullable
-	private Object resolveValue() throws JspException {
-		return evaluate(VALUE_VARIABLE_NAME, getValue());
-	}
+    /**
+     * Return the value of the label for this '{@code option}' element.
+     * <p>If the {@link #setLabel label} property is set then the resolved value
+     * of that property is used, otherwise the value of the {@code resolvedValue}
+     * argument is used.
+     */
+    private String getLabelValue(Object resolvedValue) throws JspException {
+        String label = getLabel();
+        Object labelObj = (label == null ? resolvedValue : evaluate("label", label));
+        return getDisplayString(labelObj, getBindStatus().getEditor());
+    }
+
+    private void assertUnderSelectTag() {
+        TagUtils.assertHasAncestorOfType(this, SelectTag.class, "option", "select");
+    }
+
+    private SelectTag getSelectTag() {
+        return (SelectTag) findAncestorWithClass(this, SelectTag.class);
+    }
+
+    private boolean isSelected(Object resolvedValue) {
+        return SelectedValueComparator.isSelected(getBindStatus(), resolvedValue);
+    }
+
+    @Nullable
+    private Object resolveValue() throws JspException {
+        return evaluate(VALUE_VARIABLE_NAME, getValue());
+    }
 
 }

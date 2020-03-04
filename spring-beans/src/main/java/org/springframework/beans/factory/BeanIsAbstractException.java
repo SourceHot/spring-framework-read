@@ -21,18 +21,19 @@ package org.springframework.beans.factory;
  * a bean definition which has been marked as abstract.
  *
  * @author Juergen Hoeller
- * @since 1.1
  * @see org.springframework.beans.factory.support.AbstractBeanDefinition#setAbstract
+ * @since 1.1
  */
 @SuppressWarnings("serial")
 public class BeanIsAbstractException extends BeanCreationException {
 
-	/**
-	 * Create a new BeanIsAbstractException.
-	 * @param beanName the name of the bean requested
-	 */
-	public BeanIsAbstractException(String beanName) {
-		super(beanName, "Bean definition is abstract");
-	}
+    /**
+     * Create a new BeanIsAbstractException.
+     *
+     * @param beanName the name of the bean requested
+     */
+    public BeanIsAbstractException(String beanName) {
+        super(beanName, "Bean definition is abstract");
+    }
 
 }

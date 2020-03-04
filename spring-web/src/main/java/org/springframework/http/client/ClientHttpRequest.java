@@ -16,11 +16,11 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpRequest;
+
+import java.io.IOException;
 
 /**
  * Represents a client-side HTTP request.
@@ -30,16 +30,17 @@ import org.springframework.http.HttpRequest;
  * receiving a {@link ClientHttpResponse} which can be read from.
  *
  * @author Arjen Poutsma
- * @since 3.0
  * @see ClientHttpRequestFactory#createRequest(java.net.URI, HttpMethod)
+ * @since 3.0
  */
 public interface ClientHttpRequest extends HttpRequest, HttpOutputMessage {
 
-	/**
-	 * Execute this request, resulting in a {@link ClientHttpResponse} that can be read.
-	 * @return the response result of the execution
-	 * @throws IOException in case of I/O errors
-	 */
-	ClientHttpResponse execute() throws IOException;
+    /**
+     * Execute this request, resulting in a {@link ClientHttpResponse} that can be read.
+     *
+     * @return the response result of the execution
+     * @throws IOException in case of I/O errors
+     */
+    ClientHttpResponse execute() throws IOException;
 
 }

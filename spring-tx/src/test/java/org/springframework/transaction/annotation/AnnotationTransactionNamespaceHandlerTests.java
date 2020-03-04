@@ -16,16 +16,8 @@
 
 package org.springframework.transaction.annotation;
 
-import java.lang.management.ManagementFactory;
-import java.util.Collection;
-import java.util.Map;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import org.junit.After;
 import org.junit.Test;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -36,7 +28,15 @@ import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.config.TransactionManagementConfigUtils;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
 
-import static org.junit.Assert.*;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import java.lang.management.ManagementFactory;
+import java.util.Collection;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -45,111 +45,110 @@ import static org.junit.Assert.*;
  */
 public class AnnotationTransactionNamespaceHandlerTests {
 
-	private final ConfigurableApplicationContext context = new ClassPathXmlApplicationContext(
-			"org/springframework/transaction/annotation/annotationTransactionNamespaceHandlerTests.xml");
+    private final ConfigurableApplicationContext context = new ClassPathXmlApplicationContext(
+            "org/springframework/transaction/annotation/annotationTransactionNamespaceHandlerTests.xml");
 
-	@After
-	public void tearDown() {
-		this.context.close();
-	}
+    @After
+    public void tearDown() {
+        this.context.close();
+    }
 
-	@Test
-	public void isProxy() throws Exception {
-		TransactionalTestBean bean = getTestBean();
-		assertTrue("testBean is not a proxy", AopUtils.isAopProxy(bean));
-		Map<String, Object> services = this.context.getBeansWithAnnotation(Service.class);
-		assertTrue("Stereotype annotation not visible", services.containsKey("testBean"));
-	}
+    @Test
+    public void isProxy() throws Exception {
+        TransactionalTestBean bean = getTestBean();
+        assertTrue("testBean is not a proxy", AopUtils.isAopProxy(bean));
+        Map<String, Object> services = this.context.getBeansWithAnnotation(Service.class);
+        assertTrue("Stereotype annotation not visible", services.containsKey("testBean"));
+    }
 
-	@Test
-	public void invokeTransactional() throws Exception {
-		TransactionalTestBean testBean = getTestBean();
-		CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
+    @Test
+    public void invokeTransactional() throws Exception {
+        TransactionalTestBean testBean = getTestBean();
+        CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
 
-		// try with transactional
-		assertEquals("Should not have any started transactions", 0, ptm.begun);
-		testBean.findAllFoos();
-		assertEquals("Should have 1 started transaction", 1, ptm.begun);
-		assertEquals("Should have 1 committed transaction", 1, ptm.commits);
+        // try with transactional
+        assertEquals("Should not have any started transactions", 0, ptm.begun);
+        testBean.findAllFoos();
+        assertEquals("Should have 1 started transaction", 1, ptm.begun);
+        assertEquals("Should have 1 committed transaction", 1, ptm.commits);
 
-		// try with non-transaction
-		testBean.doSomething();
-		assertEquals("Should not have started another transaction", 1, ptm.begun);
+        // try with non-transaction
+        testBean.doSomething();
+        assertEquals("Should not have started another transaction", 1, ptm.begun);
 
-		// try with exceptional
-		try {
-			testBean.exceptional(new IllegalArgumentException("foo"));
-			fail("Should NEVER get here");
-		}
-		catch (Throwable throwable) {
-			assertEquals("Should have another started transaction", 2, ptm.begun);
-			assertEquals("Should have 1 rolled back transaction", 1, ptm.rollbacks);
-		}
-	}
+        // try with exceptional
+        try {
+            testBean.exceptional(new IllegalArgumentException("foo"));
+            fail("Should NEVER get here");
+        } catch (Throwable throwable) {
+            assertEquals("Should have another started transaction", 2, ptm.begun);
+            assertEquals("Should have 1 rolled back transaction", 1, ptm.rollbacks);
+        }
+    }
 
-	@Test
-	public void nonPublicMethodsNotAdvised() {
-		TransactionalTestBean testBean = getTestBean();
-		CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
+    @Test
+    public void nonPublicMethodsNotAdvised() {
+        TransactionalTestBean testBean = getTestBean();
+        CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
 
-		assertEquals("Should not have any started transactions", 0, ptm.begun);
-		testBean.annotationsOnProtectedAreIgnored();
-		assertEquals("Should not have any started transactions", 0, ptm.begun);
-	}
+        assertEquals("Should not have any started transactions", 0, ptm.begun);
+        testBean.annotationsOnProtectedAreIgnored();
+        assertEquals("Should not have any started transactions", 0, ptm.begun);
+    }
 
-	@Test
-	public void mBeanExportAlsoWorks() throws Exception {
-		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-		assertEquals("done",
-				server.invoke(ObjectName.getInstance("test:type=TestBean"), "doSomething", new Object[0], new String[0]));
-	}
+    @Test
+    public void mBeanExportAlsoWorks() throws Exception {
+        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+        assertEquals("done",
+                server.invoke(ObjectName.getInstance("test:type=TestBean"), "doSomething", new Object[0], new String[0]));
+    }
 
-	@Test
-	public void transactionalEventListenerRegisteredProperly() {
-		assertTrue(this.context.containsBean(TransactionManagementConfigUtils
-				.TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME));
-		assertEquals(1, this.context.getBeansOfType(TransactionalEventListenerFactory.class).size());
-	}
+    @Test
+    public void transactionalEventListenerRegisteredProperly() {
+        assertTrue(this.context.containsBean(TransactionManagementConfigUtils
+                .TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME));
+        assertEquals(1, this.context.getBeansOfType(TransactionalEventListenerFactory.class).size());
+    }
 
-	private TransactionalTestBean getTestBean() {
-		return (TransactionalTestBean) context.getBean("testBean");
-	}
+    private TransactionalTestBean getTestBean() {
+        return (TransactionalTestBean) context.getBean("testBean");
+    }
 
 
-	@Service
-	@ManagedResource("test:type=TestBean")
-	public static class TransactionalTestBean {
+    @Service
+    @ManagedResource("test:type=TestBean")
+    public static class TransactionalTestBean {
 
-		@Transactional(readOnly = true)
-		public Collection<?> findAllFoos() {
-			return null;
-		}
+        @Transactional(readOnly = true)
+        public Collection<?> findAllFoos() {
+            return null;
+        }
 
-		@Transactional
-		public void saveFoo() {
-		}
+        @Transactional
+        public void saveFoo() {
+        }
 
-		@Transactional("qualifiedTransactionManager")
-		public void saveQualifiedFoo() {
-		}
+        @Transactional("qualifiedTransactionManager")
+        public void saveQualifiedFoo() {
+        }
 
-		@Transactional(transactionManager = "qualifiedTransactionManager")
-		public void saveQualifiedFooWithAttributeAlias() {
-		}
+        @Transactional(transactionManager = "qualifiedTransactionManager")
+        public void saveQualifiedFooWithAttributeAlias() {
+        }
 
-		@Transactional
-		public void exceptional(Throwable t) throws Throwable {
-			throw t;
-		}
+        @Transactional
+        public void exceptional(Throwable t) throws Throwable {
+            throw t;
+        }
 
-		@ManagedOperation
-		public String doSomething() {
-			return "done";
-		}
+        @ManagedOperation
+        public String doSomething() {
+            return "done";
+        }
 
-		@Transactional
-		protected void annotationsOnProtectedAreIgnored() {
-		}
-	}
+        @Transactional
+        protected void annotationsOnProtectedAreIgnored() {
+        }
+    }
 
 }

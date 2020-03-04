@@ -40,9 +40,10 @@ public interface PropertyEditorRegistrar {
      * <p>It is expected that implementations will create brand new
      * {@code PropertyEditors} instances for each invocation of this
      * method (since {@code PropertyEditors} are not threadsafe).
+     * <p>
+     * 属性编辑器注册方法
      *
-	 * 属性编辑器注册方法
-	 * @param registry the {@code PropertyEditorRegistry} to register the
+     * @param registry the {@code PropertyEditorRegistry} to register the
      *                 custom {@code PropertyEditors} with
      */
     void registerCustomEditors(PropertyEditorRegistry registry);

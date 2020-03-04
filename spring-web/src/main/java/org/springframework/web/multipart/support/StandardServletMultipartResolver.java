@@ -16,15 +16,14 @@
 
 package org.springframework.web.multipart.support;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
-
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 
 /**
  * Standard implementation of the {@link MultipartResolver} interface,
@@ -43,9 +42,9 @@ import org.springframework.web.multipart.MultipartResolver;
  *
  * <pre class="code">
  * public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
- *	 // ...
- *	 &#064;Override
- *	 protected void customizeRegistration(ServletRegistration.Dynamic registration) {
+ * 	 // ...
+ * 	 &#064;Override
+ * 	 protected void customizeRegistration(ServletRegistration.Dynamic registration) {
  *     // Optionally also set maxFileSize, maxRequestSize, fileSizeThreshold
  *     registration.setMultipartConfig(new MultipartConfigElement("/tmp"));
  *   }
@@ -53,57 +52,57 @@ import org.springframework.web.multipart.MultipartResolver;
  * </pre>
  *
  * @author Juergen Hoeller
- * @since 3.1
  * @see #setResolveLazily
  * @see HttpServletRequest#getParts()
  * @see org.springframework.web.multipart.commons.CommonsMultipartResolver
+ * @since 3.1
  */
 public class StandardServletMultipartResolver implements MultipartResolver {
 
-	private boolean resolveLazily = false;
+    private boolean resolveLazily = false;
 
 
-	/**
-	 * Set whether to resolve the multipart request lazily at the time of
-	 * file or parameter access.
-	 * <p>Default is "false", resolving the multipart elements immediately, throwing
-	 * corresponding exceptions at the time of the {@link #resolveMultipart} call.
-	 * Switch this to "true" for lazy multipart parsing, throwing parse exceptions
-	 * once the application attempts to obtain multipart files or parameters.
-	 * @since 3.2.9
-	 */
-	public void setResolveLazily(boolean resolveLazily) {
-		this.resolveLazily = resolveLazily;
-	}
+    /**
+     * Set whether to resolve the multipart request lazily at the time of
+     * file or parameter access.
+     * <p>Default is "false", resolving the multipart elements immediately, throwing
+     * corresponding exceptions at the time of the {@link #resolveMultipart} call.
+     * Switch this to "true" for lazy multipart parsing, throwing parse exceptions
+     * once the application attempts to obtain multipart files or parameters.
+     *
+     * @since 3.2.9
+     */
+    public void setResolveLazily(boolean resolveLazily) {
+        this.resolveLazily = resolveLazily;
+    }
 
 
-	@Override
-	public boolean isMultipart(HttpServletRequest request) {
-		return StringUtils.startsWithIgnoreCase(request.getContentType(), "multipart/");
-	}
+    @Override
+    public boolean isMultipart(HttpServletRequest request) {
+        return StringUtils.startsWithIgnoreCase(request.getContentType(), "multipart/");
+    }
 
-	@Override
-	public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
-		return new StandardMultipartHttpServletRequest(request, this.resolveLazily);
-	}
+    @Override
+    public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
+        return new StandardMultipartHttpServletRequest(request, this.resolveLazily);
+    }
 
-	@Override
-	public void cleanupMultipart(MultipartHttpServletRequest request) {
-		if (!(request instanceof AbstractMultipartHttpServletRequest) ||
-				((AbstractMultipartHttpServletRequest) request).isResolved()) {
-			// To be on the safe side: explicitly delete the parts,
-			// but only actual file parts (for Resin compatibility)
-			try {
-				for (Part part : request.getParts()) {
-					if (request.getFile(part.getName()) != null) {
-						part.delete();
-					}
-				}
-			}
-			catch (Throwable ex) {
-				LogFactory.getLog(getClass()).warn("Failed to perform cleanup of multipart items", ex);
-			}
-		}
-	}
+    @Override
+    public void cleanupMultipart(MultipartHttpServletRequest request) {
+        if (!(request instanceof AbstractMultipartHttpServletRequest) ||
+                ((AbstractMultipartHttpServletRequest) request).isResolved()) {
+            // To be on the safe side: explicitly delete the parts,
+            // but only actual file parts (for Resin compatibility)
+            try {
+                for (Part part : request.getParts()) {
+                    if (request.getFile(part.getName()) != null) {
+                        part.delete();
+                    }
+                }
+            } catch (Throwable ex) {
+                LogFactory.getLog(getClass()).warn("Failed to perform cleanup of multipart items", ex);
+            }
+        }
+    }
 
 }

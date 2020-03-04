@@ -16,20 +16,7 @@
 
 package org.springframework.core.codec;
 
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Consumer;
-
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
@@ -42,6 +29,18 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
+import reactor.core.publisher.Flux;
+
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
 
 /**
  * Decode from a data buffer stream to a {@code String} stream. Before decoding, this decoder
@@ -55,312 +54,306 @@ import org.springframework.util.MimeTypeUtils;
  * @author Brian Clozel
  * @author Arjen Poutsma
  * @author Mark Paluch
- * @since 5.0
  * @see CharSequenceEncoder
+ * @since 5.0
  */
 public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
-	private static final DataBuffer END_FRAME = new DefaultDataBufferFactory().wrap(new byte[0]);
+    /**
+     * The default charset to use, i.e. "UTF-8".
+     */
+    public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+    /**
+     * The default delimiter strings to use, i.e. {@code \r\n} and {@code \n}.
+     */
+    public static final List<String> DEFAULT_DELIMITERS = Arrays.asList("\r\n", "\n");
+    private static final DataBuffer END_FRAME = new DefaultDataBufferFactory().wrap(new byte[0]);
+    private final List<String> delimiters;
 
-	/** The default charset to use, i.e. "UTF-8". */
-	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+    private final boolean stripDelimiter;
 
-	/** The default delimiter strings to use, i.e. {@code \r\n} and {@code \n}. */
-	public static final List<String> DEFAULT_DELIMITERS = Arrays.asList("\r\n", "\n");
-
-
-	private final List<String> delimiters;
-
-	private final boolean stripDelimiter;
-
-	private final ConcurrentMap<Charset, List<byte[]>> delimitersCache = new ConcurrentHashMap<>();
-
-
-	private StringDecoder(List<String> delimiters, boolean stripDelimiter, MimeType... mimeTypes) {
-		super(mimeTypes);
-		Assert.notEmpty(delimiters, "'delimiters' must not be empty");
-		this.delimiters = new ArrayList<>(delimiters);
-		this.stripDelimiter = stripDelimiter;
-	}
+    private final ConcurrentMap<Charset, List<byte[]>> delimitersCache = new ConcurrentHashMap<>();
 
 
-	@Override
-	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		return (elementType.resolve() == String.class && super.canDecode(elementType, mimeType));
-	}
+    private StringDecoder(List<String> delimiters, boolean stripDelimiter, MimeType... mimeTypes) {
+        super(mimeTypes);
+        Assert.notEmpty(delimiters, "'delimiters' must not be empty");
+        this.delimiters = new ArrayList<>(delimiters);
+        this.stripDelimiter = stripDelimiter;
+    }
 
-	@Override
-	public Flux<String> decode(Publisher<DataBuffer> input, ResolvableType elementType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+    /**
+     * Find the given delimiter in the given data buffer.
+     *
+     * @return the index of the delimiter, or -1 if not found.
+     */
+    private static int indexOf(DataBuffer buffer, byte[] delimiter) {
+        for (int i = buffer.readPosition(); i < buffer.writePosition(); i++) {
+            int bufferPos = i;
+            int delimiterPos = 0;
+            while (delimiterPos < delimiter.length) {
+                if (buffer.getByte(bufferPos) != delimiter[delimiterPos]) {
+                    break;
+                } else {
+                    bufferPos++;
+                    boolean endOfBuffer = bufferPos == buffer.writePosition();
+                    boolean endOfDelimiter = delimiterPos == delimiter.length - 1;
+                    if (endOfBuffer && !endOfDelimiter) {
+                        return -1;
+                    }
+                }
+                delimiterPos++;
+            }
+            if (delimiterPos == delimiter.length) {
+                return i - buffer.readPosition();
+            }
+        }
+        return -1;
+    }
 
-		List<byte[]> delimiterBytes = getDelimiterBytes(mimeType);
+    /**
+     * Join the given list of buffers into a single buffer.
+     */
+    private static DataBuffer joinUntilEndFrame(List<DataBuffer> dataBuffers) {
+        if (!dataBuffers.isEmpty()) {
+            int lastIdx = dataBuffers.size() - 1;
+            if (dataBuffers.get(lastIdx) == END_FRAME) {
+                dataBuffers.remove(lastIdx);
+            }
+        }
+        return dataBuffers.get(0).factory().join(dataBuffers);
+    }
 
-		Flux<DataBuffer> inputFlux = Flux.defer(() -> {
-			if (getMaxInMemorySize() != -1) {
+    private static Charset getCharset(@Nullable MimeType mimeType) {
+        if (mimeType != null && mimeType.getCharset() != null) {
+            return mimeType.getCharset();
+        } else {
+            return DEFAULT_CHARSET;
+        }
+    }
 
-				// Passing limiter into endFrameAfterDelimiter helps to ensure that in case of one DataBuffer
-				// containing multiple lines, the limit is checked and raised  immediately without accumulating
-				// subsequent lines. This is necessary because concatMapIterable doesn't respect doOnDiscard.
-				// When reactor-core#1925 is resolved, we could replace bufferUntil with:
+    /**
+     * Create a {@code StringDecoder} for {@code "text/plain"}.
+     *
+     * @param ignored ignored
+     * @deprecated as of Spring 5.0.4, in favor of {@link #textPlainOnly()} or
+     * {@link #textPlainOnly(List, boolean)}
+     */
+    @Deprecated
+    public static StringDecoder textPlainOnly(boolean ignored) {
+        return textPlainOnly();
+    }
 
-				//	.windowUntil(buffer -> buffer instanceof EndFrameBuffer)
-				//	.concatMap(fluxes -> fluxes.collect(() -> new LimitedDataBufferList(getMaxInMemorySize()), LimitedDataBufferList::add))
+    /**
+     * Create a {@code StringDecoder} for {@code "text/plain"}.
+     */
+    public static StringDecoder textPlainOnly() {
+        return textPlainOnly(DEFAULT_DELIMITERS, true);
+    }
 
-				LimitedDataBufferList limiter = new LimitedDataBufferList(getMaxInMemorySize());
+    /**
+     * Create a {@code StringDecoder} for {@code "text/plain"}.
+     *
+     * @param delimiters     delimiter strings to use to split the input stream
+     * @param stripDelimiter whether to remove delimiters from the resulting
+     *                       input strings
+     */
+    public static StringDecoder textPlainOnly(List<String> delimiters, boolean stripDelimiter) {
+        return new StringDecoder(delimiters, stripDelimiter, new MimeType("text", "plain", DEFAULT_CHARSET));
+    }
 
-				return Flux.from(input)
-						.concatMapIterable(buffer -> splitOnDelimiter(buffer, delimiterBytes, limiter))
-						.bufferUntil(buffer -> buffer == END_FRAME)
-						.map(StringDecoder::joinUntilEndFrame)
-						.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
-			}
-			else {
+    /**
+     * Create a {@code StringDecoder} that supports all MIME types.
+     *
+     * @param ignored ignored
+     * @deprecated as of Spring 5.0.4, in favor of {@link #allMimeTypes()} or
+     * {@link #allMimeTypes(List, boolean)}
+     */
+    @Deprecated
+    public static StringDecoder allMimeTypes(boolean ignored) {
+        return allMimeTypes();
+    }
 
-				// When the decoder is unlimited (-1), concatMapIterable will cache buffers that may not
-				// be released if cancel is signalled before they are turned into String lines
-				// (see test maxInMemoryLimitReleasesUnprocessedLinesWhenUnlimited).
-				// When reactor-core#1925 is resolved, the workaround can be removed and the entire
-				// else clause possibly dropped.
+    /**
+     * Create a {@code StringDecoder} that supports all MIME types.
+     */
+    public static StringDecoder allMimeTypes() {
+        return allMimeTypes(DEFAULT_DELIMITERS, true);
+    }
 
-				ConcatMapIterableDiscardWorkaroundCache cache = new ConcatMapIterableDiscardWorkaroundCache();
+    /**
+     * Create a {@code StringDecoder} that supports all MIME types.
+     *
+     * @param delimiters     delimiter strings to use to split the input stream
+     * @param stripDelimiter whether to remove delimiters from the resulting
+     *                       input strings
+     */
+    public static StringDecoder allMimeTypes(List<String> delimiters, boolean stripDelimiter) {
+        return new StringDecoder(delimiters, stripDelimiter,
+                new MimeType("text", "plain", DEFAULT_CHARSET), MimeTypeUtils.ALL);
+    }
 
-				return Flux.from(input)
-						.concatMapIterable(buffer -> cache.addAll(splitOnDelimiter(buffer, delimiterBytes, null)))
-						.doOnNext(cache)
-						.doOnCancel(cache)
-						.bufferUntil(buffer -> buffer == END_FRAME)
-						.map(StringDecoder::joinUntilEndFrame)
-						.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
-			}
-		});
+    @Override
+    public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
+        return (elementType.resolve() == String.class && super.canDecode(elementType, mimeType));
+    }
 
-		return super.decode(inputFlux, elementType, mimeType, hints);
-	}
+    @Override
+    public Flux<String> decode(Publisher<DataBuffer> input, ResolvableType elementType,
+                               @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-	private List<byte[]> getDelimiterBytes(@Nullable MimeType mimeType) {
-		return this.delimitersCache.computeIfAbsent(getCharset(mimeType), charset -> {
-			List<byte[]> list = new ArrayList<>();
-			for (String delimiter : this.delimiters) {
-				byte[] bytes = delimiter.getBytes(charset);
-				list.add(bytes);
-			}
-			return list;
-		});
-	}
+        List<byte[]> delimiterBytes = getDelimiterBytes(mimeType);
 
-	/**
-	 * Split the given data buffer on delimiter boundaries.
-	 * The returned Flux contains an {@link #END_FRAME} buffer after each delimiter.
-	 */
-	private List<DataBuffer> splitOnDelimiter(
-			DataBuffer buffer, List<byte[]> delimiterBytes, @Nullable LimitedDataBufferList limiter) {
+        Flux<DataBuffer> inputFlux = Flux.defer(() -> {
+            if (getMaxInMemorySize() != -1) {
 
-		List<DataBuffer> frames = new ArrayList<>();
-		try {
-			do {
-				int length = Integer.MAX_VALUE;
-				byte[] matchingDelimiter = null;
-				for (byte[] delimiter : delimiterBytes) {
-					int index = indexOf(buffer, delimiter);
-					if (index >= 0 && index < length) {
-						length = index;
-						matchingDelimiter = delimiter;
-					}
-				}
-				DataBuffer frame;
-				int readPosition = buffer.readPosition();
-				if (matchingDelimiter != null) {
-					frame = this.stripDelimiter ?
-							buffer.slice(readPosition, length) :
-							buffer.slice(readPosition, length + matchingDelimiter.length);
-					buffer.readPosition(readPosition + length + matchingDelimiter.length);
-					frames.add(DataBufferUtils.retain(frame));
-					frames.add(END_FRAME);
-					if (limiter != null) {
-						limiter.add(frame); // enforce the limit
-						limiter.clear();
-					}
-				}
-				else {
-					frame = buffer.slice(readPosition, buffer.readableByteCount());
-					buffer.readPosition(readPosition + buffer.readableByteCount());
-					frames.add(DataBufferUtils.retain(frame));
-					if (limiter != null) {
-						limiter.add(frame);
-					}
-				}
-			}
-			while (buffer.readableByteCount() > 0);
-		}
-		catch (DataBufferLimitException ex) {
-			if (limiter != null) {
-				limiter.releaseAndClear();
-			}
-			throw ex;
-		}
-		catch (Throwable ex) {
-			for (DataBuffer frame : frames) {
-				DataBufferUtils.release(frame);
-			}
-			throw ex;
-		}
-		finally {
-			DataBufferUtils.release(buffer);
-		}
-		return frames;
-	}
+                // Passing limiter into endFrameAfterDelimiter helps to ensure that in case of one DataBuffer
+                // containing multiple lines, the limit is checked and raised  immediately without accumulating
+                // subsequent lines. This is necessary because concatMapIterable doesn't respect doOnDiscard.
+                // When reactor-core#1925 is resolved, we could replace bufferUntil with:
 
-	/**
-	 * Find the given delimiter in the given data buffer.
-	 * @return the index of the delimiter, or -1 if not found.
-	 */
-	private static int indexOf(DataBuffer buffer, byte[] delimiter) {
-		for (int i = buffer.readPosition(); i < buffer.writePosition(); i++) {
-			int bufferPos = i;
-			int delimiterPos = 0;
-			while (delimiterPos < delimiter.length) {
-				if (buffer.getByte(bufferPos) != delimiter[delimiterPos]) {
-					break;
-				}
-				else {
-					bufferPos++;
-					boolean endOfBuffer = bufferPos == buffer.writePosition();
-					boolean endOfDelimiter = delimiterPos == delimiter.length - 1;
-					if (endOfBuffer && !endOfDelimiter) {
-						return -1;
-					}
-				}
-				delimiterPos++;
-			}
-			if (delimiterPos == delimiter.length) {
-				return i - buffer.readPosition();
-			}
-		}
-		return -1;
-	}
+                //	.windowUntil(buffer -> buffer instanceof EndFrameBuffer)
+                //	.concatMap(fluxes -> fluxes.collect(() -> new LimitedDataBufferList(getMaxInMemorySize()), LimitedDataBufferList::add))
 
-	/**
-	 * Join the given list of buffers into a single buffer.
-	 */
-	private static DataBuffer joinUntilEndFrame(List<DataBuffer> dataBuffers) {
-		if (!dataBuffers.isEmpty()) {
-			int lastIdx = dataBuffers.size() - 1;
-			if (dataBuffers.get(lastIdx) == END_FRAME) {
-				dataBuffers.remove(lastIdx);
-			}
-		}
-		return dataBuffers.get(0).factory().join(dataBuffers);
-	}
+                LimitedDataBufferList limiter = new LimitedDataBufferList(getMaxInMemorySize());
 
-	@Override
-	protected String decodeDataBuffer(DataBuffer dataBuffer, ResolvableType elementType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+                return Flux.from(input)
+                        .concatMapIterable(buffer -> splitOnDelimiter(buffer, delimiterBytes, limiter))
+                        .bufferUntil(buffer -> buffer == END_FRAME)
+                        .map(StringDecoder::joinUntilEndFrame)
+                        .doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+            } else {
 
-		Charset charset = getCharset(mimeType);
-		CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
-		DataBufferUtils.release(dataBuffer);
-		String value = charBuffer.toString();
-		LogFormatUtils.traceDebug(logger, traceOn -> {
-			String formatted = LogFormatUtils.formatValue(value, !traceOn);
-			return Hints.getLogPrefix(hints) + "Decoded " + formatted;
-		});
-		return value;
-	}
+                // When the decoder is unlimited (-1), concatMapIterable will cache buffers that may not
+                // be released if cancel is signalled before they are turned into String lines
+                // (see test maxInMemoryLimitReleasesUnprocessedLinesWhenUnlimited).
+                // When reactor-core#1925 is resolved, the workaround can be removed and the entire
+                // else clause possibly dropped.
 
-	private static Charset getCharset(@Nullable MimeType mimeType) {
-		if (mimeType != null && mimeType.getCharset() != null) {
-			return mimeType.getCharset();
-		}
-		else {
-			return DEFAULT_CHARSET;
-		}
-	}
+                ConcatMapIterableDiscardWorkaroundCache cache = new ConcatMapIterableDiscardWorkaroundCache();
 
+                return Flux.from(input)
+                        .concatMapIterable(buffer -> cache.addAll(splitOnDelimiter(buffer, delimiterBytes, null)))
+                        .doOnNext(cache)
+                        .doOnCancel(cache)
+                        .bufferUntil(buffer -> buffer == END_FRAME)
+                        .map(StringDecoder::joinUntilEndFrame)
+                        .doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+            }
+        });
 
-	/**
-	 * Create a {@code StringDecoder} for {@code "text/plain"}.
-	 * @param ignored ignored
-	 * @deprecated as of Spring 5.0.4, in favor of {@link #textPlainOnly()} or
-	 * {@link #textPlainOnly(List, boolean)}
-	 */
-	@Deprecated
-	public static StringDecoder textPlainOnly(boolean ignored) {
-		return textPlainOnly();
-	}
+        return super.decode(inputFlux, elementType, mimeType, hints);
+    }
 
-	/**
-	 * Create a {@code StringDecoder} for {@code "text/plain"}.
-	 */
-	public static StringDecoder textPlainOnly() {
-		return textPlainOnly(DEFAULT_DELIMITERS, true);
-	}
+    private List<byte[]> getDelimiterBytes(@Nullable MimeType mimeType) {
+        return this.delimitersCache.computeIfAbsent(getCharset(mimeType), charset -> {
+            List<byte[]> list = new ArrayList<>();
+            for (String delimiter : this.delimiters) {
+                byte[] bytes = delimiter.getBytes(charset);
+                list.add(bytes);
+            }
+            return list;
+        });
+    }
 
-	/**
-	 * Create a {@code StringDecoder} for {@code "text/plain"}.
-	 * @param delimiters delimiter strings to use to split the input stream
-	 * @param stripDelimiter whether to remove delimiters from the resulting
-	 * input strings
-	 */
-	public static StringDecoder textPlainOnly(List<String> delimiters, boolean stripDelimiter) {
-		return new StringDecoder(delimiters, stripDelimiter, new MimeType("text", "plain", DEFAULT_CHARSET));
-	}
+    /**
+     * Split the given data buffer on delimiter boundaries.
+     * The returned Flux contains an {@link #END_FRAME} buffer after each delimiter.
+     */
+    private List<DataBuffer> splitOnDelimiter(
+            DataBuffer buffer, List<byte[]> delimiterBytes, @Nullable LimitedDataBufferList limiter) {
 
-	/**
-	 * Create a {@code StringDecoder} that supports all MIME types.
-	 * @param ignored ignored
-	 * @deprecated as of Spring 5.0.4, in favor of {@link #allMimeTypes()} or
-	 * {@link #allMimeTypes(List, boolean)}
-	 */
-	@Deprecated
-	public static StringDecoder allMimeTypes(boolean ignored) {
-		return allMimeTypes();
-	}
+        List<DataBuffer> frames = new ArrayList<>();
+        try {
+            do {
+                int length = Integer.MAX_VALUE;
+                byte[] matchingDelimiter = null;
+                for (byte[] delimiter : delimiterBytes) {
+                    int index = indexOf(buffer, delimiter);
+                    if (index >= 0 && index < length) {
+                        length = index;
+                        matchingDelimiter = delimiter;
+                    }
+                }
+                DataBuffer frame;
+                int readPosition = buffer.readPosition();
+                if (matchingDelimiter != null) {
+                    frame = this.stripDelimiter ?
+                            buffer.slice(readPosition, length) :
+                            buffer.slice(readPosition, length + matchingDelimiter.length);
+                    buffer.readPosition(readPosition + length + matchingDelimiter.length);
+                    frames.add(DataBufferUtils.retain(frame));
+                    frames.add(END_FRAME);
+                    if (limiter != null) {
+                        limiter.add(frame); // enforce the limit
+                        limiter.clear();
+                    }
+                } else {
+                    frame = buffer.slice(readPosition, buffer.readableByteCount());
+                    buffer.readPosition(readPosition + buffer.readableByteCount());
+                    frames.add(DataBufferUtils.retain(frame));
+                    if (limiter != null) {
+                        limiter.add(frame);
+                    }
+                }
+            }
+            while (buffer.readableByteCount() > 0);
+        } catch (DataBufferLimitException ex) {
+            if (limiter != null) {
+                limiter.releaseAndClear();
+            }
+            throw ex;
+        } catch (Throwable ex) {
+            for (DataBuffer frame : frames) {
+                DataBufferUtils.release(frame);
+            }
+            throw ex;
+        } finally {
+            DataBufferUtils.release(buffer);
+        }
+        return frames;
+    }
 
-	/**
-	 * Create a {@code StringDecoder} that supports all MIME types.
-	 */
-	public static StringDecoder allMimeTypes() {
-		return allMimeTypes(DEFAULT_DELIMITERS, true);
-	}
+    @Override
+    protected String decodeDataBuffer(DataBuffer dataBuffer, ResolvableType elementType,
+                                      @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-	/**
-	 * Create a {@code StringDecoder} that supports all MIME types.
-	 * @param delimiters delimiter strings to use to split the input stream
-	 * @param stripDelimiter whether to remove delimiters from the resulting
-	 * input strings
-	 */
-	public static StringDecoder allMimeTypes(List<String> delimiters, boolean stripDelimiter) {
-		return new StringDecoder(delimiters, stripDelimiter,
-				new MimeType("text", "plain", DEFAULT_CHARSET), MimeTypeUtils.ALL);
-	}
+        Charset charset = getCharset(mimeType);
+        CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
+        DataBufferUtils.release(dataBuffer);
+        String value = charBuffer.toString();
+        LogFormatUtils.traceDebug(logger, traceOn -> {
+            String formatted = LogFormatUtils.formatValue(value, !traceOn);
+            return Hints.getLogPrefix(hints) + "Decoded " + formatted;
+        });
+        return value;
+    }
+
+    private class ConcatMapIterableDiscardWorkaroundCache implements Consumer<DataBuffer>, Runnable {
+
+        private final List<DataBuffer> buffers = new ArrayList<>();
 
 
-	private class ConcatMapIterableDiscardWorkaroundCache implements Consumer<DataBuffer>, Runnable {
+        public List<DataBuffer> addAll(List<DataBuffer> buffersToAdd) {
+            this.buffers.addAll(buffersToAdd);
+            return buffersToAdd;
+        }
 
-		private final List<DataBuffer> buffers = new ArrayList<>();
+        @Override
+        public void accept(DataBuffer dataBuffer) {
+            this.buffers.remove(dataBuffer);
+        }
 
-
-		public List<DataBuffer> addAll(List<DataBuffer> buffersToAdd) {
-			this.buffers.addAll(buffersToAdd);
-			return buffersToAdd;
-		}
-
-		@Override
-		public void accept(DataBuffer dataBuffer) {
-			this.buffers.remove(dataBuffer);
-		}
-
-		@Override
-		public void run() {
-			this.buffers.forEach(buffer -> {
-				try {
-					DataBufferUtils.release(buffer);
-				}
-				catch (Throwable ex) {
-					// Keep going..
-				}
-			});
-		}
-	}
+        @Override
+        public void run() {
+            this.buffers.forEach(buffer -> {
+                try {
+                    DataBufferUtils.release(buffer);
+                } catch (Throwable ex) {
+                    // Keep going..
+                }
+            });
+        }
+    }
 
 }

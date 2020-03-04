@@ -67,9 +67,10 @@ public interface HandlerAdapter {
     /**
      * Use the given handler to handle this request.
      * The workflow that is required may vary widely.
+     * <p>
+     * 将请求处理成 {@link ModelAndView}
      *
-	 * 将请求处理成 {@link ModelAndView}
-	 * @param request  current HTTP request
+     * @param request  current HTTP request
      * @param response current HTTP response
      * @param handler  handler to use. This object must have previously been passed
      *                 to the {@code supports} method of this interface, which must have
@@ -84,9 +85,10 @@ public interface HandlerAdapter {
     /**
      * Same contract as for HttpServlet's {@code getLastModified} method.
      * Can simply return -1 if there's no support in the handler class.
+     * <p>
+     * 最后一次修改时间 -1 表示不支持
      *
-	 * 最后一次修改时间 -1 表示不支持
-	 * @param request current HTTP request
+     * @param request current HTTP request
      * @param handler handler to use
      * @return the lastModified value for the given handler
      * @see javax.servlet.http.HttpServlet#getLastModified

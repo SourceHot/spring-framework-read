@@ -16,20 +16,22 @@
 
 package org.springframework.test.context.junit4.spr9051;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * This set of tests refutes the claims made in
@@ -54,48 +56,45 @@ import static org.junit.Assert.*;
 @ContextConfiguration(classes = AnnotatedConfigClassesWithoutAtConfigurationTests.AnnotatedFactoryBeans.class)
 public class AnnotatedConfigClassesWithoutAtConfigurationTests {
 
-	/**
-	 * This is intentionally <b>not</b> annotated with {@code @Configuration}.
-	 * Consequently, this class contains what we call <i>annotated factory bean
-	 * methods</i> instead of standard bean definition methods.
-	 */
-	static class AnnotatedFactoryBeans {
+    @Autowired
+    private String enigma;
+    @Autowired
+    private LifecycleBean lifecycleBean;
 
-		static final AtomicInteger enigmaCallCount = new AtomicInteger();
+    @Test
+    public void testSPR_9051() throws Exception {
+        assertNotNull(enigma);
+        assertNotNull(lifecycleBean);
+        assertTrue(lifecycleBean.isInitialized());
+        Set<String> names = new HashSet<>();
+        names.add(enigma.toString());
+        names.add(lifecycleBean.getName());
+        assertEquals(names, new HashSet<>(Arrays.asList("enigma #1", "enigma #2")));
+    }
 
+    /**
+     * This is intentionally <b>not</b> annotated with {@code @Configuration}.
+     * Consequently, this class contains what we call <i>annotated factory bean
+     * methods</i> instead of standard bean definition methods.
+     */
+    static class AnnotatedFactoryBeans {
 
-		@Bean
-		public String enigma() {
-			return "enigma #" + enigmaCallCount.incrementAndGet();
-		}
-
-		@Bean
-		public LifecycleBean lifecycleBean() {
-			// The following call to enigma() literally invokes the local
-			// enigma() method, not a CGLIB proxied version, since these methods
-			// are essentially factory bean methods.
-			LifecycleBean bean = new LifecycleBean(enigma());
-			assertFalse(bean.isInitialized());
-			return bean;
-		}
-	}
-
-
-	@Autowired
-	private String enigma;
-
-	@Autowired
-	private LifecycleBean lifecycleBean;
+        static final AtomicInteger enigmaCallCount = new AtomicInteger();
 
 
-	@Test
-	public void testSPR_9051() throws Exception {
-		assertNotNull(enigma);
-		assertNotNull(lifecycleBean);
-		assertTrue(lifecycleBean.isInitialized());
-		Set<String> names = new HashSet<>();
-		names.add(enigma.toString());
-		names.add(lifecycleBean.getName());
-		assertEquals(names, new HashSet<>(Arrays.asList("enigma #1", "enigma #2")));
-	}
+        @Bean
+        public String enigma() {
+            return "enigma #" + enigmaCallCount.incrementAndGet();
+        }
+
+        @Bean
+        public LifecycleBean lifecycleBean() {
+            // The following call to enigma() literally invokes the local
+            // enigma() method, not a CGLIB proxied version, since these methods
+            // are essentially factory bean methods.
+            LifecycleBean bean = new LifecycleBean(enigma());
+            assertFalse(bean.isInitialized());
+            return bean;
+        }
+    }
 }

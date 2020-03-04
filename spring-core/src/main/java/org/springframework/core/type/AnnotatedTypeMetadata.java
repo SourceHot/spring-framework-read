@@ -47,8 +47,7 @@ public interface AnnotatedTypeMetadata {
      *
      * @param annotationName the fully qualified class name of the annotation
      *                       type to look for
-	 *                       注解全类名
-	 *
+     *                       注解全类名
      * @return whether a matching annotation is defined
      */
     boolean isAnnotated(String annotationName);

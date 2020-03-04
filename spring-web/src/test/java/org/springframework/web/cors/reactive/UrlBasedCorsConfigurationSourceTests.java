@@ -17,7 +17,6 @@
 package org.springframework.web.cors.reactive;
 
 import org.junit.Test;
-
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.cors.CorsConfiguration;
@@ -33,26 +32,26 @@ import static org.junit.Assert.assertNull;
  */
 public class UrlBasedCorsConfigurationSourceTests {
 
-	private final UrlBasedCorsConfigurationSource configSource
-			= new UrlBasedCorsConfigurationSource();
+    private final UrlBasedCorsConfigurationSource configSource
+            = new UrlBasedCorsConfigurationSource();
 
 
-	@Test
-	public void empty() {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/bar/test.html"));
-		assertNull(this.configSource.getCorsConfiguration(exchange));
-	}
+    @Test
+    public void empty() {
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/bar/test.html"));
+        assertNull(this.configSource.getCorsConfiguration(exchange));
+    }
 
-	@Test
-	public void registerAndMatch() {
-		CorsConfiguration config = new CorsConfiguration();
-		this.configSource.registerCorsConfiguration("/bar/**", config);
+    @Test
+    public void registerAndMatch() {
+        CorsConfiguration config = new CorsConfiguration();
+        this.configSource.registerCorsConfiguration("/bar/**", config);
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo/test.html"));
-		assertNull(this.configSource.getCorsConfiguration(exchange));
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo/test.html"));
+        assertNull(this.configSource.getCorsConfiguration(exchange));
 
-		exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/bar/test.html"));
-		assertEquals(config, this.configSource.getCorsConfiguration(exchange));
-	}
+        exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/bar/test.html"));
+        assertEquals(config, this.configSource.getCorsConfiguration(exchange));
+    }
 
 }

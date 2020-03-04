@@ -28,22 +28,24 @@ import org.springframework.dao.NonTransientDataAccessException;
 @SuppressWarnings("serial")
 public class DataSourceLookupFailureException extends NonTransientDataAccessException {
 
-	/**
-	 * Constructor for DataSourceLookupFailureException.
-	 * @param msg the detail message
-	 */
-	public DataSourceLookupFailureException(String msg) {
-		super(msg);
-	}
+    /**
+     * Constructor for DataSourceLookupFailureException.
+     *
+     * @param msg the detail message
+     */
+    public DataSourceLookupFailureException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Constructor for DataSourceLookupFailureException.
-	 * @param msg the detail message
-	 * @param cause the root cause (usually from using a underlying
-	 * lookup API such as JNDI)
-	 */
-	public DataSourceLookupFailureException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Constructor for DataSourceLookupFailureException.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause (usually from using a underlying
+     *              lookup API such as JNDI)
+     */
+    public DataSourceLookupFailureException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

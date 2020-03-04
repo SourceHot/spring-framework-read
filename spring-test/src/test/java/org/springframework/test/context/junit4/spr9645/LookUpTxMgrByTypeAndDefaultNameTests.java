@@ -18,7 +18,6 @@ package org.springframework.test.context.junit4.spr9645;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -29,7 +28,7 @@ import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Integration tests that verify the behavior requested in
@@ -43,43 +42,43 @@ import static org.junit.Assert.*;
 @Transactional
 public class LookUpTxMgrByTypeAndDefaultNameTests {
 
-	private static final CallCountingTransactionManager txManager1 = new CallCountingTransactionManager();
-	private static final CallCountingTransactionManager txManager2 = new CallCountingTransactionManager();
+    private static final CallCountingTransactionManager txManager1 = new CallCountingTransactionManager();
+    private static final CallCountingTransactionManager txManager2 = new CallCountingTransactionManager();
 
-	@Configuration
-	static class Config {
+    @BeforeTransaction
+    public void beforeTransaction() {
+        txManager1.clear();
+        txManager2.clear();
+    }
 
-		@Bean
-		public PlatformTransactionManager transactionManager() {
-			return txManager1;
-		}
+    @Test
+    public void transactionalTest() {
+        assertEquals(1, txManager1.begun);
+        assertEquals(1, txManager1.inflight);
+        assertEquals(0, txManager1.commits);
+        assertEquals(0, txManager1.rollbacks);
+    }
 
-		@Bean
-		public PlatformTransactionManager txManager2() {
-			return txManager2;
-		}
-	}
+    @AfterTransaction
+    public void afterTransaction() {
+        assertEquals(1, txManager1.begun);
+        assertEquals(0, txManager1.inflight);
+        assertEquals(0, txManager1.commits);
+        assertEquals(1, txManager1.rollbacks);
+    }
 
-	@BeforeTransaction
-	public void beforeTransaction() {
-		txManager1.clear();
-		txManager2.clear();
-	}
+    @Configuration
+    static class Config {
 
-	@Test
-	public void transactionalTest() {
-		assertEquals(1, txManager1.begun);
-		assertEquals(1, txManager1.inflight);
-		assertEquals(0, txManager1.commits);
-		assertEquals(0, txManager1.rollbacks);
-	}
+        @Bean
+        public PlatformTransactionManager transactionManager() {
+            return txManager1;
+        }
 
-	@AfterTransaction
-	public void afterTransaction() {
-		assertEquals(1, txManager1.begun);
-		assertEquals(0, txManager1.inflight);
-		assertEquals(0, txManager1.commits);
-		assertEquals(1, txManager1.rollbacks);
-	}
+        @Bean
+        public PlatformTransactionManager txManager2() {
+            return txManager2;
+        }
+    }
 
 }

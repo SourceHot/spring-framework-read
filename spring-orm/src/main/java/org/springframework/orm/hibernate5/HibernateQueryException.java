@@ -17,7 +17,6 @@
 package org.springframework.orm.hibernate5;
 
 import org.hibernate.QueryException;
-
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 /**
@@ -25,21 +24,21 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * thrown on invalid HQL query syntax.
  *
  * @author Juergen Hoeller
- * @since 4.2
  * @see SessionFactoryUtils#convertHibernateAccessException
+ * @since 4.2
  */
 @SuppressWarnings("serial")
 public class HibernateQueryException extends InvalidDataAccessResourceUsageException {
 
-	public HibernateQueryException(QueryException ex) {
-		super(ex.getMessage(), ex);
-	}
+    public HibernateQueryException(QueryException ex) {
+        super(ex.getMessage(), ex);
+    }
 
-	/**
-	 * Return the HQL query string that was invalid.
-	 */
-	public String getQueryString() {
-		return ((QueryException) getCause()).getQueryString();
-	}
+    /**
+     * Return the HQL query string that was invalid.
+     */
+    public String getQueryString() {
+        return ((QueryException) getCause()).getQueryString();
+    }
 
 }

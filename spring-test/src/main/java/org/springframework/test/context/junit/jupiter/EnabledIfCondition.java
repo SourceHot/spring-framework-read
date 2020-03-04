@@ -29,22 +29,22 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * {@link ConditionEvaluationResult}.
  *
  * @author Sam Brannen
- * @since 5.0
  * @see EnabledIf
  * @see DisabledIf
  * @see SpringExtension
+ * @since 5.0
  */
 public class EnabledIfCondition extends AbstractExpressionEvaluatingCondition {
 
-	/**
-	 * Containers and tests are enabled if {@code @EnabledIf} is present on the
-	 * corresponding test class or test method and the configured expression
-	 * evaluates to {@code true}.
-	 */
-	@Override
-	public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
-		return evaluateAnnotation(EnabledIf.class, EnabledIf::expression, EnabledIf::reason,
-				EnabledIf::loadContext, true, context);
-	}
+    /**
+     * Containers and tests are enabled if {@code @EnabledIf} is present on the
+     * corresponding test class or test method and the configured expression
+     * evaluates to {@code true}.
+     */
+    @Override
+    public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
+        return evaluateAnnotation(EnabledIf.class, EnabledIf::expression, EnabledIf::reason,
+                EnabledIf::loadContext, true, context);
+    }
 
 }

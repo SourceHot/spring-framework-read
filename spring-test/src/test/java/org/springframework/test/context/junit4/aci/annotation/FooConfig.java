@@ -26,9 +26,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 class FooConfig {
 
-	@Bean
-	String foo() {
-		return "foo";
-	}
+    @Bean
+    String foo() {
+        return "foo";
+    }
 
 }

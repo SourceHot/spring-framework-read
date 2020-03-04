@@ -18,7 +18,6 @@ package org.springframework.test.context.env;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +26,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Integration tests for {@link TestPropertySource @TestPropertySource} support with
@@ -41,22 +40,22 @@ import static org.junit.Assert.*;
 @TestPropertySource(locations = "explicit.properties", properties = "explicit = inlined")
 public class InlinedPropertiesOverridePropertiesFilesTestPropertySourceTests {
 
-	@Autowired
-	Environment env;
+    @Autowired
+    Environment env;
 
-	@Value("${explicit}")
-	String explicit;
-
-
-	@Test
-	public void inlinedPropertyOverridesValueFromPropertiesFile() {
-		assertEquals("inlined", env.getProperty("explicit"));
-		assertEquals("inlined", this.explicit);
-	}
+    @Value("${explicit}")
+    String explicit;
 
 
-	@Configuration
-	static class Config {
-	}
+    @Test
+    public void inlinedPropertyOverridesValueFromPropertiesFile() {
+        assertEquals("inlined", env.getProperty("explicit"));
+        assertEquals("inlined", this.explicit);
+    }
+
+
+    @Configuration
+    static class Config {
+    }
 
 }

@@ -16,14 +16,14 @@
 
 package org.springframework.util.xml;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
+
 import java.io.BufferedReader;
 import java.io.CharConversionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
 
 /**
  * Detects whether an XML stream is using DTD- or XSD-based validation.
@@ -115,13 +115,11 @@ public class XmlValidationModeDetector {
                 }
             }
             return (isDtdValidated ? VALIDATION_DTD : VALIDATION_XSD);
-        }
-        catch (CharConversionException ex) {
+        } catch (CharConversionException ex) {
             // Choked on some character encoding...
             // Leave the decision up to the caller.
             return VALIDATION_AUTO;
-        }
-        finally {
+        } finally {
             reader.close();
         }
     }
@@ -138,7 +136,7 @@ public class XmlValidationModeDetector {
      * Does the supplied content contain an XML opening tag. If the parse state is currently
      * in an XML comment then this method always returns false. It is expected that all comment
      * tokens will have consumed for the supplied content before passing the remainder to this method.
-     *
+     * <p>
      * 是否为tag标签 判断{@code <}开头
      */
     private boolean hasOpeningTag(String content) {

@@ -17,10 +17,10 @@
 package org.springframework.test.context.junit4.profile.xml;
 
 import org.junit.Test;
-
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Sam Brannen
@@ -29,11 +29,11 @@ import static org.junit.Assert.*;
 @ActiveProfiles("dev")
 public class DevProfileXmlConfigTests extends DefaultProfileXmlConfigTests {
 
-	@Test
-	@Override
-	public void employee() {
-		assertNotNull("employee bean should be loaded for the 'dev' profile", employee);
-		assertEquals("John Smith", employee.getName());
-	}
+    @Test
+    @Override
+    public void employee() {
+        assertNotNull("employee bean should be loaded for the 'dev' profile", employee);
+        assertEquals("John Smith", employee.getName());
+    }
 
 }

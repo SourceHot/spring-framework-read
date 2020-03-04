@@ -202,8 +202,9 @@ public interface ListableBeanFactory extends BeanFactory {
      * <p>The Map returned by this method should always return bean names and
      * corresponding bean instances <i>in the order of definition</i> in the
      * backend configuration, as far as possible.
+     * <p>
+     * 根据类型获取bean
      *
-	 * 根据类型获取bean
      * @param type the class or interface to match, or {@code null} for all concrete beans
      * @return a Map with the matching beans, containing the bean names as
      * keys and the corresponding bean instances as values

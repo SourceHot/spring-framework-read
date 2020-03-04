@@ -16,10 +16,10 @@
 
 package org.springframework.beans;
 
+import org.springframework.lang.Nullable;
+
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for creating {@link BeanInfo} instances for Spring beans.
@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
  * <p>BeanInfoFactories are instantiated by the {@link CachedIntrospectionResults},
  * by using the {@link org.springframework.core.io.support.SpringFactoriesLoader}
  * utility class.
- *
+ * <p>
  * When a {@link BeanInfo} is to be created, the {@code CachedIntrospectionResults}
  * will iterate through the discovered factories, calling {@link #getBeanInfo(Class)}
  * on each one. If {@code null} is returned, the next factory will be queried.
@@ -42,19 +42,20 @@ import org.springframework.lang.Nullable;
  * higher precedence come first.
  *
  * @author Arjen Poutsma
- * @since 3.2
  * @see CachedIntrospectionResults
  * @see org.springframework.core.io.support.SpringFactoriesLoader
+ * @since 3.2
  */
 public interface BeanInfoFactory {
 
-	/**
-	 * Return the bean info for the given class, if supported.
-	 * @param beanClass the bean class
-	 * @return the BeanInfo, or {@code null} if the given class is not supported
-	 * @throws IntrospectionException in case of exceptions
-	 */
-	@Nullable
-	BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException;
+    /**
+     * Return the bean info for the given class, if supported.
+     *
+     * @param beanClass the bean class
+     * @return the BeanInfo, or {@code null} if the given class is not supported
+     * @throws IntrospectionException in case of exceptions
+     */
+    @Nullable
+    BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException;
 
 }

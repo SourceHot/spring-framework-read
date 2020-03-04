@@ -48,28 +48,28 @@ import javax.servlet.jsp.JspException;
  * </table>
  *
  * @author Juergen Hoeller
- * @since 04.03.2003
  * @see HtmlEscapingAwareTag#setHtmlEscape
+ * @since 04.03.2003
  */
 @SuppressWarnings("serial")
 public class HtmlEscapeTag extends RequestContextAwareTag {
 
-	private boolean defaultHtmlEscape;
+    private boolean defaultHtmlEscape;
 
 
-	/**
-	 * Set the default value for HTML escaping,
-	 * to be put into the current PageContext.
-	 */
-	public void setDefaultHtmlEscape(boolean defaultHtmlEscape) {
-		this.defaultHtmlEscape = defaultHtmlEscape;
-	}
+    /**
+     * Set the default value for HTML escaping,
+     * to be put into the current PageContext.
+     */
+    public void setDefaultHtmlEscape(boolean defaultHtmlEscape) {
+        this.defaultHtmlEscape = defaultHtmlEscape;
+    }
 
 
-	@Override
-	protected int doStartTagInternal() throws JspException {
-		getRequestContext().setDefaultHtmlEscape(this.defaultHtmlEscape);
-		return EVAL_BODY_INCLUDE;
-	}
+    @Override
+    protected int doStartTagInternal() throws JspException {
+        getRequestContext().setDefaultHtmlEscape(this.defaultHtmlEscape);
+        return EVAL_BODY_INCLUDE;
+    }
 
 }

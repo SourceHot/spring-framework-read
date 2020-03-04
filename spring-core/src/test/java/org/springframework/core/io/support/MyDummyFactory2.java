@@ -26,8 +26,8 @@ import org.springframework.core.annotation.Order;
 @Order(2)
 public class MyDummyFactory2 implements DummyFactory {
 
-	@Override
-	public String getString() {
-		return "Bar";
-	}
+    @Override
+    public String getString() {
+        return "Bar";
+    }
 }

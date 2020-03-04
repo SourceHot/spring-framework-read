@@ -16,16 +16,9 @@
 
 package org.springframework.test.web.reactive.server;
 
-import java.net.URI;
-import java.util.function.Function;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -43,6 +36,12 @@ import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.MockServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
+
+import java.net.URI;
+import java.util.function.Function;
 
 /**
  * Connector that handles requests by invoking an {@link HttpHandler} rather
@@ -57,74 +56,76 @@ import org.springframework.util.MultiValueMap;
  */
 public class HttpHandlerConnector implements ClientHttpConnector {
 
-	private static Log logger = LogFactory.getLog(HttpHandlerConnector.class);
+    private static Log logger = LogFactory.getLog(HttpHandlerConnector.class);
 
-	private final HttpHandler handler;
-
-
-	/**
-	 * Constructor with the {@link HttpHandler} to handle requests with.
-	 */
-	public HttpHandlerConnector(HttpHandler handler) {
-		Assert.notNull(handler, "HttpHandler is required");
-		this.handler = handler;
-	}
+    private final HttpHandler handler;
 
 
-	@Override
-	public Mono<ClientHttpResponse> connect(HttpMethod httpMethod, URI uri,
-			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
+    /**
+     * Constructor with the {@link HttpHandler} to handle requests with.
+     */
+    public HttpHandlerConnector(HttpHandler handler) {
+        Assert.notNull(handler, "HttpHandler is required");
+        this.handler = handler;
+    }
 
-		MonoProcessor<ClientHttpResponse> result = MonoProcessor.create();
 
-		MockClientHttpRequest mockClientRequest = new MockClientHttpRequest(httpMethod, uri);
-		MockServerHttpResponse mockServerResponse = new MockServerHttpResponse();
+    @Override
+    public Mono<ClientHttpResponse> connect(HttpMethod httpMethod, URI uri,
+                                            Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		mockClientRequest.setWriteHandler(requestBody -> {
-			log("Invoking HttpHandler for ", httpMethod, uri);
-			ServerHttpRequest mockServerRequest = adaptRequest(mockClientRequest, requestBody);
-			ServerHttpResponse responseToUse = prepareResponse(mockServerResponse, mockServerRequest);
-			this.handler.handle(mockServerRequest, responseToUse).subscribe(aVoid -> {}, result::onError);
-			return Mono.empty();
-		});
+        MonoProcessor<ClientHttpResponse> result = MonoProcessor.create();
 
-		mockServerResponse.setWriteHandler(responseBody ->
-				Mono.fromRunnable(() -> {
-					log("Creating client response for ", httpMethod, uri);
-					result.onNext(adaptResponse(mockServerResponse, responseBody));
-				}));
+        MockClientHttpRequest mockClientRequest = new MockClientHttpRequest(httpMethod, uri);
+        MockServerHttpResponse mockServerResponse = new MockServerHttpResponse();
 
-		log("Writing client request for ", httpMethod, uri);
-		requestCallback.apply(mockClientRequest).subscribe(aVoid -> {}, result::onError);
+        mockClientRequest.setWriteHandler(requestBody -> {
+            log("Invoking HttpHandler for ", httpMethod, uri);
+            ServerHttpRequest mockServerRequest = adaptRequest(mockClientRequest, requestBody);
+            ServerHttpResponse responseToUse = prepareResponse(mockServerResponse, mockServerRequest);
+            this.handler.handle(mockServerRequest, responseToUse).subscribe(aVoid -> {
+            }, result::onError);
+            return Mono.empty();
+        });
 
-		return result;
-	}
+        mockServerResponse.setWriteHandler(responseBody ->
+                Mono.fromRunnable(() -> {
+                    log("Creating client response for ", httpMethod, uri);
+                    result.onNext(adaptResponse(mockServerResponse, responseBody));
+                }));
 
-	private void log(String message, HttpMethod httpMethod, URI uri) {
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("%s %s \"%s\"", message, httpMethod, uri));
-		}
-	}
+        log("Writing client request for ", httpMethod, uri);
+        requestCallback.apply(mockClientRequest).subscribe(aVoid -> {
+        }, result::onError);
 
-	private ServerHttpRequest adaptRequest(MockClientHttpRequest request, Publisher<DataBuffer> body) {
-		HttpMethod method = request.getMethod();
-		URI uri = request.getURI();
-		HttpHeaders headers = request.getHeaders();
-		MultiValueMap<String, HttpCookie> cookies = request.getCookies();
-		return MockServerHttpRequest.method(method, uri).headers(headers).cookies(cookies).body(body);
-	}
+        return result;
+    }
 
-	private ServerHttpResponse prepareResponse(ServerHttpResponse response, ServerHttpRequest request) {
-		return (request.getMethod() == HttpMethod.HEAD ? new HttpHeadResponseDecorator(response) : response);
-	}
+    private void log(String message, HttpMethod httpMethod, URI uri) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("%s %s \"%s\"", message, httpMethod, uri));
+        }
+    }
 
-	private ClientHttpResponse adaptResponse(MockServerHttpResponse response, Flux<DataBuffer> body) {
-		Integer status = response.getStatusCodeValue();
-		MockClientHttpResponse clientResponse = new MockClientHttpResponse((status != null) ? status : 200);
-		clientResponse.getHeaders().putAll(response.getHeaders());
-		clientResponse.getCookies().putAll(response.getCookies());
-		clientResponse.setBody(body);
-		return clientResponse;
-	}
+    private ServerHttpRequest adaptRequest(MockClientHttpRequest request, Publisher<DataBuffer> body) {
+        HttpMethod method = request.getMethod();
+        URI uri = request.getURI();
+        HttpHeaders headers = request.getHeaders();
+        MultiValueMap<String, HttpCookie> cookies = request.getCookies();
+        return MockServerHttpRequest.method(method, uri).headers(headers).cookies(cookies).body(body);
+    }
+
+    private ServerHttpResponse prepareResponse(ServerHttpResponse response, ServerHttpRequest request) {
+        return (request.getMethod() == HttpMethod.HEAD ? new HttpHeadResponseDecorator(response) : response);
+    }
+
+    private ClientHttpResponse adaptResponse(MockServerHttpResponse response, Flux<DataBuffer> body) {
+        Integer status = response.getStatusCodeValue();
+        MockClientHttpResponse clientResponse = new MockClientHttpResponse((status != null) ? status : 200);
+        clientResponse.getHeaders().putAll(response.getHeaders());
+        clientResponse.getCookies().putAll(response.getCookies());
+        clientResponse.setBody(body);
+        return clientResponse;
+    }
 
 }

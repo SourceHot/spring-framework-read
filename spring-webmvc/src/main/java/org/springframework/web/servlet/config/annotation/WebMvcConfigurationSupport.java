@@ -16,16 +16,6 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.function.Predicate;
-
-import javax.servlet.ServletContext;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -99,6 +89,15 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.util.UrlPathHelper;
 
+import javax.servlet.ServletContext;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.function.Predicate;
+
 /**
  * This is the main class providing the configuration behind the MVC Java config.
  * It is typically imported by adding {@link EnableWebMvc @EnableWebMvc} to an
@@ -167,9 +166,9 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Sebastien Deleuze
- * @since 3.1
  * @see EnableWebMvc
  * @see WebMvcConfigurer
+ * @since 3.1
  */
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
@@ -270,8 +269,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
     /**
      * Return a {@link RequestMappingHandlerMapping} ordered at 0 for mapping
      * requests to annotated controllers.
-     *
-     *
      */
     @Bean
     public RequestMappingHandlerMapping requestMappingHandlerMapping() {
@@ -319,8 +316,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
     /**
      * Protected method for plugging in a custom subclass of
      * {@link RequestMappingHandlerMapping}.
-     *
+     * <p>
      * 创建请求处理器
+     *
      * @since 4.0
      */
     protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {
@@ -356,8 +354,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
     /**
      * Callback for building the {@link PathMatchConfigurer}.
      * Delegates to {@link #configurePathMatch}.
-     *
+     * <p>
      * 获取地址匹配器
+     *
      * @since 4.1
      */
     protected PathMatchConfigurer getPathMatchConfigurer() {
@@ -422,6 +421,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
     /**
      * 获取默认的媒体类型
+     *
      * @return
      */
     protected Map<String, MediaType> getDefaultMediaTypes() {
@@ -687,13 +687,11 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
                 try {
                     String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
                     clazz = ClassUtils.forName(className, WebMvcConfigurationSupport.class.getClassLoader());
-                }
-                catch (ClassNotFoundException | LinkageError ex) {
+                } catch (ClassNotFoundException | LinkageError ex) {
                     throw new BeanInitializationException("Failed to resolve default validator class", ex);
                 }
                 validator = (Validator) BeanUtils.instantiateClass(clazz);
-            }
-            else {
+            } else {
                 validator = new NoOpValidator();
             }
         }
@@ -823,8 +821,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
         messageConverters.add(new ResourceRegionHttpMessageConverter());
         try {
             messageConverters.add(new SourceHttpMessageConverter<>());
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             // Ignore when no TransformerFactory implementation is available...
         }
         messageConverters.add(new AllEncompassingFormHttpMessageConverter());
@@ -840,8 +837,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
                 builder.applicationContext(this.applicationContext);
             }
             messageConverters.add(new MappingJackson2XmlHttpMessageConverter(builder.build()));
-        }
-        else if (jaxb2Present) {
+        } else if (jaxb2Present) {
             messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
         }
 
@@ -851,11 +847,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
                 builder.applicationContext(this.applicationContext);
             }
             messageConverters.add(new MappingJackson2HttpMessageConverter(builder.build()));
-        }
-        else if (gsonPresent) {
+        } else if (gsonPresent) {
             messageConverters.add(new GsonHttpMessageConverter());
-        }
-        else if (jsonbPresent) {
+        } else if (jsonbPresent) {
             messageConverters.add(new JsonbHttpMessageConverter());
         }
 

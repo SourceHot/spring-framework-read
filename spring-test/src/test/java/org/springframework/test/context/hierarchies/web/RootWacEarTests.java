@@ -18,7 +18,6 @@ package org.springframework.test.context.hierarchies.web;
 
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +27,9 @@ import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Sam Brannen
@@ -38,42 +39,39 @@ import static org.junit.Assert.*;
 @ContextHierarchy(@ContextConfiguration)
 public class RootWacEarTests extends EarTests {
 
-	@Configuration
-	static class RootWacConfig {
-
-		@Bean
-		public String root() {
-			return "root";
-		}
-	}
+    @Autowired
+    private WebApplicationContext wac;
 
 
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    @Autowired
+    private String ear;
+    @Autowired
+    private String root;
 
-	@Autowired
-	private WebApplicationContext wac;
+    @Ignore("Superseded by verifyRootWacConfig()")
+    @Test
+    @Override
+    public void verifyEarConfig() {
+        /* no-op */
+    }
 
-	@Autowired
-	private String ear;
+    @Test
+    public void verifyRootWacConfig() {
+        ApplicationContext parent = wac.getParent();
+        assertNotNull(parent);
+        assertFalse(parent instanceof WebApplicationContext);
+        assertEquals("ear", ear);
+        assertEquals("root", root);
+    }
 
-	@Autowired
-	private String root;
+    @Configuration
+    static class RootWacConfig {
 
-
-	@Ignore("Superseded by verifyRootWacConfig()")
-	@Test
-	@Override
-	public void verifyEarConfig() {
-		/* no-op */
-	}
-
-	@Test
-	public void verifyRootWacConfig() {
-		ApplicationContext parent = wac.getParent();
-		assertNotNull(parent);
-		assertFalse(parent instanceof WebApplicationContext);
-		assertEquals("ear", ear);
-		assertEquals("root", root);
-	}
+        @Bean
+        public String root() {
+            return "root";
+        }
+    }
 
 }

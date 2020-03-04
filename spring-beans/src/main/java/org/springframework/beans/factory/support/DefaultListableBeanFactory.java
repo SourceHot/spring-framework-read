@@ -591,7 +591,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
                             (mbd.hasBeanClass() || !mbd.isLazyInit() || isAllowEagerClassLoading()) &&
                                     !requiresEagerInitForType(mbd.getFactoryBeanName()))) {
                         // In case of FactoryBean, match object created by FactoryBean.
-						// 判断是否是工厂bean
+                        // 判断是否是工厂bean
                         boolean isFactoryBean = isFactoryBean(beanName, mbd);
                         // bean 定义
                         BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
@@ -698,20 +698,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     public <T> Map<String, T> getBeansOfType(@Nullable Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
             throws BeansException {
 
-    	// 根据bean 类型获取beanName
+        // 根据bean 类型获取beanName
         String[] beanNames = getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
         Map<String, T> result = new LinkedHashMap<>(beanNames.length);
         for (String beanName : beanNames) {
             try {
-    			// 获取bean实例
-				Object beanInstance = getBean(beanName);
-				// 当前bean不是一个空bean
-				if (!(beanInstance instanceof NullBean)) {
-					// 放入数据
-					result.put(beanName, (T) beanInstance);
-				}
+                // 获取bean实例
+                Object beanInstance = getBean(beanName);
+                // 当前bean不是一个空bean
+                if (!(beanInstance instanceof NullBean)) {
+                    // 放入数据
+                    result.put(beanName, (T) beanInstance);
+                }
             } catch (BeanCreationException ex) {
-            	// 异常处理
+                // 异常处理
                 Throwable rootCause = ex.getMostSpecificCause();
                 if (rootCause instanceof BeanCurrentlyInCreationException) {
                     BeanCreationException bce = (BeanCreationException) rootCause;

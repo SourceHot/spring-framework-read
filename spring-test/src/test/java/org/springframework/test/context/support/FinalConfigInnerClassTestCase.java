@@ -22,14 +22,14 @@ import org.springframework.context.annotation.Configuration;
  * Not an actual <em>test case</em>.
  *
  * @author Sam Brannen
- * @since 3.1
  * @see AnnotationConfigContextLoaderTests
+ * @since 3.1
  */
 public class FinalConfigInnerClassTestCase {
 
-	// Intentionally FINAL.
-	@Configuration
-	static final class Config {
-	}
+    // Intentionally FINAL.
+    @Configuration
+    static final class Config {
+    }
 
 }

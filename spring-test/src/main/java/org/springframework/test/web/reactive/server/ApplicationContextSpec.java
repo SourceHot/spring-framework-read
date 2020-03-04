@@ -29,18 +29,18 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  */
 class ApplicationContextSpec extends AbstractMockServerSpec<ApplicationContextSpec> {
 
-	private final ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
 
-	ApplicationContextSpec(ApplicationContext applicationContext) {
-		Assert.notNull(applicationContext, "ApplicationContext is required");
-		this.applicationContext = applicationContext;
-	}
+    ApplicationContextSpec(ApplicationContext applicationContext) {
+        Assert.notNull(applicationContext, "ApplicationContext is required");
+        this.applicationContext = applicationContext;
+    }
 
 
-	@Override
-	protected WebHttpHandlerBuilder initHttpHandlerBuilder() {
-		return WebHttpHandlerBuilder.applicationContext(this.applicationContext);
-	}
+    @Override
+    protected WebHttpHandlerBuilder initHttpHandlerBuilder() {
+        return WebHttpHandlerBuilder.applicationContext(this.applicationContext);
+    }
 
 }

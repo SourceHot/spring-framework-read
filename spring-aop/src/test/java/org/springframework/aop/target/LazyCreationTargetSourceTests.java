@@ -17,11 +17,10 @@
 package org.springframework.aop.target;
 
 import org.junit.Test;
-
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rob Harrop
@@ -30,46 +29,47 @@ import static org.junit.Assert.*;
  */
 public class LazyCreationTargetSourceTests {
 
-	@Test
-	public void testCreateLazy() {
-		TargetSource targetSource = new AbstractLazyCreationTargetSource() {
-			@Override
-			protected Object createObject() {
-				return new InitCountingBean();
-			}
-			@Override
-			public Class<?> getTargetClass() {
-				return InitCountingBean.class;
-			}
-		};
+    @Test
+    public void testCreateLazy() {
+        TargetSource targetSource = new AbstractLazyCreationTargetSource() {
+            @Override
+            protected Object createObject() {
+                return new InitCountingBean();
+            }
 
-		InitCountingBean proxy = (InitCountingBean) ProxyFactory.getProxy(targetSource);
-		assertEquals("Init count should be 0", 0, InitCountingBean.initCount);
-		assertEquals("Target class incorrect", InitCountingBean.class, targetSource.getTargetClass());
-		assertEquals("Init count should still be 0 after getTargetClass()", 0, InitCountingBean.initCount);
+            @Override
+            public Class<?> getTargetClass() {
+                return InitCountingBean.class;
+            }
+        };
 
-		proxy.doSomething();
-		assertEquals("Init count should now be 1", 1, InitCountingBean.initCount);
+        InitCountingBean proxy = (InitCountingBean) ProxyFactory.getProxy(targetSource);
+        assertEquals("Init count should be 0", 0, InitCountingBean.initCount);
+        assertEquals("Target class incorrect", InitCountingBean.class, targetSource.getTargetClass());
+        assertEquals("Init count should still be 0 after getTargetClass()", 0, InitCountingBean.initCount);
 
-		proxy.doSomething();
-		assertEquals("Init count should still be 1", 1, InitCountingBean.initCount);
-	}
+        proxy.doSomething();
+        assertEquals("Init count should now be 1", 1, InitCountingBean.initCount);
+
+        proxy.doSomething();
+        assertEquals("Init count should still be 1", 1, InitCountingBean.initCount);
+    }
 
 
-	private static class InitCountingBean {
+    private static class InitCountingBean {
 
-		public static int initCount;
+        public static int initCount;
 
-		public InitCountingBean() {
-			if (InitCountingBean.class.equals(getClass())) {
-				// only increment when creating the actual target - not the proxy
-				initCount++;
-			}
-		}
+        public InitCountingBean() {
+            if (InitCountingBean.class.equals(getClass())) {
+                // only increment when creating the actual target - not the proxy
+                initCount++;
+            }
+        }
 
-		public void doSomething() {
-			//no-op
-		}
-	}
+        public void doSomething() {
+            //no-op
+        }
+    }
 
 }

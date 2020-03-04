@@ -29,21 +29,23 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class DataRetrievalFailureException extends NonTransientDataAccessException {
 
-	/**
-	 * Constructor for DataRetrievalFailureException.
-	 * @param msg the detail message
-	 */
-	public DataRetrievalFailureException(String msg) {
-		super(msg);
-	}
+    /**
+     * Constructor for DataRetrievalFailureException.
+     *
+     * @param msg the detail message
+     */
+    public DataRetrievalFailureException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Constructor for DataRetrievalFailureException.
-	 * @param msg the detail message
-	 * @param cause the root cause from the data access API in use
-	 */
-	public DataRetrievalFailureException(String msg, @Nullable Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Constructor for DataRetrievalFailureException.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause from the data access API in use
+     */
+    public DataRetrievalFailureException(String msg, @Nullable Throwable cause) {
+        super(msg, cause);
+    }
 
 }

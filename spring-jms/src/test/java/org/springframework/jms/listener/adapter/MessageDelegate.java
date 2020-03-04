@@ -28,12 +28,12 @@ import javax.jms.TextMessage;
  */
 public interface MessageDelegate {
 
-	void handleMessage(TextMessage message);
+    void handleMessage(TextMessage message);
 
-	void handleMessage(MapMessage message);
+    void handleMessage(MapMessage message);
 
-	void handleMessage(BytesMessage message);
+    void handleMessage(BytesMessage message);
 
-	void handleMessage(ObjectMessage message);
+    void handleMessage(ObjectMessage message);
 
 }

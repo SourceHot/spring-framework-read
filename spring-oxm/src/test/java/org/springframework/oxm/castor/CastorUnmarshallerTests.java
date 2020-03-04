@@ -16,24 +16,27 @@
 
 package org.springframework.oxm.castor;
 
+import org.junit.Ignore;
+import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.oxm.AbstractUnmarshallerTests;
+import org.springframework.oxm.MarshallingException;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
+
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamSource;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
-
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.oxm.AbstractUnmarshallerTests;
-import org.springframework.oxm.MarshallingException;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -43,218 +46,218 @@ import static org.junit.Assert.*;
 @Deprecated
 public class CastorUnmarshallerTests extends AbstractUnmarshallerTests<CastorMarshaller> {
 
-	/**
-	 * Represents the xml with additional attribute that is not mapped in Castor config.
-	 */
-	protected static final String EXTRA_ATTRIBUTES_STRING =
-			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
-			"<tns:flight status=\"canceled\"><tns:number>42</tns:number></tns:flight></tns:flights>";
+    /**
+     * Represents the xml with additional attribute that is not mapped in Castor config.
+     */
+    protected static final String EXTRA_ATTRIBUTES_STRING =
+            "<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
+                    "<tns:flight status=\"canceled\"><tns:number>42</tns:number></tns:flight></tns:flights>";
 
-	/**
-	 * Represents the xml with additional element that is not mapped in Castor config.
-	 */
-	protected static final String EXTRA_ELEMENTS_STRING =
-			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
-			"<tns:flight><tns:number>42</tns:number><tns:date>2011-06-14</tns:date>" +
-			"</tns:flight></tns:flights>";
-
-
-	@Override
-	protected CastorMarshaller createUnmarshaller() throws Exception {
-		CastorMarshaller marshaller = new CastorMarshaller();
-		ClassPathResource mappingLocation = new ClassPathResource("mapping.xml", CastorMarshaller.class);
-		marshaller.setMappingLocation(mappingLocation);
-		marshaller.afterPropertiesSet();
-		return marshaller;
-	}
-
-	@Override
-	protected void testFlights(Object o) {
-		Flights flights = (Flights) o;
-		assertNotNull("Flights is null", flights);
-		assertEquals("Invalid amount of flight elements", 1, flights.getFlightCount());
-		testFlight(flights.getFlight()[0]);
-	}
-
-	@Override
-	protected void testFlight(Object o) {
-		Flight flight = (Flight) o;
-		assertNotNull("Flight is null", flight);
-		assertThat("Number is invalid", flight.getNumber(), equalTo(42L));
-	}
+    /**
+     * Represents the xml with additional element that is not mapped in Castor config.
+     */
+    protected static final String EXTRA_ELEMENTS_STRING =
+            "<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
+                    "<tns:flight><tns:number>42</tns:number><tns:date>2011-06-14</tns:date>" +
+                    "</tns:flight></tns:flights>";
 
 
-	@Test
-	public void unmarshalTargetClass() throws Exception {
-		CastorMarshaller unmarshaller = new CastorMarshaller();
-		unmarshaller.setTargetClasses(Flights.class);
-		unmarshaller.afterPropertiesSet();
-		StreamSource source = new StreamSource(new ByteArrayInputStream(INPUT_STRING.getBytes("UTF-8")));
-		Object flights = unmarshaller.unmarshal(source);
-		testFlights(flights);
-	}
+    @Override
+    protected CastorMarshaller createUnmarshaller() throws Exception {
+        CastorMarshaller marshaller = new CastorMarshaller();
+        ClassPathResource mappingLocation = new ClassPathResource("mapping.xml", CastorMarshaller.class);
+        marshaller.setMappingLocation(mappingLocation);
+        marshaller.afterPropertiesSet();
+        return marshaller;
+    }
 
-	@Test
-	public void setBothTargetClassesAndMapping() throws IOException {
-		CastorMarshaller unmarshaller = new CastorMarshaller();
-		unmarshaller.setMappingLocation(new ClassPathResource("order-mapping.xml", CastorMarshaller.class));
-		unmarshaller.setTargetClasses(Order.class);
-		unmarshaller.afterPropertiesSet();
+    @Override
+    protected void testFlights(Object o) {
+        Flights flights = (Flights) o;
+        assertNotNull("Flights is null", flights);
+        assertEquals("Invalid amount of flight elements", 1, flights.getFlightCount());
+        testFlight(flights.getFlight()[0]);
+    }
 
-		String xml = "<order>" +
-				"<order-item id=\"1\" quantity=\"15\"/>" +
-				"<order-item id=\"3\" quantity=\"20\"/>" +
-				"</order>";
+    @Override
+    protected void testFlight(Object o) {
+        Flight flight = (Flight) o;
+        assertNotNull("Flight is null", flight);
+        assertThat("Number is invalid", flight.getNumber(), equalTo(42L));
+    }
 
-		Order order = (Order) unmarshaller.unmarshal(new StreamSource(new StringReader(xml)));
-		assertEquals("Invalid amount of items", 2, order.getOrderItemCount());
-		OrderItem item = order.getOrderItem(0);
-		assertEquals("Invalid items", "1", item.getId());
-		assertThat("Invalid items", item.getQuantity(), equalTo(15));
-		item = order.getOrderItem(1);
-		assertEquals("Invalid items", "3", item.getId());
-		assertThat("Invalid items", item.getQuantity(), equalTo(20));
-	}
 
-	@Test
-	public void whitespacePreserveTrue() throws Exception {
-		unmarshaller.setWhitespacePreserve(true);
-		Object result = unmarshalFlights();
-		testFlights(result);
-	}
+    @Test
+    public void unmarshalTargetClass() throws Exception {
+        CastorMarshaller unmarshaller = new CastorMarshaller();
+        unmarshaller.setTargetClasses(Flights.class);
+        unmarshaller.afterPropertiesSet();
+        StreamSource source = new StreamSource(new ByteArrayInputStream(INPUT_STRING.getBytes("UTF-8")));
+        Object flights = unmarshaller.unmarshal(source);
+        testFlights(flights);
+    }
 
-	@Test
-	public void whitespacePreserveFalse() throws Exception {
-		unmarshaller.setWhitespacePreserve(false);
-		Object result = unmarshalFlights();
-		testFlights(result);
-	}
+    @Test
+    public void setBothTargetClassesAndMapping() throws IOException {
+        CastorMarshaller unmarshaller = new CastorMarshaller();
+        unmarshaller.setMappingLocation(new ClassPathResource("order-mapping.xml", CastorMarshaller.class));
+        unmarshaller.setTargetClasses(Order.class);
+        unmarshaller.afterPropertiesSet();
 
-	@Test
-	public void ignoreExtraAttributesTrue() throws Exception {
-		unmarshaller.setIgnoreExtraAttributes(true);
-		Object result = unmarshal(EXTRA_ATTRIBUTES_STRING);
-		testFlights(result);
-	}
+        String xml = "<order>" +
+                "<order-item id=\"1\" quantity=\"15\"/>" +
+                "<order-item id=\"3\" quantity=\"20\"/>" +
+                "</order>";
 
-	@Test(expected = MarshallingException.class)
-	public void ignoreExtraAttributesFalse() throws Exception {
-		unmarshaller.setIgnoreExtraAttributes(false);
-		unmarshal(EXTRA_ATTRIBUTES_STRING);
-	}
+        Order order = (Order) unmarshaller.unmarshal(new StreamSource(new StringReader(xml)));
+        assertEquals("Invalid amount of items", 2, order.getOrderItemCount());
+        OrderItem item = order.getOrderItem(0);
+        assertEquals("Invalid items", "1", item.getId());
+        assertThat("Invalid items", item.getQuantity(), equalTo(15));
+        item = order.getOrderItem(1);
+        assertEquals("Invalid items", "3", item.getId());
+        assertThat("Invalid items", item.getQuantity(), equalTo(20));
+    }
 
-	@Test
-	@Ignore("Not working yet")
-	public void ignoreExtraElementsTrue() throws Exception {
-		unmarshaller.setIgnoreExtraElements(true);
-		unmarshaller.setValidating(false);
-		Object result = unmarshal(EXTRA_ELEMENTS_STRING);
-		testFlights(result);
-	}
+    @Test
+    public void whitespacePreserveTrue() throws Exception {
+        unmarshaller.setWhitespacePreserve(true);
+        Object result = unmarshalFlights();
+        testFlights(result);
+    }
 
-	@Test(expected = MarshallingException.class)
-	public void ignoreExtraElementsFalse() throws Exception {
-		unmarshaller.setIgnoreExtraElements(false);
-		unmarshal(EXTRA_ELEMENTS_STRING);
-	}
+    @Test
+    public void whitespacePreserveFalse() throws Exception {
+        unmarshaller.setWhitespacePreserve(false);
+        Object result = unmarshalFlights();
+        testFlights(result);
+    }
 
-	@Test
-	public void rootObject() throws Exception {
-		Flights flights = new Flights();
-		unmarshaller.setRootObject(flights);
-		Object result = unmarshalFlights();
-		testFlights(result);
-		assertSame("Result Flights is different object.", flights, result);
-	}
+    @Test
+    public void ignoreExtraAttributesTrue() throws Exception {
+        unmarshaller.setIgnoreExtraAttributes(true);
+        Object result = unmarshal(EXTRA_ATTRIBUTES_STRING);
+        testFlights(result);
+    }
 
-	@Test
-	public void clearCollectionsTrue() throws Exception {
-		Flights flights = new Flights();
-		flights.setFlight(new Flight[]{new Flight()});
-		unmarshaller.setRootObject(flights);
-		unmarshaller.setClearCollections(true);
-		Object result = unmarshalFlights();
+    @Test(expected = MarshallingException.class)
+    public void ignoreExtraAttributesFalse() throws Exception {
+        unmarshaller.setIgnoreExtraAttributes(false);
+        unmarshal(EXTRA_ATTRIBUTES_STRING);
+    }
 
-		assertSame("Result Flights is different object.", flights, result);
-		assertEquals("Result Flights has incorrect number of Flight.", 1, ((Flights) result).getFlightCount());
-		testFlights(result);
-	}
+    @Test
+    @Ignore("Not working yet")
+    public void ignoreExtraElementsTrue() throws Exception {
+        unmarshaller.setIgnoreExtraElements(true);
+        unmarshaller.setValidating(false);
+        Object result = unmarshal(EXTRA_ELEMENTS_STRING);
+        testFlights(result);
+    }
 
-	@Test
-	public void clearCollectionsFalse() throws Exception {
-		Flights flights = new Flights();
-		flights.setFlight(new Flight[] {new Flight(), null});
-		unmarshaller.setRootObject(flights);
-		unmarshaller.setClearCollections(false);
-		Object result = unmarshalFlights();
+    @Test(expected = MarshallingException.class)
+    public void ignoreExtraElementsFalse() throws Exception {
+        unmarshaller.setIgnoreExtraElements(false);
+        unmarshal(EXTRA_ELEMENTS_STRING);
+    }
 
-		assertSame("Result Flights is different object.", flights, result);
-		assertEquals("Result Flights has incorrect number of Flights.", 3, ((Flights) result).getFlightCount());
-		assertNull("Null Flight was expected.", flights.getFlight()[1]);
-		testFlight(flights.getFlight()[2]);
-	}
+    @Test
+    public void rootObject() throws Exception {
+        Flights flights = new Flights();
+        unmarshaller.setRootObject(flights);
+        Object result = unmarshalFlights();
+        testFlights(result);
+        assertSame("Result Flights is different object.", flights, result);
+    }
 
-	@Test
-	public void unmarshalStreamSourceWithXmlOptions() throws Exception {
-		final AtomicReference<XMLReader> result = new AtomicReference<>();
-		CastorMarshaller marshaller = new CastorMarshaller() {
-			@Override
-			protected Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource) {
-				result.set(xmlReader);
-				return null;
-			}
-		};
+    @Test
+    public void clearCollectionsTrue() throws Exception {
+        Flights flights = new Flights();
+        flights.setFlight(new Flight[]{new Flight()});
+        unmarshaller.setRootObject(flights);
+        unmarshaller.setClearCollections(true);
+        Object result = unmarshalFlights();
 
-		// 1. external-general-entities and dtd support disabled (default)
-		marshaller.unmarshal(new StreamSource("1"));
-		assertNotNull(result.get());
-		assertEquals(true, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
-		assertEquals(false, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
+        assertSame("Result Flights is different object.", flights, result);
+        assertEquals("Result Flights has incorrect number of Flight.", 1, ((Flights) result).getFlightCount());
+        testFlights(result);
+    }
 
-		// 2. external-general-entities and dtd support enabled
-		result.set(null);
-		marshaller.setSupportDtd(true);
-		marshaller.setProcessExternalEntities(true);
-		marshaller.unmarshal(new StreamSource("1"));
-		assertNotNull(result.get());
-		assertEquals(false, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
-		assertEquals(true, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
-	}
+    @Test
+    public void clearCollectionsFalse() throws Exception {
+        Flights flights = new Flights();
+        flights.setFlight(new Flight[]{new Flight(), null});
+        unmarshaller.setRootObject(flights);
+        unmarshaller.setClearCollections(false);
+        Object result = unmarshalFlights();
 
-	@Test
-	public void unmarshalSaxSourceWithXmlOptions() throws Exception {
-		final AtomicReference<XMLReader> result = new AtomicReference<>();
-		CastorMarshaller marshaller = new CastorMarshaller() {
-			@Override
-			protected Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource) {
-				result.set(xmlReader);
-				return null;
-			}
-		};
+        assertSame("Result Flights is different object.", flights, result);
+        assertEquals("Result Flights has incorrect number of Flights.", 3, ((Flights) result).getFlightCount());
+        assertNull("Null Flight was expected.", flights.getFlight()[1]);
+        testFlight(flights.getFlight()[2]);
+    }
 
-		// 1. external-general-entities and dtd support disabled (default)
-		marshaller.unmarshal(new SAXSource(new InputSource("1")));
-		assertNotNull(result.get());
-		assertEquals(true, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
-		assertEquals(false, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
+    @Test
+    public void unmarshalStreamSourceWithXmlOptions() throws Exception {
+        final AtomicReference<XMLReader> result = new AtomicReference<>();
+        CastorMarshaller marshaller = new CastorMarshaller() {
+            @Override
+            protected Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource) {
+                result.set(xmlReader);
+                return null;
+            }
+        };
 
-		// 2. external-general-entities and dtd support enabled
-		result.set(null);
-		marshaller.setSupportDtd(true);
-		marshaller.setProcessExternalEntities(true);
-		marshaller.unmarshal(new SAXSource(new InputSource("1")));
-		assertNotNull(result.get());
-		assertEquals(false, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
-		assertEquals(true, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
-	}
+        // 1. external-general-entities and dtd support disabled (default)
+        marshaller.unmarshal(new StreamSource("1"));
+        assertNotNull(result.get());
+        assertEquals(true, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
+        assertEquals(false, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
 
-	private Object unmarshalFlights() throws Exception {
-		return unmarshal(INPUT_STRING);
-	}
+        // 2. external-general-entities and dtd support enabled
+        result.set(null);
+        marshaller.setSupportDtd(true);
+        marshaller.setProcessExternalEntities(true);
+        marshaller.unmarshal(new StreamSource("1"));
+        assertNotNull(result.get());
+        assertEquals(false, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
+        assertEquals(true, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
+    }
 
-	private Object unmarshal(String xml) throws Exception {
-		StreamSource source = new StreamSource(new StringReader(xml));
-		return unmarshaller.unmarshal(source);
-	}
+    @Test
+    public void unmarshalSaxSourceWithXmlOptions() throws Exception {
+        final AtomicReference<XMLReader> result = new AtomicReference<>();
+        CastorMarshaller marshaller = new CastorMarshaller() {
+            @Override
+            protected Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource) {
+                result.set(xmlReader);
+                return null;
+            }
+        };
+
+        // 1. external-general-entities and dtd support disabled (default)
+        marshaller.unmarshal(new SAXSource(new InputSource("1")));
+        assertNotNull(result.get());
+        assertEquals(true, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
+        assertEquals(false, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
+
+        // 2. external-general-entities and dtd support enabled
+        result.set(null);
+        marshaller.setSupportDtd(true);
+        marshaller.setProcessExternalEntities(true);
+        marshaller.unmarshal(new SAXSource(new InputSource("1")));
+        assertNotNull(result.get());
+        assertEquals(false, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
+        assertEquals(true, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
+    }
+
+    private Object unmarshalFlights() throws Exception {
+        return unmarshal(INPUT_STRING);
+    }
+
+    private Object unmarshal(String xml) throws Exception {
+        StreamSource source = new StreamSource(new StringReader(xml));
+        return unmarshaller.unmarshal(source);
+    }
 
 }

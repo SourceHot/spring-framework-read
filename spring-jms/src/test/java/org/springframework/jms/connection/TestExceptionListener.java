@@ -24,15 +24,15 @@ import javax.jms.JMSException;
  */
 public class TestExceptionListener implements ExceptionListener {
 
-	private int count = 0;
+    private int count = 0;
 
-	@Override
-	public void onException(JMSException ex) {
-		this.count++;
-	}
+    @Override
+    public void onException(JMSException ex) {
+        this.count++;
+    }
 
-	public int getCount() {
-		return count;
-	}
+    public int getCount() {
+        return count;
+    }
 
 }

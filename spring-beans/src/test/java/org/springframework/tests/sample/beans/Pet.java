@@ -22,36 +22,36 @@ package org.springframework.tests.sample.beans;
  */
 public class Pet {
 
-	private String name;
+    private String name;
 
-	public Pet(String name) {
-		this.name = name;
-	}
+    public Pet(String name) {
+        this.name = name;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public String toString() {
-		return getName();
-	}
+    @Override
+    public String toString() {
+        return getName();
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-		final Pet pet = (Pet) o;
+        final Pet pet = (Pet) o;
 
-		if (name != null ? !name.equals(pet.name) : pet.name != null) return false;
+        if (name != null ? !name.equals(pet.name) : pet.name != null) return false;
 
-		return true;
-	}
+        return true;
+    }
 
-	@Override
-	public int hashCode() {
-		return (name != null ? name.hashCode() : 0);
-	}
+    @Override
+    public int hashCode() {
+        return (name != null ? name.hashCode() : 0);
+    }
 
 }

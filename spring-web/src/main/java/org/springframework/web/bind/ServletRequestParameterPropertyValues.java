@@ -16,11 +16,11 @@
 
 package org.springframework.web.bind;
 
-import javax.servlet.ServletRequest;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.lang.Nullable;
 import org.springframework.web.util.WebUtils;
+
+import javax.servlet.ServletRequest;
 
 /**
  * PropertyValues implementation created from parameters in a ServletRequest.
@@ -40,46 +40,51 @@ import org.springframework.web.util.WebUtils;
 @SuppressWarnings("serial")
 public class ServletRequestParameterPropertyValues extends MutablePropertyValues {
 
-	/** Default prefix separator. */
-	public static final String DEFAULT_PREFIX_SEPARATOR = "_";
+    /**
+     * Default prefix separator.
+     */
+    public static final String DEFAULT_PREFIX_SEPARATOR = "_";
 
 
-	/**
-	 * Create new ServletRequestPropertyValues using no prefix
-	 * (and hence, no prefix separator).
-	 * @param request the HTTP request
-	 */
-	public ServletRequestParameterPropertyValues(ServletRequest request) {
-		this(request, null, null);
-	}
+    /**
+     * Create new ServletRequestPropertyValues using no prefix
+     * (and hence, no prefix separator).
+     *
+     * @param request the HTTP request
+     */
+    public ServletRequestParameterPropertyValues(ServletRequest request) {
+        this(request, null, null);
+    }
 
-	/**
-	 * Create new ServletRequestPropertyValues using the given prefix and
-	 * the default prefix separator (the underscore character "_").
-	 * @param request the HTTP request
-	 * @param prefix the prefix for parameters (the full prefix will
-	 * consist of this plus the separator)
-	 * @see #DEFAULT_PREFIX_SEPARATOR
-	 */
-	public ServletRequestParameterPropertyValues(ServletRequest request, @Nullable String prefix) {
-		this(request, prefix, DEFAULT_PREFIX_SEPARATOR);
-	}
+    /**
+     * Create new ServletRequestPropertyValues using the given prefix and
+     * the default prefix separator (the underscore character "_").
+     *
+     * @param request the HTTP request
+     * @param prefix  the prefix for parameters (the full prefix will
+     *                consist of this plus the separator)
+     * @see #DEFAULT_PREFIX_SEPARATOR
+     */
+    public ServletRequestParameterPropertyValues(ServletRequest request, @Nullable String prefix) {
+        this(request, prefix, DEFAULT_PREFIX_SEPARATOR);
+    }
 
-	/**
-	 * Create new ServletRequestPropertyValues supplying both prefix and
-	 * prefix separator.
-	 * @param request the HTTP request
-	 * @param prefix the prefix for parameters (the full prefix will
-	 * consist of this plus the separator)
-	 * @param prefixSeparator separator delimiting prefix (e.g. "spring")
-	 * and the rest of the parameter name ("param1", "param2")
-	 */
-	public ServletRequestParameterPropertyValues(
-			ServletRequest request, @Nullable String prefix, @Nullable String prefixSeparator) {
+    /**
+     * Create new ServletRequestPropertyValues supplying both prefix and
+     * prefix separator.
+     *
+     * @param request         the HTTP request
+     * @param prefix          the prefix for parameters (the full prefix will
+     *                        consist of this plus the separator)
+     * @param prefixSeparator separator delimiting prefix (e.g. "spring")
+     *                        and the rest of the parameter name ("param1", "param2")
+     */
+    public ServletRequestParameterPropertyValues(
+            ServletRequest request, @Nullable String prefix, @Nullable String prefixSeparator) {
 
-		// 初始化
-		super(WebUtils.getParametersStartingWith(
-				request, (prefix != null ? prefix + prefixSeparator : null)));
-	}
+        // 初始化
+        super(WebUtils.getParametersStartingWith(
+                request, (prefix != null ? prefix + prefixSeparator : null)));
+    }
 
 }

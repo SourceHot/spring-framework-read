@@ -16,11 +16,10 @@
 
 package org.springframework.test.context.testng;
 
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-import org.springframework.test.context.ContextConfiguration;
-
-import static org.springframework.test.transaction.TransactionTestUtils.*;
+import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 /**
  * Timed integration tests for
@@ -34,15 +33,15 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
 @ContextConfiguration
 public class TimedTransactionalTestNGSpringContextTests extends AbstractTransactionalTestNGSpringContextTests {
 
-	@Test
-	public void testWithoutTimeout() {
-		assertInTransaction(true);
-	}
+    @Test
+    public void testWithoutTimeout() {
+        assertInTransaction(true);
+    }
 
-	// TODO Enable TestNG test with timeout once we have a solution.
-	@Test(timeOut = 10000, enabled = false)
-	public void testWithTimeout() {
-		assertInTransaction(true);
-	}
+    // TODO Enable TestNG test with timeout once we have a solution.
+    @Test(timeOut = 10000, enabled = false)
+    public void testWithTimeout() {
+        assertInTransaction(true);
+    }
 
 }

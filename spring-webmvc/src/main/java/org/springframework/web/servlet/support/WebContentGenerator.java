@@ -16,18 +16,6 @@
 
 package org.springframework.web.servlet.support;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -37,6 +25,17 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Convenient superclass for any kind of web content generator,
@@ -187,8 +186,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
     public final void setSupportedMethods(@Nullable String... methods) {
         if (!ObjectUtils.isEmpty(methods)) {
             this.supportedMethods = new LinkedHashSet<>(Arrays.asList(methods));
-        }
-        else {
+        } else {
             this.supportedMethods = null;
         }
         initAllowHeader();
@@ -203,11 +201,9 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
                     allowedMethods.add(method.name());
                 }
             }
-        }
-        else if (this.supportedMethods.contains(HttpMethod.OPTIONS.name())) {
+        } else if (this.supportedMethods.contains(HttpMethod.OPTIONS.name())) {
             allowedMethods = this.supportedMethods;
-        }
-        else {
+        } else {
             allowedMethods = new ArrayList<>(this.supportedMethods);
             allowedMethods.add(HttpMethod.OPTIONS.name());
 
@@ -407,8 +403,9 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
     /**
      * Check the given request for supported methods and a required session, if any.
-     *
+     * <p>
      * 校验请求
+     *
      * @param request current HTTP request
      * @throws ServletException if the request cannot be handled because a check failed
      * @since 4.2
@@ -431,8 +428,9 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
     /**
      * Prepare the given response according to the settings of this generator.
      * Applies the number of cache seconds specified for this generator.
-     *
+     * <p>
      * 设置response
+     *
      * @param response current HTTP response
      * @since 4.2
      */
@@ -440,8 +438,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
         if (this.cacheControl != null) {
             // 缓存
             applyCacheControl(response, this.cacheControl);
-        }
-        else {
+        } else {
             // 缓存时间
             applyCacheSeconds(response, this.cacheSeconds);
         }
@@ -493,23 +490,19 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
             // Deprecated HTTP 1.0 cache behavior, as in previous Spring versions
             if (cacheSeconds > 0) {
                 cacheForSeconds(response, cacheSeconds);
-            }
-            else if (cacheSeconds == 0) {
+            } else if (cacheSeconds == 0) {
                 preventCaching(response);
             }
-        }
-        else {
+        } else {
             CacheControl cControl;
             if (cacheSeconds > 0) {
                 cControl = CacheControl.maxAge(cacheSeconds, TimeUnit.SECONDS);
                 if (this.alwaysMustRevalidate) {
                     cControl = cControl.mustRevalidate();
                 }
-            }
-            else if (cacheSeconds == 0) {
+            } else if (cacheSeconds == 0) {
                 cControl = (this.useCacheControlNoStore ? CacheControl.noStore() : CacheControl.noCache());
-            }
-            else {
+            } else {
                 cControl = CacheControl.empty();
             }
             applyCacheControl(response, cControl);
@@ -570,8 +563,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
     protected final void applyCacheSeconds(HttpServletResponse response, int cacheSeconds, boolean mustRevalidate) {
         if (cacheSeconds > 0) {
             cacheForSeconds(response, cacheSeconds, mustRevalidate);
-        }
-        else if (cacheSeconds == 0) {
+        } else if (cacheSeconds == 0) {
             preventCaching(response);
         }
     }
@@ -607,8 +599,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
         if (this.useExpiresHeader) {
             // HTTP 1.0 header
             response.setDateHeader(HEADER_EXPIRES, System.currentTimeMillis() + seconds * 1000L);
-        }
-        else if (response.containsHeader(HEADER_EXPIRES)) {
+        } else if (response.containsHeader(HEADER_EXPIRES)) {
             // Reset HTTP 1.0 Expires header if present
             response.setHeader(HEADER_EXPIRES, "");
         }

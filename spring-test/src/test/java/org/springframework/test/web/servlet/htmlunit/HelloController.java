@@ -16,10 +16,10 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Rob Winch
@@ -28,9 +28,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HelloController {
 
-	@RequestMapping
-	public String header(HttpServletRequest request) {
-		return "hello";
-	}
+    @RequestMapping
+    public String header(HttpServletRequest request) {
+        return "hello";
+    }
 
 }

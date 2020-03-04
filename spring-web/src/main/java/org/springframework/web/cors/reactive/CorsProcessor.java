@@ -27,18 +27,19 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
- * @since 5.0
  * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+ * @since 5.0
  */
 public interface CorsProcessor {
 
-	/**
-	 * Process a request using the given {@code CorsConfiguration}.
-	 * @param configuration the CORS configuration to use; possibly {@code null}
-	 * in which case pre-flight requests are rejected, but all others allowed.
-	 * @param exchange the current exchange
-	 * @return {@code false} if the request was rejected, {@code true} otherwise
-	 */
-	boolean process(@Nullable CorsConfiguration configuration, ServerWebExchange exchange);
+    /**
+     * Process a request using the given {@code CorsConfiguration}.
+     *
+     * @param configuration the CORS configuration to use; possibly {@code null}
+     *                      in which case pre-flight requests are rejected, but all others allowed.
+     * @param exchange      the current exchange
+     * @return {@code false} if the request was rejected, {@code true} otherwise
+     */
+    boolean process(@Nullable CorsConfiguration configuration, ServerWebExchange exchange);
 
 }

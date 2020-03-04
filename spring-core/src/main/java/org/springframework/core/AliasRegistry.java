@@ -38,8 +38,8 @@ public interface AliasRegistry {
 
     /**
      * Remove the specified alias from this registry.
-	 * 别名移除
-	 *
+     * 别名移除
+     *
      * @param alias the alias to remove
      * @throws IllegalStateException if no such alias was found
      */
@@ -48,8 +48,8 @@ public interface AliasRegistry {
     /**
      * Determine whether this given name is defines as an alias
      * (as opposed to the name of an actually registered component).
-	 * 是不是别名
-	 *
+     * 是不是别名
+     *
      * @param name the name to check
      * @return whether the given name is an alias
      */
@@ -57,8 +57,8 @@ public interface AliasRegistry {
 
     /**
      * Return the aliases for the given name, if defined.
-	 * 从别名注册map中获取别名信息
-	 *
+     * 从别名注册map中获取别名信息
+     *
      * @param name the name to check for aliases
      * @return the aliases, or an empty array if none
      */

@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
+import org.springframework.jdbc.datasource.AbstractDataSource;
+
 import java.sql.Connection;
 import java.sql.SQLException;
-
-import org.springframework.jdbc.datasource.AbstractDataSource;
 
 /**
  * Stub, do-nothing DataSource implementation.
@@ -30,14 +30,14 @@ import org.springframework.jdbc.datasource.AbstractDataSource;
  */
 class StubDataSource extends AbstractDataSource {
 
-	@Override
-	public Connection getConnection() throws SQLException {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public Connection getConnection() throws SQLException {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public Connection getConnection(String username, String password) throws SQLException {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public Connection getConnection(String username, String password) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
 
 }

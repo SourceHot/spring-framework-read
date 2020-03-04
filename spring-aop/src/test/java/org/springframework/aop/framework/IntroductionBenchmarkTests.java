@@ -17,7 +17,6 @@
 package org.springframework.aop.framework;
 
 import org.junit.Test;
-
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
@@ -25,7 +24,7 @@ import org.springframework.util.StopWatch;
 
 /**
  * Benchmarks for introductions.
- *
+ * <p>
  * NOTE: No assertions!
  *
  * @author Rod Johnson
@@ -34,54 +33,55 @@ import org.springframework.util.StopWatch;
  */
 public class IntroductionBenchmarkTests {
 
-	private static final int EXPECTED_COMPARE = 13;
+    private static final int EXPECTED_COMPARE = 13;
 
-	/** Increase this if you want meaningful results! */
-	private static final int INVOCATIONS = 100000;
+    /**
+     * Increase this if you want meaningful results!
+     */
+    private static final int INVOCATIONS = 100000;
 
+    @Test
+    public void timeManyInvocations() {
+        StopWatch sw = new StopWatch();
 
-	@SuppressWarnings("serial")
-	public static class SimpleCounterIntroduction extends DelegatingIntroductionInterceptor implements Counter {
-		@Override
-		public int getCount() {
-			return EXPECTED_COMPARE;
-		}
-	}
+        TestBean target = new TestBean();
+        ProxyFactory pf = new ProxyFactory(target);
+        pf.setProxyTargetClass(false);
+        pf.addAdvice(new SimpleCounterIntroduction());
+        ITestBean proxy = (ITestBean) pf.getProxy();
 
-	public static interface Counter {
-		int getCount();
-	}
+        Counter counter = (Counter) proxy;
 
-	@Test
-	public void timeManyInvocations() {
-		StopWatch sw = new StopWatch();
+        sw.start(INVOCATIONS + " invocations on proxy, not hitting introduction");
+        for (int i = 0; i < INVOCATIONS; i++) {
+            proxy.getAge();
+        }
+        sw.stop();
 
-		TestBean target = new TestBean();
-		ProxyFactory pf = new ProxyFactory(target);
-		pf.setProxyTargetClass(false);
-		pf.addAdvice(new SimpleCounterIntroduction());
-		ITestBean proxy = (ITestBean) pf.getProxy();
+        sw.start(INVOCATIONS + " invocations on proxy, hitting introduction");
+        for (int i = 0; i < INVOCATIONS; i++) {
+            counter.getCount();
+        }
+        sw.stop();
 
-		Counter counter = (Counter) proxy;
+        sw.start(INVOCATIONS + " invocations on target");
+        for (int i = 0; i < INVOCATIONS; i++) {
+            target.getAge();
+        }
+        sw.stop();
 
-		sw.start(INVOCATIONS + " invocations on proxy, not hitting introduction");
-		for (int i = 0; i < INVOCATIONS; i++) {
-			proxy.getAge();
-		}
-		sw.stop();
+        System.out.println(sw.prettyPrint());
+    }
 
-		sw.start(INVOCATIONS + " invocations on proxy, hitting introduction");
-		for (int i = 0; i < INVOCATIONS; i++) {
-			counter.getCount();
-		}
-		sw.stop();
+    public static interface Counter {
+        int getCount();
+    }
 
-		sw.start(INVOCATIONS + " invocations on target");
-		for (int i = 0; i < INVOCATIONS; i++) {
-			target.getAge();
-		}
-		sw.stop();
-
-		System.out.println(sw.prettyPrint());
-	}
+    @SuppressWarnings("serial")
+    public static class SimpleCounterIntroduction extends DelegatingIntroductionInterceptor implements Counter {
+        @Override
+        public int getCount() {
+            return EXPECTED_COMPARE;
+        }
+    }
 }

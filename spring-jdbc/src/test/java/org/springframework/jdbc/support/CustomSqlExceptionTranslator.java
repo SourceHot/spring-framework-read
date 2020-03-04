@@ -16,11 +16,11 @@
 
 package org.springframework.jdbc.support;
 
-import java.sql.SQLException;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.lang.Nullable;
+
+import java.sql.SQLException;
 
 /**
  * Custom SQLException translation for testing.
@@ -29,12 +29,12 @@ import org.springframework.lang.Nullable;
  */
 public class CustomSqlExceptionTranslator implements SQLExceptionTranslator {
 
-	@Override
-	public DataAccessException translate(String task, @Nullable String sql, SQLException ex) {
-		if (ex.getErrorCode() == 2) {
-			return new TransientDataAccessResourceException("Custom", ex);
-		}
-		return null;
-	}
+    @Override
+    public DataAccessException translate(String task, @Nullable String sql, SQLException ex) {
+        if (ex.getErrorCode() == 2) {
+            return new TransientDataAccessResourceException("Custom", ex);
+        }
+        return null;
+    }
 
 }

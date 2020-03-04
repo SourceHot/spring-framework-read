@@ -16,11 +16,11 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.io.IOException;
-
 import org.springframework.core.io.Resource;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.FileCopyUtils;
+
+import java.io.IOException;
 
 /**
  * A {@code VersionStrategy} that calculates an Hex MD5 hashes from the content
@@ -29,24 +29,23 @@ import org.springframework.util.FileCopyUtils;
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
- * @since 4.1
  * @see VersionResourceResolver
+ * @since 4.1
  */
 public class ContentVersionStrategy extends AbstractVersionStrategy {
 
-	public ContentVersionStrategy() {
-		super(new FileNameVersionPathStrategy());
-	}
+    public ContentVersionStrategy() {
+        super(new FileNameVersionPathStrategy());
+    }
 
-	@Override
-	public String getResourceVersion(Resource resource) {
-		try {
-			byte[] content = FileCopyUtils.copyToByteArray(resource.getInputStream());
-			return DigestUtils.md5DigestAsHex(content);
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException("Failed to calculate hash for " + resource, ex);
-		}
-	}
+    @Override
+    public String getResourceVersion(Resource resource) {
+        try {
+            byte[] content = FileCopyUtils.copyToByteArray(resource.getInputStream());
+            return DigestUtils.md5DigestAsHex(content);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Failed to calculate hash for " + resource, ex);
+        }
+    }
 
 }

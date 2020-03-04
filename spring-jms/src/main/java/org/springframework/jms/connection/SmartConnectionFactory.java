@@ -28,12 +28,13 @@ import javax.jms.ConnectionFactory;
  */
 public interface SmartConnectionFactory extends ConnectionFactory {
 
-	/**
-	 * Should we stop the Connection, obtained from this ConnectionFactory?
-	 * @param con the Connection to check
-	 * @return whether a stop call is necessary
-	 * @see javax.jms.Connection#stop()
-	 */
-	boolean shouldStop(Connection con);
+    /**
+     * Should we stop the Connection, obtained from this ConnectionFactory?
+     *
+     * @param con the Connection to check
+     * @return whether a stop call is necessary
+     * @see javax.jms.Connection#stop()
+     */
+    boolean shouldStop(Connection con);
 
 }

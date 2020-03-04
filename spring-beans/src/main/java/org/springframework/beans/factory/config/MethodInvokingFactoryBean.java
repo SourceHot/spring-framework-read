@@ -77,76 +77,75 @@ import org.springframework.lang.Nullable;
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
- * @since 21.11.2003
  * @see MethodInvokingBean
  * @see org.springframework.util.MethodInvoker
+ * @since 21.11.2003
  */
 public class MethodInvokingFactoryBean extends MethodInvokingBean implements FactoryBean<Object> {
 
-	private boolean singleton = true;
+    private boolean singleton = true;
 
-	private boolean initialized = false;
+    private boolean initialized = false;
 
-	/** Method call result in the singleton case. */
-	@Nullable
-	private Object singletonObject;
+    /**
+     * Method call result in the singleton case.
+     */
+    @Nullable
+    private Object singletonObject;
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        prepare();
+        if (this.singleton) {
+            this.initialized = true;
+            this.singletonObject = invokeWithTargetException();
+        }
+    }
 
-	/**
-	 * Set if a singleton should be created, or a new object on each
-	 * {@link #getObject()} request otherwise. Default is "true".
-	 */
-	public void setSingleton(boolean singleton) {
-		this.singleton = singleton;
-	}
+    /**
+     * Returns the same value each time if the singleton property is set
+     * to "true", otherwise returns the value returned from invoking the
+     * specified method on the fly.
+     */
+    @Override
+    @Nullable
+    public Object getObject() throws Exception {
+        if (this.singleton) {
+            if (!this.initialized) {
+                throw new FactoryBeanNotInitializedException();
+            }
+            // Singleton: return shared object.
+            return this.singletonObject;
+        } else {
+            // Prototype: new object on each call.
+            return invokeWithTargetException();
+        }
+    }
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		prepare();
-		if (this.singleton) {
-			this.initialized = true;
-			this.singletonObject = invokeWithTargetException();
-		}
-	}
+    /**
+     * Return the type of object that this FactoryBean creates,
+     * or {@code null} if not known in advance.
+     */
+    @Override
+    public Class<?> getObjectType() {
+        if (!isPrepared()) {
+            // Not fully initialized yet -> return null to indicate "not known yet".
+            return null;
+        }
+        return getPreparedMethod().getReturnType();
+    }
 
+    @Override
+    public boolean isSingleton() {
+        return this.singleton;
+    }
 
-	/**
-	 * Returns the same value each time if the singleton property is set
-	 * to "true", otherwise returns the value returned from invoking the
-	 * specified method on the fly.
-	 */
-	@Override
-	@Nullable
-	public Object getObject() throws Exception {
-		if (this.singleton) {
-			if (!this.initialized) {
-				throw new FactoryBeanNotInitializedException();
-			}
-			// Singleton: return shared object.
-			return this.singletonObject;
-		}
-		else {
-			// Prototype: new object on each call.
-			return invokeWithTargetException();
-		}
-	}
-
-	/**
-	 * Return the type of object that this FactoryBean creates,
-	 * or {@code null} if not known in advance.
-	 */
-	@Override
-	public Class<?> getObjectType() {
-		if (!isPrepared()) {
-			// Not fully initialized yet -> return null to indicate "not known yet".
-			return null;
-		}
-		return getPreparedMethod().getReturnType();
-	}
-
-	@Override
-	public boolean isSingleton() {
-		return this.singleton;
-	}
+    /**
+     * Set if a singleton should be created, or a new object on each
+     * {@link #getObject()} request otherwise. Default is "true".
+     */
+    public void setSingleton(boolean singleton) {
+        this.singleton = singleton;
+    }
 
 }

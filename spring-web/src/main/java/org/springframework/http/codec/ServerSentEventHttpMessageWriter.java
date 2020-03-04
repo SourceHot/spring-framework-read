@@ -16,16 +16,7 @@
 
 package org.springframework.http.codec;
 
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Encoder;
@@ -41,6 +32,14 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * {@code HttpMessageWriter} for {@code "text/event-stream"} responses.
@@ -52,160 +51,161 @@ import org.springframework.util.StringUtils;
  */
 public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Object> {
 
-	private static final MediaType DEFAULT_MEDIA_TYPE = new MediaType("text", "event-stream", StandardCharsets.UTF_8);
+    private static final MediaType DEFAULT_MEDIA_TYPE = new MediaType("text", "event-stream", StandardCharsets.UTF_8);
 
-	private static final List<MediaType> WRITABLE_MEDIA_TYPES = Collections.singletonList(MediaType.TEXT_EVENT_STREAM);
-
-
-	@Nullable
-	private final Encoder<?> encoder;
+    private static final List<MediaType> WRITABLE_MEDIA_TYPES = Collections.singletonList(MediaType.TEXT_EVENT_STREAM);
 
 
-	/**
-	 * Constructor without an {@code Encoder}. In this mode only {@code String}
-	 * is supported for event data to be encoded.
-	 */
-	public ServerSentEventHttpMessageWriter() {
-		this(null);
-	}
-
-	/**
-	 * Constructor with JSON {@code Encoder} for encoding objects.
-	 * Support for {@code String} event data is built-in.
-	 * @param encoder the Encoder to use (may be {@code null})
-	 */
-	public ServerSentEventHttpMessageWriter(@Nullable Encoder<?> encoder) {
-		this.encoder = encoder;
-	}
+    @Nullable
+    private final Encoder<?> encoder;
 
 
-	/**
-	 * Return the configured {@code Encoder}, if any.
-	 */
-	@Nullable
-	public Encoder<?> getEncoder() {
-		return this.encoder;
-	}
+    /**
+     * Constructor without an {@code Encoder}. In this mode only {@code String}
+     * is supported for event data to be encoded.
+     */
+    public ServerSentEventHttpMessageWriter() {
+        this(null);
+    }
 
-	@Override
-	public List<MediaType> getWritableMediaTypes() {
-		return WRITABLE_MEDIA_TYPES;
-	}
+    /**
+     * Constructor with JSON {@code Encoder} for encoding objects.
+     * Support for {@code String} event data is built-in.
+     *
+     * @param encoder the Encoder to use (may be {@code null})
+     */
+    public ServerSentEventHttpMessageWriter(@Nullable Encoder<?> encoder) {
+        this.encoder = encoder;
+    }
 
 
-	@Override
-	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
-		return (mediaType == null || MediaType.TEXT_EVENT_STREAM.includes(mediaType) ||
-				ServerSentEvent.class.isAssignableFrom(elementType.toClass()));
-	}
+    /**
+     * Return the configured {@code Encoder}, if any.
+     */
+    @Nullable
+    public Encoder<?> getEncoder() {
+        return this.encoder;
+    }
 
-	@Override
-	public Mono<Void> write(Publisher<?> input, ResolvableType elementType, @Nullable MediaType mediaType,
-			ReactiveHttpOutputMessage message, Map<String, Object> hints) {
+    @Override
+    public List<MediaType> getWritableMediaTypes() {
+        return WRITABLE_MEDIA_TYPES;
+    }
 
-		mediaType = (mediaType != null && mediaType.getCharset() != null ? mediaType : DEFAULT_MEDIA_TYPE);
-		DataBufferFactory bufferFactory = message.bufferFactory();
 
-		message.getHeaders().setContentType(mediaType);
-		return message.writeAndFlushWith(encode(input, elementType, mediaType, bufferFactory, hints));
-	}
+    @Override
+    public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
+        return (mediaType == null || MediaType.TEXT_EVENT_STREAM.includes(mediaType) ||
+                ServerSentEvent.class.isAssignableFrom(elementType.toClass()));
+    }
 
-	private Flux<Publisher<DataBuffer>> encode(Publisher<?> input, ResolvableType elementType,
-			MediaType mediaType, DataBufferFactory factory, Map<String, Object> hints) {
+    @Override
+    public Mono<Void> write(Publisher<?> input, ResolvableType elementType, @Nullable MediaType mediaType,
+                            ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
-		ResolvableType valueType = (ServerSentEvent.class.isAssignableFrom(elementType.toClass()) ?
-				elementType.getGeneric() : elementType);
+        mediaType = (mediaType != null && mediaType.getCharset() != null ? mediaType : DEFAULT_MEDIA_TYPE);
+        DataBufferFactory bufferFactory = message.bufferFactory();
 
-		return Flux.from(input).map(element -> {
+        message.getHeaders().setContentType(mediaType);
+        return message.writeAndFlushWith(encode(input, elementType, mediaType, bufferFactory, hints));
+    }
 
-			ServerSentEvent<?> sse = (element instanceof ServerSentEvent ?
-					(ServerSentEvent<?>) element : ServerSentEvent.builder().data(element).build());
+    private Flux<Publisher<DataBuffer>> encode(Publisher<?> input, ResolvableType elementType,
+                                               MediaType mediaType, DataBufferFactory factory, Map<String, Object> hints) {
 
-			StringBuilder sb = new StringBuilder();
-			String id = sse.id();
-			String event = sse.event();
-			Duration retry = sse.retry();
-			String comment = sse.comment();
-			Object data = sse.data();
-			if (id != null) {
-				writeField("id", id, sb);
-			}
-			if (event != null) {
-				writeField("event", event, sb);
-			}
-			if (retry != null) {
-				writeField("retry", retry.toMillis(), sb);
-			}
-			if (comment != null) {
-				sb.append(':').append(StringUtils.replace(comment, "\n", "\n:")).append("\n");
-			}
-			if (data != null) {
-				sb.append("data:");
-			}
+        ResolvableType valueType = (ServerSentEvent.class.isAssignableFrom(elementType.toClass()) ?
+                elementType.getGeneric() : elementType);
 
-			Flux<DataBuffer> flux = Flux.concat(
-					encodeText(sb, mediaType, factory),
-					encodeData(data, valueType, mediaType, factory, hints),
-					encodeText("\n", mediaType, factory));
+        return Flux.from(input).map(element -> {
 
-			return flux.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
-		});
-	}
+            ServerSentEvent<?> sse = (element instanceof ServerSentEvent ?
+                    (ServerSentEvent<?>) element : ServerSentEvent.builder().data(element).build());
 
-	private void writeField(String fieldName, Object fieldValue, StringBuilder sb) {
-		sb.append(fieldName);
-		sb.append(':');
-		sb.append(fieldValue.toString());
-		sb.append("\n");
-	}
+            StringBuilder sb = new StringBuilder();
+            String id = sse.id();
+            String event = sse.event();
+            Duration retry = sse.retry();
+            String comment = sse.comment();
+            Object data = sse.data();
+            if (id != null) {
+                writeField("id", id, sb);
+            }
+            if (event != null) {
+                writeField("event", event, sb);
+            }
+            if (retry != null) {
+                writeField("retry", retry.toMillis(), sb);
+            }
+            if (comment != null) {
+                sb.append(':').append(StringUtils.replace(comment, "\n", "\n:")).append("\n");
+            }
+            if (data != null) {
+                sb.append("data:");
+            }
 
-	@SuppressWarnings("unchecked")
-	private <T> Flux<DataBuffer> encodeData(@Nullable T dataValue, ResolvableType valueType,
-			MediaType mediaType, DataBufferFactory factory, Map<String, Object> hints) {
+            Flux<DataBuffer> flux = Flux.concat(
+                    encodeText(sb, mediaType, factory),
+                    encodeData(data, valueType, mediaType, factory, hints),
+                    encodeText("\n", mediaType, factory));
 
-		if (dataValue == null) {
-			return Flux.empty();
-		}
+            return flux.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+        });
+    }
 
-		if (dataValue instanceof String) {
-			String text = (String) dataValue;
-			return Flux.from(encodeText(StringUtils.replace(text, "\n", "\ndata:") + "\n", mediaType, factory));
-		}
+    private void writeField(String fieldName, Object fieldValue, StringBuilder sb) {
+        sb.append(fieldName);
+        sb.append(':');
+        sb.append(fieldValue.toString());
+        sb.append("\n");
+    }
 
-		if (this.encoder == null) {
-			return Flux.error(new CodecException("No SSE encoder configured and the data is not String."));
-		}
+    @SuppressWarnings("unchecked")
+    private <T> Flux<DataBuffer> encodeData(@Nullable T dataValue, ResolvableType valueType,
+                                            MediaType mediaType, DataBufferFactory factory, Map<String, Object> hints) {
 
-		return ((Encoder<T>) this.encoder)
-				.encode(Mono.just(dataValue), factory, valueType, mediaType, hints)
-				.concatWith(encodeText("\n", mediaType, factory));
-	}
+        if (dataValue == null) {
+            return Flux.empty();
+        }
 
-	private Mono<DataBuffer> encodeText(CharSequence text, MediaType mediaType, DataBufferFactory bufferFactory) {
-		Assert.notNull(mediaType.getCharset(), "Expected MediaType with charset");
-		byte[] bytes = text.toString().getBytes(mediaType.getCharset());
-		return Mono.just(bufferFactory.wrap(bytes)); // wrapping, not allocating
-	}
+        if (dataValue instanceof String) {
+            String text = (String) dataValue;
+            return Flux.from(encodeText(StringUtils.replace(text, "\n", "\ndata:") + "\n", mediaType, factory));
+        }
 
-	@Override
-	public Mono<Void> write(Publisher<?> input, ResolvableType actualType, ResolvableType elementType,
-			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response,
-			Map<String, Object> hints) {
+        if (this.encoder == null) {
+            return Flux.error(new CodecException("No SSE encoder configured and the data is not String."));
+        }
 
-		Map<String, Object> allHints = Hints.merge(hints,
-				getEncodeHints(actualType, elementType, mediaType, request, response));
+        return ((Encoder<T>) this.encoder)
+                .encode(Mono.just(dataValue), factory, valueType, mediaType, hints)
+                .concatWith(encodeText("\n", mediaType, factory));
+    }
 
-		return write(input, elementType, mediaType, response, allHints);
-	}
+    private Mono<DataBuffer> encodeText(CharSequence text, MediaType mediaType, DataBufferFactory bufferFactory) {
+        Assert.notNull(mediaType.getCharset(), "Expected MediaType with charset");
+        byte[] bytes = text.toString().getBytes(mediaType.getCharset());
+        return Mono.just(bufferFactory.wrap(bytes)); // wrapping, not allocating
+    }
 
-	private Map<String, Object> getEncodeHints(ResolvableType actualType, ResolvableType elementType,
-			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+    @Override
+    public Mono<Void> write(Publisher<?> input, ResolvableType actualType, ResolvableType elementType,
+                            @Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response,
+                            Map<String, Object> hints) {
 
-		if (this.encoder instanceof HttpMessageEncoder) {
-			HttpMessageEncoder<?> encoder = (HttpMessageEncoder<?>) this.encoder;
-			return encoder.getEncodeHints(actualType, elementType, mediaType, request, response);
-		}
-		return Hints.none();
-	}
+        Map<String, Object> allHints = Hints.merge(hints,
+                getEncodeHints(actualType, elementType, mediaType, request, response));
+
+        return write(input, elementType, mediaType, response, allHints);
+    }
+
+    private Map<String, Object> getEncodeHints(ResolvableType actualType, ResolvableType elementType,
+                                               @Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+
+        if (this.encoder instanceof HttpMessageEncoder) {
+            HttpMessageEncoder<?> encoder = (HttpMessageEncoder<?>) this.encoder;
+            return encoder.getEncodeHints(actualType, elementType, mediaType, request, response);
+        }
+        return Hints.none();
+    }
 
 }

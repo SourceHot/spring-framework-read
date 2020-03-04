@@ -17,7 +17,6 @@
 package org.springframework.test.context.junit4.statements;
 
 import org.junit.runners.model.Statement;
-
 import org.springframework.test.context.TestContextManager;
 
 /**
@@ -27,38 +26,39 @@ import org.springframework.test.context.TestContextManager;
  * supplied {@link TestContextManager}.
  *
  * @author Sam Brannen
- * @since 3.0
  * @see #evaluate()
  * @see RunAfterTestMethodCallbacks
+ * @since 3.0
  */
 public class RunBeforeTestClassCallbacks extends Statement {
 
-	private final Statement next;
+    private final Statement next;
 
-	private final TestContextManager testContextManager;
-
-
-	/**
-	 * Construct a new {@code RunBeforeTestClassCallbacks} statement.
-	 * @param next the next {@code Statement} in the execution chain
-	 * @param testContextManager the TestContextManager upon which to call
-	 * {@code beforeTestClass()}
-	 */
-	public RunBeforeTestClassCallbacks(Statement next, TestContextManager testContextManager) {
-		this.next = next;
-		this.testContextManager = testContextManager;
-	}
+    private final TestContextManager testContextManager;
 
 
-	/**
-	 * Invoke {@link TestContextManager#beforeTestClass()} and then evaluate
-	 * the next {@link Statement} in the execution chain (typically an instance
-	 * of {@link org.junit.internal.runners.statements.RunBefores RunBefores}).
-	 */
-	@Override
-	public void evaluate() throws Throwable {
-		this.testContextManager.beforeTestClass();
-		this.next.evaluate();
-	}
+    /**
+     * Construct a new {@code RunBeforeTestClassCallbacks} statement.
+     *
+     * @param next               the next {@code Statement} in the execution chain
+     * @param testContextManager the TestContextManager upon which to call
+     *                           {@code beforeTestClass()}
+     */
+    public RunBeforeTestClassCallbacks(Statement next, TestContextManager testContextManager) {
+        this.next = next;
+        this.testContextManager = testContextManager;
+    }
+
+
+    /**
+     * Invoke {@link TestContextManager#beforeTestClass()} and then evaluate
+     * the next {@link Statement} in the execution chain (typically an instance
+     * of {@link org.junit.internal.runners.statements.RunBefores RunBefores}).
+     */
+    @Override
+    public void evaluate() throws Throwable {
+        this.testContextManager.beforeTestClass();
+        this.next.evaluate();
+    }
 
 }

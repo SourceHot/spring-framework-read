@@ -28,20 +28,22 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 @SuppressWarnings("serial")
 public class SqlXmlFeatureNotImplementedException extends InvalidDataAccessApiUsageException {
 
-	/**
-	 * Constructor for SqlXmlFeatureNotImplementedException.
-	 * @param msg the detail message
-	 */
-	public SqlXmlFeatureNotImplementedException(String msg) {
-		super(msg);
-	}
+    /**
+     * Constructor for SqlXmlFeatureNotImplementedException.
+     *
+     * @param msg the detail message
+     */
+    public SqlXmlFeatureNotImplementedException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Constructor for SqlXmlFeatureNotImplementedException.
-	 * @param msg the detail message
-	 * @param cause the root cause from the data access API in use
-	 */
-	public SqlXmlFeatureNotImplementedException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Constructor for SqlXmlFeatureNotImplementedException.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause from the data access API in use
+     */
+    public SqlXmlFeatureNotImplementedException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 }

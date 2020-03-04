@@ -15,52 +15,57 @@
  */
 package org.springframework.web.method;
 
-import java.util.function.Predicate;
-
 import org.junit.Test;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.junit.Assert.*;
+import java.util.function.Predicate;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link HandlerTypePredicate}.
+ *
  * @author Rossen Stoyanchev
  */
 public class HandlerTypePredicateTests {
 
-	@Test
-	public void forAnnotation() {
+    @Test
+    public void forAnnotation() {
 
-		Predicate<Class<?>> predicate = HandlerTypePredicate.forAnnotation(Controller.class);
+        Predicate<Class<?>> predicate = HandlerTypePredicate.forAnnotation(Controller.class);
 
-		assertTrue(predicate.test(HtmlController.class));
-		assertTrue(predicate.test(ApiController.class));
-		assertTrue(predicate.test(AnotherApiController.class));
-	}
+        assertTrue(predicate.test(HtmlController.class));
+        assertTrue(predicate.test(ApiController.class));
+        assertTrue(predicate.test(AnotherApiController.class));
+    }
 
-	@Test
-	public void forAnnotationWithException() {
+    @Test
+    public void forAnnotationWithException() {
 
-		Predicate<Class<?>> predicate = HandlerTypePredicate.forAnnotation(Controller.class)
-				.and(HandlerTypePredicate.forAssignableType(Special.class));
+        Predicate<Class<?>> predicate = HandlerTypePredicate.forAnnotation(Controller.class)
+                .and(HandlerTypePredicate.forAssignableType(Special.class));
 
-		assertFalse(predicate.test(HtmlController.class));
-		assertFalse(predicate.test(ApiController.class));
-		assertTrue(predicate.test(AnotherApiController.class));
-	}
+        assertFalse(predicate.test(HtmlController.class));
+        assertFalse(predicate.test(ApiController.class));
+        assertTrue(predicate.test(AnotherApiController.class));
+    }
 
 
-	@Controller
-	private static class HtmlController {}
+    interface Special {
+    }
 
-	@RestController
-	private static class ApiController {}
+    @Controller
+    private static class HtmlController {
+    }
 
-	@RestController
-	private static class AnotherApiController implements Special {}
+    @RestController
+    private static class ApiController {
+    }
 
-	interface Special {}
+    @RestController
+    private static class AnotherApiController implements Special {
+    }
 
 }

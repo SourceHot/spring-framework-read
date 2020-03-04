@@ -19,7 +19,6 @@ package org.springframework.test.web.client.samples;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -56,48 +55,48 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration
 public class MockMvcClientHttpRequestFactoryTests {
 
-	@Autowired
-	private WebApplicationContext wac;
+    @Autowired
+    private WebApplicationContext wac;
 
-	private MockMvc mockMvc;
-
-
-	@Before
-	public void setup() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).alwaysExpect(status().isOk()).build();
-	}
-
-	@Test
-	public void test() throws Exception {
-		RestTemplate template = new RestTemplate(new MockMvcClientHttpRequestFactory(this.mockMvc));
-		String result = template.getForObject("/foo", String.class);
-		assertEquals("bar", result);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	public void testAsyncTemplate() throws Exception {
-		org.springframework.web.client.AsyncRestTemplate template = new org.springframework.web.client.AsyncRestTemplate(
-				new MockMvcClientHttpRequestFactory(this.mockMvc));
-		ListenableFuture<ResponseEntity<String>> entity = template.getForEntity("/foo", String.class);
-		assertEquals("bar", entity.get().getBody());
-	}
+    private MockMvc mockMvc;
 
 
-	@EnableWebMvc
-	@Configuration
-	@ComponentScan(basePackageClasses=MockMvcClientHttpRequestFactoryTests.class)
-	static class MyWebConfig implements WebMvcConfigurer {
-	}
+    @Before
+    public void setup() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).alwaysExpect(status().isOk()).build();
+    }
 
-	@Controller
-	static class MyController {
+    @Test
+    public void test() throws Exception {
+        RestTemplate template = new RestTemplate(new MockMvcClientHttpRequestFactory(this.mockMvc));
+        String result = template.getForObject("/foo", String.class);
+        assertEquals("bar", result);
+    }
 
-		@RequestMapping(value="/foo", method=RequestMethod.GET)
-		@ResponseBody
-		public String handle() {
-			return "bar";
-		}
-	}
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testAsyncTemplate() throws Exception {
+        org.springframework.web.client.AsyncRestTemplate template = new org.springframework.web.client.AsyncRestTemplate(
+                new MockMvcClientHttpRequestFactory(this.mockMvc));
+        ListenableFuture<ResponseEntity<String>> entity = template.getForEntity("/foo", String.class);
+        assertEquals("bar", entity.get().getBody());
+    }
+
+
+    @EnableWebMvc
+    @Configuration
+    @ComponentScan(basePackageClasses = MockMvcClientHttpRequestFactoryTests.class)
+    static class MyWebConfig implements WebMvcConfigurer {
+    }
+
+    @Controller
+    static class MyController {
+
+        @RequestMapping(value = "/foo", method = RequestMethod.GET)
+        @ResponseBody
+        public String handle() {
+            return "bar";
+        }
+    }
 
 }

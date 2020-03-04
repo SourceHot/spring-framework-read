@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.datasource.embedded;
 
-import java.sql.Driver;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import java.sql.Driver;
 
 /**
  * {@link EmbeddedDatabaseConfigurer} for an H2 embedded database instance.
@@ -33,37 +33,37 @@ import org.springframework.util.ClassUtils;
  */
 final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
 
-	@Nullable
-	private static H2EmbeddedDatabaseConfigurer instance;
+    @Nullable
+    private static H2EmbeddedDatabaseConfigurer instance;
 
-	private final Class<? extends Driver> driverClass;
-
-
-	/**
-	 * Get the singleton {@code H2EmbeddedDatabaseConfigurer} instance.
-	 * @return the configurer instance
-	 * @throws ClassNotFoundException if H2 is not on the classpath
-	 */
-	@SuppressWarnings("unchecked")
-	public static synchronized H2EmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
-		if (instance == null) {
-			instance = new H2EmbeddedDatabaseConfigurer( (Class<? extends Driver>)
-					ClassUtils.forName("org.h2.Driver", H2EmbeddedDatabaseConfigurer.class.getClassLoader()));
-		}
-		return instance;
-	}
+    private final Class<? extends Driver> driverClass;
 
 
-	private H2EmbeddedDatabaseConfigurer(Class<? extends Driver> driverClass) {
-		this.driverClass = driverClass;
-	}
+    private H2EmbeddedDatabaseConfigurer(Class<? extends Driver> driverClass) {
+        this.driverClass = driverClass;
+    }
 
-	@Override
-	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
-		properties.setDriverClass(this.driverClass);
-		properties.setUrl(String.format("jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false", databaseName));
-		properties.setUsername("sa");
-		properties.setPassword("");
-	}
+    /**
+     * Get the singleton {@code H2EmbeddedDatabaseConfigurer} instance.
+     *
+     * @return the configurer instance
+     * @throws ClassNotFoundException if H2 is not on the classpath
+     */
+    @SuppressWarnings("unchecked")
+    public static synchronized H2EmbeddedDatabaseConfigurer getInstance() throws ClassNotFoundException {
+        if (instance == null) {
+            instance = new H2EmbeddedDatabaseConfigurer((Class<? extends Driver>)
+                    ClassUtils.forName("org.h2.Driver", H2EmbeddedDatabaseConfigurer.class.getClassLoader()));
+        }
+        return instance;
+    }
+
+    @Override
+    public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
+        properties.setDriverClass(this.driverClass);
+        properties.setUrl(String.format("jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false", databaseName));
+        properties.setUsername("sa");
+        properties.setPassword("");
+    }
 
 }

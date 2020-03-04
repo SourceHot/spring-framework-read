@@ -17,7 +17,6 @@
 package org.springframework.remoting.httpinvoker;
 
 import org.junit.Test;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -33,111 +32,111 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.stereotype.Component;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertSame;
 
 /**
  * @author Stephane Nicoll
  */
 public class HttpInvokerFactoryBeanIntegrationTests {
 
-	@Test
-	@SuppressWarnings("resource")
-	public void testLoadedConfigClass() {
-		ApplicationContext context = new AnnotationConfigApplicationContext(InvokerAutowiringConfig.class);
-		MyBean myBean = context.getBean("myBean", MyBean.class);
-		assertSame(context.getBean("myService"), myBean.myService);
-		myBean.myService.handle();
-		myBean.myService.handleAsync();
-	}
+    @Test
+    @SuppressWarnings("resource")
+    public void testLoadedConfigClass() {
+        ApplicationContext context = new AnnotationConfigApplicationContext(InvokerAutowiringConfig.class);
+        MyBean myBean = context.getBean("myBean", MyBean.class);
+        assertSame(context.getBean("myService"), myBean.myService);
+        myBean.myService.handle();
+        myBean.myService.handleAsync();
+    }
 
-	@Test
-	@SuppressWarnings("resource")
-	public void testNonLoadedConfigClass() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.registerBeanDefinition("config", new RootBeanDefinition(InvokerAutowiringConfig.class.getName()));
-		context.refresh();
-		MyBean myBean = context.getBean("myBean", MyBean.class);
-		assertSame(context.getBean("myService"), myBean.myService);
-		myBean.myService.handle();
-		myBean.myService.handleAsync();
-	}
+    @Test
+    @SuppressWarnings("resource")
+    public void testNonLoadedConfigClass() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.registerBeanDefinition("config", new RootBeanDefinition(InvokerAutowiringConfig.class.getName()));
+        context.refresh();
+        MyBean myBean = context.getBean("myBean", MyBean.class);
+        assertSame(context.getBean("myService"), myBean.myService);
+        myBean.myService.handle();
+        myBean.myService.handleAsync();
+    }
 
-	@Test
-	@SuppressWarnings("resource")
-	public void withConfigurationClassWithPlainFactoryBean() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(ConfigWithPlainFactoryBean.class);
-		context.refresh();
-		MyBean myBean = context.getBean("myBean", MyBean.class);
-		assertSame(context.getBean("myService"), myBean.myService);
-		myBean.myService.handle();
-		myBean.myService.handleAsync();
-	}
-
-
-	public interface MyService {
-
-		public void handle();
-
-		@Async
-		public void handleAsync();
-	}
+    @Test
+    @SuppressWarnings("resource")
+    public void withConfigurationClassWithPlainFactoryBean() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.register(ConfigWithPlainFactoryBean.class);
+        context.refresh();
+        MyBean myBean = context.getBean("myBean", MyBean.class);
+        assertSame(context.getBean("myService"), myBean.myService);
+        myBean.myService.handle();
+        myBean.myService.handleAsync();
+    }
 
 
-	@Component("myBean")
-	public static class MyBean {
+    public interface MyService {
 
-		@Autowired
-		public MyService myService;
-	}
+        public void handle();
 
-
-	@Configuration
-	@ComponentScan
-	@Lazy
-	public static class InvokerAutowiringConfig {
-
-		@Bean
-		public AsyncAnnotationBeanPostProcessor aabpp() {
-			return new AsyncAnnotationBeanPostProcessor();
-		}
-
-		@Bean
-		public HttpInvokerProxyFactoryBean myService() {
-			HttpInvokerProxyFactoryBean factory = new HttpInvokerProxyFactoryBean();
-			factory.setServiceUrl("/svc/dummy");
-			factory.setServiceInterface(MyService.class);
-			factory.setHttpInvokerRequestExecutor((config, invocation) -> new RemoteInvocationResult());
-			return factory;
-		}
-
-		@Bean
-		public FactoryBean<String> myOtherService() {
-			throw new IllegalStateException("Don't ever call me");
-		}
-	}
+        @Async
+        public void handleAsync();
+    }
 
 
-	@Configuration
-	static class ConfigWithPlainFactoryBean {
+    @Component("myBean")
+    public static class MyBean {
 
-		@Autowired
-		Environment env;
+        @Autowired
+        public MyService myService;
+    }
 
-		@Bean
-		public MyBean myBean() {
-			return new MyBean();
-		}
 
-		@Bean
-		public HttpInvokerProxyFactoryBean myService() {
-			String name = env.getProperty("testbean.name");
-			HttpInvokerProxyFactoryBean factory = new HttpInvokerProxyFactoryBean();
-			factory.setServiceUrl("/svc/" + name);
-			factory.setServiceInterface(MyService.class);
-			factory.setHttpInvokerRequestExecutor((config, invocation) -> new RemoteInvocationResult());
-			return factory;
-		}
-	}
+    @Configuration
+    @ComponentScan
+    @Lazy
+    public static class InvokerAutowiringConfig {
+
+        @Bean
+        public AsyncAnnotationBeanPostProcessor aabpp() {
+            return new AsyncAnnotationBeanPostProcessor();
+        }
+
+        @Bean
+        public HttpInvokerProxyFactoryBean myService() {
+            HttpInvokerProxyFactoryBean factory = new HttpInvokerProxyFactoryBean();
+            factory.setServiceUrl("/svc/dummy");
+            factory.setServiceInterface(MyService.class);
+            factory.setHttpInvokerRequestExecutor((config, invocation) -> new RemoteInvocationResult());
+            return factory;
+        }
+
+        @Bean
+        public FactoryBean<String> myOtherService() {
+            throw new IllegalStateException("Don't ever call me");
+        }
+    }
+
+
+    @Configuration
+    static class ConfigWithPlainFactoryBean {
+
+        @Autowired
+        Environment env;
+
+        @Bean
+        public MyBean myBean() {
+            return new MyBean();
+        }
+
+        @Bean
+        public HttpInvokerProxyFactoryBean myService() {
+            String name = env.getProperty("testbean.name");
+            HttpInvokerProxyFactoryBean factory = new HttpInvokerProxyFactoryBean();
+            factory.setServiceUrl("/svc/" + name);
+            factory.setServiceInterface(MyService.class);
+            factory.setHttpInvokerRequestExecutor((config, invocation) -> new RemoteInvocationResult());
+            return factory;
+        }
+    }
 
 }

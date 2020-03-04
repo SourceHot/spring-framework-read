@@ -16,10 +16,6 @@
 
 package org.springframework.http.converter;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -29,6 +25,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Implementation of {@link HttpMessageConverter} that can read/write {@link Resource Resources}
@@ -44,108 +44,103 @@ import org.springframework.util.StreamUtils;
  */
 public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<Resource> {
 
-	private final boolean supportsReadStreaming;
+    private final boolean supportsReadStreaming;
 
 
-	/**
-	 * Create a new instance of the {@code ResourceHttpMessageConverter}
-	 * that supports read streaming, i.e. can convert an
-	 * {@code HttpInputMessage} to {@code InputStreamResource}.
-	 */
-	public ResourceHttpMessageConverter() {
-		super(MediaType.ALL);
-		this.supportsReadStreaming = true;
-	}
+    /**
+     * Create a new instance of the {@code ResourceHttpMessageConverter}
+     * that supports read streaming, i.e. can convert an
+     * {@code HttpInputMessage} to {@code InputStreamResource}.
+     */
+    public ResourceHttpMessageConverter() {
+        super(MediaType.ALL);
+        this.supportsReadStreaming = true;
+    }
 
-	/**
-	 * Create a new instance of the {@code ResourceHttpMessageConverter}.
-	 * @param supportsReadStreaming whether the converter should support
-	 * read streaming, i.e. convert to {@code InputStreamResource}
-	 * @since 5.0
-	 */
-	public ResourceHttpMessageConverter(boolean supportsReadStreaming) {
-		super(MediaType.ALL);
-		this.supportsReadStreaming = supportsReadStreaming;
-	}
+    /**
+     * Create a new instance of the {@code ResourceHttpMessageConverter}.
+     *
+     * @param supportsReadStreaming whether the converter should support
+     *                              read streaming, i.e. convert to {@code InputStreamResource}
+     * @since 5.0
+     */
+    public ResourceHttpMessageConverter(boolean supportsReadStreaming) {
+        super(MediaType.ALL);
+        this.supportsReadStreaming = supportsReadStreaming;
+    }
 
 
-	@Override
-	protected boolean supports(Class<?> clazz) {
-		return Resource.class.isAssignableFrom(clazz);
-	}
+    @Override
+    protected boolean supports(Class<?> clazz) {
+        return Resource.class.isAssignableFrom(clazz);
+    }
 
-	@Override
-	protected Resource readInternal(Class<? extends Resource> clazz, HttpInputMessage inputMessage)
-			throws IOException, HttpMessageNotReadableException {
+    @Override
+    protected Resource readInternal(Class<? extends Resource> clazz, HttpInputMessage inputMessage)
+            throws IOException, HttpMessageNotReadableException {
 
-		if (this.supportsReadStreaming && InputStreamResource.class == clazz) {
-			return new InputStreamResource(inputMessage.getBody()) {
-				@Override
-				public String getFilename() {
-					return inputMessage.getHeaders().getContentDisposition().getFilename();
-				}
-			};
-		}
-		else if (Resource.class == clazz || ByteArrayResource.class.isAssignableFrom(clazz)) {
-			byte[] body = StreamUtils.copyToByteArray(inputMessage.getBody());
-			return new ByteArrayResource(body) {
-				@Override
-				@Nullable
-				public String getFilename() {
-					return inputMessage.getHeaders().getContentDisposition().getFilename();
-				}
-			};
-		}
-		else {
-			throw new HttpMessageNotReadableException("Unsupported resource class: " + clazz, inputMessage);
-		}
-	}
+        if (this.supportsReadStreaming && InputStreamResource.class == clazz) {
+            return new InputStreamResource(inputMessage.getBody()) {
+                @Override
+                public String getFilename() {
+                    return inputMessage.getHeaders().getContentDisposition().getFilename();
+                }
+            };
+        } else if (Resource.class == clazz || ByteArrayResource.class.isAssignableFrom(clazz)) {
+            byte[] body = StreamUtils.copyToByteArray(inputMessage.getBody());
+            return new ByteArrayResource(body) {
+                @Override
+                @Nullable
+                public String getFilename() {
+                    return inputMessage.getHeaders().getContentDisposition().getFilename();
+                }
+            };
+        } else {
+            throw new HttpMessageNotReadableException("Unsupported resource class: " + clazz, inputMessage);
+        }
+    }
 
-	@Override
-	protected MediaType getDefaultContentType(Resource resource) {
-		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
-	}
+    @Override
+    protected MediaType getDefaultContentType(Resource resource) {
+        return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
+    }
 
-	@Override
-	protected Long getContentLength(Resource resource, @Nullable MediaType contentType) throws IOException {
-		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
-		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
-		if (InputStreamResource.class == resource.getClass()) {
-			return null;
-		}
-		long contentLength = resource.contentLength();
-		return (contentLength < 0 ? null : contentLength);
-	}
+    @Override
+    protected Long getContentLength(Resource resource, @Nullable MediaType contentType) throws IOException {
+        // Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
+        // Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
+        if (InputStreamResource.class == resource.getClass()) {
+            return null;
+        }
+        long contentLength = resource.contentLength();
+        return (contentLength < 0 ? null : contentLength);
+    }
 
-	@Override
-	protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
-			throws IOException, HttpMessageNotWritableException {
+    @Override
+    protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
+            throws IOException, HttpMessageNotWritableException {
 
-		writeContent(resource, outputMessage);
-	}
+        writeContent(resource, outputMessage);
+    }
 
-	protected void writeContent(Resource resource, HttpOutputMessage outputMessage)
-			throws IOException, HttpMessageNotWritableException {
-		try {
-			InputStream in = resource.getInputStream();
-			try {
-				StreamUtils.copy(in, outputMessage.getBody());
-			}
-			catch (NullPointerException ex) {
-				// ignore, see SPR-13620
-			}
-			finally {
-				try {
-					in.close();
-				}
-				catch (Throwable ex) {
-					// ignore, see SPR-12999
-				}
-			}
-		}
-		catch (FileNotFoundException ex) {
-			// ignore, see SPR-12999
-		}
-	}
+    protected void writeContent(Resource resource, HttpOutputMessage outputMessage)
+            throws IOException, HttpMessageNotWritableException {
+        try {
+            InputStream in = resource.getInputStream();
+            try {
+                StreamUtils.copy(in, outputMessage.getBody());
+            } catch (NullPointerException ex) {
+                // ignore, see SPR-13620
+            } finally {
+                try {
+                    in.close();
+                } catch (Throwable ex) {
+                    // ignore, see SPR-12999
+                }
+            }
+        } catch (FileNotFoundException ex) {
+            // ignore, see SPR-12999
+        }
+    }
 
 }

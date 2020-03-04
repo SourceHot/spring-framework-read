@@ -25,8 +25,8 @@ package org.springframework.test.context.transaction.ejb.dao;
  */
 public interface TestEntityDao {
 
-	int getCount(String name);
+    int getCount(String name);
 
-	int incrementCount(String name);
+    int incrementCount(String name);
 
 }

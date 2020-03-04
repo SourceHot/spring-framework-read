@@ -16,9 +16,6 @@
 
 package org.springframework.web.bind.support;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
@@ -30,6 +27,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartRequest;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 
 /**
  * Special {@link org.springframework.validation.DataBinder} to perform data binding
@@ -59,113 +59,115 @@ import org.springframework.web.multipart.MultipartRequest;
  *
  * @author Juergen Hoeller
  * @author Brian Clozel
- * @since 2.5.2
  * @see #bind(org.springframework.web.context.request.WebRequest)
  * @see #registerCustomEditor
  * @see #setAllowedFields
  * @see #setRequiredFields
  * @see #setFieldMarkerPrefix
+ * @since 2.5.2
  */
 public class WebRequestDataBinder extends WebDataBinder {
 
-	/**
-	 * Create a new WebRequestDataBinder instance, with default object name.
-	 * @param target the target object to bind onto (or {@code null}
-	 * if the binder is just used to convert a plain parameter value)
-	 * @see #DEFAULT_OBJECT_NAME
-	 */
-	public WebRequestDataBinder(@Nullable Object target) {
-		super(target);
-	}
+    /**
+     * Create a new WebRequestDataBinder instance, with default object name.
+     *
+     * @param target the target object to bind onto (or {@code null}
+     *               if the binder is just used to convert a plain parameter value)
+     * @see #DEFAULT_OBJECT_NAME
+     */
+    public WebRequestDataBinder(@Nullable Object target) {
+        super(target);
+    }
 
-	/**
-	 * Create a new WebRequestDataBinder instance.
-	 * @param target the target object to bind onto (or {@code null}
-	 * if the binder is just used to convert a plain parameter value)
-	 * @param objectName the name of the target object
-	 */
-	public WebRequestDataBinder(@Nullable Object target, String objectName) {
-		super(target, objectName);
-	}
+    /**
+     * Create a new WebRequestDataBinder instance.
+     *
+     * @param target     the target object to bind onto (or {@code null}
+     *                   if the binder is just used to convert a plain parameter value)
+     * @param objectName the name of the target object
+     */
+    public WebRequestDataBinder(@Nullable Object target, String objectName) {
+        super(target, objectName);
+    }
 
 
-	/**
-	 * Bind the parameters of the given request to this binder's target,
-	 * also binding multipart files in case of a multipart request.
-	 * <p>This call can create field errors, representing basic binding
-	 * errors like a required field (code "required"), or type mismatch
-	 * between value and bean property (code "typeMismatch").
-	 * <p>Multipart files are bound via their parameter name, just like normal
-	 * HTTP parameters: i.e. "uploadedFile" to an "uploadedFile" bean property,
-	 * invoking a "setUploadedFile" setter method.
-	 * <p>The type of the target property for a multipart file can be Part, MultipartFile,
-	 * byte[], or String. The latter two receive the contents of the uploaded file;
-	 * all metadata like original file name, content type, etc are lost in those cases.
-	 * @param request request with parameters to bind (can be multipart)
-	 * @see org.springframework.web.multipart.MultipartRequest
-	 * @see org.springframework.web.multipart.MultipartFile
-	 * @see javax.servlet.http.Part
-	 * @see #bind(org.springframework.beans.PropertyValues)
-	 */
-	public void bind(WebRequest request) {
-		MutablePropertyValues mpvs = new MutablePropertyValues(request.getParameterMap());
-		if (isMultipartRequest(request) && request instanceof NativeWebRequest) {
-			MultipartRequest multipartRequest = ((NativeWebRequest) request).getNativeRequest(MultipartRequest.class);
-			if (multipartRequest != null) {
-				bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
-			}
-			else {
-				HttpServletRequest servletRequest = ((NativeWebRequest) request).getNativeRequest(HttpServletRequest.class);
-				if (servletRequest != null) {
-					bindParts(servletRequest, mpvs);
-				}
-			}
-		}
-		doBind(mpvs);
-	}
+    /**
+     * Bind the parameters of the given request to this binder's target,
+     * also binding multipart files in case of a multipart request.
+     * <p>This call can create field errors, representing basic binding
+     * errors like a required field (code "required"), or type mismatch
+     * between value and bean property (code "typeMismatch").
+     * <p>Multipart files are bound via their parameter name, just like normal
+     * HTTP parameters: i.e. "uploadedFile" to an "uploadedFile" bean property,
+     * invoking a "setUploadedFile" setter method.
+     * <p>The type of the target property for a multipart file can be Part, MultipartFile,
+     * byte[], or String. The latter two receive the contents of the uploaded file;
+     * all metadata like original file name, content type, etc are lost in those cases.
+     *
+     * @param request request with parameters to bind (can be multipart)
+     * @see org.springframework.web.multipart.MultipartRequest
+     * @see org.springframework.web.multipart.MultipartFile
+     * @see javax.servlet.http.Part
+     * @see #bind(org.springframework.beans.PropertyValues)
+     */
+    public void bind(WebRequest request) {
+        MutablePropertyValues mpvs = new MutablePropertyValues(request.getParameterMap());
+        if (isMultipartRequest(request) && request instanceof NativeWebRequest) {
+            MultipartRequest multipartRequest = ((NativeWebRequest) request).getNativeRequest(MultipartRequest.class);
+            if (multipartRequest != null) {
+                bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
+            } else {
+                HttpServletRequest servletRequest = ((NativeWebRequest) request).getNativeRequest(HttpServletRequest.class);
+                if (servletRequest != null) {
+                    bindParts(servletRequest, mpvs);
+                }
+            }
+        }
+        doBind(mpvs);
+    }
 
-	/**
-	 * Check if the request is a multipart request (by checking its Content-Type header).
-	 * @param request request with parameters to bind
-	 */
-	private boolean isMultipartRequest(WebRequest request) {
-		String contentType = request.getHeader("Content-Type");
-		return (contentType != null && StringUtils.startsWithIgnoreCase(contentType, "multipart"));
-	}
+    /**
+     * Check if the request is a multipart request (by checking its Content-Type header).
+     *
+     * @param request request with parameters to bind
+     */
+    private boolean isMultipartRequest(WebRequest request) {
+        String contentType = request.getHeader("Content-Type");
+        return (contentType != null && StringUtils.startsWithIgnoreCase(contentType, "multipart"));
+    }
 
-	private void bindParts(HttpServletRequest request, MutablePropertyValues mpvs) {
-		try {
-			MultiValueMap<String, Part> map = new LinkedMultiValueMap<>();
-			for (Part part : request.getParts()) {
-				map.add(part.getName(), part);
-			}
-			map.forEach((key, values) -> {
-				if (values.size() == 1) {
-					Part part = values.get(0);
-					if (isBindEmptyMultipartFiles() || part.getSize() > 0) {
-						mpvs.add(key, part);
-					}
-				}
-				else {
-					mpvs.add(key, values);
-				}
-			});
-		}
-		catch (Exception ex) {
-			throw new MultipartException("Failed to get request parts", ex);
-		}
-	}
+    private void bindParts(HttpServletRequest request, MutablePropertyValues mpvs) {
+        try {
+            MultiValueMap<String, Part> map = new LinkedMultiValueMap<>();
+            for (Part part : request.getParts()) {
+                map.add(part.getName(), part);
+            }
+            map.forEach((key, values) -> {
+                if (values.size() == 1) {
+                    Part part = values.get(0);
+                    if (isBindEmptyMultipartFiles() || part.getSize() > 0) {
+                        mpvs.add(key, part);
+                    }
+                } else {
+                    mpvs.add(key, values);
+                }
+            });
+        } catch (Exception ex) {
+            throw new MultipartException("Failed to get request parts", ex);
+        }
+    }
 
-	/**
-	 * Treats errors as fatal.
-	 * <p>Use this method only if it's an error if the input isn't valid.
-	 * This might be appropriate if all input is from dropdowns, for example.
-	 * @throws BindException if binding errors have been encountered
-	 */
-	public void closeNoCatch() throws BindException {
-		if (getBindingResult().hasErrors()) {
-			throw new BindException(getBindingResult());
-		}
-	}
+    /**
+     * Treats errors as fatal.
+     * <p>Use this method only if it's an error if the input isn't valid.
+     * This might be appropriate if all input is from dropdowns, for example.
+     *
+     * @throws BindException if binding errors have been encountered
+     */
+    public void closeNoCatch() throws BindException {
+        if (getBindingResult().hasErrors()) {
+            throw new BindException(getBindingResult());
+        }
+    }
 
 }

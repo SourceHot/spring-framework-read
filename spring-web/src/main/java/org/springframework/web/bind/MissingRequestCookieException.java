@@ -24,47 +24,48 @@ import org.springframework.core.MethodParameter;
  * {@code @RequestMapping} method is not present.
  *
  * @author Juergen Hoeller
- * @since 5.1
  * @see MissingRequestHeaderException
+ * @since 5.1
  */
 @SuppressWarnings("serial")
 public class MissingRequestCookieException extends ServletRequestBindingException {
 
-	private final String cookieName;
+    private final String cookieName;
 
-	private final MethodParameter parameter;
-
-
-	/**
-	 * Constructor for MissingRequestCookieException.
-	 * @param cookieName the name of the missing request cookie
-	 * @param parameter the method parameter
-	 */
-	public MissingRequestCookieException(String cookieName, MethodParameter parameter) {
-		super("");
-		this.cookieName = cookieName;
-		this.parameter = parameter;
-	}
+    private final MethodParameter parameter;
 
 
-	@Override
-	public String getMessage() {
-		return "Missing cookie '" + this.cookieName +
-				"' for method parameter of type " + this.parameter.getNestedParameterType().getSimpleName();
-	}
+    /**
+     * Constructor for MissingRequestCookieException.
+     *
+     * @param cookieName the name of the missing request cookie
+     * @param parameter  the method parameter
+     */
+    public MissingRequestCookieException(String cookieName, MethodParameter parameter) {
+        super("");
+        this.cookieName = cookieName;
+        this.parameter = parameter;
+    }
 
-	/**
-	 * Return the expected name of the request cookie.
-	 */
-	public final String getCookieName() {
-		return this.cookieName;
-	}
 
-	/**
-	 * Return the method parameter bound to the request cookie.
-	 */
-	public final MethodParameter getParameter() {
-		return this.parameter;
-	}
+    @Override
+    public String getMessage() {
+        return "Missing cookie '" + this.cookieName +
+                "' for method parameter of type " + this.parameter.getNestedParameterType().getSimpleName();
+    }
+
+    /**
+     * Return the expected name of the request cookie.
+     */
+    public final String getCookieName() {
+        return this.cookieName;
+    }
+
+    /**
+     * Return the method parameter bound to the request cookie.
+     */
+    public final MethodParameter getParameter() {
+        return this.parameter;
+    }
 
 }

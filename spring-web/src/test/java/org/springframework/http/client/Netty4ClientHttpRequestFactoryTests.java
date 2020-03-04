@@ -21,7 +21,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.springframework.http.HttpMethod;
 
 /**
@@ -29,29 +28,29 @@ import org.springframework.http.HttpMethod;
  */
 public class Netty4ClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 
-	private static EventLoopGroup eventLoopGroup;
+    private static EventLoopGroup eventLoopGroup;
 
 
-	@BeforeClass
-	public static void createEventLoopGroup() {
-		eventLoopGroup = new NioEventLoopGroup();
-	}
+    @BeforeClass
+    public static void createEventLoopGroup() {
+        eventLoopGroup = new NioEventLoopGroup();
+    }
 
-	@AfterClass
-	public static void shutdownEventLoopGroup() throws InterruptedException {
-		eventLoopGroup.shutdownGracefully().sync();
-	}
+    @AfterClass
+    public static void shutdownEventLoopGroup() throws InterruptedException {
+        eventLoopGroup.shutdownGracefully().sync();
+    }
 
-	@Override
-	protected ClientHttpRequestFactory createRequestFactory() {
-		return new Netty4ClientHttpRequestFactory(eventLoopGroup);
-	}
+    @Override
+    protected ClientHttpRequestFactory createRequestFactory() {
+        return new Netty4ClientHttpRequestFactory(eventLoopGroup);
+    }
 
-	@Override
-	@Test
-	public void httpMethods() throws Exception {
-		super.httpMethods();
-		assertHttpMethod("patch", HttpMethod.PATCH);
-	}
+    @Override
+    @Test
+    public void httpMethods() throws Exception {
+        super.httpMethods();
+        assertHttpMethod("patch", HttpMethod.PATCH);
+    }
 
 }

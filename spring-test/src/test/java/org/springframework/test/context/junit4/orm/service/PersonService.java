@@ -26,8 +26,8 @@ import org.springframework.test.context.junit4.orm.domain.Person;
  */
 public interface PersonService {
 
-	Person findByName(String name);
+    Person findByName(String name);
 
-	Person save(Person person);
+    Person save(Person person);
 
 }

@@ -16,13 +16,8 @@
 
 package org.springframework.test.context.junit4;
 
-import javax.annotation.Resource;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +32,15 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.tests.sample.beans.Pet;
 
-import static org.junit.Assert.*;
+import javax.annotation.Resource;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * SpringJUnit4ClassRunnerAppCtxTests serves as a <em>proof of concept</em>
@@ -67,163 +70,149 @@ import static org.junit.Assert.*;
  * {@value #DEFAULT_CONTEXT_RESOURCE_PATH}.
  *
  * @author Sam Brannen
- * @since 2.5
  * @see AbsolutePathSpringJUnit4ClassRunnerAppCtxTests
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @see InheritedConfigSpringJUnit4ClassRunnerAppCtxTests
+ * @since 2.5
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @TestExecutionListeners(DependencyInjectionTestExecutionListener.class)
 public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAware, BeanNameAware, InitializingBean {
 
-	/**
-	 * Default resource path for the application context configuration for
-	 * {@link SpringJUnit4ClassRunnerAppCtxTests}: {@value #DEFAULT_CONTEXT_RESOURCE_PATH}
-	 */
-	public static final String DEFAULT_CONTEXT_RESOURCE_PATH =
-			"/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml";
+    /**
+     * Default resource path for the application context configuration for
+     * {@link SpringJUnit4ClassRunnerAppCtxTests}: {@value #DEFAULT_CONTEXT_RESOURCE_PATH}
+     */
+    public static final String DEFAULT_CONTEXT_RESOURCE_PATH =
+            "/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml";
+    @Autowired(required = false)
+    protected Long nonrequiredLong;
+    @Resource
+    protected String foo;
+    protected String bar;
+    @Autowired
+    @Qualifier("quux")
+    protected String quux;
+    @Inject
+    @Named("quux")
+    protected String namedQuux;
+    private Employee employee;
+    @Autowired
+    private Pet autowiredPet;
+    @Inject
+    private Pet injectedPet;
+    @Value("enigma")
+    private String literalFieldValue;
+    @Value("#{2 == (1+1)}")
+    private Boolean spelFieldValue;
+    private String literalParameterValue;
+    private Boolean spelParameterValue;
+    private String beanName;
+
+    private ApplicationContext applicationContext;
+
+    private boolean beanInitialized = false;
 
 
-	private Employee employee;
+    @Autowired
+    protected void setEmployee(Employee employee) {
+        this.employee = employee;
+    }
 
-	@Autowired
-	private Pet autowiredPet;
+    @Resource
+    protected void setBar(String bar) {
+        this.bar = bar;
+    }
 
-	@Inject
-	private Pet injectedPet;
+    @Autowired
+    public void setLiteralParameterValue(@Value("enigma") String literalParameterValue) {
+        this.literalParameterValue = literalParameterValue;
+    }
 
-	@Autowired(required = false)
-	protected Long nonrequiredLong;
+    @Autowired
+    public void setSpelParameterValue(@Value("#{2 == (1+1)}") Boolean spelParameterValue) {
+        this.spelParameterValue = spelParameterValue;
+    }
 
-	@Resource
-	protected String foo;
+    @Override
+    public void setBeanName(String beanName) {
+        this.beanName = beanName;
+    }
 
-	protected String bar;
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
-	@Value("enigma")
-	private String literalFieldValue;
-
-	@Value("#{2 == (1+1)}")
-	private Boolean spelFieldValue;
-
-	private String literalParameterValue;
-
-	private Boolean spelParameterValue;
-
-	@Autowired
-	@Qualifier("quux")
-	protected String quux;
-
-	@Inject
-	@Named("quux")
-	protected String namedQuux;
-
-	private String beanName;
-
-	private ApplicationContext applicationContext;
-
-	private boolean beanInitialized = false;
+    @Override
+    public void afterPropertiesSet() {
+        this.beanInitialized = true;
+    }
 
 
-	@Autowired
-	protected void setEmployee(Employee employee) {
-		this.employee = employee;
-	}
+    @Test
+    public void verifyBeanNameSet() {
+        assertTrue("The bean name of this test instance should have been set due to BeanNameAware semantics.",
+                this.beanName.startsWith(getClass().getName()));
+    }
 
-	@Resource
-	protected void setBar(String bar) {
-		this.bar = bar;
-	}
+    @Test
+    public void verifyApplicationContextSet() {
+        assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
+                this.applicationContext);
+    }
 
-	@Autowired
-	public void setLiteralParameterValue(@Value("enigma") String literalParameterValue) {
-		this.literalParameterValue = literalParameterValue;
-	}
+    @Test
+    public void verifyBeanInitialized() {
+        assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
+                this.beanInitialized);
+    }
 
-	@Autowired
-	public void setSpelParameterValue(@Value("#{2 == (1+1)}") Boolean spelParameterValue) {
-		this.spelParameterValue = spelParameterValue;
-	}
+    @Test
+    public void verifyAnnotationAutowiredAndInjectedFields() {
+        assertNull("The nonrequiredLong field should NOT have been autowired.", this.nonrequiredLong);
+        assertEquals("The quux field should have been autowired via @Autowired and @Qualifier.", "Quux", this.quux);
+        assertEquals("The namedFoo field should have been injected via @Inject and @Named.", "Quux", this.namedQuux);
+        assertSame("@Autowired/@Qualifier and @Inject/@Named quux should be the same object.", this.quux, this.namedQuux);
 
-	@Override
-	public void setBeanName(String beanName) {
-		this.beanName = beanName;
-	}
+        assertNotNull("The pet field should have been autowired.", this.autowiredPet);
+        assertNotNull("The pet field should have been injected.", this.injectedPet);
+        assertEquals("Fido", this.autowiredPet.getName());
+        assertEquals("Fido", this.injectedPet.getName());
+        assertSame("@Autowired and @Inject pet should be the same object.", this.autowiredPet, this.injectedPet);
+    }
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
+    @Test
+    public void verifyAnnotationAutowiredMethods() {
+        assertNotNull("The employee setter method should have been autowired.", this.employee);
+        assertEquals("John Smith", this.employee.getName());
+    }
 
-	@Override
-	public void afterPropertiesSet() {
-		this.beanInitialized = true;
-	}
+    @Test
+    public void verifyAutowiredAtValueFields() {
+        assertNotNull("Literal @Value field should have been autowired", this.literalFieldValue);
+        assertNotNull("SpEL @Value field should have been autowired.", this.spelFieldValue);
+        assertEquals("enigma", this.literalFieldValue);
+        assertEquals(Boolean.TRUE, this.spelFieldValue);
+    }
 
+    @Test
+    public void verifyAutowiredAtValueMethods() {
+        assertNotNull("Literal @Value method parameter should have been autowired.", this.literalParameterValue);
+        assertNotNull("SpEL @Value method parameter should have been autowired.", this.spelParameterValue);
+        assertEquals("enigma", this.literalParameterValue);
+        assertEquals(Boolean.TRUE, this.spelParameterValue);
+    }
 
-	@Test
-	public void verifyBeanNameSet() {
-		assertTrue("The bean name of this test instance should have been set due to BeanNameAware semantics.",
-				this.beanName.startsWith(getClass().getName()));
-	}
+    @Test
+    public void verifyResourceAnnotationInjectedFields() {
+        assertEquals("The foo field should have been injected via @Resource.", "Foo", this.foo);
+    }
 
-	@Test
-	public void verifyApplicationContextSet() {
-		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
-				this.applicationContext);
-	}
-
-	@Test
-	public void verifyBeanInitialized() {
-		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
-				this.beanInitialized);
-	}
-
-	@Test
-	public void verifyAnnotationAutowiredAndInjectedFields() {
-		assertNull("The nonrequiredLong field should NOT have been autowired.", this.nonrequiredLong);
-		assertEquals("The quux field should have been autowired via @Autowired and @Qualifier.", "Quux", this.quux);
-		assertEquals("The namedFoo field should have been injected via @Inject and @Named.", "Quux", this.namedQuux);
-		assertSame("@Autowired/@Qualifier and @Inject/@Named quux should be the same object.", this.quux, this.namedQuux);
-
-		assertNotNull("The pet field should have been autowired.", this.autowiredPet);
-		assertNotNull("The pet field should have been injected.", this.injectedPet);
-		assertEquals("Fido", this.autowiredPet.getName());
-		assertEquals("Fido", this.injectedPet.getName());
-		assertSame("@Autowired and @Inject pet should be the same object.", this.autowiredPet, this.injectedPet);
-	}
-
-	@Test
-	public void verifyAnnotationAutowiredMethods() {
-		assertNotNull("The employee setter method should have been autowired.", this.employee);
-		assertEquals("John Smith", this.employee.getName());
-	}
-
-	@Test
-	public void verifyAutowiredAtValueFields() {
-		assertNotNull("Literal @Value field should have been autowired", this.literalFieldValue);
-		assertNotNull("SpEL @Value field should have been autowired.", this.spelFieldValue);
-		assertEquals("enigma", this.literalFieldValue);
-		assertEquals(Boolean.TRUE, this.spelFieldValue);
-	}
-
-	@Test
-	public void verifyAutowiredAtValueMethods() {
-		assertNotNull("Literal @Value method parameter should have been autowired.", this.literalParameterValue);
-		assertNotNull("SpEL @Value method parameter should have been autowired.", this.spelParameterValue);
-		assertEquals("enigma", this.literalParameterValue);
-		assertEquals(Boolean.TRUE, this.spelParameterValue);
-	}
-
-	@Test
-	public void verifyResourceAnnotationInjectedFields() {
-		assertEquals("The foo field should have been injected via @Resource.", "Foo", this.foo);
-	}
-
-	@Test
-	public void verifyResourceAnnotationInjectedMethods() {
-		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
-	}
+    @Test
+    public void verifyResourceAnnotationInjectedMethods() {
+        assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
+    }
 
 }

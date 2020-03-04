@@ -26,19 +26,19 @@ import org.junit.Test;
  */
 public class PropertyEntryTests {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testCtorBailsOnNullPropertyNameArgument() throws Exception {
-		new PropertyEntry(null);
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testCtorBailsOnNullPropertyNameArgument() throws Exception {
+        new PropertyEntry(null);
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testCtorBailsOnEmptyPropertyNameArgument() throws Exception {
-		new PropertyEntry("");
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testCtorBailsOnEmptyPropertyNameArgument() throws Exception {
+        new PropertyEntry("");
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testCtorBailsOnWhitespacedPropertyNameArgument() throws Exception {
-		new PropertyEntry("\t   ");
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testCtorBailsOnWhitespacedPropertyNameArgument() throws Exception {
+        new PropertyEntry("\t   ");
+    }
 
 }

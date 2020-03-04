@@ -16,13 +16,10 @@
 
 package org.springframework.test.context.cache;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -34,8 +31,12 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.annotation.DirtiesContext.MethodMode.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.test.annotation.DirtiesContext.MethodMode.BEFORE_METHOD;
 
 /**
  * Integration test which verifies correct interaction between the
@@ -52,60 +53,55 @@ import static org.springframework.test.annotation.DirtiesContext.MethodMode.*;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class MethodLevelDirtiesContextTests {
 
-	private static final AtomicInteger contextCount = new AtomicInteger();
+    private static final AtomicInteger contextCount = new AtomicInteger();
+    @Autowired
+    private ConfigurableApplicationContext context;
+    @Autowired
+    private Integer count;
 
+    @Test
+    // test## prefix required for @FixMethodOrder.
+    public void test01() throws Exception {
+        performAssertions(1);
+    }
 
-	@Configuration
-	static class Config {
+    @Test
+    @DirtiesContext(methodMode = BEFORE_METHOD)
+    // test## prefix required for @FixMethodOrder.
+    public void test02_dirtyContextBeforeTestMethod() throws Exception {
+        performAssertions(2);
+    }
 
-		@Bean
-		Integer count() {
-			return contextCount.incrementAndGet();
-		}
-	}
+    @Test
+    @DirtiesContext
+    // test## prefix required for @FixMethodOrder.
+    public void test03_dirtyContextAfterTestMethod() throws Exception {
+        performAssertions(2);
+    }
 
+    @Test
+    // test## prefix required for @FixMethodOrder.
+    public void test04() throws Exception {
+        performAssertions(3);
+    }
 
-	@Autowired
-	private ConfigurableApplicationContext context;
+    private void performAssertions(int expectedContextCreationCount) throws Exception {
+        assertNotNull("context must not be null", this.context);
+        assertTrue("context must be active", this.context.isActive());
 
-	@Autowired
-	private Integer count;
+        assertNotNull("count must not be null", this.count);
+        assertEquals("count: ", expectedContextCreationCount, this.count.intValue());
 
+        assertEquals("context creation count: ", expectedContextCreationCount, contextCount.get());
+    }
 
-	@Test
-	// test## prefix required for @FixMethodOrder.
-	public void test01() throws Exception {
-		performAssertions(1);
-	}
+    @Configuration
+    static class Config {
 
-	@Test
-	@DirtiesContext(methodMode = BEFORE_METHOD)
-	// test## prefix required for @FixMethodOrder.
-	public void test02_dirtyContextBeforeTestMethod() throws Exception {
-		performAssertions(2);
-	}
-
-	@Test
-	@DirtiesContext
-	// test## prefix required for @FixMethodOrder.
-	public void test03_dirtyContextAfterTestMethod() throws Exception {
-		performAssertions(2);
-	}
-
-	@Test
-	// test## prefix required for @FixMethodOrder.
-	public void test04() throws Exception {
-		performAssertions(3);
-	}
-
-	private void performAssertions(int expectedContextCreationCount) throws Exception {
-		assertNotNull("context must not be null", this.context);
-		assertTrue("context must be active", this.context.isActive());
-
-		assertNotNull("count must not be null", this.count);
-		assertEquals("count: ", expectedContextCreationCount, this.count.intValue());
-
-		assertEquals("context creation count: ", expectedContextCreationCount, contextCount.get());
-	}
+        @Bean
+        Integer count() {
+            return contextCount.incrementAndGet();
+        }
+    }
 
 }

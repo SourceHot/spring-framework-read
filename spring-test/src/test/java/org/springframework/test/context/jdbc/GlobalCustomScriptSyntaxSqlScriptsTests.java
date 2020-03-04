@@ -17,12 +17,11 @@
 package org.springframework.test.context.jdbc;
 
 import org.junit.Test;
-
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Modified copy of {@link CustomScriptSyntaxSqlScriptsTests} with
@@ -36,15 +35,15 @@ import static org.junit.Assert.*;
 @SqlConfig(commentPrefix = "`", blockCommentStartDelimiter = "#$", blockCommentEndDelimiter = "$#", separator = "@@")
 public class GlobalCustomScriptSyntaxSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
 
-	@Test
-	@Sql(scripts = "schema.sql", config = @SqlConfig(separator = ";"))
-	@Sql("data-add-users-with-custom-script-syntax.sql")
-	public void methodLevelScripts() {
-		assertNumUsers(3);
-	}
+    @Test
+    @Sql(scripts = "schema.sql", config = @SqlConfig(separator = ";"))
+    @Sql("data-add-users-with-custom-script-syntax.sql")
+    public void methodLevelScripts() {
+        assertNumUsers(3);
+    }
 
-	protected void assertNumUsers(int expected) {
-		assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
-	}
+    protected void assertNumUsers(int expected) {
+        assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+    }
 
 }

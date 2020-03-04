@@ -27,27 +27,29 @@ import javax.sql.DataSource;
  */
 public class H2SequenceMaxValueIncrementer extends AbstractSequenceMaxValueIncrementer {
 
-	/**
-	 * Default constructor for bean property style usage.
-	 * @see #setDataSource
-	 * @see #setIncrementerName
-	 */
-	public H2SequenceMaxValueIncrementer() {
-	}
+    /**
+     * Default constructor for bean property style usage.
+     *
+     * @see #setDataSource
+     * @see #setIncrementerName
+     */
+    public H2SequenceMaxValueIncrementer() {
+    }
 
-	/**
-	 * Convenience constructor.
-	 * @param dataSource the DataSource to use
-	 * @param incrementerName the name of the sequence/table to use
-	 */
-	public H2SequenceMaxValueIncrementer(DataSource dataSource, String incrementerName) {
-		super(dataSource, incrementerName);
-	}
+    /**
+     * Convenience constructor.
+     *
+     * @param dataSource      the DataSource to use
+     * @param incrementerName the name of the sequence/table to use
+     */
+    public H2SequenceMaxValueIncrementer(DataSource dataSource, String incrementerName) {
+        super(dataSource, incrementerName);
+    }
 
 
-	@Override
-	protected String getSequenceQuery() {
-		return "select " + getIncrementerName() + ".nextval from dual";
-	}
+    @Override
+    protected String getSequenceQuery() {
+        return "select " + getIncrementerName() + ".nextval from dual";
+    }
 
 }

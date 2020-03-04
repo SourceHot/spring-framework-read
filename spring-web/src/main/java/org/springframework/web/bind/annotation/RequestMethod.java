@@ -27,13 +27,13 @@ package org.springframework.web.bind.annotation;
  * and "dispatchTraceRequest" properties, switching them to "true" if necessary.
  *
  * @author Juergen Hoeller
- * @since 2.5
  * @see RequestMapping
  * @see org.springframework.web.servlet.DispatcherServlet#setDispatchOptionsRequest
  * @see org.springframework.web.servlet.DispatcherServlet#setDispatchTraceRequest
+ * @since 2.5
  */
 public enum RequestMethod {
 
-	GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE
+    GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE
 
 }

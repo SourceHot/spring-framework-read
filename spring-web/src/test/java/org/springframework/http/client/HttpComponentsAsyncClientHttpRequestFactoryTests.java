@@ -16,17 +16,18 @@
 
 package org.springframework.http.client;
 
-import java.net.URI;
-
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.junit.Test;
-
 import org.springframework.http.HttpMethod;
 
-import static org.junit.Assert.*;
+import java.net.URI;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Arjen Poutsma
@@ -35,56 +36,56 @@ import static org.junit.Assert.*;
 @SuppressWarnings("deprecation")
 public class HttpComponentsAsyncClientHttpRequestFactoryTests extends AbstractAsyncHttpRequestFactoryTestCase {
 
-	@Override
-	protected AsyncClientHttpRequestFactory createRequestFactory() {
-		return new HttpComponentsAsyncClientHttpRequestFactory();
-	}
+    @Override
+    protected AsyncClientHttpRequestFactory createRequestFactory() {
+        return new HttpComponentsAsyncClientHttpRequestFactory();
+    }
 
 
-	@Override
-	@Test
-	public void httpMethods() throws Exception {
-		super.httpMethods();
-		assertHttpMethod("patch", HttpMethod.PATCH);
-	}
+    @Override
+    @Test
+    public void httpMethods() throws Exception {
+        super.httpMethods();
+        assertHttpMethod("patch", HttpMethod.PATCH);
+    }
 
-	@Test
-	public void customHttpAsyncClientUsesItsDefault() throws Exception {
-		HttpComponentsAsyncClientHttpRequestFactory factory =
-				new HttpComponentsAsyncClientHttpRequestFactory();
+    @Test
+    public void customHttpAsyncClientUsesItsDefault() throws Exception {
+        HttpComponentsAsyncClientHttpRequestFactory factory =
+                new HttpComponentsAsyncClientHttpRequestFactory();
 
-		URI uri = new URI(baseUrl + "/status/ok");
-		HttpComponentsAsyncClientHttpRequest request = (HttpComponentsAsyncClientHttpRequest)
-				factory.createAsyncRequest(uri, HttpMethod.GET);
+        URI uri = new URI(baseUrl + "/status/ok");
+        HttpComponentsAsyncClientHttpRequest request = (HttpComponentsAsyncClientHttpRequest)
+                factory.createAsyncRequest(uri, HttpMethod.GET);
 
-		assertNull("No custom config should be set with a custom HttpAsyncClient",
-				request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG));
-	}
+        assertNull("No custom config should be set with a custom HttpAsyncClient",
+                request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG));
+    }
 
-	@Test
-	public void defaultSettingsOfHttpAsyncClientLostOnExecutorCustomization() throws Exception {
-		CloseableHttpAsyncClient client = HttpAsyncClientBuilder.create()
-				.setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(1234).build())
-				.build();
-		HttpComponentsAsyncClientHttpRequestFactory factory = new HttpComponentsAsyncClientHttpRequestFactory(client);
+    @Test
+    public void defaultSettingsOfHttpAsyncClientLostOnExecutorCustomization() throws Exception {
+        CloseableHttpAsyncClient client = HttpAsyncClientBuilder.create()
+                .setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(1234).build())
+                .build();
+        HttpComponentsAsyncClientHttpRequestFactory factory = new HttpComponentsAsyncClientHttpRequestFactory(client);
 
-		URI uri = new URI(baseUrl + "/status/ok");
-		HttpComponentsAsyncClientHttpRequest request = (HttpComponentsAsyncClientHttpRequest)
-				factory.createAsyncRequest(uri, HttpMethod.GET);
+        URI uri = new URI(baseUrl + "/status/ok");
+        HttpComponentsAsyncClientHttpRequest request = (HttpComponentsAsyncClientHttpRequest)
+                factory.createAsyncRequest(uri, HttpMethod.GET);
 
-		assertNull("No custom config should be set with a custom HttpClient",
-				request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG));
+        assertNull("No custom config should be set with a custom HttpClient",
+                request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG));
 
-		factory.setConnectionRequestTimeout(4567);
-		HttpComponentsAsyncClientHttpRequest request2 = (HttpComponentsAsyncClientHttpRequest)
-				factory.createAsyncRequest(uri, HttpMethod.GET);
-		Object requestConfigAttribute = request2.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG);
-		assertNotNull(requestConfigAttribute);
-		RequestConfig requestConfig = (RequestConfig) requestConfigAttribute;
+        factory.setConnectionRequestTimeout(4567);
+        HttpComponentsAsyncClientHttpRequest request2 = (HttpComponentsAsyncClientHttpRequest)
+                factory.createAsyncRequest(uri, HttpMethod.GET);
+        Object requestConfigAttribute = request2.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG);
+        assertNotNull(requestConfigAttribute);
+        RequestConfig requestConfig = (RequestConfig) requestConfigAttribute;
 
-		assertEquals(4567, requestConfig.getConnectionRequestTimeout());
-		// No way to access the request config of the HTTP client so no way to "merge" our customizations
-		assertEquals(-1, requestConfig.getConnectTimeout());
-	}
+        assertEquals(4567, requestConfig.getConnectionRequestTimeout());
+        // No way to access the request config of the HTTP client so no way to "merge" our customizations
+        assertEquals(-1, requestConfig.getConnectTimeout());
+    }
 
 }

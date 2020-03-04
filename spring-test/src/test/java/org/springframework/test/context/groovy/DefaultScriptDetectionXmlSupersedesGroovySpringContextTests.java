@@ -18,12 +18,11 @@ package org.springframework.test.context.groovy;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Integration test class that verifies proper detection of a default
@@ -36,13 +35,13 @@ import static org.junit.Assert.*;
 @ContextConfiguration
 public class DefaultScriptDetectionXmlSupersedesGroovySpringContextTests {
 
-	@Autowired
-	protected String foo;
+    @Autowired
+    protected String foo;
 
 
-	@Test
-	public final void foo() {
-		assertEquals("The foo field should have been autowired.", "Foo", this.foo);
-	}
+    @Test
+    public final void foo() {
+        assertEquals("The foo field should have been autowired.", "Foo", this.foo);
+    }
 
 }

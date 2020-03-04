@@ -21,7 +21,6 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +31,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Integration tests that verify support for {@link DirtiesContext.HierarchyMode}
@@ -45,106 +46,103 @@ import static org.junit.Assert.*;
  * @since 3.2.2
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextHierarchy({ @ContextConfiguration(classes = DirtiesContextWithContextHierarchyTests.ParentConfig.class),
-	@ContextConfiguration(classes = DirtiesContextWithContextHierarchyTests.ChildConfig.class) })
+@ContextHierarchy({@ContextConfiguration(classes = DirtiesContextWithContextHierarchyTests.ParentConfig.class),
+        @ContextConfiguration(classes = DirtiesContextWithContextHierarchyTests.ChildConfig.class)})
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DirtiesContextWithContextHierarchyTests {
 
-	@Configuration
-	static class ParentConfig {
+    @Autowired
+    private StringBuffer foo;
+    @Autowired
+    private StringBuffer baz;
+    @Autowired
+    private ApplicationContext context;
 
-		@Bean
-		public StringBuffer foo() {
-			return new StringBuffer("foo");
-		}
+    private void reverseStringBuffers() {
+        foo.reverse();
+        baz.reverse();
+    }
 
-		@Bean
-		public StringBuffer baz() {
-			return new StringBuffer("baz-parent");
-		}
-	}
-
-	@Configuration
-	static class ChildConfig {
-
-		@Bean
-		public StringBuffer baz() {
-			return new StringBuffer("baz-child");
-		}
-	}
+    private void assertOriginalState() {
+        assertCleanParentContext();
+        assertCleanChildContext();
+    }
 
 
-	@Autowired
-	private StringBuffer foo;
+    // -------------------------------------------------------------------------
 
-	@Autowired
-	private StringBuffer baz;
+    private void assertCleanParentContext() {
+        assertEquals("foo", foo.toString());
+    }
 
-	@Autowired
-	private ApplicationContext context;
+    private void assertCleanChildContext() {
+        assertEquals("baz-child", baz.toString());
+    }
 
+    private void assertDirtyParentContext() {
+        assertEquals("oof", foo.toString());
+    }
 
-	// -------------------------------------------------------------------------
+    private void assertDirtyChildContext() {
+        assertEquals("dlihc-zab", baz.toString());
+    }
 
-	private void reverseStringBuffers() {
-		foo.reverse();
-		baz.reverse();
-	}
+    @Before
+    public void verifyContextHierarchy() {
+        assertNotNull("child ApplicationContext", context);
+        assertNotNull("parent ApplicationContext", context.getParent());
+        assertNull("grandparent ApplicationContext", context.getParent().getParent());
+    }
 
-	private void assertOriginalState() {
-		assertCleanParentContext();
-		assertCleanChildContext();
-	}
+    @Test
+    public void test1_verifyOriginalStateAndDirtyContexts() {
+        assertOriginalState();
+        reverseStringBuffers();
+    }
 
-	private void assertCleanParentContext() {
-		assertEquals("foo", foo.toString());
-	}
+    // -------------------------------------------------------------------------
 
-	private void assertCleanChildContext() {
-		assertEquals("baz-child", baz.toString());
-	}
+    @Test
+    @DirtiesContext
+    public void test2_verifyContextsWereDirtiedAndTriggerExhaustiveCacheClearing() {
+        assertDirtyParentContext();
+        assertDirtyChildContext();
+    }
 
-	private void assertDirtyParentContext() {
-		assertEquals("oof", foo.toString());
-	}
+    @Test
+    @DirtiesContext(hierarchyMode = HierarchyMode.CURRENT_LEVEL)
+    public void test3_verifyOriginalStateWasReinstatedAndDirtyContextsAndTriggerCurrentLevelCacheClearing() {
+        assertOriginalState();
+        reverseStringBuffers();
+    }
 
-	private void assertDirtyChildContext() {
-		assertEquals("dlihc-zab", baz.toString());
-	}
+    @Test
+    public void test4_verifyParentContextIsStillDirtyButChildContextHasBeenReinstated() {
+        assertDirtyParentContext();
+        assertCleanChildContext();
+    }
 
-	// -------------------------------------------------------------------------
+    @Configuration
+    static class ParentConfig {
 
-	@Before
-	public void verifyContextHierarchy() {
-		assertNotNull("child ApplicationContext", context);
-		assertNotNull("parent ApplicationContext", context.getParent());
-		assertNull("grandparent ApplicationContext", context.getParent().getParent());
-	}
+        @Bean
+        public StringBuffer foo() {
+            return new StringBuffer("foo");
+        }
 
-	@Test
-	public void test1_verifyOriginalStateAndDirtyContexts() {
-		assertOriginalState();
-		reverseStringBuffers();
-	}
+        @Bean
+        public StringBuffer baz() {
+            return new StringBuffer("baz-parent");
+        }
+    }
 
-	@Test
-	@DirtiesContext
-	public void test2_verifyContextsWereDirtiedAndTriggerExhaustiveCacheClearing() {
-		assertDirtyParentContext();
-		assertDirtyChildContext();
-	}
+    @Configuration
+    static class ChildConfig {
 
-	@Test
-	@DirtiesContext(hierarchyMode = HierarchyMode.CURRENT_LEVEL)
-	public void test3_verifyOriginalStateWasReinstatedAndDirtyContextsAndTriggerCurrentLevelCacheClearing() {
-		assertOriginalState();
-		reverseStringBuffers();
-	}
-
-	@Test
-	public void test4_verifyParentContextIsStillDirtyButChildContextHasBeenReinstated() {
-		assertDirtyParentContext();
-		assertCleanChildContext();
-	}
+        @Bean
+        public StringBuffer baz() {
+            return new StringBuffer("baz-child");
+        }
+    }
 
 }

@@ -16,16 +16,16 @@
 
 package org.springframework.jdbc.core.metadata;
 
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ReflectionUtils;
+
 import java.lang.reflect.Method;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
-
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.lang.Nullable;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Oracle-specific implementation of the {@link org.springframework.jdbc.core.metadata.TableMetaDataProvider}.
@@ -41,129 +41,126 @@ import org.springframework.util.ReflectionUtils;
  */
 public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 
-	private final boolean includeSynonyms;
+    private final boolean includeSynonyms;
 
-	@Nullable
-	private final String defaultSchema;
-
-
-	/**
-	 * Constructor used to initialize with provided database meta-data.
-	 * @param databaseMetaData meta-data to be used
-	 */
-	public OracleTableMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
-		this(databaseMetaData, false);
-	}
-
-	/**
-	 * Constructor used to initialize with provided database meta-data.
-	 * @param databaseMetaData meta-data to be used
-	 * @param includeSynonyms whether to include synonyms
-	 */
-	public OracleTableMetaDataProvider(DatabaseMetaData databaseMetaData, boolean includeSynonyms)
-			throws SQLException {
-
-		super(databaseMetaData);
-		this.includeSynonyms = includeSynonyms;
-		this.defaultSchema = lookupDefaultSchema(databaseMetaData);
-	}
+    @Nullable
+    private final String defaultSchema;
 
 
-	/*
-	 * Oracle-based implementation for detecting the current schema.
-	 */
-	@Nullable
-	private static String lookupDefaultSchema(DatabaseMetaData databaseMetaData) {
-		try {
-			CallableStatement cstmt = null;
-			try {
-				Connection con = databaseMetaData.getConnection();
-				if (con == null) {
-					logger.debug("Cannot check default schema - no Connection from DatabaseMetaData");
-					return null;
-				}
-				cstmt = con.prepareCall("{? = call sys_context('USERENV', 'CURRENT_SCHEMA')}");
-				cstmt.registerOutParameter(1, Types.VARCHAR);
-				cstmt.execute();
-				return cstmt.getString(1);
-			}
-			finally {
-				if (cstmt != null) {
-					cstmt.close();
-				}
-			}
-		}
-		catch (SQLException ex) {
-			logger.debug("Exception encountered during default schema lookup", ex);
-			return null;
-		}
-	}
+    /**
+     * Constructor used to initialize with provided database meta-data.
+     *
+     * @param databaseMetaData meta-data to be used
+     */
+    public OracleTableMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
+        this(databaseMetaData, false);
+    }
 
-	@Override
-	@Nullable
-	protected String getDefaultSchema() {
-		if (this.defaultSchema != null) {
-			return this.defaultSchema;
-		}
-		return super.getDefaultSchema();
-	}
+    /**
+     * Constructor used to initialize with provided database meta-data.
+     *
+     * @param databaseMetaData meta-data to be used
+     * @param includeSynonyms  whether to include synonyms
+     */
+    public OracleTableMetaDataProvider(DatabaseMetaData databaseMetaData, boolean includeSynonyms)
+            throws SQLException {
+
+        super(databaseMetaData);
+        this.includeSynonyms = includeSynonyms;
+        this.defaultSchema = lookupDefaultSchema(databaseMetaData);
+    }
 
 
-	@Override
-	public void initializeWithTableColumnMetaData(DatabaseMetaData databaseMetaData,
-			@Nullable String catalogName, @Nullable String schemaName, @Nullable String tableName)
-			throws SQLException {
+    /*
+     * Oracle-based implementation for detecting the current schema.
+     */
+    @Nullable
+    private static String lookupDefaultSchema(DatabaseMetaData databaseMetaData) {
+        try {
+            CallableStatement cstmt = null;
+            try {
+                Connection con = databaseMetaData.getConnection();
+                if (con == null) {
+                    logger.debug("Cannot check default schema - no Connection from DatabaseMetaData");
+                    return null;
+                }
+                cstmt = con.prepareCall("{? = call sys_context('USERENV', 'CURRENT_SCHEMA')}");
+                cstmt.registerOutParameter(1, Types.VARCHAR);
+                cstmt.execute();
+                return cstmt.getString(1);
+            } finally {
+                if (cstmt != null) {
+                    cstmt.close();
+                }
+            }
+        } catch (SQLException ex) {
+            logger.debug("Exception encountered during default schema lookup", ex);
+            return null;
+        }
+    }
 
-		if (!this.includeSynonyms) {
-			logger.debug("Defaulting to no synonyms in table meta-data lookup");
-			super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
-			return;
-		}
+    @Override
+    @Nullable
+    protected String getDefaultSchema() {
+        if (this.defaultSchema != null) {
+            return this.defaultSchema;
+        }
+        return super.getDefaultSchema();
+    }
 
-		Connection con = databaseMetaData.getConnection();
-		if (con == null) {
-			logger.info("Unable to include synonyms in table meta-data lookup - no Connection from DatabaseMetaData");
-			super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
-			return;
-		}
 
-		try {
-			Class<?> oracleConClass = con.getClass().getClassLoader().loadClass("oracle.jdbc.OracleConnection");
-			con = (Connection) con.unwrap(oracleConClass);
-		}
-		catch (ClassNotFoundException | SQLException ex) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Unable to include synonyms in table meta-data lookup - no Oracle Connection: " + ex);
-			}
-			super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
-			return;
-		}
+    @Override
+    public void initializeWithTableColumnMetaData(DatabaseMetaData databaseMetaData,
+                                                  @Nullable String catalogName, @Nullable String schemaName, @Nullable String tableName)
+            throws SQLException {
 
-		logger.debug("Including synonyms in table meta-data lookup");
-		Method setIncludeSynonyms;
-		Boolean originalValueForIncludeSynonyms;
+        if (!this.includeSynonyms) {
+            logger.debug("Defaulting to no synonyms in table meta-data lookup");
+            super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
+            return;
+        }
 
-		try {
-			Method getIncludeSynonyms = con.getClass().getMethod("getIncludeSynonyms");
-			ReflectionUtils.makeAccessible(getIncludeSynonyms);
-			originalValueForIncludeSynonyms = (Boolean) getIncludeSynonyms.invoke(con);
+        Connection con = databaseMetaData.getConnection();
+        if (con == null) {
+            logger.info("Unable to include synonyms in table meta-data lookup - no Connection from DatabaseMetaData");
+            super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
+            return;
+        }
 
-			setIncludeSynonyms = con.getClass().getMethod("setIncludeSynonyms", boolean.class);
-			ReflectionUtils.makeAccessible(setIncludeSynonyms);
-			setIncludeSynonyms.invoke(con, Boolean.TRUE);
-		}
-		catch (Throwable ex) {
-			throw new InvalidDataAccessApiUsageException("Could not prepare Oracle Connection", ex);
-		}
+        try {
+            Class<?> oracleConClass = con.getClass().getClassLoader().loadClass("oracle.jdbc.OracleConnection");
+            con = (Connection) con.unwrap(oracleConClass);
+        } catch (ClassNotFoundException | SQLException ex) {
+            if (logger.isInfoEnabled()) {
+                logger.info("Unable to include synonyms in table meta-data lookup - no Oracle Connection: " + ex);
+            }
+            super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
+            return;
+        }
 
-		super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
+        logger.debug("Including synonyms in table meta-data lookup");
+        Method setIncludeSynonyms;
+        Boolean originalValueForIncludeSynonyms;
 
-		try {
-			setIncludeSynonyms.invoke(con, originalValueForIncludeSynonyms);
-		}
-		catch (Throwable ex) {
-			throw new InvalidDataAccessApiUsageException("Could not reset Oracle Connection", ex);
-		}
-	}
+        try {
+            Method getIncludeSynonyms = con.getClass().getMethod("getIncludeSynonyms");
+            ReflectionUtils.makeAccessible(getIncludeSynonyms);
+            originalValueForIncludeSynonyms = (Boolean) getIncludeSynonyms.invoke(con);
+
+            setIncludeSynonyms = con.getClass().getMethod("setIncludeSynonyms", boolean.class);
+            ReflectionUtils.makeAccessible(setIncludeSynonyms);
+            setIncludeSynonyms.invoke(con, Boolean.TRUE);
+        } catch (Throwable ex) {
+            throw new InvalidDataAccessApiUsageException("Could not prepare Oracle Connection", ex);
+        }
+
+        super.initializeWithTableColumnMetaData(databaseMetaData, catalogName, schemaName, tableName);
+
+        try {
+            setIncludeSynonyms.invoke(con, originalValueForIncludeSynonyms);
+        } catch (Throwable ex) {
+            throw new InvalidDataAccessApiUsageException("Could not reset Oracle Connection", ex);
+        }
+    }
 
 }

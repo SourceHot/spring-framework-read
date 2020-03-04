@@ -16,19 +16,17 @@
 
 package org.springframework.web.context;
 
-import java.util.EventListener;
-
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletException;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import static org.junit.Assert.*;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletException;
+import java.util.EventListener;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test case for {@link AbstractContextLoaderInitializer}.
@@ -37,57 +35,57 @@ import static org.junit.Assert.*;
  */
 public class ContextLoaderInitializerTests {
 
-	private static final String BEAN_NAME = "myBean";
+    private static final String BEAN_NAME = "myBean";
 
-	private AbstractContextLoaderInitializer initializer;
+    private AbstractContextLoaderInitializer initializer;
 
-	private MockServletContext servletContext;
+    private MockServletContext servletContext;
 
-	private EventListener eventListener;
+    private EventListener eventListener;
 
-	@Before
-	public void setUp() throws Exception {
-		servletContext = new MyMockServletContext();
-		initializer = new MyContextLoaderInitializer();
-		eventListener = null;
-	}
+    @Before
+    public void setUp() throws Exception {
+        servletContext = new MyMockServletContext();
+        initializer = new MyContextLoaderInitializer();
+        eventListener = null;
+    }
 
-	@Test
-	public void register() throws ServletException {
-		initializer.onStartup(servletContext);
+    @Test
+    public void register() throws ServletException {
+        initializer.onStartup(servletContext);
 
-		assertTrue(eventListener instanceof ContextLoaderListener);
-		ContextLoaderListener cll = (ContextLoaderListener) eventListener;
-		cll.contextInitialized(new ServletContextEvent(servletContext));
+        assertTrue(eventListener instanceof ContextLoaderListener);
+        ContextLoaderListener cll = (ContextLoaderListener) eventListener;
+        cll.contextInitialized(new ServletContextEvent(servletContext));
 
-		WebApplicationContext applicationContext = WebApplicationContextUtils
-				.getRequiredWebApplicationContext(servletContext);
+        WebApplicationContext applicationContext = WebApplicationContextUtils
+                .getRequiredWebApplicationContext(servletContext);
 
-		assertTrue(applicationContext.containsBean(BEAN_NAME));
-		assertTrue(applicationContext.getBean(BEAN_NAME) instanceof MyBean);
-	}
+        assertTrue(applicationContext.containsBean(BEAN_NAME));
+        assertTrue(applicationContext.getBean(BEAN_NAME) instanceof MyBean);
+    }
 
-	private class MyMockServletContext extends MockServletContext {
+    private static class MyContextLoaderInitializer
+            extends AbstractContextLoaderInitializer {
 
-		@Override
-		public <T extends EventListener> void addListener(T listener) {
-			eventListener = listener;
-		}
+        @Override
+        protected WebApplicationContext createRootApplicationContext() {
+            StaticWebApplicationContext rootContext = new StaticWebApplicationContext();
+            rootContext.registerSingleton(BEAN_NAME, MyBean.class);
+            return rootContext;
+        }
+    }
 
-	}
+    private static class MyBean {
 
-	private static class MyContextLoaderInitializer
-			extends AbstractContextLoaderInitializer {
+    }
 
-		@Override
-		protected WebApplicationContext createRootApplicationContext() {
-			StaticWebApplicationContext rootContext = new StaticWebApplicationContext();
-			rootContext.registerSingleton(BEAN_NAME, MyBean.class);
-			return rootContext;
-		}
-	}
+    private class MyMockServletContext extends MockServletContext {
 
-	private static class MyBean {
+        @Override
+        public <T extends EventListener> void addListener(T listener) {
+            eventListener = listener;
+        }
 
-	}
+    }
 }

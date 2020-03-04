@@ -31,25 +31,26 @@ import org.springframework.beans.FatalBeanException;
  * them on initialization instead of just storing the reference.
  *
  * @author Juergen Hoeller
- * @since 30.10.2003
  * @see FactoryBean#getObject()
+ * @since 30.10.2003
  */
 @SuppressWarnings("serial")
 public class FactoryBeanNotInitializedException extends FatalBeanException {
 
-	/**
-	 * Create a new FactoryBeanNotInitializedException with the default message.
-	 */
-	public FactoryBeanNotInitializedException() {
-		super("FactoryBean is not fully initialized yet");
-	}
+    /**
+     * Create a new FactoryBeanNotInitializedException with the default message.
+     */
+    public FactoryBeanNotInitializedException() {
+        super("FactoryBean is not fully initialized yet");
+    }
 
-	/**
-	 * Create a new FactoryBeanNotInitializedException with the given message.
-	 * @param msg the detail message
-	 */
-	public FactoryBeanNotInitializedException(String msg) {
-		super(msg);
-	}
+    /**
+     * Create a new FactoryBeanNotInitializedException with the given message.
+     *
+     * @param msg the detail message
+     */
+    public FactoryBeanNotInitializedException(String msg) {
+        super(msg);
+    }
 
 }

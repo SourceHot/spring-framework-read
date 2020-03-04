@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.web.socket;
 
-import javax.websocket.server.ServerContainer;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +26,9 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
-import static org.junit.Assert.*;
+import javax.websocket.server.ServerContainer;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Integration tests that validate support for {@link ServletServerContainerFactoryBean}
@@ -42,26 +42,26 @@ import static org.junit.Assert.*;
 @WebAppConfiguration
 public class WebSocketServletServerContainerFactoryBeanTests {
 
-	@Autowired
-	ServerContainer serverContainer;
+    @Autowired
+    ServerContainer serverContainer;
 
 
-	@Test
-	public void servletServerContainerFactoryBeanSupport() {
-		assertEquals(42, serverContainer.getDefaultMaxTextMessageBufferSize());
-	}
+    @Test
+    public void servletServerContainerFactoryBeanSupport() {
+        assertEquals(42, serverContainer.getDefaultMaxTextMessageBufferSize());
+    }
 
 
-	@Configuration
-	@EnableWebSocket
-	static class WebSocketConfig {
+    @Configuration
+    @EnableWebSocket
+    static class WebSocketConfig {
 
-		@Bean
-		ServletServerContainerFactoryBean createWebSocketContainer() {
-			ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-			container.setMaxTextMessageBufferSize(42);
-			return container;
-		}
-	}
+        @Bean
+        ServletServerContainerFactoryBean createWebSocketContainer() {
+            ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+            container.setMaxTextMessageBufferSize(42);
+            return container;
+        }
+    }
 
 }

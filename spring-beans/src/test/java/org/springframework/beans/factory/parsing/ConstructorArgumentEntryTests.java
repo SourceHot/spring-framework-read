@@ -26,9 +26,9 @@ import org.junit.Test;
  */
 public class ConstructorArgumentEntryTests {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testCtorBailsOnNegativeCtorIndexArgument() {
-		new ConstructorArgumentEntry(-1);
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testCtorBailsOnNegativeCtorIndexArgument() {
+        new ConstructorArgumentEntry(-1);
+    }
 
 }

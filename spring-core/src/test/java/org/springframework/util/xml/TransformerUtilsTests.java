@@ -16,7 +16,7 @@
 
 package org.springframework.util.xml;
 
-import java.util.Properties;
+import org.junit.Test;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.OutputKeys;
@@ -25,10 +25,10 @@ import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
+import java.util.Properties;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for {@link TransformerUtils}.
@@ -38,123 +38,123 @@ import static org.junit.Assert.*;
  */
 public class TransformerUtilsTests {
 
-	@Test
-	public void enableIndentingSunnyDay() throws Exception {
-		Transformer transformer = new StubTransformer();
-		TransformerUtils.enableIndenting(transformer);
-		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
-		assertNotNull(indent);
-		assertEquals("yes", indent);
-		String indentAmount = transformer.getOutputProperty("{http://xml.apache.org/xalan}indent-amount");
-		assertNotNull(indentAmount);
-		assertEquals(String.valueOf(TransformerUtils.DEFAULT_INDENT_AMOUNT), indentAmount);
-	}
+    @Test
+    public void enableIndentingSunnyDay() throws Exception {
+        Transformer transformer = new StubTransformer();
+        TransformerUtils.enableIndenting(transformer);
+        String indent = transformer.getOutputProperty(OutputKeys.INDENT);
+        assertNotNull(indent);
+        assertEquals("yes", indent);
+        String indentAmount = transformer.getOutputProperty("{http://xml.apache.org/xalan}indent-amount");
+        assertNotNull(indentAmount);
+        assertEquals(String.valueOf(TransformerUtils.DEFAULT_INDENT_AMOUNT), indentAmount);
+    }
 
-	@Test
-	public void enableIndentingSunnyDayWithCustomKosherIndentAmount() throws Exception {
-		final String indentAmountProperty = "10";
-		Transformer transformer = new StubTransformer();
-		TransformerUtils.enableIndenting(transformer, Integer.valueOf(indentAmountProperty));
-		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
-		assertNotNull(indent);
-		assertEquals("yes", indent);
-		String indentAmount = transformer.getOutputProperty("{http://xml.apache.org/xalan}indent-amount");
-		assertNotNull(indentAmount);
-		assertEquals(indentAmountProperty, indentAmount);
-	}
+    @Test
+    public void enableIndentingSunnyDayWithCustomKosherIndentAmount() throws Exception {
+        final String indentAmountProperty = "10";
+        Transformer transformer = new StubTransformer();
+        TransformerUtils.enableIndenting(transformer, Integer.valueOf(indentAmountProperty));
+        String indent = transformer.getOutputProperty(OutputKeys.INDENT);
+        assertNotNull(indent);
+        assertEquals("yes", indent);
+        String indentAmount = transformer.getOutputProperty("{http://xml.apache.org/xalan}indent-amount");
+        assertNotNull(indentAmount);
+        assertEquals(indentAmountProperty, indentAmount);
+    }
 
-	@Test
-	public void disableIndentingSunnyDay() throws Exception {
-		Transformer transformer = new StubTransformer();
-		TransformerUtils.disableIndenting(transformer);
-		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
-		assertNotNull(indent);
-		assertEquals("no", indent);
-	}
+    @Test
+    public void disableIndentingSunnyDay() throws Exception {
+        Transformer transformer = new StubTransformer();
+        TransformerUtils.disableIndenting(transformer);
+        String indent = transformer.getOutputProperty(OutputKeys.INDENT);
+        assertNotNull(indent);
+        assertEquals("no", indent);
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void enableIndentingWithNullTransformer() throws Exception {
-		TransformerUtils.enableIndenting(null);
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void enableIndentingWithNullTransformer() throws Exception {
+        TransformerUtils.enableIndenting(null);
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void disableIndentingWithNullTransformer() throws Exception {
-		TransformerUtils.disableIndenting(null);
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void disableIndentingWithNullTransformer() throws Exception {
+        TransformerUtils.disableIndenting(null);
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void enableIndentingWithNegativeIndentAmount() throws Exception {
-		TransformerUtils.enableIndenting(new StubTransformer(), -21938);
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void enableIndentingWithNegativeIndentAmount() throws Exception {
+        TransformerUtils.enableIndenting(new StubTransformer(), -21938);
+    }
 
-	@Test
-	public void enableIndentingWithZeroIndentAmount() throws Exception {
-		TransformerUtils.enableIndenting(new StubTransformer(), 0);
-	}
+    @Test
+    public void enableIndentingWithZeroIndentAmount() throws Exception {
+        TransformerUtils.enableIndenting(new StubTransformer(), 0);
+    }
 
-	private static class StubTransformer extends Transformer {
+    private static class StubTransformer extends Transformer {
 
-		private Properties outputProperties = new Properties();
+        private Properties outputProperties = new Properties();
 
-		@Override
-		public void transform(Source xmlSource, Result outputTarget) throws TransformerException {
-			throw new UnsupportedOperationException();
-		}
+        @Override
+        public void transform(Source xmlSource, Result outputTarget) throws TransformerException {
+            throw new UnsupportedOperationException();
+        }
 
-		@Override
-		public void setParameter(String name, Object value) {
-			throw new UnsupportedOperationException();
-		}
+        @Override
+        public void setParameter(String name, Object value) {
+            throw new UnsupportedOperationException();
+        }
 
-		@Override
-		public Object getParameter(String name) {
-			throw new UnsupportedOperationException();
-		}
+        @Override
+        public Object getParameter(String name) {
+            throw new UnsupportedOperationException();
+        }
 
-		@Override
-		public void clearParameters() {
-			throw new UnsupportedOperationException();
-		}
+        @Override
+        public void clearParameters() {
+            throw new UnsupportedOperationException();
+        }
 
-		@Override
-		public void setURIResolver(URIResolver resolver) {
-			throw new UnsupportedOperationException();
-		}
+        @Override
+        public URIResolver getURIResolver() {
+            throw new UnsupportedOperationException();
+        }
 
-		@Override
-		public URIResolver getURIResolver() {
-			throw new UnsupportedOperationException();
-		}
+        @Override
+        public void setURIResolver(URIResolver resolver) {
+            throw new UnsupportedOperationException();
+        }
 
-		@Override
-		public void setOutputProperties(Properties oformat) {
-			throw new UnsupportedOperationException();
-		}
+        @Override
+        public Properties getOutputProperties() {
+            return this.outputProperties;
+        }
 
-		@Override
-		public Properties getOutputProperties() {
-			return this.outputProperties;
-		}
+        @Override
+        public void setOutputProperties(Properties oformat) {
+            throw new UnsupportedOperationException();
+        }
 
-		@Override
-		public void setOutputProperty(String name, String value) throws IllegalArgumentException {
-			this.outputProperties.setProperty(name, value);
-		}
+        @Override
+        public void setOutputProperty(String name, String value) throws IllegalArgumentException {
+            this.outputProperties.setProperty(name, value);
+        }
 
-		@Override
-		public String getOutputProperty(String name) throws IllegalArgumentException {
-			return this.outputProperties.getProperty(name);
-		}
+        @Override
+        public String getOutputProperty(String name) throws IllegalArgumentException {
+            return this.outputProperties.getProperty(name);
+        }
 
-		@Override
-		public void setErrorListener(ErrorListener listener) throws IllegalArgumentException {
-			throw new UnsupportedOperationException();
-		}
+        @Override
+        public ErrorListener getErrorListener() {
+            throw new UnsupportedOperationException();
+        }
 
-		@Override
-		public ErrorListener getErrorListener() {
-			throw new UnsupportedOperationException();
-		}
-	}
+        @Override
+        public void setErrorListener(ErrorListener listener) throws IllegalArgumentException {
+            throw new UnsupportedOperationException();
+        }
+    }
 
 }

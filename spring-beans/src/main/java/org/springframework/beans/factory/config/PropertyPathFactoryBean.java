@@ -18,7 +18,6 @@ package org.springframework.beans.factory.config;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -74,169 +73,170 @@ import org.springframework.util.StringUtils;
  *
  * <pre class="code"> &lt;!-- will result in 10, which is the value of property 'age' of bean 'tb' --&gt;
  * &lt;util:property-path id="name" path="testBean.age"/&gt;</pre>
- *
+ * <p>
  * Thanks to Matthias Ernst for the suggestion and initial prototype!
  *
  * @author Juergen Hoeller
- * @since 1.1.2
  * @see #setTargetObject
  * @see #setTargetBeanName
  * @see #setPropertyPath
+ * @since 1.1.2
  */
 public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAware, BeanFactoryAware {
 
-	private static final Log logger = LogFactory.getLog(PropertyPathFactoryBean.class);
+    private static final Log logger = LogFactory.getLog(PropertyPathFactoryBean.class);
 
-	@Nullable
-	private BeanWrapper targetBeanWrapper;
+    @Nullable
+    private BeanWrapper targetBeanWrapper;
 
-	@Nullable
-	private String targetBeanName;
+    @Nullable
+    private String targetBeanName;
 
-	@Nullable
-	private String propertyPath;
+    @Nullable
+    private String propertyPath;
 
-	@Nullable
-	private Class<?> resultType;
+    @Nullable
+    private Class<?> resultType;
 
-	@Nullable
-	private String beanName;
+    @Nullable
+    private String beanName;
 
-	@Nullable
-	private BeanFactory beanFactory;
-
-
-	/**
-	 * Specify a target object to apply the property path to.
-	 * Alternatively, specify a target bean name.
-	 * @param targetObject a target object, for example a bean reference
-	 * or an inner bean
-	 * @see #setTargetBeanName
-	 */
-	public void setTargetObject(Object targetObject) {
-		this.targetBeanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(targetObject);
-	}
-
-	/**
-	 * Specify the name of a target bean to apply the property path to.
-	 * Alternatively, specify a target object directly.
-	 * @param targetBeanName the bean name to be looked up in the
-	 * containing bean factory (e.g. "testBean")
-	 * @see #setTargetObject
-	 */
-	public void setTargetBeanName(String targetBeanName) {
-		this.targetBeanName = StringUtils.trimAllWhitespace(targetBeanName);
-	}
-
-	/**
-	 * Specify the property path to apply to the target.
-	 * @param propertyPath the property path, potentially nested
-	 * (e.g. "age" or "spouse.age")
-	 */
-	public void setPropertyPath(String propertyPath) {
-		this.propertyPath = StringUtils.trimAllWhitespace(propertyPath);
-	}
-
-	/**
-	 * Specify the type of the result from evaluating the property path.
-	 * <p>Note: This is not necessary for directly specified target objects
-	 * or singleton target beans, where the type can be determined through
-	 * introspection. Just specify this in case of a prototype target,
-	 * provided that you need matching by type (for example, for autowiring).
-	 * @param resultType the result type, for example "java.lang.Integer"
-	 */
-	public void setResultType(Class<?> resultType) {
-		this.resultType = resultType;
-	}
-
-	/**
-	 * The bean name of this PropertyPathFactoryBean will be interpreted
-	 * as "beanName.property" pattern, if neither "targetObject" nor
-	 * "targetBeanName" nor "propertyPath" have been specified.
-	 * This allows for concise bean definitions with just an id/name.
-	 */
-	@Override
-	public void setBeanName(String beanName) {
-		this.beanName = StringUtils.trimAllWhitespace(BeanFactoryUtils.originalBeanName(beanName));
-	}
+    @Nullable
+    private BeanFactory beanFactory;
 
 
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
+    /**
+     * Specify a target object to apply the property path to.
+     * Alternatively, specify a target bean name.
+     *
+     * @param targetObject a target object, for example a bean reference
+     *                     or an inner bean
+     * @see #setTargetBeanName
+     */
+    public void setTargetObject(Object targetObject) {
+        this.targetBeanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(targetObject);
+    }
 
-		if (this.targetBeanWrapper != null && this.targetBeanName != null) {
-			throw new IllegalArgumentException("Specify either 'targetObject' or 'targetBeanName', not both");
-		}
+    /**
+     * Specify the name of a target bean to apply the property path to.
+     * Alternatively, specify a target object directly.
+     *
+     * @param targetBeanName the bean name to be looked up in the
+     *                       containing bean factory (e.g. "testBean")
+     * @see #setTargetObject
+     */
+    public void setTargetBeanName(String targetBeanName) {
+        this.targetBeanName = StringUtils.trimAllWhitespace(targetBeanName);
+    }
 
-		if (this.targetBeanWrapper == null && this.targetBeanName == null) {
-			if (this.propertyPath != null) {
-				throw new IllegalArgumentException(
-						"Specify 'targetObject' or 'targetBeanName' in combination with 'propertyPath'");
-			}
+    /**
+     * Specify the property path to apply to the target.
+     *
+     * @param propertyPath the property path, potentially nested
+     *                     (e.g. "age" or "spouse.age")
+     */
+    public void setPropertyPath(String propertyPath) {
+        this.propertyPath = StringUtils.trimAllWhitespace(propertyPath);
+    }
 
-			// No other properties specified: check bean name.
-			int dotIndex = (this.beanName != null ? this.beanName.indexOf('.') : -1);
-			if (dotIndex == -1) {
-				throw new IllegalArgumentException(
-						"Neither 'targetObject' nor 'targetBeanName' specified, and PropertyPathFactoryBean " +
-						"bean name '" + this.beanName + "' does not follow 'beanName.property' syntax");
-			}
-			this.targetBeanName = this.beanName.substring(0, dotIndex);
-			this.propertyPath = this.beanName.substring(dotIndex + 1);
-		}
+    /**
+     * Specify the type of the result from evaluating the property path.
+     * <p>Note: This is not necessary for directly specified target objects
+     * or singleton target beans, where the type can be determined through
+     * introspection. Just specify this in case of a prototype target,
+     * provided that you need matching by type (for example, for autowiring).
+     *
+     * @param resultType the result type, for example "java.lang.Integer"
+     */
+    public void setResultType(Class<?> resultType) {
+        this.resultType = resultType;
+    }
 
-		else if (this.propertyPath == null) {
-			// either targetObject or targetBeanName specified
-			throw new IllegalArgumentException("'propertyPath' is required");
-		}
-
-		if (this.targetBeanWrapper == null && this.beanFactory.isSingleton(this.targetBeanName)) {
-			// Eagerly fetch singleton target bean, and determine result type.
-			Object bean = this.beanFactory.getBean(this.targetBeanName);
-			this.targetBeanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(bean);
-			this.resultType = this.targetBeanWrapper.getPropertyType(this.propertyPath);
-		}
-	}
+    /**
+     * The bean name of this PropertyPathFactoryBean will be interpreted
+     * as "beanName.property" pattern, if neither "targetObject" nor
+     * "targetBeanName" nor "propertyPath" have been specified.
+     * This allows for concise bean definitions with just an id/name.
+     */
+    @Override
+    public void setBeanName(String beanName) {
+        this.beanName = StringUtils.trimAllWhitespace(BeanFactoryUtils.originalBeanName(beanName));
+    }
 
 
-	@Override
-	@Nullable
-	public Object getObject() throws BeansException {
-		BeanWrapper target = this.targetBeanWrapper;
-		if (target != null) {
-			if (logger.isWarnEnabled() && this.targetBeanName != null &&
-					this.beanFactory instanceof ConfigurableBeanFactory &&
-					((ConfigurableBeanFactory) this.beanFactory).isCurrentlyInCreation(this.targetBeanName)) {
-				logger.warn("Target bean '" + this.targetBeanName + "' is still in creation due to a circular " +
-						"reference - obtained value for property '" + this.propertyPath + "' may be outdated!");
-			}
-		}
-		else {
-			// Fetch prototype target bean...
-			Assert.state(this.beanFactory != null, "No BeanFactory available");
-			Assert.state(this.targetBeanName != null, "No target bean name specified");
-			Object bean = this.beanFactory.getBean(this.targetBeanName);
-			target = PropertyAccessorFactory.forBeanPropertyAccess(bean);
-		}
-		Assert.state(this.propertyPath != null, "No property path specified");
-		return target.getPropertyValue(this.propertyPath);
-	}
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
 
-	@Override
-	public Class<?> getObjectType() {
-		return this.resultType;
-	}
+        if (this.targetBeanWrapper != null && this.targetBeanName != null) {
+            throw new IllegalArgumentException("Specify either 'targetObject' or 'targetBeanName', not both");
+        }
 
-	/**
-	 * While this FactoryBean will often be used for singleton targets,
-	 * the invoked getters for the property path might return a new object
-	 * for each call, so we have to assume that we're not returning the
-	 * same object for each {@link #getObject()} call.
-	 */
-	@Override
-	public boolean isSingleton() {
-		return false;
-	}
+        if (this.targetBeanWrapper == null && this.targetBeanName == null) {
+            if (this.propertyPath != null) {
+                throw new IllegalArgumentException(
+                        "Specify 'targetObject' or 'targetBeanName' in combination with 'propertyPath'");
+            }
+
+            // No other properties specified: check bean name.
+            int dotIndex = (this.beanName != null ? this.beanName.indexOf('.') : -1);
+            if (dotIndex == -1) {
+                throw new IllegalArgumentException(
+                        "Neither 'targetObject' nor 'targetBeanName' specified, and PropertyPathFactoryBean " +
+                                "bean name '" + this.beanName + "' does not follow 'beanName.property' syntax");
+            }
+            this.targetBeanName = this.beanName.substring(0, dotIndex);
+            this.propertyPath = this.beanName.substring(dotIndex + 1);
+        } else if (this.propertyPath == null) {
+            // either targetObject or targetBeanName specified
+            throw new IllegalArgumentException("'propertyPath' is required");
+        }
+
+        if (this.targetBeanWrapper == null && this.beanFactory.isSingleton(this.targetBeanName)) {
+            // Eagerly fetch singleton target bean, and determine result type.
+            Object bean = this.beanFactory.getBean(this.targetBeanName);
+            this.targetBeanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(bean);
+            this.resultType = this.targetBeanWrapper.getPropertyType(this.propertyPath);
+        }
+    }
+
+
+    @Override
+    @Nullable
+    public Object getObject() throws BeansException {
+        BeanWrapper target = this.targetBeanWrapper;
+        if (target != null) {
+            if (logger.isWarnEnabled() && this.targetBeanName != null &&
+                    this.beanFactory instanceof ConfigurableBeanFactory &&
+                    ((ConfigurableBeanFactory) this.beanFactory).isCurrentlyInCreation(this.targetBeanName)) {
+                logger.warn("Target bean '" + this.targetBeanName + "' is still in creation due to a circular " +
+                        "reference - obtained value for property '" + this.propertyPath + "' may be outdated!");
+            }
+        } else {
+            // Fetch prototype target bean...
+            Assert.state(this.beanFactory != null, "No BeanFactory available");
+            Assert.state(this.targetBeanName != null, "No target bean name specified");
+            Object bean = this.beanFactory.getBean(this.targetBeanName);
+            target = PropertyAccessorFactory.forBeanPropertyAccess(bean);
+        }
+        Assert.state(this.propertyPath != null, "No property path specified");
+        return target.getPropertyValue(this.propertyPath);
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return this.resultType;
+    }
+
+    /**
+     * While this FactoryBean will often be used for singleton targets,
+     * the invoked getters for the property path might return a new object
+     * for each call, so we have to assume that we're not returning the
+     * same object for each {@link #getObject()} call.
+     */
+    @Override
+    public boolean isSingleton() {
+        return false;
+    }
 
 }

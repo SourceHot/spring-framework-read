@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet;
 
+import org.springframework.lang.Nullable;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Interface for web-based theme resolution strategies that allows for
@@ -42,28 +42,30 @@ import org.springframework.lang.Nullable;
  *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
- * @since 17.06.2003
  * @see org.springframework.ui.context.Theme
  * @see org.springframework.ui.context.ThemeSource
+ * @since 17.06.2003
  */
 public interface ThemeResolver {
 
-	/**
-	 * Resolve the current theme name via the given request.
-	 * Should return a default theme as fallback in any case.
-	 * @param request request to be used for resolution
-	 * @return the current theme name
-	 */
-	String resolveThemeName(HttpServletRequest request);
+    /**
+     * Resolve the current theme name via the given request.
+     * Should return a default theme as fallback in any case.
+     *
+     * @param request request to be used for resolution
+     * @return the current theme name
+     */
+    String resolveThemeName(HttpServletRequest request);
 
-	/**
-	 * Set the current theme name to the given one.
-	 * @param request request to be used for theme name modification
-	 * @param response response to be used for theme name modification
-	 * @param themeName the new theme name ({@code null} or empty to reset it)
-	 * @throws UnsupportedOperationException if the ThemeResolver implementation
-	 * does not support dynamic changing of the theme
-	 */
-	void setThemeName(HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable String themeName);
+    /**
+     * Set the current theme name to the given one.
+     *
+     * @param request   request to be used for theme name modification
+     * @param response  response to be used for theme name modification
+     * @param themeName the new theme name ({@code null} or empty to reset it)
+     * @throws UnsupportedOperationException if the ThemeResolver implementation
+     *                                       does not support dynamic changing of the theme
+     */
+    void setThemeName(HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable String themeName);
 
 }

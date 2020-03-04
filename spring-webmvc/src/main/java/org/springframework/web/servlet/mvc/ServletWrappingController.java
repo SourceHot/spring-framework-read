@@ -16,15 +16,6 @@
 
 package org.springframework.web.servlet.mvc;
 
-import java.util.Enumeration;
-import java.util.Properties;
-
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -32,6 +23,14 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Enumeration;
+import java.util.Properties;
 
 /**
  * Spring Controller implementation that wraps a servlet instance which it manages
@@ -80,135 +79,139 @@ import org.springframework.web.servlet.ModelAndView;
  * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
- * @since 1.1.1
  * @see ServletForwardingController
+ * @since 1.1.1
  */
 public class ServletWrappingController extends AbstractController
-		implements BeanNameAware, InitializingBean, DisposableBean {
+        implements BeanNameAware, InitializingBean, DisposableBean {
 
-	@Nullable
-	private Class<? extends Servlet> servletClass;
+    @Nullable
+    private Class<? extends Servlet> servletClass;
 
-	@Nullable
-	private String servletName;
+    @Nullable
+    private String servletName;
 
-	private Properties initParameters = new Properties();
+    private Properties initParameters = new Properties();
 
-	@Nullable
-	private String beanName;
+    @Nullable
+    private String beanName;
 
-	@Nullable
-	private Servlet servletInstance;
-
-
-	public ServletWrappingController() {
-		super(false);
-	}
+    @Nullable
+    private Servlet servletInstance;
 
 
-	/**
-	 * Set the class of the servlet to wrap.
-	 * Needs to implement {@code javax.servlet.Servlet}.
-	 * @see javax.servlet.Servlet
-	 */
-	public void setServletClass(Class<? extends Servlet> servletClass) {
-		this.servletClass = servletClass;
-	}
-
-	/**
-	 * Set the name of the servlet to wrap.
-	 * Default is the bean name of this controller.
-	 */
-	public void setServletName(String servletName) {
-		this.servletName = servletName;
-	}
-
-	/**
-	 * Specify init parameters for the servlet to wrap,
-	 * as name-value pairs.
-	 */
-	public void setInitParameters(Properties initParameters) {
-		this.initParameters = initParameters;
-	}
-
-	@Override
-	public void setBeanName(String name) {
-		this.beanName = name;
-	}
+    public ServletWrappingController() {
+        super(false);
+    }
 
 
-	/**
-	 * Initialize the wrapped Servlet instance.
-	 * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
-	 */
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		if (this.servletClass == null) {
-			throw new IllegalArgumentException("'servletClass' is required");
-		}
-		if (this.servletName == null) {
-			this.servletName = this.beanName;
-		}
-		this.servletInstance = ReflectionUtils.accessibleConstructor(this.servletClass).newInstance();
-		this.servletInstance.init(new DelegatingServletConfig());
-	}
+    /**
+     * Set the class of the servlet to wrap.
+     * Needs to implement {@code javax.servlet.Servlet}.
+     *
+     * @see javax.servlet.Servlet
+     */
+    public void setServletClass(Class<? extends Servlet> servletClass) {
+        this.servletClass = servletClass;
+    }
+
+    /**
+     * Set the name of the servlet to wrap.
+     * Default is the bean name of this controller.
+     */
+    public void setServletName(String servletName) {
+        this.servletName = servletName;
+    }
+
+    /**
+     * Specify init parameters for the servlet to wrap,
+     * as name-value pairs.
+     */
+    public void setInitParameters(Properties initParameters) {
+        this.initParameters = initParameters;
+    }
+
+    @Override
+    public void setBeanName(String name) {
+        this.beanName = name;
+    }
 
 
-	/**
-	 * Invoke the wrapped Servlet instance.
-	 * @see javax.servlet.Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
-	 */
-	@Override
-	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-
-		Assert.state(this.servletInstance != null, "No Servlet instance");
-		this.servletInstance.service(request, response);
-		return null;
-	}
-
-
-	/**
-	 * Destroy the wrapped Servlet instance.
-	 * @see javax.servlet.Servlet#destroy()
-	 */
-	@Override
-	public void destroy() {
-		if (this.servletInstance != null) {
-			this.servletInstance.destroy();
-		}
-	}
+    /**
+     * Initialize the wrapped Servlet instance.
+     *
+     * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
+     */
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (this.servletClass == null) {
+            throw new IllegalArgumentException("'servletClass' is required");
+        }
+        if (this.servletName == null) {
+            this.servletName = this.beanName;
+        }
+        this.servletInstance = ReflectionUtils.accessibleConstructor(this.servletClass).newInstance();
+        this.servletInstance.init(new DelegatingServletConfig());
+    }
 
 
-	/**
-	 * Internal implementation of the ServletConfig interface, to be passed
-	 * to the wrapped servlet. Delegates to ServletWrappingController fields
-	 * and methods to provide init parameters and other environment info.
-	 */
-	private class DelegatingServletConfig implements ServletConfig {
+    /**
+     * Invoke the wrapped Servlet instance.
+     *
+     * @see javax.servlet.Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
+     */
+    @Override
+    protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
 
-		@Override
-		@Nullable
-		public String getServletName() {
-			return servletName;
-		}
+        Assert.state(this.servletInstance != null, "No Servlet instance");
+        this.servletInstance.service(request, response);
+        return null;
+    }
 
-		@Override
-		@Nullable
-		public ServletContext getServletContext() {
-			return ServletWrappingController.this.getServletContext();
-		}
 
-		@Override
-		public String getInitParameter(String paramName) {
-			return initParameters.getProperty(paramName);
-		}
+    /**
+     * Destroy the wrapped Servlet instance.
+     *
+     * @see javax.servlet.Servlet#destroy()
+     */
+    @Override
+    public void destroy() {
+        if (this.servletInstance != null) {
+            this.servletInstance.destroy();
+        }
+    }
 
-		@Override
-		@SuppressWarnings({"rawtypes", "unchecked"})
-		public Enumeration<String> getInitParameterNames() {
-			return (Enumeration) initParameters.keys();
-		}
-	}
+
+    /**
+     * Internal implementation of the ServletConfig interface, to be passed
+     * to the wrapped servlet. Delegates to ServletWrappingController fields
+     * and methods to provide init parameters and other environment info.
+     */
+    private class DelegatingServletConfig implements ServletConfig {
+
+        @Override
+        @Nullable
+        public String getServletName() {
+            return servletName;
+        }
+
+        @Override
+        @Nullable
+        public ServletContext getServletContext() {
+            return ServletWrappingController.this.getServletContext();
+        }
+
+        @Override
+        public String getInitParameter(String paramName) {
+            return initParameters.getProperty(paramName);
+        }
+
+        @Override
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        public Enumeration<String> getInitParameterNames() {
+            return (Enumeration) initParameters.keys();
+        }
+    }
 
 }

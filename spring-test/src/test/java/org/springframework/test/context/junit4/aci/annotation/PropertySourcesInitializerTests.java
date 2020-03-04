@@ -18,7 +18,6 @@ package org.springframework.test.context.junit4.aci.annotation;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContextInitializer;
@@ -30,7 +29,7 @@ import org.springframework.mock.env.MockPropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Integration tests that verify that a {@link PropertySource} can be set via a
@@ -43,42 +42,39 @@ import static org.junit.Assert.*;
 @ContextConfiguration(initializers = PropertySourcesInitializerTests.PropertySourceInitializer.class)
 public class PropertySourcesInitializerTests {
 
-	@Configuration
-	static class Config {
+    @Autowired
+    private String enigma;
 
-		@Value("${enigma}")
-		// The following can also be used to directly access the
-		// environment instead of relying on placeholder replacement.
-		// @Value("#{ environment['enigma'] }")
-		private String enigma;
+    @Test
+    public void customPropertySourceConfiguredViaContextInitializer() {
+        assertEquals("foo", enigma);
+    }
 
+    @Configuration
+    static class Config {
 
-		@Bean
-		public String enigma() {
-			return enigma;
-		}
-
-	}
-
-
-	@Autowired
-	private String enigma;
+        @Value("${enigma}")
+        // The following can also be used to directly access the
+        // environment instead of relying on placeholder replacement.
+        // @Value("#{ environment['enigma'] }")
+        private String enigma;
 
 
-	@Test
-	public void customPropertySourceConfiguredViaContextInitializer() {
-		assertEquals("foo", enigma);
-	}
+        @Bean
+        public String enigma() {
+            return enigma;
+        }
 
+    }
 
-	public static class PropertySourceInitializer implements
-			ApplicationContextInitializer<ConfigurableApplicationContext> {
+    public static class PropertySourceInitializer implements
+            ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-		@Override
-		public void initialize(ConfigurableApplicationContext applicationContext) {
-			applicationContext.getEnvironment().getPropertySources().addFirst(
-				new MockPropertySource().withProperty("enigma", "foo"));
-		}
-	}
+        @Override
+        public void initialize(ConfigurableApplicationContext applicationContext) {
+            applicationContext.getEnvironment().getPropertySources().addFirst(
+                    new MockPropertySource().withProperty("enigma", "foo"));
+        }
+    }
 
 }

@@ -23,24 +23,25 @@ import org.springframework.lang.Nullable;
  * Used by {@link org.springframework.beans.factory.config.ConfigurableBeanFactory}.
  *
  * @author Juergen Hoeller
- * @since 2.5
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#resolveAliases
  * @see org.springframework.beans.factory.config.BeanDefinitionVisitor#BeanDefinitionVisitor(StringValueResolver)
  * @see org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
+ * @since 2.5
  */
 @FunctionalInterface
 public interface StringValueResolver {
 
-	/**
-	 * Resolve the given String value, for example parsing placeholders.
+    /**
+     * Resolve the given String value, for example parsing placeholders.
      * 字符串值解析器
-	 * @param strVal the original String value (never {@code null})
-	 * @return the resolved String value (may be {@code null} when resolved to a null
-	 * value), possibly the original String value itself (in case of no placeholders
-	 * to resolve or when ignoring unresolvable placeholders)
-	 * @throws IllegalArgumentException in case of an unresolvable String value
-	 */
-	@Nullable
-	String resolveStringValue(String strVal);
+     *
+     * @param strVal the original String value (never {@code null})
+     * @return the resolved String value (may be {@code null} when resolved to a null
+     * value), possibly the original String value itself (in case of no placeholders
+     * to resolve or when ignoring unresolvable placeholders)
+     * @throws IllegalArgumentException in case of an unresolvable String value
+     */
+    @Nullable
+    String resolveStringValue(String strVal);
 
 }

@@ -16,13 +16,6 @@
 
 package org.springframework.core.io.buffer;
 
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
-
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PoolArenaMetric;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -32,11 +25,17 @@ import org.junit.Rule;
 import org.junit.rules.Verifier;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Base class for tests that read or write data buffers with a rule to check
@@ -48,112 +47,107 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public abstract class AbstractDataBufferAllocatingTestCase {
 
-	@Parameterized.Parameter
-	public DataBufferFactory bufferFactory;
+    @Rule
+    public final Verifier leakDetector = new LeakDetector();
+    @Parameterized.Parameter
+    public DataBufferFactory bufferFactory;
 
-	@Parameterized.Parameters(name = "{0}")
-	public static Object[][] dataBufferFactories() {
-		return new Object[][] {
-				{new NettyDataBufferFactory(new UnpooledByteBufAllocator(true))},
-				{new NettyDataBufferFactory(new UnpooledByteBufAllocator(false))},
-				// disable caching for reliable leak detection, see https://github.com/netty/netty/issues/5275
-				{new NettyDataBufferFactory(new PooledByteBufAllocator(true, 1, 1, 8192, 11, 0, 0, 0, true))},
-				{new NettyDataBufferFactory(new PooledByteBufAllocator(false, 1, 1, 8192, 11, 0, 0, 0, true))},
-				{new DefaultDataBufferFactory(true)},
-				{new DefaultDataBufferFactory(false)}
+    @Parameterized.Parameters(name = "{0}")
+    public static Object[][] dataBufferFactories() {
+        return new Object[][]{
+                {new NettyDataBufferFactory(new UnpooledByteBufAllocator(true))},
+                {new NettyDataBufferFactory(new UnpooledByteBufAllocator(false))},
+                // disable caching for reliable leak detection, see https://github.com/netty/netty/issues/5275
+                {new NettyDataBufferFactory(new PooledByteBufAllocator(true, 1, 1, 8192, 11, 0, 0, 0, true))},
+                {new NettyDataBufferFactory(new PooledByteBufAllocator(false, 1, 1, 8192, 11, 0, 0, 0, true))},
+                {new DefaultDataBufferFactory(true)},
+                {new DefaultDataBufferFactory(false)}
 
-		};
-	}
+        };
+    }
 
-	@Rule
-	public final Verifier leakDetector = new LeakDetector();
+    private static long getAllocations(List<PoolArenaMetric> metrics) {
+        return metrics.stream().mapToLong(PoolArenaMetric::numActiveAllocations).sum();
+    }
 
+    protected DataBuffer createDataBuffer(int capacity) {
+        return this.bufferFactory.allocateBuffer(capacity);
+    }
 
-	protected DataBuffer createDataBuffer(int capacity) {
-		return this.bufferFactory.allocateBuffer(capacity);
-	}
+    protected DataBuffer stringBuffer(String value) {
+        return byteBuffer(value.getBytes(StandardCharsets.UTF_8));
+    }
 
-	protected DataBuffer stringBuffer(String value) {
-		return byteBuffer(value.getBytes(StandardCharsets.UTF_8));
-	}
+    protected Mono<DataBuffer> deferStringBuffer(String value) {
+        return Mono.defer(() -> Mono.just(stringBuffer(value)));
+    }
 
-	protected Mono<DataBuffer> deferStringBuffer(String value) {
-		return Mono.defer(() -> Mono.just(stringBuffer(value)));
-	}
+    protected DataBuffer byteBuffer(byte[] value) {
+        DataBuffer buffer = this.bufferFactory.allocateBuffer(value.length);
+        buffer.write(value);
+        return buffer;
+    }
 
-	protected DataBuffer byteBuffer(byte[] value) {
-		DataBuffer buffer = this.bufferFactory.allocateBuffer(value.length);
-		buffer.write(value);
-		return buffer;
-	}
+    protected void release(DataBuffer... buffers) {
+        Arrays.stream(buffers).forEach(DataBufferUtils::release);
+    }
 
-	protected void release(DataBuffer... buffers) {
-		Arrays.stream(buffers).forEach(DataBufferUtils::release);
-	}
+    protected Consumer<DataBuffer> stringConsumer(String expected) {
+        return dataBuffer -> {
+            String value =
+                    DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
+            DataBufferUtils.release(dataBuffer);
+            assertEquals(expected, value);
+        };
+    }
 
-	protected Consumer<DataBuffer> stringConsumer(String expected) {
-		return dataBuffer -> {
-			String value =
-					DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
-			DataBufferUtils.release(dataBuffer);
-			assertEquals(expected, value);
-		};
-	}
+    /**
+     * Wait until allocations are at 0, or the given duration elapses.
+     */
+    protected void waitForDataBufferRelease(Duration duration) throws InterruptedException {
+        Instant start = Instant.now();
+        while (Instant.now().isBefore(start.plus(duration))) {
+            try {
+                verifyAllocations();
+                break;
+            } catch (AssertionError ex) {
+                // ignore;
+            }
+            Thread.sleep(50);
+        }
+    }
 
-	/**
-	 * Wait until allocations are at 0, or the given duration elapses.
-	 */
-	protected void waitForDataBufferRelease(Duration duration) throws InterruptedException {
-		Instant start = Instant.now();
-		while (Instant.now().isBefore(start.plus(duration))) {
-			try {
-				verifyAllocations();
-				break;
-			}
-			catch (AssertionError ex) {
-				// ignore;
-			}
-			Thread.sleep(50);
-		}
-	}
+    private void verifyAllocations() {
+        if (this.bufferFactory instanceof NettyDataBufferFactory) {
+            ByteBufAllocator allocator = ((NettyDataBufferFactory) this.bufferFactory).getByteBufAllocator();
+            if (allocator instanceof PooledByteBufAllocator) {
+                Instant start = Instant.now();
+                while (true) {
+                    PooledByteBufAllocatorMetric metric = ((PooledByteBufAllocator) allocator).metric();
+                    long total = getAllocations(metric.directArenas()) + getAllocations(metric.heapArenas());
+                    if (total == 0) {
+                        return;
+                    }
+                    if (Instant.now().isBefore(start.plus(Duration.ofSeconds(5)))) {
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException ex) {
+                            // ignore
+                        }
+                        continue;
+                    }
+                    assertEquals("ByteBuf Leak: " + total + " unreleased allocations", 0, total);
+                }
+            }
+        }
+    }
 
-	private void verifyAllocations() {
-		if (this.bufferFactory instanceof NettyDataBufferFactory) {
-			ByteBufAllocator allocator = ((NettyDataBufferFactory) this.bufferFactory).getByteBufAllocator();
-			if (allocator instanceof PooledByteBufAllocator) {
-				Instant start = Instant.now();
-				while (true) {
-					PooledByteBufAllocatorMetric metric = ((PooledByteBufAllocator) allocator).metric();
-					long total = getAllocations(metric.directArenas()) + getAllocations(metric.heapArenas());
-					if (total == 0) {
-						return;
-					}
-					if (Instant.now().isBefore(start.plus(Duration.ofSeconds(5)))) {
-						try {
-							Thread.sleep(50);
-						}
-						catch (InterruptedException ex) {
-							// ignore
-						}
-						continue;
-					}
-					assertEquals("ByteBuf Leak: " + total + " unreleased allocations", 0, total);
-				}
-			}
-		}
-	}
+    protected class LeakDetector extends Verifier {
 
-	private static long getAllocations(List<PoolArenaMetric> metrics) {
-		return metrics.stream().mapToLong(PoolArenaMetric::numActiveAllocations).sum();
-	}
-
-
-	protected class LeakDetector extends Verifier {
-
-		@Override
-		public void verify() {
-			AbstractDataBufferAllocatingTestCase.this.verifyAllocations();
-		}
-	}
+        @Override
+        public void verify() {
+            AbstractDataBufferAllocatingTestCase.this.verifyAllocations();
+        }
+    }
 
 }

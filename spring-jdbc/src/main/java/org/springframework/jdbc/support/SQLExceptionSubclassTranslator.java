@@ -16,6 +16,18 @@
 
 package org.springframework.jdbc.support;
 
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.PermissionDeniedDataAccessException;
+import org.springframework.dao.QueryTimeoutException;
+import org.springframework.dao.RecoverableDataAccessException;
+import org.springframework.dao.TransientDataAccessResourceException;
+import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.lang.Nullable;
+
 import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -30,18 +42,6 @@ import java.sql.SQLTransactionRollbackException;
 import java.sql.SQLTransientConnectionException;
 import java.sql.SQLTransientException;
 
-import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.dao.PermissionDeniedDataAccessException;
-import org.springframework.dao.QueryTimeoutException;
-import org.springframework.dao.RecoverableDataAccessException;
-import org.springframework.dao.TransientDataAccessResourceException;
-import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.lang.Nullable;
-
 /**
  * {@link SQLExceptionTranslator} implementation which analyzes the specific
  * {@link java.sql.SQLException} subclass thrown by the JDBC driver.
@@ -51,57 +51,48 @@ import org.springframework.lang.Nullable;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @since 2.5
  * @see java.sql.SQLTransientException
  * @see java.sql.SQLTransientException
  * @see java.sql.SQLRecoverableException
+ * @since 2.5
  */
 public class SQLExceptionSubclassTranslator extends AbstractFallbackSQLExceptionTranslator {
 
-	public SQLExceptionSubclassTranslator() {
-		setFallbackTranslator(new SQLStateSQLExceptionTranslator());
-	}
+    public SQLExceptionSubclassTranslator() {
+        setFallbackTranslator(new SQLStateSQLExceptionTranslator());
+    }
 
-	@Override
-	@Nullable
-	protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {
-		if (ex instanceof SQLTransientException) {
-			if (ex instanceof SQLTransientConnectionException) {
-				return new TransientDataAccessResourceException(buildMessage(task, sql, ex), ex);
-			}
-			else if (ex instanceof SQLTransactionRollbackException) {
-				return new ConcurrencyFailureException(buildMessage(task, sql, ex), ex);
-			}
-			else if (ex instanceof SQLTimeoutException) {
-				return new QueryTimeoutException(buildMessage(task, sql, ex), ex);
-			}
-		}
-		else if (ex instanceof SQLNonTransientException) {
-			if (ex instanceof SQLNonTransientConnectionException) {
-				return new DataAccessResourceFailureException(buildMessage(task, sql, ex), ex);
-			}
-			else if (ex instanceof SQLDataException) {
-				return new DataIntegrityViolationException(buildMessage(task, sql, ex), ex);
-			}
-			else if (ex instanceof SQLIntegrityConstraintViolationException) {
-				return new DataIntegrityViolationException(buildMessage(task, sql, ex), ex);
-			}
-			else if (ex instanceof SQLInvalidAuthorizationSpecException) {
-				return new PermissionDeniedDataAccessException(buildMessage(task, sql, ex), ex);
-			}
-			else if (ex instanceof SQLSyntaxErrorException) {
-				return new BadSqlGrammarException(task, (sql != null ? sql : ""), ex);
-			}
-			else if (ex instanceof SQLFeatureNotSupportedException) {
-				return new InvalidDataAccessApiUsageException(buildMessage(task, sql, ex), ex);
-			}
-		}
-		else if (ex instanceof SQLRecoverableException) {
-			return new RecoverableDataAccessException(buildMessage(task, sql, ex), ex);
-		}
+    @Override
+    @Nullable
+    protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {
+        if (ex instanceof SQLTransientException) {
+            if (ex instanceof SQLTransientConnectionException) {
+                return new TransientDataAccessResourceException(buildMessage(task, sql, ex), ex);
+            } else if (ex instanceof SQLTransactionRollbackException) {
+                return new ConcurrencyFailureException(buildMessage(task, sql, ex), ex);
+            } else if (ex instanceof SQLTimeoutException) {
+                return new QueryTimeoutException(buildMessage(task, sql, ex), ex);
+            }
+        } else if (ex instanceof SQLNonTransientException) {
+            if (ex instanceof SQLNonTransientConnectionException) {
+                return new DataAccessResourceFailureException(buildMessage(task, sql, ex), ex);
+            } else if (ex instanceof SQLDataException) {
+                return new DataIntegrityViolationException(buildMessage(task, sql, ex), ex);
+            } else if (ex instanceof SQLIntegrityConstraintViolationException) {
+                return new DataIntegrityViolationException(buildMessage(task, sql, ex), ex);
+            } else if (ex instanceof SQLInvalidAuthorizationSpecException) {
+                return new PermissionDeniedDataAccessException(buildMessage(task, sql, ex), ex);
+            } else if (ex instanceof SQLSyntaxErrorException) {
+                return new BadSqlGrammarException(task, (sql != null ? sql : ""), ex);
+            } else if (ex instanceof SQLFeatureNotSupportedException) {
+                return new InvalidDataAccessApiUsageException(buildMessage(task, sql, ex), ex);
+            }
+        } else if (ex instanceof SQLRecoverableException) {
+            return new RecoverableDataAccessException(buildMessage(task, sql, ex), ex);
+        }
 
-		// Fallback to Spring's own SQL state translation...
-		return null;
-	}
+        // Fallback to Spring's own SQL state translation...
+        return null;
+    }
 
 }

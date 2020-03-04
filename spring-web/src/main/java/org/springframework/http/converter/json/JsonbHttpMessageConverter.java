@@ -16,17 +16,16 @@
 
 package org.springframework.http.converter.json;
 
-import java.io.Reader;
-import java.io.Writer;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbConfig;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
+import java.io.Reader;
+import java.io.Writer;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}
@@ -38,76 +37,76 @@ import org.springframework.util.Assert;
  * {@code UTF-8} character set.
  *
  * @author Juergen Hoeller
- * @since 5.0
  * @see javax.json.bind.Jsonb
  * @see javax.json.bind.JsonbBuilder
  * @see #setJsonb
+ * @since 5.0
  */
 public class JsonbHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 
-	private Jsonb jsonb;
+    private Jsonb jsonb;
 
 
-	/**
-	 * Construct a new {@code JsonbHttpMessageConverter} with default configuration.
-	 */
-	public JsonbHttpMessageConverter() {
-		this(JsonbBuilder.create());
-	}
+    /**
+     * Construct a new {@code JsonbHttpMessageConverter} with default configuration.
+     */
+    public JsonbHttpMessageConverter() {
+        this(JsonbBuilder.create());
+    }
 
-	/**
-	 * Construct a new {@code JsonbHttpMessageConverter} with the given configuration.
-	 * @param config the {@code JsonbConfig} for the underlying delegate
-	 */
-	public JsonbHttpMessageConverter(JsonbConfig config) {
-		this.jsonb = JsonbBuilder.create(config);
-	}
+    /**
+     * Construct a new {@code JsonbHttpMessageConverter} with the given configuration.
+     *
+     * @param config the {@code JsonbConfig} for the underlying delegate
+     */
+    public JsonbHttpMessageConverter(JsonbConfig config) {
+        this.jsonb = JsonbBuilder.create(config);
+    }
 
-	/**
-	 * Construct a new {@code JsonbHttpMessageConverter} with the given delegate.
-	 * @param jsonb the Jsonb instance to use
-	 */
-	public JsonbHttpMessageConverter(Jsonb jsonb) {
-		Assert.notNull(jsonb, "A Jsonb instance is required");
-		this.jsonb = jsonb;
-	}
+    /**
+     * Construct a new {@code JsonbHttpMessageConverter} with the given delegate.
+     *
+     * @param jsonb the Jsonb instance to use
+     */
+    public JsonbHttpMessageConverter(Jsonb jsonb) {
+        Assert.notNull(jsonb, "A Jsonb instance is required");
+        this.jsonb = jsonb;
+    }
 
+    /**
+     * Return the configured {@code Jsonb} instance for this converter.
+     */
+    public Jsonb getJsonb() {
+        return this.jsonb;
+    }
 
-	/**
-	 * Set the {@code Jsonb} instance to use.
-	 * If not set, a default {@code Jsonb} instance will be created.
-	 * <p>Setting a custom-configured {@code Jsonb} is one way to take further
-	 * control of the JSON serialization process.
-	 * @see #JsonbHttpMessageConverter(Jsonb)
-	 * @see #JsonbHttpMessageConverter(JsonbConfig)
-	 * @see JsonbBuilder
-	 */
-	public void setJsonb(Jsonb jsonb) {
-		Assert.notNull(jsonb, "A Jsonb instance is required");
-		this.jsonb = jsonb;
-	}
+    /**
+     * Set the {@code Jsonb} instance to use.
+     * If not set, a default {@code Jsonb} instance will be created.
+     * <p>Setting a custom-configured {@code Jsonb} is one way to take further
+     * control of the JSON serialization process.
+     *
+     * @see #JsonbHttpMessageConverter(Jsonb)
+     * @see #JsonbHttpMessageConverter(JsonbConfig)
+     * @see JsonbBuilder
+     */
+    public void setJsonb(Jsonb jsonb) {
+        Assert.notNull(jsonb, "A Jsonb instance is required");
+        this.jsonb = jsonb;
+    }
 
-	/**
-	 * Return the configured {@code Jsonb} instance for this converter.
-	 */
-	public Jsonb getJsonb() {
-		return this.jsonb;
-	}
+    @Override
+    protected Object readInternal(Type resolvedType, Reader reader) throws Exception {
+        return getJsonb().fromJson(reader, resolvedType);
+    }
 
-
-	@Override
-	protected Object readInternal(Type resolvedType, Reader reader) throws Exception {
-		return getJsonb().fromJson(reader, resolvedType);
-	}
-
-	@Override
-	protected void writeInternal(Object o, @Nullable Type type, Writer writer) throws Exception {
-		if (type instanceof ParameterizedType) {
-			getJsonb().toJson(o, type, writer);
-		}
-		else {
-			getJsonb().toJson(o, writer);
-		}
-	}
+    @Override
+    protected void writeInternal(Object o, @Nullable Type type, Writer writer) throws Exception {
+        if (type instanceof ParameterizedType) {
+            getJsonb().toJson(o, type, writer);
+        } else {
+            getJsonb().toJson(o, writer);
+        }
+    }
 
 }

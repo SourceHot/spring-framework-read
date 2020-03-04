@@ -28,21 +28,23 @@ package org.aopalliance.aop;
 @SuppressWarnings("serial")
 public class AspectException extends RuntimeException {
 
-	/**
-	 * Constructor for AspectException.
-	 * @param message the exception message
-	 */
-	public AspectException(String message) {
-		super(message);
-	}
+    /**
+     * Constructor for AspectException.
+     *
+     * @param message the exception message
+     */
+    public AspectException(String message) {
+        super(message);
+    }
 
-	/**
-	 * Constructor for AspectException.
-	 * @param message the exception message
-	 * @param cause the root cause, if any
-	 */
-	public AspectException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    /**
+     * Constructor for AspectException.
+     *
+     * @param message the exception message
+     * @param cause   the root cause, if any
+     */
+    public AspectException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }

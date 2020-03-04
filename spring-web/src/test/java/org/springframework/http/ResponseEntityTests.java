@@ -16,16 +16,21 @@
 
 package org.springframework.http;
 
+import org.hamcrest.Matchers;
+import org.junit.Test;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma
@@ -34,270 +39,270 @@ import static org.junit.Assert.*;
  */
 public class ResponseEntityTests {
 
-	@Test
-	public void normal() {
-		String headerName = "My-Custom-Header";
-		String headerValue1 = "HeaderValue1";
-		String headerValue2 = "HeaderValue2";
-		Integer entity = 42;
+    @Test
+    public void normal() {
+        String headerName = "My-Custom-Header";
+        String headerValue1 = "HeaderValue1";
+        String headerValue2 = "HeaderValue2";
+        Integer entity = 42;
 
-		ResponseEntity<Integer> responseEntity =
-				ResponseEntity.status(HttpStatus.OK).header(headerName, headerValue1, headerValue2).body(entity);
+        ResponseEntity<Integer> responseEntity =
+                ResponseEntity.status(HttpStatus.OK).header(headerName, headerValue1, headerValue2).body(entity);
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-		assertTrue(responseEntity.getHeaders().containsKey(headerName));
-		List<String> list = responseEntity.getHeaders().get(headerName);
-		assertEquals(2, list.size());
-		assertEquals(headerValue1, list.get(0));
-		assertEquals(headerValue2, list.get(1));
-		assertEquals(entity, responseEntity.getBody());
-	}
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertTrue(responseEntity.getHeaders().containsKey(headerName));
+        List<String> list = responseEntity.getHeaders().get(headerName);
+        assertEquals(2, list.size());
+        assertEquals(headerValue1, list.get(0));
+        assertEquals(headerValue2, list.get(1));
+        assertEquals(entity, responseEntity.getBody());
+    }
 
-	@Test
-	public void okNoBody() {
-		ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
+    @Test
+    public void okNoBody() {
+        ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-		assertNull(responseEntity.getBody());
-	}
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertNull(responseEntity.getBody());
+    }
 
-	@Test
-	public void okEntity() {
-		Integer entity = 42;
-		ResponseEntity<Integer> responseEntity = ResponseEntity.ok(entity);
+    @Test
+    public void okEntity() {
+        Integer entity = 42;
+        ResponseEntity<Integer> responseEntity = ResponseEntity.ok(entity);
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-		assertEquals(entity, responseEntity.getBody());
-	}
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(entity, responseEntity.getBody());
+    }
 
-	@Test
-	public void ofOptional() {
-		Integer entity = 42;
-		ResponseEntity<Integer> responseEntity = ResponseEntity.of(Optional.of(entity));
+    @Test
+    public void ofOptional() {
+        Integer entity = 42;
+        ResponseEntity<Integer> responseEntity = ResponseEntity.of(Optional.of(entity));
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-		assertEquals(entity, responseEntity.getBody());
-	}
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(entity, responseEntity.getBody());
+    }
 
-	@Test
-	public void ofEmptyOptional() {
-		ResponseEntity<Integer> responseEntity = ResponseEntity.of(Optional.empty());
+    @Test
+    public void ofEmptyOptional() {
+        ResponseEntity<Integer> responseEntity = ResponseEntity.of(Optional.empty());
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-		assertNull(responseEntity.getBody());
-	}
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertNull(responseEntity.getBody());
+    }
 
-	@Test
-	public void createdLocation() throws URISyntaxException {
-		URI location = new URI("location");
-		ResponseEntity<Void> responseEntity = ResponseEntity.created(location).build();
+    @Test
+    public void createdLocation() throws URISyntaxException {
+        URI location = new URI("location");
+        ResponseEntity<Void> responseEntity = ResponseEntity.created(location).build();
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-		assertTrue(responseEntity.getHeaders().containsKey("Location"));
-		assertEquals(location.toString(),
-				responseEntity.getHeaders().getFirst("Location"));
-		assertNull(responseEntity.getBody());
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+        assertTrue(responseEntity.getHeaders().containsKey("Location"));
+        assertEquals(location.toString(),
+                responseEntity.getHeaders().getFirst("Location"));
+        assertNull(responseEntity.getBody());
 
-		ResponseEntity.created(location).header("MyResponseHeader", "MyValue").body("Hello World");
-	}
+        ResponseEntity.created(location).header("MyResponseHeader", "MyValue").body("Hello World");
+    }
 
-	@Test
-	public void acceptedNoBody() throws URISyntaxException {
-		ResponseEntity<Void> responseEntity = ResponseEntity.accepted().build();
+    @Test
+    public void acceptedNoBody() throws URISyntaxException {
+        ResponseEntity<Void> responseEntity = ResponseEntity.accepted().build();
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
-		assertNull(responseEntity.getBody());
-	}
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
+        assertNull(responseEntity.getBody());
+    }
 
-	@Test // SPR-14939
-	public void acceptedNoBodyWithAlternativeBodyType() throws URISyntaxException {
-		ResponseEntity<String> responseEntity = ResponseEntity.accepted().build();
+    @Test // SPR-14939
+    public void acceptedNoBodyWithAlternativeBodyType() throws URISyntaxException {
+        ResponseEntity<String> responseEntity = ResponseEntity.accepted().build();
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
-		assertNull(responseEntity.getBody());
-	}
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
+        assertNull(responseEntity.getBody());
+    }
 
-	@Test
-	public void noContent() throws URISyntaxException {
-		ResponseEntity<Void> responseEntity = ResponseEntity.noContent().build();
+    @Test
+    public void noContent() throws URISyntaxException {
+        ResponseEntity<Void> responseEntity = ResponseEntity.noContent().build();
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
-		assertNull(responseEntity.getBody());
-	}
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
+        assertNull(responseEntity.getBody());
+    }
 
-	@Test
-	public void badRequest() throws URISyntaxException {
-		ResponseEntity<Void> responseEntity = ResponseEntity.badRequest().build();
+    @Test
+    public void badRequest() throws URISyntaxException {
+        ResponseEntity<Void> responseEntity = ResponseEntity.badRequest().build();
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-		assertNull(responseEntity.getBody());
-	}
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertNull(responseEntity.getBody());
+    }
 
-	@Test
-	public void notFound() throws URISyntaxException {
-		ResponseEntity<Void> responseEntity = ResponseEntity.notFound().build();
+    @Test
+    public void notFound() throws URISyntaxException {
+        ResponseEntity<Void> responseEntity = ResponseEntity.notFound().build();
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-		assertNull(responseEntity.getBody());
-	}
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertNull(responseEntity.getBody());
+    }
 
-	@Test
-	public void unprocessableEntity() throws URISyntaxException {
-		ResponseEntity<String> responseEntity = ResponseEntity.unprocessableEntity().body("error");
+    @Test
+    public void unprocessableEntity() throws URISyntaxException {
+        ResponseEntity<String> responseEntity = ResponseEntity.unprocessableEntity().body("error");
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, responseEntity.getStatusCode());
-		assertEquals("error", responseEntity.getBody());
-	}
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, responseEntity.getStatusCode());
+        assertEquals("error", responseEntity.getBody());
+    }
 
-	@Test
-	public void headers() throws URISyntaxException {
-		URI location = new URI("location");
-		long contentLength = 67890;
-		MediaType contentType = MediaType.TEXT_PLAIN;
+    @Test
+    public void headers() throws URISyntaxException {
+        URI location = new URI("location");
+        long contentLength = 67890;
+        MediaType contentType = MediaType.TEXT_PLAIN;
 
-		ResponseEntity<Void> responseEntity = ResponseEntity.ok().
-				allow(HttpMethod.GET).
-				lastModified(12345L).
-				location(location).
-				contentLength(contentLength).
-				contentType(contentType).
-				build();
+        ResponseEntity<Void> responseEntity = ResponseEntity.ok().
+                allow(HttpMethod.GET).
+                lastModified(12345L).
+                location(location).
+                contentLength(contentLength).
+                contentType(contentType).
+                build();
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-		HttpHeaders responseHeaders = responseEntity.getHeaders();
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        HttpHeaders responseHeaders = responseEntity.getHeaders();
 
-		assertEquals("GET", responseHeaders.getFirst("Allow"));
-		assertEquals("Thu, 01 Jan 1970 00:00:12 GMT",
-				responseHeaders.getFirst("Last-Modified"));
-		assertEquals(location.toASCIIString(),
-				responseHeaders.getFirst("Location"));
-		assertEquals(String.valueOf(contentLength), responseHeaders.getFirst("Content-Length"));
-		assertEquals(contentType.toString(), responseHeaders.getFirst("Content-Type"));
+        assertEquals("GET", responseHeaders.getFirst("Allow"));
+        assertEquals("Thu, 01 Jan 1970 00:00:12 GMT",
+                responseHeaders.getFirst("Last-Modified"));
+        assertEquals(location.toASCIIString(),
+                responseHeaders.getFirst("Location"));
+        assertEquals(String.valueOf(contentLength), responseHeaders.getFirst("Content-Length"));
+        assertEquals(contentType.toString(), responseHeaders.getFirst("Content-Type"));
 
-		assertNull(responseEntity.getBody());
-	}
+        assertNull(responseEntity.getBody());
+    }
 
-	@Test
-	public void Etagheader() throws URISyntaxException {
+    @Test
+    public void Etagheader() throws URISyntaxException {
 
-		ResponseEntity<Void> responseEntity = ResponseEntity.ok().eTag("\"foo\"").build();
-		assertEquals("\"foo\"", responseEntity.getHeaders().getETag());
+        ResponseEntity<Void> responseEntity = ResponseEntity.ok().eTag("\"foo\"").build();
+        assertEquals("\"foo\"", responseEntity.getHeaders().getETag());
 
-		responseEntity = ResponseEntity.ok().eTag("foo").build();
-		assertEquals("\"foo\"", responseEntity.getHeaders().getETag());
+        responseEntity = ResponseEntity.ok().eTag("foo").build();
+        assertEquals("\"foo\"", responseEntity.getHeaders().getETag());
 
-		responseEntity = ResponseEntity.ok().eTag("W/\"foo\"").build();
-		assertEquals("W/\"foo\"", responseEntity.getHeaders().getETag());
-	}
+        responseEntity = ResponseEntity.ok().eTag("W/\"foo\"").build();
+        assertEquals("W/\"foo\"", responseEntity.getHeaders().getETag());
+    }
 
-	@Test
-	public void headersCopy() {
-		HttpHeaders customHeaders = new HttpHeaders();
-		customHeaders.set("X-CustomHeader", "vale");
+    @Test
+    public void headersCopy() {
+        HttpHeaders customHeaders = new HttpHeaders();
+        customHeaders.set("X-CustomHeader", "vale");
 
-		ResponseEntity<Void> responseEntity = ResponseEntity.ok().headers(customHeaders).build();
-		HttpHeaders responseHeaders = responseEntity.getHeaders();
+        ResponseEntity<Void> responseEntity = ResponseEntity.ok().headers(customHeaders).build();
+        HttpHeaders responseHeaders = responseEntity.getHeaders();
 
-		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-		assertEquals(1, responseHeaders.size());
-		assertEquals(1, responseHeaders.get("X-CustomHeader").size());
-		assertEquals("vale", responseHeaders.getFirst("X-CustomHeader"));
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(1, responseHeaders.size());
+        assertEquals(1, responseHeaders.get("X-CustomHeader").size());
+        assertEquals("vale", responseHeaders.getFirst("X-CustomHeader"));
 
-	}
+    }
 
-	@Test  // SPR-12792
-	public void headersCopyWithEmptyAndNull() {
-		ResponseEntity<Void> responseEntityWithEmptyHeaders =
-				ResponseEntity.ok().headers(new HttpHeaders()).build();
-		ResponseEntity<Void> responseEntityWithNullHeaders =
-				ResponseEntity.ok().headers(null).build();
+    @Test  // SPR-12792
+    public void headersCopyWithEmptyAndNull() {
+        ResponseEntity<Void> responseEntityWithEmptyHeaders =
+                ResponseEntity.ok().headers(new HttpHeaders()).build();
+        ResponseEntity<Void> responseEntityWithNullHeaders =
+                ResponseEntity.ok().headers(null).build();
 
-		assertEquals(HttpStatus.OK, responseEntityWithEmptyHeaders.getStatusCode());
-		assertTrue(responseEntityWithEmptyHeaders.getHeaders().isEmpty());
-		assertEquals(responseEntityWithEmptyHeaders.toString(), responseEntityWithNullHeaders.toString());
-	}
+        assertEquals(HttpStatus.OK, responseEntityWithEmptyHeaders.getStatusCode());
+        assertTrue(responseEntityWithEmptyHeaders.getHeaders().isEmpty());
+        assertEquals(responseEntityWithEmptyHeaders.toString(), responseEntityWithNullHeaders.toString());
+    }
 
-	@Test
-	public void emptyCacheControl() {
-		Integer entity = 42;
+    @Test
+    public void emptyCacheControl() {
+        Integer entity = 42;
 
-		ResponseEntity<Integer> responseEntity =
-				ResponseEntity.status(HttpStatus.OK)
-						.cacheControl(CacheControl.empty())
-						.body(entity);
+        ResponseEntity<Integer> responseEntity =
+                ResponseEntity.status(HttpStatus.OK)
+                        .cacheControl(CacheControl.empty())
+                        .body(entity);
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-		assertFalse(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL));
-		assertEquals(entity, responseEntity.getBody());
-	}
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertFalse(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL));
+        assertEquals(entity, responseEntity.getBody());
+    }
 
-	@Test
-	public void cacheControl() {
-		Integer entity = 42;
+    @Test
+    public void cacheControl() {
+        Integer entity = 42;
 
-		ResponseEntity<Integer> responseEntity =
-				ResponseEntity.status(HttpStatus.OK)
-						.cacheControl(CacheControl.maxAge(1, TimeUnit.HOURS).cachePrivate().
-								mustRevalidate().proxyRevalidate().sMaxAge(30, TimeUnit.MINUTES))
-						.body(entity);
+        ResponseEntity<Integer> responseEntity =
+                ResponseEntity.status(HttpStatus.OK)
+                        .cacheControl(CacheControl.maxAge(1, TimeUnit.HOURS).cachePrivate().
+                                mustRevalidate().proxyRevalidate().sMaxAge(30, TimeUnit.MINUTES))
+                        .body(entity);
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-		assertTrue(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL));
-		assertEquals(entity, responseEntity.getBody());
-		String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
-		assertThat(cacheControlHeader,
-				Matchers.equalTo("max-age=3600, must-revalidate, private, proxy-revalidate, s-maxage=1800"));
-	}
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertTrue(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL));
+        assertEquals(entity, responseEntity.getBody());
+        String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
+        assertThat(cacheControlHeader,
+                Matchers.equalTo("max-age=3600, must-revalidate, private, proxy-revalidate, s-maxage=1800"));
+    }
 
-	@Test
-	public void cacheControlNoCache() {
-		Integer entity = 42;
+    @Test
+    public void cacheControlNoCache() {
+        Integer entity = 42;
 
-		ResponseEntity<Integer> responseEntity =
-				ResponseEntity.status(HttpStatus.OK)
-						.cacheControl(CacheControl.noStore())
-						.body(entity);
+        ResponseEntity<Integer> responseEntity =
+                ResponseEntity.status(HttpStatus.OK)
+                        .cacheControl(CacheControl.noStore())
+                        .body(entity);
 
-		assertNotNull(responseEntity);
-		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-		assertTrue(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL));
-		assertEquals(entity, responseEntity.getBody());
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertTrue(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL));
+        assertEquals(entity, responseEntity.getBody());
 
-		String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
-		assertThat(cacheControlHeader, Matchers.equalTo("no-store"));
-	}
+        String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
+        assertThat(cacheControlHeader, Matchers.equalTo("no-store"));
+    }
 
-	@Test
-	public void statusCodeAsInt() {
-		Integer entity = 42;
-		ResponseEntity<Integer> responseEntity = ResponseEntity.status(200).body(entity);
+    @Test
+    public void statusCodeAsInt() {
+        Integer entity = 42;
+        ResponseEntity<Integer> responseEntity = ResponseEntity.status(200).body(entity);
 
-		assertEquals(200, responseEntity.getStatusCode().value());
-		assertEquals(entity, responseEntity.getBody());
-	}
+        assertEquals(200, responseEntity.getStatusCode().value());
+        assertEquals(entity, responseEntity.getBody());
+    }
 
-	@Test
-	public void customStatusCode() {
-		Integer entity = 42;
-		ResponseEntity<Integer> responseEntity = ResponseEntity.status(299).body(entity);
+    @Test
+    public void customStatusCode() {
+        Integer entity = 42;
+        ResponseEntity<Integer> responseEntity = ResponseEntity.status(299).body(entity);
 
-		assertEquals(299, responseEntity.getStatusCodeValue());
-		assertEquals(entity, responseEntity.getBody());
-	}
+        assertEquals(299, responseEntity.getStatusCodeValue());
+        assertEquals(entity, responseEntity.getBody());
+    }
 
 }

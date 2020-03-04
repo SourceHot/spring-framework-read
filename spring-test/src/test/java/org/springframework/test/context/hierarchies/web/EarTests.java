@@ -18,7 +18,6 @@ package org.springframework.test.context.hierarchies.web;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +26,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Sam Brannen
@@ -37,30 +38,28 @@ import static org.junit.Assert.*;
 @ContextConfiguration
 public class EarTests {
 
-	@Configuration
-	static class EarConfig {
-
-		@Bean
-		public String ear() {
-			return "ear";
-		}
-	}
+    @Autowired
+    private ApplicationContext context;
 
 
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    @Autowired
+    private String ear;
 
-	@Autowired
-	private ApplicationContext context;
+    @Test
+    public void verifyEarConfig() {
+        assertFalse(context instanceof WebApplicationContext);
+        assertNull(context.getParent());
+        assertEquals("ear", ear);
+    }
 
-	@Autowired
-	private String ear;
+    @Configuration
+    static class EarConfig {
 
-
-	@Test
-	public void verifyEarConfig() {
-		assertFalse(context instanceof WebApplicationContext);
-		assertNull(context.getParent());
-		assertEquals("ear", ear);
-	}
+        @Bean
+        public String ear() {
+            return "ear";
+        }
+    }
 
 }

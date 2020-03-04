@@ -38,72 +38,76 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCreator implements BeanNameAware {
 
-	/** Separator between prefix and remainder of bean name. */
-	public static final String SEPARATOR = ".";
+    /**
+     * Separator between prefix and remainder of bean name.
+     */
+    public static final String SEPARATOR = ".";
 
 
-	private boolean usePrefix = false;
+    private boolean usePrefix = false;
 
-	@Nullable
-	private String advisorBeanNamePrefix;
+    @Nullable
+    private String advisorBeanNamePrefix;
+
+    /**
+     * Return whether to only include advisors with a certain prefix in the bean name.
+     */
+    public boolean isUsePrefix() {
+        return this.usePrefix;
+    }
+
+    /**
+     * Set whether to only include advisors with a certain prefix in the bean name.
+     * <p>Default is {@code false}, including all beans of type {@code Advisor}.
+     *
+     * @see #setAdvisorBeanNamePrefix
+     */
+    public void setUsePrefix(boolean usePrefix) {
+        this.usePrefix = usePrefix;
+    }
+
+    /**
+     * Return the prefix for bean names that will cause them to be included
+     * for auto-proxying by this object.
+     */
+    @Nullable
+    public String getAdvisorBeanNamePrefix() {
+        return this.advisorBeanNamePrefix;
+    }
+
+    /**
+     * Set the prefix for bean names that will cause them to be included for
+     * auto-proxying by this object. This prefix should be set to avoid circular
+     * references. Default value is the bean name of this object + a dot.
+     *
+     * @param advisorBeanNamePrefix the exclusion prefix
+     */
+    public void setAdvisorBeanNamePrefix(@Nullable String advisorBeanNamePrefix) {
+        this.advisorBeanNamePrefix = advisorBeanNamePrefix;
+    }
+
+    @Override
+    public void setBeanName(String name) {
+        // If no infrastructure bean name prefix has been set, override it.
+        if (this.advisorBeanNamePrefix == null) {
+            this.advisorBeanNamePrefix = name + SEPARATOR;
+        }
+    }
 
 
-	/**
-	 * Set whether to only include advisors with a certain prefix in the bean name.
-	 * <p>Default is {@code false}, including all beans of type {@code Advisor}.
-	 * @see #setAdvisorBeanNamePrefix
-	 */
-	public void setUsePrefix(boolean usePrefix) {
-		this.usePrefix = usePrefix;
-	}
-
-	/**
-	 * Return whether to only include advisors with a certain prefix in the bean name.
-	 */
-	public boolean isUsePrefix() {
-		return this.usePrefix;
-	}
-
-	/**
-	 * Set the prefix for bean names that will cause them to be included for
-	 * auto-proxying by this object. This prefix should be set to avoid circular
-	 * references. Default value is the bean name of this object + a dot.
-	 * @param advisorBeanNamePrefix the exclusion prefix
-	 */
-	public void setAdvisorBeanNamePrefix(@Nullable String advisorBeanNamePrefix) {
-		this.advisorBeanNamePrefix = advisorBeanNamePrefix;
-	}
-
-	/**
-	 * Return the prefix for bean names that will cause them to be included
-	 * for auto-proxying by this object.
-	 */
-	@Nullable
-	public String getAdvisorBeanNamePrefix() {
-		return this.advisorBeanNamePrefix;
-	}
-
-	@Override
-	public void setBeanName(String name) {
-		// If no infrastructure bean name prefix has been set, override it.
-		if (this.advisorBeanNamePrefix == null) {
-			this.advisorBeanNamePrefix = name + SEPARATOR;
-		}
-	}
-
-
-	/**
-	 * Consider {@code Advisor} beans with the specified prefix as eligible, if activated.
-	 * @see #setUsePrefix
-	 * @see #setAdvisorBeanNamePrefix
-	 */
-	@Override
-	protected boolean isEligibleAdvisorBean(String beanName) {
-		if (!isUsePrefix()) {
-			return true;
-		}
-		String prefix = getAdvisorBeanNamePrefix();
-		return (prefix != null && beanName.startsWith(prefix));
-	}
+    /**
+     * Consider {@code Advisor} beans with the specified prefix as eligible, if activated.
+     *
+     * @see #setUsePrefix
+     * @see #setAdvisorBeanNamePrefix
+     */
+    @Override
+    protected boolean isEligibleAdvisorBean(String beanName) {
+        if (!isUsePrefix()) {
+            return true;
+        }
+        String prefix = getAdvisorBeanNamePrefix();
+        return (prefix != null && beanName.startsWith(prefix));
+    }
 
 }

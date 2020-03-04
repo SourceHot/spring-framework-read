@@ -16,11 +16,8 @@
 
 package org.springframework.test.context.junit4.profile.resolver;
 
-import java.util.Arrays;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +25,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.*;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Michail Nikolaev
@@ -39,20 +38,18 @@ import static org.junit.Assert.*;
 @ActiveProfiles(resolver = ClassNameActiveProfilesResolver.class)
 public class ClassNameActiveProfilesResolverTests {
 
-	@Configuration
-	static class Config {
+    @Autowired
+    private ApplicationContext applicationContext;
 
-	}
+    @Test
+    public void test() {
+        assertTrue(Arrays.asList(applicationContext.getEnvironment().getActiveProfiles()).contains(
+                getClass().getSimpleName().toLowerCase()));
+    }
 
+    @Configuration
+    static class Config {
 
-	@Autowired
-	private ApplicationContext applicationContext;
-
-
-	@Test
-	public void test() {
-		assertTrue(Arrays.asList(applicationContext.getEnvironment().getActiveProfiles()).contains(
-			getClass().getSimpleName().toLowerCase()));
-	}
+    }
 
 }

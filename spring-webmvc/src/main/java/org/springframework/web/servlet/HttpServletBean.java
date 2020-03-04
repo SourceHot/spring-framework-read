@@ -201,8 +201,9 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
      * All bean properties of this servlet will have been set before this
      * method is invoked.
      * <p>This default implementation is empty.
+     * <p>
+     * 初始化servlet bean
      *
-	 * 初始化servlet bean
      * @throws ServletException if subclass initialization fails
      */
     protected void initServletBean() throws ServletException {

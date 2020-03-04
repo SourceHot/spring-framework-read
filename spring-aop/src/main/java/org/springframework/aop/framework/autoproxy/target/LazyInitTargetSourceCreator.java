@@ -47,31 +47,31 @@ import org.springframework.lang.Nullable;
  * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
- * @since 1.2
  * @see org.springframework.beans.factory.config.BeanDefinition#isLazyInit
  * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#setCustomTargetSourceCreators
  * @see org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator
+ * @since 1.2
  */
 public class LazyInitTargetSourceCreator extends AbstractBeanFactoryBasedTargetSourceCreator {
 
-	@Override
-	protected boolean isPrototypeBased() {
-		return false;
-	}
+    @Override
+    protected boolean isPrototypeBased() {
+        return false;
+    }
 
-	@Override
-	@Nullable
-	protected AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
-			Class<?> beanClass, String beanName) {
+    @Override
+    @Nullable
+    protected AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
+            Class<?> beanClass, String beanName) {
 
-		if (getBeanFactory() instanceof ConfigurableListableBeanFactory) {
-			BeanDefinition definition =
-					((ConfigurableListableBeanFactory) getBeanFactory()).getBeanDefinition(beanName);
-			if (definition.isLazyInit()) {
-				return new LazyInitTargetSource();
-			}
-		}
-		return null;
-	}
+        if (getBeanFactory() instanceof ConfigurableListableBeanFactory) {
+            BeanDefinition definition =
+                    ((ConfigurableListableBeanFactory) getBeanFactory()).getBeanDefinition(beanName);
+            if (definition.isLazyInit()) {
+                return new LazyInitTargetSource();
+            }
+        }
+        return null;
+    }
 
 }

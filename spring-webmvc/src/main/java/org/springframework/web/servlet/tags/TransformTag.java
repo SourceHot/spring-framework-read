@@ -16,14 +16,13 @@
 
 package org.springframework.web.servlet.tags;
 
-import java.beans.PropertyEditor;
-import java.io.IOException;
+import org.springframework.lang.Nullable;
+import org.springframework.web.util.TagUtils;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
-
-import org.springframework.lang.Nullable;
-import org.springframework.web.util.TagUtils;
+import java.beans.PropertyEditor;
+import java.io.IOException;
 
 /**
  * The {@code <transform>} tag provides transformation for reference data values
@@ -81,94 +80,99 @@ import org.springframework.web.util.TagUtils;
  *
  * @author Alef Arendsen
  * @author Juergen Hoeller
- * @since 20.09.2003
  * @see BindTag
+ * @since 20.09.2003
  */
 @SuppressWarnings("serial")
 public class TransformTag extends HtmlEscapingAwareTag {
 
-	/** the value to transform using the appropriate property editor. */
-	@Nullable
-	private Object value;
+    /**
+     * the value to transform using the appropriate property editor.
+     */
+    @Nullable
+    private Object value;
 
-	/** the variable to put the result in. */
-	@Nullable
-	private String var;
+    /**
+     * the variable to put the result in.
+     */
+    @Nullable
+    private String var;
 
-	/** the scope of the variable the result will be put in. */
-	private String scope = TagUtils.SCOPE_PAGE;
-
-
-	/**
-	 * Set the value to transform, using the appropriate PropertyEditor
-	 * from the enclosing BindTag.
-	 * <p>The value can either be a plain value to transform (a hard-coded String
-	 * value in a JSP or a JSP expression), or a JSP EL expression to be evaluated
-	 * (transforming the result of the expression).
-	 */
-	public void setValue(Object value) {
-		this.value = value;
-	}
-
-	/**
-	 * Set PageContext attribute name under which to expose
-	 * a variable that contains the result of the transformation.
-	 * @see #setScope
-	 * @see javax.servlet.jsp.PageContext#setAttribute
-	 */
-	public void setVar(String var) {
-		this.var = var;
-	}
-
-	/**
-	 * Set the scope to export the variable to.
-	 * Default is SCOPE_PAGE ("page").
-	 * @see #setVar
-	 * @see org.springframework.web.util.TagUtils#SCOPE_PAGE
-	 * @see javax.servlet.jsp.PageContext#setAttribute
-	 */
-	public void setScope(String scope) {
-		this.scope = scope;
-	}
+    /**
+     * the scope of the variable the result will be put in.
+     */
+    private String scope = TagUtils.SCOPE_PAGE;
 
 
-	@Override
-	protected final int doStartTagInternal() throws JspException {
-		if (this.value != null) {
-			// Find the containing EditorAwareTag (e.g. BindTag), if applicable.
-			EditorAwareTag tag = (EditorAwareTag) TagSupport.findAncestorWithClass(this, EditorAwareTag.class);
-			if (tag == null) {
-				throw new JspException("TransformTag can only be used within EditorAwareTag (e.g. BindTag)");
-			}
+    /**
+     * Set the value to transform, using the appropriate PropertyEditor
+     * from the enclosing BindTag.
+     * <p>The value can either be a plain value to transform (a hard-coded String
+     * value in a JSP or a JSP expression), or a JSP EL expression to be evaluated
+     * (transforming the result of the expression).
+     */
+    public void setValue(Object value) {
+        this.value = value;
+    }
 
-			// OK, let's obtain the editor...
-			String result = null;
-			PropertyEditor editor = tag.getEditor();
-			if (editor != null) {
-				// If an editor was found, edit the value.
-				editor.setValue(this.value);
-				result = editor.getAsText();
-			}
-			else {
-				// Else, just do a toString.
-				result = this.value.toString();
-			}
-			result = htmlEscape(result);
-			if (this.var != null) {
-				this.pageContext.setAttribute(this.var, result, TagUtils.getScope(this.scope));
-			}
-			else {
-				try {
-					// Else, just print it out.
-					this.pageContext.getOut().print(result);
-				}
-				catch (IOException ex) {
-					throw new JspException(ex);
-				}
-			}
-		}
+    /**
+     * Set PageContext attribute name under which to expose
+     * a variable that contains the result of the transformation.
+     *
+     * @see #setScope
+     * @see javax.servlet.jsp.PageContext#setAttribute
+     */
+    public void setVar(String var) {
+        this.var = var;
+    }
 
-		return SKIP_BODY;
-	}
+    /**
+     * Set the scope to export the variable to.
+     * Default is SCOPE_PAGE ("page").
+     *
+     * @see #setVar
+     * @see org.springframework.web.util.TagUtils#SCOPE_PAGE
+     * @see javax.servlet.jsp.PageContext#setAttribute
+     */
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
+
+    @Override
+    protected final int doStartTagInternal() throws JspException {
+        if (this.value != null) {
+            // Find the containing EditorAwareTag (e.g. BindTag), if applicable.
+            EditorAwareTag tag = (EditorAwareTag) TagSupport.findAncestorWithClass(this, EditorAwareTag.class);
+            if (tag == null) {
+                throw new JspException("TransformTag can only be used within EditorAwareTag (e.g. BindTag)");
+            }
+
+            // OK, let's obtain the editor...
+            String result = null;
+            PropertyEditor editor = tag.getEditor();
+            if (editor != null) {
+                // If an editor was found, edit the value.
+                editor.setValue(this.value);
+                result = editor.getAsText();
+            } else {
+                // Else, just do a toString.
+                result = this.value.toString();
+            }
+            result = htmlEscape(result);
+            if (this.var != null) {
+                this.pageContext.setAttribute(this.var, result, TagUtils.getScope(this.scope));
+            } else {
+                try {
+                    // Else, just print it out.
+                    this.pageContext.getOut().print(result);
+                } catch (IOException ex) {
+                    throw new JspException(ex);
+                }
+            }
+        }
+
+        return SKIP_BODY;
+    }
 
 }

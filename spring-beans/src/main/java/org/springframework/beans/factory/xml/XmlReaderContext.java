@@ -16,11 +16,6 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.io.StringReader;
-
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -32,6 +27,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
+import java.io.StringReader;
 
 /**
  * Extension of {@link org.springframework.beans.factory.parsing.ReaderContext},
@@ -134,8 +133,9 @@ public class XmlReaderContext extends ReaderContext {
 
     /**
      * Call the bean name generator for the given bean definition.
-     *
+     * <p>
      * 生成beanName
+     *
      * @see XmlBeanDefinitionReader#getBeanNameGenerator()
      * @see org.springframework.beans.factory.support.BeanNameGenerator#generateBeanName
      */
@@ -146,8 +146,9 @@ public class XmlReaderContext extends ReaderContext {
     /**
      * Call the bean name generator for the given bean definition
      * and register the bean definition under the generated name.
-     *
+     * <p>
      * 注册并且创建beanName
+     *
      * @see XmlBeanDefinitionReader#getBeanNameGenerator()
      * @see org.springframework.beans.factory.support.BeanNameGenerator#generateBeanName
      * @see BeanDefinitionRegistry#registerBeanDefinition
@@ -168,8 +169,7 @@ public class XmlReaderContext extends ReaderContext {
         InputSource is = new InputSource(new StringReader(documentContent));
         try {
             return this.reader.doLoadDocument(is, getResource());
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             throw new BeanDefinitionStoreException("Failed to read XML document", ex);
         }
     }

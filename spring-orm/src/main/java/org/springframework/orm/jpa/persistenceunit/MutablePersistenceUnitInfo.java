@@ -16,20 +16,19 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
-import java.net.URL;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.ClassTransformer;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
+import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Spring's base implementation of the JPA
@@ -46,253 +45,243 @@ import org.springframework.util.ClassUtils;
  */
 public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
-	@Nullable
-	private String persistenceUnitName;
+    private final List<String> mappingFileNames = new LinkedList<>();
+    private final List<String> managedClassNames = new LinkedList<>();
+    private final List<String> managedPackages = new LinkedList<>();
+    @Nullable
+    private String persistenceUnitName;
+    @Nullable
+    private String persistenceProviderClassName;
+    @Nullable
+    private PersistenceUnitTransactionType transactionType;
+    @Nullable
+    private DataSource nonJtaDataSource;
+    @Nullable
+    private DataSource jtaDataSource;
+    private List<URL> jarFileUrls = new LinkedList<>();
+    @Nullable
+    private URL persistenceUnitRootUrl;
+    private boolean excludeUnlistedClasses = false;
 
-	@Nullable
-	private String persistenceProviderClassName;
+    private SharedCacheMode sharedCacheMode = SharedCacheMode.UNSPECIFIED;
 
-	@Nullable
-	private PersistenceUnitTransactionType transactionType;
+    private ValidationMode validationMode = ValidationMode.AUTO;
 
-	@Nullable
-	private DataSource nonJtaDataSource;
+    private Properties properties = new Properties();
 
-	@Nullable
-	private DataSource jtaDataSource;
+    private String persistenceXMLSchemaVersion = "2.0";
 
-	private final List<String> mappingFileNames = new LinkedList<>();
+    @Nullable
+    private String persistenceProviderPackageName;
 
-	private List<URL> jarFileUrls = new LinkedList<>();
+    @Override
+    @Nullable
+    public String getPersistenceUnitName() {
+        return this.persistenceUnitName;
+    }
 
-	@Nullable
-	private URL persistenceUnitRootUrl;
+    public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
+        this.persistenceUnitName = persistenceUnitName;
+    }
 
-	private final List<String> managedClassNames = new LinkedList<>();
+    @Override
+    @Nullable
+    public String getPersistenceProviderClassName() {
+        return this.persistenceProviderClassName;
+    }
 
-	private final List<String> managedPackages = new LinkedList<>();
+    public void setPersistenceProviderClassName(@Nullable String persistenceProviderClassName) {
+        this.persistenceProviderClassName = persistenceProviderClassName;
+    }
 
-	private boolean excludeUnlistedClasses = false;
+    @Override
+    public PersistenceUnitTransactionType getTransactionType() {
+        if (this.transactionType != null) {
+            return this.transactionType;
+        } else {
+            return (this.jtaDataSource != null ?
+                    PersistenceUnitTransactionType.JTA : PersistenceUnitTransactionType.RESOURCE_LOCAL);
+        }
+    }
 
-	private SharedCacheMode sharedCacheMode = SharedCacheMode.UNSPECIFIED;
+    public void setTransactionType(PersistenceUnitTransactionType transactionType) {
+        this.transactionType = transactionType;
+    }
 
-	private ValidationMode validationMode = ValidationMode.AUTO;
+    @Override
+    @Nullable
+    public DataSource getJtaDataSource() {
+        return this.jtaDataSource;
+    }
 
-	private Properties properties = new Properties();
+    public void setJtaDataSource(@Nullable DataSource jtaDataSource) {
+        this.jtaDataSource = jtaDataSource;
+    }
 
-	private String persistenceXMLSchemaVersion = "2.0";
+    @Override
+    @Nullable
+    public DataSource getNonJtaDataSource() {
+        return this.nonJtaDataSource;
+    }
 
-	@Nullable
-	private String persistenceProviderPackageName;
+    public void setNonJtaDataSource(@Nullable DataSource nonJtaDataSource) {
+        this.nonJtaDataSource = nonJtaDataSource;
+    }
 
+    public void addMappingFileName(String mappingFileName) {
+        this.mappingFileNames.add(mappingFileName);
+    }
 
-	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
-		this.persistenceUnitName = persistenceUnitName;
-	}
+    @Override
+    public List<String> getMappingFileNames() {
+        return this.mappingFileNames;
+    }
 
-	@Override
-	@Nullable
-	public String getPersistenceUnitName() {
-		return this.persistenceUnitName;
-	}
+    public void addJarFileUrl(URL jarFileUrl) {
+        this.jarFileUrls.add(jarFileUrl);
+    }
 
-	public void setPersistenceProviderClassName(@Nullable String persistenceProviderClassName) {
-		this.persistenceProviderClassName = persistenceProviderClassName;
-	}
+    @Override
+    public List<URL> getJarFileUrls() {
+        return this.jarFileUrls;
+    }
 
-	@Override
-	@Nullable
-	public String getPersistenceProviderClassName() {
-		return this.persistenceProviderClassName;
-	}
+    @Override
+    @Nullable
+    public URL getPersistenceUnitRootUrl() {
+        return this.persistenceUnitRootUrl;
+    }
 
-	public void setTransactionType(PersistenceUnitTransactionType transactionType) {
-		this.transactionType = transactionType;
-	}
+    public void setPersistenceUnitRootUrl(@Nullable URL persistenceUnitRootUrl) {
+        this.persistenceUnitRootUrl = persistenceUnitRootUrl;
+    }
 
-	@Override
-	public PersistenceUnitTransactionType getTransactionType() {
-		if (this.transactionType != null) {
-			return this.transactionType;
-		}
-		else {
-			return (this.jtaDataSource != null ?
-					PersistenceUnitTransactionType.JTA : PersistenceUnitTransactionType.RESOURCE_LOCAL);
-		}
-	}
+    /**
+     * Add a managed class name to the persistence provider's metadata.
+     *
+     * @see javax.persistence.spi.PersistenceUnitInfo#getManagedClassNames()
+     * @see #addManagedPackage
+     */
+    public void addManagedClassName(String managedClassName) {
+        this.managedClassNames.add(managedClassName);
+    }
 
-	public void setJtaDataSource(@Nullable DataSource jtaDataSource) {
-		this.jtaDataSource = jtaDataSource;
-	}
+    @Override
+    public List<String> getManagedClassNames() {
+        return this.managedClassNames;
+    }
 
-	@Override
-	@Nullable
-	public DataSource getJtaDataSource() {
-		return this.jtaDataSource;
-	}
+    /**
+     * Add a managed package to the persistence provider's metadata.
+     * <p>Note: This refers to annotated {@code package-info.java} files. It does
+     * <i>not</i> trigger entity scanning in the specified package; this is
+     * rather the job of {@link DefaultPersistenceUnitManager#setPackagesToScan}.
+     *
+     * @see SmartPersistenceUnitInfo#getManagedPackages()
+     * @see #addManagedClassName
+     * @since 4.1
+     */
+    public void addManagedPackage(String packageName) {
+        this.managedPackages.add(packageName);
+    }
 
-	public void setNonJtaDataSource(@Nullable DataSource nonJtaDataSource) {
-		this.nonJtaDataSource = nonJtaDataSource;
-	}
+    @Override
+    public List<String> getManagedPackages() {
+        return this.managedPackages;
+    }
 
-	@Override
-	@Nullable
-	public DataSource getNonJtaDataSource() {
-		return this.nonJtaDataSource;
-	}
+    public void setExcludeUnlistedClasses(boolean excludeUnlistedClasses) {
+        this.excludeUnlistedClasses = excludeUnlistedClasses;
+    }
 
-	public void addMappingFileName(String mappingFileName) {
-		this.mappingFileNames.add(mappingFileName);
-	}
+    @Override
+    public boolean excludeUnlistedClasses() {
+        return this.excludeUnlistedClasses;
+    }
 
-	@Override
-	public List<String> getMappingFileNames() {
-		return this.mappingFileNames;
-	}
+    @Override
+    public SharedCacheMode getSharedCacheMode() {
+        return this.sharedCacheMode;
+    }
 
-	public void addJarFileUrl(URL jarFileUrl) {
-		this.jarFileUrls.add(jarFileUrl);
-	}
+    public void setSharedCacheMode(SharedCacheMode sharedCacheMode) {
+        this.sharedCacheMode = sharedCacheMode;
+    }
 
-	@Override
-	public List<URL> getJarFileUrls() {
-		return this.jarFileUrls;
-	}
+    @Override
+    public ValidationMode getValidationMode() {
+        return this.validationMode;
+    }
 
-	public void setPersistenceUnitRootUrl(@Nullable URL persistenceUnitRootUrl) {
-		this.persistenceUnitRootUrl = persistenceUnitRootUrl;
-	}
+    public void setValidationMode(ValidationMode validationMode) {
+        this.validationMode = validationMode;
+    }
 
-	@Override
-	@Nullable
-	public URL getPersistenceUnitRootUrl() {
-		return this.persistenceUnitRootUrl;
-	}
+    public void addProperty(String name, String value) {
+        this.properties.setProperty(name, value);
+    }
 
-	/**
-	 * Add a managed class name to the persistence provider's metadata.
-	 * @see javax.persistence.spi.PersistenceUnitInfo#getManagedClassNames()
-	 * @see #addManagedPackage
-	 */
-	public void addManagedClassName(String managedClassName) {
-		this.managedClassNames.add(managedClassName);
-	}
+    @Override
+    public Properties getProperties() {
+        return this.properties;
+    }
 
-	@Override
-	public List<String> getManagedClassNames() {
-		return this.managedClassNames;
-	}
+    public void setProperties(Properties properties) {
+        Assert.notNull(properties, "Properties must not be null");
+        this.properties = properties;
+    }
 
-	/**
-	 * Add a managed package to the persistence provider's metadata.
-	 * <p>Note: This refers to annotated {@code package-info.java} files. It does
-	 * <i>not</i> trigger entity scanning in the specified package; this is
-	 * rather the job of {@link DefaultPersistenceUnitManager#setPackagesToScan}.
-	 * @since 4.1
-	 * @see SmartPersistenceUnitInfo#getManagedPackages()
-	 * @see #addManagedClassName
-	 */
-	public void addManagedPackage(String packageName) {
-		this.managedPackages.add(packageName);
-	}
+    @Override
+    public String getPersistenceXMLSchemaVersion() {
+        return this.persistenceXMLSchemaVersion;
+    }
 
-	@Override
-	public List<String> getManagedPackages() {
-		return this.managedPackages;
-	}
+    public void setPersistenceXMLSchemaVersion(String persistenceXMLSchemaVersion) {
+        this.persistenceXMLSchemaVersion = persistenceXMLSchemaVersion;
+    }
 
-	public void setExcludeUnlistedClasses(boolean excludeUnlistedClasses) {
-		this.excludeUnlistedClasses = excludeUnlistedClasses;
-	}
+    @Nullable
+    public String getPersistenceProviderPackageName() {
+        return this.persistenceProviderPackageName;
+    }
 
-	@Override
-	public boolean excludeUnlistedClasses() {
-		return this.excludeUnlistedClasses;
-	}
+    @Override
+    public void setPersistenceProviderPackageName(@Nullable String persistenceProviderPackageName) {
+        this.persistenceProviderPackageName = persistenceProviderPackageName;
+    }
 
-	public void setSharedCacheMode(SharedCacheMode sharedCacheMode) {
-		this.sharedCacheMode = sharedCacheMode;
-	}
+    /**
+     * This implementation returns the default ClassLoader.
+     *
+     * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
+     */
+    @Override
+    @Nullable
+    public ClassLoader getClassLoader() {
+        return ClassUtils.getDefaultClassLoader();
+    }
 
-	@Override
-	public SharedCacheMode getSharedCacheMode() {
-		return this.sharedCacheMode;
-	}
+    /**
+     * This implementation throws an UnsupportedOperationException.
+     */
+    @Override
+    public void addTransformer(ClassTransformer classTransformer) {
+        throw new UnsupportedOperationException("addTransformer not supported");
+    }
 
-	public void setValidationMode(ValidationMode validationMode) {
-		this.validationMode = validationMode;
-	}
-
-	@Override
-	public ValidationMode getValidationMode() {
-		return this.validationMode;
-	}
-
-	public void addProperty(String name, String value) {
-		this.properties.setProperty(name, value);
-	}
-
-	public void setProperties(Properties properties) {
-		Assert.notNull(properties, "Properties must not be null");
-		this.properties = properties;
-	}
-
-	@Override
-	public Properties getProperties() {
-		return this.properties;
-	}
-
-	public void setPersistenceXMLSchemaVersion(String persistenceXMLSchemaVersion) {
-		this.persistenceXMLSchemaVersion = persistenceXMLSchemaVersion;
-	}
-
-	@Override
-	public String getPersistenceXMLSchemaVersion() {
-		return this.persistenceXMLSchemaVersion;
-	}
-
-	@Override
-	public void setPersistenceProviderPackageName(@Nullable String persistenceProviderPackageName) {
-		this.persistenceProviderPackageName = persistenceProviderPackageName;
-	}
-
-	@Nullable
-	public String getPersistenceProviderPackageName() {
-		return this.persistenceProviderPackageName;
-	}
-
-
-	/**
-	 * This implementation returns the default ClassLoader.
-	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
-	 */
-	@Override
-	@Nullable
-	public ClassLoader getClassLoader() {
-		return ClassUtils.getDefaultClassLoader();
-	}
-
-	/**
-	 * This implementation throws an UnsupportedOperationException.
-	 */
-	@Override
-	public void addTransformer(ClassTransformer classTransformer) {
-		throw new UnsupportedOperationException("addTransformer not supported");
-	}
-
-	/**
-	 * This implementation throws an UnsupportedOperationException.
-	 */
-	@Override
-	public ClassLoader getNewTempClassLoader() {
-		throw new UnsupportedOperationException("getNewTempClassLoader not supported");
-	}
+    /**
+     * This implementation throws an UnsupportedOperationException.
+     */
+    @Override
+    public ClassLoader getNewTempClassLoader() {
+        throw new UnsupportedOperationException("getNewTempClassLoader not supported");
+    }
 
 
-	@Override
-	public String toString() {
-		return "PersistenceUnitInfo: name '" + this.persistenceUnitName +
-				"', root URL [" + this.persistenceUnitRootUrl + "]";
-	}
+    @Override
+    public String toString() {
+        return "PersistenceUnitInfo: name '" + this.persistenceUnitName +
+                "', root URL [" + this.persistenceUnitRootUrl + "]";
+    }
 
 }

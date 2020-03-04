@@ -29,8 +29,8 @@ package org.springframework.aop;
  * other interfaces that a concrete AOP proxy may implement.
  *
  * @author Juergen Hoeller
- * @since 2.0.5
  * @see org.springframework.aop.scope.ScopedObject
+ * @since 2.0.5
  */
 public interface RawTargetAccess {
 

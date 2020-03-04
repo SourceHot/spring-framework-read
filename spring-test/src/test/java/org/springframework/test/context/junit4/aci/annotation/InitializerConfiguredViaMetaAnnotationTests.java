@@ -16,12 +16,6 @@
 
 package org.springframework.test.context.junit4.aci.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.List;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +27,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.junit4.aci.annotation.InitializerConfiguredViaMetaAnnotationTests.ComposedContextConfiguration;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -54,39 +54,39 @@ import static org.junit.Assert.assertEquals;
 @ComposedContextConfiguration(BarConfig.class)
 public class InitializerConfiguredViaMetaAnnotationTests {
 
-	@Autowired
-	String foo;
+    @Autowired
+    String foo;
 
-	@Autowired
-	String bar;
+    @Autowired
+    String bar;
 
-	@Autowired
-	List<String> strings;
-
-
-	@Test
-	public void beansFromInitializerAndComposedAnnotation() {
-		assertEquals(2, strings.size());
-		assertEquals("foo", foo);
-		assertEquals("bar", bar);
-	}
+    @Autowired
+    List<String> strings;
 
 
-	static class FooConfigInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
+    @Test
+    public void beansFromInitializerAndComposedAnnotation() {
+        assertEquals(2, strings.size());
+        assertEquals("foo", foo);
+        assertEquals("bar", bar);
+    }
 
-		@Override
-		public void initialize(GenericApplicationContext applicationContext) {
-			new AnnotatedBeanDefinitionReader(applicationContext).register(FooConfig.class);
-		}
-	}
 
-	@ContextConfiguration(loader = AnnotationConfigContextLoader.class, initializers = FooConfigInitializer.class)
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
-	@interface ComposedContextConfiguration {
+    @ContextConfiguration(loader = AnnotationConfigContextLoader.class, initializers = FooConfigInitializer.class)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @interface ComposedContextConfiguration {
 
-		@AliasFor(annotation = ContextConfiguration.class, attribute = "classes")
-		Class<?>[] value() default {};
-	}
+        @AliasFor(annotation = ContextConfiguration.class, attribute = "classes")
+        Class<?>[] value() default {};
+    }
+
+    static class FooConfigInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
+
+        @Override
+        public void initialize(GenericApplicationContext applicationContext) {
+            new AnnotatedBeanDefinitionReader(applicationContext).register(FooConfig.class);
+        }
+    }
 
 }

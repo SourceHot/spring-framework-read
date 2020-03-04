@@ -16,17 +16,21 @@
 
 package org.springframework.orm.jpa.support;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-
 import org.junit.Test;
-
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.orm.jpa.EntityManagerProxy;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * @author Rod Johnson
@@ -35,48 +39,46 @@ import static org.mockito.BDDMockito.*;
  */
 public class SharedEntityManagerFactoryTests {
 
-	@Test
-	public void testValidUsage() {
-		Object o = new Object();
+    @Test
+    public void testValidUsage() {
+        Object o = new Object();
 
-		EntityManager mockEm = mock(EntityManager.class);
-		given(mockEm.isOpen()).willReturn(true);
+        EntityManager mockEm = mock(EntityManager.class);
+        given(mockEm.isOpen()).willReturn(true);
 
-		EntityManagerFactory mockEmf = mock(EntityManagerFactory.class);
-		given(mockEmf.createEntityManager()).willReturn(mockEm);
+        EntityManagerFactory mockEmf = mock(EntityManagerFactory.class);
+        given(mockEmf.createEntityManager()).willReturn(mockEm);
 
-		SharedEntityManagerBean proxyFactoryBean = new SharedEntityManagerBean();
-		proxyFactoryBean.setEntityManagerFactory(mockEmf);
-		proxyFactoryBean.afterPropertiesSet();
+        SharedEntityManagerBean proxyFactoryBean = new SharedEntityManagerBean();
+        proxyFactoryBean.setEntityManagerFactory(mockEmf);
+        proxyFactoryBean.afterPropertiesSet();
 
-		assertTrue(EntityManager.class.isAssignableFrom(proxyFactoryBean.getObjectType()));
-		assertTrue(proxyFactoryBean.isSingleton());
+        assertTrue(EntityManager.class.isAssignableFrom(proxyFactoryBean.getObjectType()));
+        assertTrue(proxyFactoryBean.isSingleton());
 
-		EntityManager proxy = proxyFactoryBean.getObject();
-		assertSame(proxy, proxyFactoryBean.getObject());
-		assertFalse(proxy.contains(o));
+        EntityManager proxy = proxyFactoryBean.getObject();
+        assertSame(proxy, proxyFactoryBean.getObject());
+        assertFalse(proxy.contains(o));
 
-		assertTrue(proxy instanceof EntityManagerProxy);
-		EntityManagerProxy emProxy = (EntityManagerProxy) proxy;
-		try {
-			emProxy.getTargetEntityManager();
-			fail("Should have thrown IllegalStateException outside of transaction");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+        assertTrue(proxy instanceof EntityManagerProxy);
+        EntityManagerProxy emProxy = (EntityManagerProxy) proxy;
+        try {
+            emProxy.getTargetEntityManager();
+            fail("Should have thrown IllegalStateException outside of transaction");
+        } catch (IllegalStateException ex) {
+            // expected
+        }
 
-		TransactionSynchronizationManager.bindResource(mockEmf, new EntityManagerHolder(mockEm));
-		try {
-			assertSame(mockEm, emProxy.getTargetEntityManager());
-		}
-		finally {
-			TransactionSynchronizationManager.unbindResource(mockEmf);
-		}
+        TransactionSynchronizationManager.bindResource(mockEmf, new EntityManagerHolder(mockEm));
+        try {
+            assertSame(mockEm, emProxy.getTargetEntityManager());
+        } finally {
+            TransactionSynchronizationManager.unbindResource(mockEmf);
+        }
 
-		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
-		verify(mockEm).contains(o);
-		verify(mockEm).close();
-	}
+        assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+        verify(mockEm).contains(o);
+        verify(mockEm).close();
+    }
 
 }

@@ -16,15 +16,16 @@
 
 package org.springframework.test.context.testng;
 
-import org.testng.annotations.Test;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContextManager;
+import org.testng.annotations.Test;
 
-import static org.springframework.test.transaction.TransactionTestUtils.*;
-import static org.testng.Assert.*;
+import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertSame;
 
 /**
  * <p>
@@ -49,36 +50,36 @@ import static org.testng.Assert.*;
 @ContextConfiguration
 public class DirtiesContextTransactionalTestNGSpringContextTests extends AbstractTransactionalTestNGSpringContextTests {
 
-	private ApplicationContext dirtiedApplicationContext;
+    private ApplicationContext dirtiedApplicationContext;
 
 
-	private void performCommonAssertions() {
-		assertInTransaction(true);
-		assertNotNull(super.applicationContext,
-			"The application context should have been set due to ApplicationContextAware semantics.");
-		assertNotNull(super.jdbcTemplate,
-			"The JdbcTemplate should have been created in setDataSource() via DI for the DataSource.");
-	}
+    private void performCommonAssertions() {
+        assertInTransaction(true);
+        assertNotNull(super.applicationContext,
+                "The application context should have been set due to ApplicationContextAware semantics.");
+        assertNotNull(super.jdbcTemplate,
+                "The JdbcTemplate should have been created in setDataSource() via DI for the DataSource.");
+    }
 
-	@Test
-	@DirtiesContext
-	public void dirtyContext() {
-		performCommonAssertions();
-		this.dirtiedApplicationContext = super.applicationContext;
-	}
+    @Test
+    @DirtiesContext
+    public void dirtyContext() {
+        performCommonAssertions();
+        this.dirtiedApplicationContext = super.applicationContext;
+    }
 
-	@Test(dependsOnMethods = { "dirtyContext" })
-	public void verifyContextWasDirtied() {
-		performCommonAssertions();
-		assertNotSame(super.applicationContext, this.dirtiedApplicationContext,
-			"The application context should have been 'dirtied'.");
-		this.dirtiedApplicationContext = super.applicationContext;
-	}
+    @Test(dependsOnMethods = {"dirtyContext"})
+    public void verifyContextWasDirtied() {
+        performCommonAssertions();
+        assertNotSame(super.applicationContext, this.dirtiedApplicationContext,
+                "The application context should have been 'dirtied'.");
+        this.dirtiedApplicationContext = super.applicationContext;
+    }
 
-	@Test(dependsOnMethods = { "verifyContextWasDirtied" })
-	public void verifyContextWasNotDirtied() {
-		assertSame(this.applicationContext, this.dirtiedApplicationContext,
-			"The application context should NOT have been 'dirtied'.");
-	}
+    @Test(dependsOnMethods = {"verifyContextWasDirtied"})
+    public void verifyContextWasNotDirtied() {
+        assertSame(this.applicationContext, this.dirtiedApplicationContext,
+                "The application context should NOT have been 'dirtied'.");
+    }
 
 }

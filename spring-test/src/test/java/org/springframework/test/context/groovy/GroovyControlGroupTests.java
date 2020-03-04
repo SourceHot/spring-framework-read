@@ -17,13 +17,13 @@
 package org.springframework.test.context.groovy;
 
 import org.junit.Test;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericGroovyApplicationContext;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.tests.sample.beans.Pet;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Simple integration test to verify the expected functionality of
@@ -40,25 +40,25 @@ import static org.junit.Assert.*;
  */
 public class GroovyControlGroupTests {
 
-	@Test
-	@SuppressWarnings("resource")
-	public void verifyScriptUsingGenericGroovyApplicationContext() {
-		ApplicationContext ctx = new GenericGroovyApplicationContext(getClass(), "context.groovy");
+    @Test
+    @SuppressWarnings("resource")
+    public void verifyScriptUsingGenericGroovyApplicationContext() {
+        ApplicationContext ctx = new GenericGroovyApplicationContext(getClass(), "context.groovy");
 
-		String foo = ctx.getBean("foo", String.class);
-		assertEquals("Foo", foo);
+        String foo = ctx.getBean("foo", String.class);
+        assertEquals("Foo", foo);
 
-		String bar = ctx.getBean("bar", String.class);
-		assertEquals("Bar", bar);
+        String bar = ctx.getBean("bar", String.class);
+        assertEquals("Bar", bar);
 
-		Pet pet = ctx.getBean(Pet.class);
-		assertNotNull("pet", pet);
-		assertEquals("Dogbert", pet.getName());
+        Pet pet = ctx.getBean(Pet.class);
+        assertNotNull("pet", pet);
+        assertEquals("Dogbert", pet.getName());
 
-		Employee employee = ctx.getBean(Employee.class);
-		assertNotNull("employee", employee);
-		assertEquals("Dilbert", employee.getName());
-		assertEquals("???", employee.getCompany());
-	}
+        Employee employee = ctx.getBean(Employee.class);
+        assertNotNull("employee", employee);
+        assertEquals("Dilbert", employee.getName());
+        assertEquals("???", employee.getCompany());
+    }
 
 }

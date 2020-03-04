@@ -16,9 +16,9 @@
 
 package org.springframework.jms.listener;
 
-import javax.jms.Session;
-
 import org.springframework.jms.connection.JmsResourceHolder;
+
+import javax.jms.Session;
 
 /**
  * {@link JmsResourceHolder} marker subclass that indicates local exposure,
@@ -29,8 +29,8 @@ import org.springframework.jms.connection.JmsResourceHolder;
  */
 class LocallyExposedJmsResourceHolder extends JmsResourceHolder {
 
-	public LocallyExposedJmsResourceHolder(Session session) {
-		super(session);
-	}
+    public LocallyExposedJmsResourceHolder(Session session) {
+        super(session);
+    }
 
 }

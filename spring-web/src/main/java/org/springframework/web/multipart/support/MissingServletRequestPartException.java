@@ -16,9 +16,9 @@
 
 package org.springframework.web.multipart.support;
 
-import javax.servlet.ServletException;
-
 import org.springframework.web.multipart.MultipartResolver;
+
+import javax.servlet.ServletException;
 
 /**
  * Raised when the part of a "multipart/form-data" request identified by its
@@ -35,17 +35,17 @@ import org.springframework.web.multipart.MultipartResolver;
 @SuppressWarnings("serial")
 public class MissingServletRequestPartException extends ServletException {
 
-	private final String partName;
+    private final String partName;
 
 
-	public MissingServletRequestPartException(String partName) {
-		super("Required request part '" + partName + "' is not present");
-		this.partName = partName;
-	}
+    public MissingServletRequestPartException(String partName) {
+        super("Required request part '" + partName + "' is not present");
+        this.partName = partName;
+    }
 
 
-	public String getRequestPartName() {
-		return this.partName;
-	}
+    public String getRequestPartName() {
+        return this.partName;
+    }
 
 }

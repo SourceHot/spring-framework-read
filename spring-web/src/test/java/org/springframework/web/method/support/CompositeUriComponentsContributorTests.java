@@ -16,12 +16,7 @@
 
 package org.springframework.web.method.support;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Test;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -29,7 +24,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.method.annotation.RequestHeaderMethodArgumentResolver;
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
 
-import static org.junit.Assert.*;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for
@@ -40,24 +40,24 @@ import static org.junit.Assert.*;
 public class CompositeUriComponentsContributorTests {
 
 
-	@Test
-	public void supportsParameter() {
+    @Test
+    public void supportsParameter() {
 
-		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
-		resolvers.add(new RequestParamMethodArgumentResolver(false));
-		resolvers.add(new RequestHeaderMethodArgumentResolver(null));
-		resolvers.add(new RequestParamMethodArgumentResolver(true));
+        List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
+        resolvers.add(new RequestParamMethodArgumentResolver(false));
+        resolvers.add(new RequestHeaderMethodArgumentResolver(null));
+        resolvers.add(new RequestParamMethodArgumentResolver(true));
 
-		Method method = ClassUtils.getMethod(this.getClass(), "handleRequest", String.class, String.class, String.class);
+        Method method = ClassUtils.getMethod(this.getClass(), "handleRequest", String.class, String.class, String.class);
 
-		CompositeUriComponentsContributor contributor = new CompositeUriComponentsContributor(resolvers);
-		assertTrue(contributor.supportsParameter(new MethodParameter(method, 0)));
-		assertTrue(contributor.supportsParameter(new MethodParameter(method, 1)));
-		assertFalse(contributor.supportsParameter(new MethodParameter(method, 2)));
-	}
+        CompositeUriComponentsContributor contributor = new CompositeUriComponentsContributor(resolvers);
+        assertTrue(contributor.supportsParameter(new MethodParameter(method, 0)));
+        assertTrue(contributor.supportsParameter(new MethodParameter(method, 1)));
+        assertFalse(contributor.supportsParameter(new MethodParameter(method, 2)));
+    }
 
 
-	public void handleRequest(@RequestParam String p1, String p2, @RequestHeader String h) {
-	}
+    public void handleRequest(@RequestParam String p1, String p2, @RequestHeader String h) {
+    }
 
 }

@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.theme;
 
+import org.springframework.lang.Nullable;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.web.servlet.ThemeResolver} implementation
@@ -31,21 +31,21 @@ import org.springframework.lang.Nullable;
  *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
- * @since 17.06.2003
  * @see #setDefaultThemeName
+ * @since 17.06.2003
  */
 public class FixedThemeResolver extends AbstractThemeResolver {
 
-	@Override
-	public String resolveThemeName(HttpServletRequest request) {
-		return getDefaultThemeName();
-	}
+    @Override
+    public String resolveThemeName(HttpServletRequest request) {
+        return getDefaultThemeName();
+    }
 
-	@Override
-	public void setThemeName(
-			HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable String themeName) {
+    @Override
+    public void setThemeName(
+            HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable String themeName) {
 
-		throw new UnsupportedOperationException("Cannot change theme - use a different theme resolution strategy");
-	}
+        throw new UnsupportedOperationException("Cannot change theme - use a different theme resolution strategy");
+    }
 
 }

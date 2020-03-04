@@ -18,15 +18,15 @@ package org.springframework.core.type;
 
 /**
  * @author Chris Beams
- * @since 3.1
  * @see AbstractClassMetadataMemberClassTests
+ * @since 3.1
  */
 public class StandardClassMetadataMemberClassTests
-		extends AbstractClassMetadataMemberClassTests {
+        extends AbstractClassMetadataMemberClassTests {
 
-	@Override
-	public ClassMetadata getClassMetadataFor(Class<?> clazz) {
-		return new StandardClassMetadata(clazz);
-	}
+    @Override
+    public ClassMetadata getClassMetadataFor(Class<?> clazz) {
+        return new StandardClassMetadata(clazz);
+    }
 
 }

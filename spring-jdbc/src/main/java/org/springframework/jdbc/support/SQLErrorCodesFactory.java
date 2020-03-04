@@ -16,14 +16,8 @@
 
 package org.springframework.jdbc.support;
 
-import java.util.Collections;
-import java.util.Map;
-
-import javax.sql.DataSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -34,6 +28,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
+
+import javax.sql.DataSource;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Factory for creating {@link SQLErrorCodes} based on the
@@ -54,14 +52,14 @@ public class SQLErrorCodesFactory {
     /**
      * The name of custom SQL error codes file, loading from the root
      * of the class path (e.g. from the "/WEB-INF/classes" directory).
-     *
+     * <p>
      * sql 异常code列表
      */
     public static final String SQL_ERROR_CODE_OVERRIDE_PATH = "sql-error-codes.xml";
 
     /**
      * The name of default SQL error code files, loading from the class path.
-     *  sql 异常code列表
+     * sql 异常code列表
      */
     public static final String SQL_ERROR_CODE_DEFAULT_PATH = "org/springframework/jdbc/support/sql-error-codes.xml";
 
@@ -104,8 +102,7 @@ public class SQLErrorCodesFactory {
             Resource resource = loadResource(SQL_ERROR_CODE_DEFAULT_PATH);
             if (resource != null && resource.exists()) {
                 bdr.loadBeanDefinitions(resource);
-            }
-            else {
+            } else {
                 logger.info("Default sql-error-codes.xml not found (should be included in spring-jdbc jar)");
             }
 
@@ -121,8 +118,7 @@ public class SQLErrorCodesFactory {
             if (logger.isTraceEnabled()) {
                 logger.trace("SQLErrorCodes loaded: " + errorCodes.keySet());
             }
-        }
-        catch (BeansException ex) {
+        } catch (BeansException ex) {
             logger.warn("Error loading SQL error codes from config file", ex);
             errorCodes = Collections.emptyMap();
         }
@@ -219,8 +215,7 @@ public class SQLErrorCodesFactory {
                         if (StringUtils.hasLength(name)) {
                             return registerDatabase(dataSource, name);
                         }
-                    }
-                    catch (MetaDataAccessException ex) {
+                    } catch (MetaDataAccessException ex) {
                         logger.warn("Error while extracting database name - falling back to empty error codes", ex);
                     }
                     // Fallback is to return an empty SQLErrorCodes instance.
@@ -292,8 +287,7 @@ public class SQLErrorCodesFactory {
                         errorCodes.getCustomSqlExceptionTranslator().getClass().getSimpleName() +
                         " with '" + customTranslator.getClass().getSimpleName() +
                         "' found in the CustomSQLExceptionTranslatorRegistry for database '" + databaseName + "'");
-            }
-            else if (logger.isTraceEnabled()) {
+            } else if (logger.isTraceEnabled()) {
                 logger.trace("Using custom translator '" + customTranslator.getClass().getSimpleName() +
                         "' found in the CustomSQLExceptionTranslatorRegistry for database '" + databaseName + "'");
             }

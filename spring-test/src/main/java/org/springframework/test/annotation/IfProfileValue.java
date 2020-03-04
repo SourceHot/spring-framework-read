@@ -84,7 +84,6 @@ import java.lang.annotation.Target;
  *
  * @author Rod Johnson
  * @author Sam Brannen
- * @since 2.0
  * @see ProfileValueSource
  * @see SystemProfileValueSource
  * @see ProfileValueSourceConfiguration
@@ -94,6 +93,7 @@ import java.lang.annotation.Target;
  * @see org.springframework.test.context.junit4.statements.ProfileValueChecker
  * @see org.springframework.context.annotation.Profile
  * @see org.springframework.test.context.ActiveProfiles
+ * @since 2.0
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -101,25 +101,25 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface IfProfileValue {
 
-	/**
-	 * The {@code name} of the <em>profile value</em> against which to test.
-	 */
-	String name();
+    /**
+     * The {@code name} of the <em>profile value</em> against which to test.
+     */
+    String name();
 
-	/**
-	 * A single, permissible {@code value} of the <em>profile value</em>
-	 * for the given {@link #name}.
-	 * <p>Note: Assigning values to both {@code #value} and {@link #values}
-	 * will lead to a configuration conflict.
-	 */
-	String value() default "";
+    /**
+     * A single, permissible {@code value} of the <em>profile value</em>
+     * for the given {@link #name}.
+     * <p>Note: Assigning values to both {@code #value} and {@link #values}
+     * will lead to a configuration conflict.
+     */
+    String value() default "";
 
-	/**
-	 * A list of all permissible {@code values} of the <em>profile value</em>
-	 * for the given {@link #name}.
-	 * <p>Note: Assigning values to both {@link #value} and {@code #values}
-	 * will lead to a configuration conflict.
-	 */
-	String[] values() default {};
+    /**
+     * A list of all permissible {@code values} of the <em>profile value</em>
+     * for the given {@link #name}.
+     * <p>Note: Assigning values to both {@link #value} and {@code #values}
+     * will lead to a configuration conflict.
+     */
+    String[] values() default {};
 
 }

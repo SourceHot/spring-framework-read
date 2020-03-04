@@ -16,9 +16,8 @@
 
 package org.springframework.oxm.config;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
+import org.w3c.dom.Element;
 
 /**
  * Parser for the {@code <oxm:castor-marshaller/>} element.
@@ -30,9 +29,9 @@ import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
 @Deprecated
 class CastorMarshallerBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
-	@Override
-	protected String getBeanClassName(Element element) {
-		return "org.springframework.oxm.castor.CastorMarshaller";
-	}
+    @Override
+    protected String getBeanClassName(Element element) {
+        return "org.springframework.oxm.castor.CastorMarshaller";
+    }
 
 }

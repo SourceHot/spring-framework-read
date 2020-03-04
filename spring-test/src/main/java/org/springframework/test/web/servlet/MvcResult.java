@@ -32,73 +32,82 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public interface MvcResult {
 
-	/**
-	 * Return the performed request.
-	 * @return the request, never {@code null}
-	 */
-	MockHttpServletRequest getRequest();
+    /**
+     * Return the performed request.
+     *
+     * @return the request, never {@code null}
+     */
+    MockHttpServletRequest getRequest();
 
-	/**
-	 * Return the resulting response.
-	 * @return the response, never {@code null}
-	 */
-	MockHttpServletResponse getResponse();
+    /**
+     * Return the resulting response.
+     *
+     * @return the response, never {@code null}
+     */
+    MockHttpServletResponse getResponse();
 
-	/**
-	 * Return the executed handler.
-	 * @return the handler, possibly {@code null} if none were executed
-	 */
-	@Nullable
-	Object getHandler();
+    /**
+     * Return the executed handler.
+     *
+     * @return the handler, possibly {@code null} if none were executed
+     */
+    @Nullable
+    Object getHandler();
 
-	/**
-	 * Return interceptors around the handler.
-	 * @return interceptors, or {@code null} if none were selected
-	 */
-	@Nullable
-	HandlerInterceptor[] getInterceptors();
+    /**
+     * Return interceptors around the handler.
+     *
+     * @return interceptors, or {@code null} if none were selected
+     */
+    @Nullable
+    HandlerInterceptor[] getInterceptors();
 
-	/**
-	 * Return the {@code ModelAndView} prepared by the handler.
-	 * @return a {@code ModelAndView}, or {@code null} if none
-	 */
-	@Nullable
-	ModelAndView getModelAndView();
+    /**
+     * Return the {@code ModelAndView} prepared by the handler.
+     *
+     * @return a {@code ModelAndView}, or {@code null} if none
+     */
+    @Nullable
+    ModelAndView getModelAndView();
 
-	/**
-	 * Return any exception raised by a handler and successfully resolved
-	 * through a {@link HandlerExceptionResolver}.
-	 * @return an exception, or {@code null} if none
-	 */
-	@Nullable
-	Exception getResolvedException();
+    /**
+     * Return any exception raised by a handler and successfully resolved
+     * through a {@link HandlerExceptionResolver}.
+     *
+     * @return an exception, or {@code null} if none
+     */
+    @Nullable
+    Exception getResolvedException();
 
-	/**
-	 * Return the "output" flash attributes saved during request processing.
-	 * @return the {@code FlashMap}, possibly empty
-	 */
-	FlashMap getFlashMap();
+    /**
+     * Return the "output" flash attributes saved during request processing.
+     *
+     * @return the {@code FlashMap}, possibly empty
+     */
+    FlashMap getFlashMap();
 
-	/**
-	 * Get the result of async execution.
-	 * <p>This method will wait for the async result to be set within the
-	 * timeout value associated with the async request, see
-	 * {@link org.springframework.mock.web.MockAsyncContext#setTimeout
-	 * MockAsyncContext#setTimeout}. Alternatively, use
-	 * {@link #getAsyncResult(long)} to specify the amount of time to wait.
-	 * @throws IllegalStateException if the async result was not set
-	 */
-	Object getAsyncResult();
+    /**
+     * Get the result of async execution.
+     * <p>This method will wait for the async result to be set within the
+     * timeout value associated with the async request, see
+     * {@link org.springframework.mock.web.MockAsyncContext#setTimeout
+     * MockAsyncContext#setTimeout}. Alternatively, use
+     * {@link #getAsyncResult(long)} to specify the amount of time to wait.
+     *
+     * @throws IllegalStateException if the async result was not set
+     */
+    Object getAsyncResult();
 
-	/**
-	 * Get the result of async execution and wait if necessary.
-	 * @param timeToWait how long to wait for the async result to be set, in
-	 * 	milliseconds; if -1, then fall back on the timeout value associated with
-	 * 	the async request, see
-	 * 	{@link org.springframework.mock.web.MockAsyncContext#setTimeout
-	 * 	MockAsyncContext#setTimeout} for more details.
-	 * @throws IllegalStateException if the async result was not set
-	 */
-	Object getAsyncResult(long timeToWait);
+    /**
+     * Get the result of async execution and wait if necessary.
+     *
+     * @param timeToWait how long to wait for the async result to be set, in
+     *                   milliseconds; if -1, then fall back on the timeout value associated with
+     *                   the async request, see
+     *                   {@link org.springframework.mock.web.MockAsyncContext#setTimeout
+     *                   MockAsyncContext#setTimeout} for more details.
+     * @throws IllegalStateException if the async result was not set
+     */
+    Object getAsyncResult(long timeToWait);
 
 }

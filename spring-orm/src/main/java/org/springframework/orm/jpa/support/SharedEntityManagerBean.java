@@ -16,9 +16,6 @@
 
 package org.springframework.orm.jpa.support;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
@@ -26,6 +23,9 @@ import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.Assert;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 /**
  * {@link FactoryBean} that exposes a shared JPA {@link javax.persistence.EntityManager}
@@ -43,85 +43,85 @@ import org.springframework.util.Assert;
  * always needs an EntityManagerFactory in order to create new transactional EntityManager instances.
  *
  * @author Juergen Hoeller
- * @since 2.0
  * @see #setEntityManagerFactory
  * @see #setEntityManagerInterface
  * @see org.springframework.orm.jpa.LocalEntityManagerFactoryBean
  * @see org.springframework.orm.jpa.JpaTransactionManager
+ * @since 2.0
  */
 public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
-		implements FactoryBean<EntityManager>, InitializingBean {
+        implements FactoryBean<EntityManager>, InitializingBean {
 
-	@Nullable
-	private Class<? extends EntityManager> entityManagerInterface;
+    @Nullable
+    private Class<? extends EntityManager> entityManagerInterface;
 
-	private boolean synchronizedWithTransaction = true;
+    private boolean synchronizedWithTransaction = true;
 
-	@Nullable
-	private EntityManager shared;
-
-
-	/**
-	 * Specify the EntityManager interface to expose.
-	 * <p>Default is the EntityManager interface as defined by the
-	 * EntityManagerFactoryInfo, if available. Else, the standard
-	 * {@code javax.persistence.EntityManager} interface will be used.
-	 * @see org.springframework.orm.jpa.EntityManagerFactoryInfo#getEntityManagerInterface()
-	 * @see javax.persistence.EntityManager
-	 */
-	public void setEntityManagerInterface(Class<? extends EntityManager> entityManagerInterface) {
-		Assert.notNull(entityManagerInterface, "'entityManagerInterface' must not be null");
-		this.entityManagerInterface = entityManagerInterface;
-	}
-
-	/**
-	 * Set whether to automatically join ongoing transactions (according
-	 * to the JPA 2.1 SynchronizationType rules). Default is "true".
-	 */
-	public void setSynchronizedWithTransaction(boolean synchronizedWithTransaction) {
-		this.synchronizedWithTransaction = synchronizedWithTransaction;
-	}
+    @Nullable
+    private EntityManager shared;
 
 
-	@Override
-	public final void afterPropertiesSet() {
-		EntityManagerFactory emf = getEntityManagerFactory();
-		if (emf == null) {
-			throw new IllegalArgumentException("'entityManagerFactory' or 'persistenceUnitName' is required");
-		}
-		if (emf instanceof EntityManagerFactoryInfo) {
-			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
-			if (this.entityManagerInterface == null) {
-				this.entityManagerInterface = emfInfo.getEntityManagerInterface();
-				if (this.entityManagerInterface == null) {
-					this.entityManagerInterface = EntityManager.class;
-				}
-			}
-		}
-		else {
-			if (this.entityManagerInterface == null) {
-				this.entityManagerInterface = EntityManager.class;
-			}
-		}
-		this.shared = SharedEntityManagerCreator.createSharedEntityManager(
-				emf, getJpaPropertyMap(), this.synchronizedWithTransaction, this.entityManagerInterface);
-	}
+    /**
+     * Specify the EntityManager interface to expose.
+     * <p>Default is the EntityManager interface as defined by the
+     * EntityManagerFactoryInfo, if available. Else, the standard
+     * {@code javax.persistence.EntityManager} interface will be used.
+     *
+     * @see org.springframework.orm.jpa.EntityManagerFactoryInfo#getEntityManagerInterface()
+     * @see javax.persistence.EntityManager
+     */
+    public void setEntityManagerInterface(Class<? extends EntityManager> entityManagerInterface) {
+        Assert.notNull(entityManagerInterface, "'entityManagerInterface' must not be null");
+        this.entityManagerInterface = entityManagerInterface;
+    }
+
+    /**
+     * Set whether to automatically join ongoing transactions (according
+     * to the JPA 2.1 SynchronizationType rules). Default is "true".
+     */
+    public void setSynchronizedWithTransaction(boolean synchronizedWithTransaction) {
+        this.synchronizedWithTransaction = synchronizedWithTransaction;
+    }
 
 
-	@Override
-	@Nullable
-	public EntityManager getObject() {
-		return this.shared;
-	}
+    @Override
+    public final void afterPropertiesSet() {
+        EntityManagerFactory emf = getEntityManagerFactory();
+        if (emf == null) {
+            throw new IllegalArgumentException("'entityManagerFactory' or 'persistenceUnitName' is required");
+        }
+        if (emf instanceof EntityManagerFactoryInfo) {
+            EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
+            if (this.entityManagerInterface == null) {
+                this.entityManagerInterface = emfInfo.getEntityManagerInterface();
+                if (this.entityManagerInterface == null) {
+                    this.entityManagerInterface = EntityManager.class;
+                }
+            }
+        } else {
+            if (this.entityManagerInterface == null) {
+                this.entityManagerInterface = EntityManager.class;
+            }
+        }
+        this.shared = SharedEntityManagerCreator.createSharedEntityManager(
+                emf, getJpaPropertyMap(), this.synchronizedWithTransaction, this.entityManagerInterface);
+    }
 
-	@Override
-	public Class<? extends EntityManager> getObjectType() {
-		return (this.entityManagerInterface != null ? this.entityManagerInterface : EntityManager.class);
-	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
+    @Override
+    @Nullable
+    public EntityManager getObject() {
+        return this.shared;
+    }
+
+    @Override
+    public Class<? extends EntityManager> getObjectType() {
+        return (this.entityManagerInterface != null ? this.entityManagerInterface : EntityManager.class);
+    }
+
+    @Override
+    public boolean isSingleton() {
+        return true;
+    }
 
 }

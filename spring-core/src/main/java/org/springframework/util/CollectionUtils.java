@@ -87,8 +87,9 @@ public abstract class CollectionUtils {
 
     /**
      * Merge the given array into the given Collection.
-     *
+     * <p>
      * 合并 collection 对象
+     *
      * @param array      the array to merge (may be {@code null})
      * @param collection the target Collection to merge the array into
      */

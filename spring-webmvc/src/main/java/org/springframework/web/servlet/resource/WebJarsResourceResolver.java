@@ -16,14 +16,12 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.webjars.WebJarAssetLocator;
-
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
+import org.webjars.WebJarAssetLocator;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * A {@code ResourceResolver} that delegates to the chain to locate a resource and then
@@ -40,78 +38,79 @@ import org.springframework.lang.Nullable;
  * on the classpath and is automatically registered if that library is present.
  *
  * @author Brian Clozel
- * @since 4.2
  * @see org.springframework.web.servlet.config.annotation.ResourceChainRegistration
  * @see <a href="https://www.webjars.org">webjars.org</a>
+ * @since 4.2
  */
 public class WebJarsResourceResolver extends AbstractResourceResolver {
 
-	private static final String WEBJARS_LOCATION = "META-INF/resources/webjars/";
+    private static final String WEBJARS_LOCATION = "META-INF/resources/webjars/";
 
-	private static final int WEBJARS_LOCATION_LENGTH = WEBJARS_LOCATION.length();
-
-
-	private final WebJarAssetLocator webJarAssetLocator;
+    private static final int WEBJARS_LOCATION_LENGTH = WEBJARS_LOCATION.length();
 
 
-	/**
-	 * Create a {@code WebJarsResourceResolver} with a default {@code WebJarAssetLocator} instance.
-	 */
-	public WebJarsResourceResolver() {
-		this(new WebJarAssetLocator());
-	}
-
-	/**
-	 * Create a {@code WebJarsResourceResolver} with a custom {@code WebJarAssetLocator} instance,
-	 * e.g. with a custom index.
-	 * @since 4.3
-	 */
-	public WebJarsResourceResolver(WebJarAssetLocator webJarAssetLocator) {
-		this.webJarAssetLocator = webJarAssetLocator;
-	}
+    private final WebJarAssetLocator webJarAssetLocator;
 
 
-	@Override
-	protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
-			List<? extends Resource> locations, ResourceResolverChain chain) {
+    /**
+     * Create a {@code WebJarsResourceResolver} with a default {@code WebJarAssetLocator} instance.
+     */
+    public WebJarsResourceResolver() {
+        this(new WebJarAssetLocator());
+    }
 
-		Resource resolved = chain.resolveResource(request, requestPath, locations);
-		if (resolved == null) {
-			String webJarResourcePath = findWebJarResourcePath(requestPath);
-			if (webJarResourcePath != null) {
-				return chain.resolveResource(request, webJarResourcePath, locations);
-			}
-		}
-		return resolved;
-	}
+    /**
+     * Create a {@code WebJarsResourceResolver} with a custom {@code WebJarAssetLocator} instance,
+     * e.g. with a custom index.
+     *
+     * @since 4.3
+     */
+    public WebJarsResourceResolver(WebJarAssetLocator webJarAssetLocator) {
+        this.webJarAssetLocator = webJarAssetLocator;
+    }
 
-	@Override
-	protected String resolveUrlPathInternal(String resourceUrlPath,
-			List<? extends Resource> locations, ResourceResolverChain chain) {
 
-		String path = chain.resolveUrlPath(resourceUrlPath, locations);
-		if (path == null) {
-			String webJarResourcePath = findWebJarResourcePath(resourceUrlPath);
-			if (webJarResourcePath != null) {
-				return chain.resolveUrlPath(webJarResourcePath, locations);
-			}
-		}
-		return path;
-	}
+    @Override
+    protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
+                                               List<? extends Resource> locations, ResourceResolverChain chain) {
 
-	@Nullable
-	protected String findWebJarResourcePath(String path) {
-		int startOffset = (path.startsWith("/") ? 1 : 0);
-		int endOffset = path.indexOf('/', 1);
-		if (endOffset != -1) {
-			String webjar = path.substring(startOffset, endOffset);
-			String partialPath = path.substring(endOffset + 1);
-			String webJarPath = this.webJarAssetLocator.getFullPathExact(webjar, partialPath);
-			if (webJarPath != null) {
-				return webJarPath.substring(WEBJARS_LOCATION_LENGTH);
-			}
-		}
-		return null;
-	}
+        Resource resolved = chain.resolveResource(request, requestPath, locations);
+        if (resolved == null) {
+            String webJarResourcePath = findWebJarResourcePath(requestPath);
+            if (webJarResourcePath != null) {
+                return chain.resolveResource(request, webJarResourcePath, locations);
+            }
+        }
+        return resolved;
+    }
+
+    @Override
+    protected String resolveUrlPathInternal(String resourceUrlPath,
+                                            List<? extends Resource> locations, ResourceResolverChain chain) {
+
+        String path = chain.resolveUrlPath(resourceUrlPath, locations);
+        if (path == null) {
+            String webJarResourcePath = findWebJarResourcePath(resourceUrlPath);
+            if (webJarResourcePath != null) {
+                return chain.resolveUrlPath(webJarResourcePath, locations);
+            }
+        }
+        return path;
+    }
+
+    @Nullable
+    protected String findWebJarResourcePath(String path) {
+        int startOffset = (path.startsWith("/") ? 1 : 0);
+        int endOffset = path.indexOf('/', 1);
+        if (endOffset != -1) {
+            String webjar = path.substring(startOffset, endOffset);
+            String partialPath = path.substring(endOffset + 1);
+            String webJarPath = this.webJarAssetLocator.getFullPathExact(webjar, partialPath);
+            if (webJarPath != null) {
+                return webJarPath.substring(WEBJARS_LOCATION_LENGTH);
+            }
+        }
+        return null;
+    }
 
 }

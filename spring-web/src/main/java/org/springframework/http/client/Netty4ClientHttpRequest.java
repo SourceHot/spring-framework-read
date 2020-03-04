@@ -16,11 +16,6 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
-import java.util.concurrent.ExecutionException;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
@@ -32,11 +27,15 @@ import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpVersion;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+import java.util.concurrent.ExecutionException;
 
 /**
  * {@link ClientHttpRequest} implementation based on Netty 4.
@@ -53,135 +52,128 @@ import org.springframework.util.concurrent.SettableListenableFuture;
 @Deprecated
 class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements ClientHttpRequest {
 
-	private final Bootstrap bootstrap;
+    private final Bootstrap bootstrap;
 
-	private final URI uri;
+    private final URI uri;
 
-	private final HttpMethod method;
+    private final HttpMethod method;
 
-	private final ByteBufOutputStream body;
-
-
-	public Netty4ClientHttpRequest(Bootstrap bootstrap, URI uri, HttpMethod method) {
-		this.bootstrap = bootstrap;
-		this.uri = uri;
-		this.method = method;
-		this.body = new ByteBufOutputStream(Unpooled.buffer(1024));
-	}
+    private final ByteBufOutputStream body;
 
 
-	@Override
-	public HttpMethod getMethod() {
-		return this.method;
-	}
+    public Netty4ClientHttpRequest(Bootstrap bootstrap, URI uri, HttpMethod method) {
+        this.bootstrap = bootstrap;
+        this.uri = uri;
+        this.method = method;
+        this.body = new ByteBufOutputStream(Unpooled.buffer(1024));
+    }
 
-	@Override
-	public String getMethodValue() {
-		return this.method.name();
-	}
+    private static int getPort(URI uri) {
+        int port = uri.getPort();
+        if (port == -1) {
+            if ("http".equalsIgnoreCase(uri.getScheme())) {
+                port = 80;
+            } else if ("https".equalsIgnoreCase(uri.getScheme())) {
+                port = 443;
+            }
+        }
+        return port;
+    }
 
-	@Override
-	public URI getURI() {
-		return this.uri;
-	}
+    @Override
+    public HttpMethod getMethod() {
+        return this.method;
+    }
 
-	@Override
-	public ClientHttpResponse execute() throws IOException {
-		try {
-			return executeAsync().get();
-		}
-		catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-			throw new IOException("Interrupted during request execution", ex);
-		}
-		catch (ExecutionException ex) {
-			if (ex.getCause() instanceof IOException) {
-				throw (IOException) ex.getCause();
-			}
-			else {
-				throw new IOException(ex.getMessage(), ex.getCause());
-			}
-		}
-	}
+    @Override
+    public String getMethodValue() {
+        return this.method.name();
+    }
 
-	@Override
-	protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
-		return this.body;
-	}
+    @Override
+    public URI getURI() {
+        return this.uri;
+    }
 
-	@Override
-	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
-		final SettableListenableFuture<ClientHttpResponse> responseFuture = new SettableListenableFuture<>();
+    @Override
+    public ClientHttpResponse execute() throws IOException {
+        try {
+            return executeAsync().get();
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Interrupted during request execution", ex);
+        } catch (ExecutionException ex) {
+            if (ex.getCause() instanceof IOException) {
+                throw (IOException) ex.getCause();
+            } else {
+                throw new IOException(ex.getMessage(), ex.getCause());
+            }
+        }
+    }
 
-		ChannelFutureListener connectionListener = future -> {
-			if (future.isSuccess()) {
-				Channel channel = future.channel();
-				channel.pipeline().addLast(new RequestExecuteHandler(responseFuture));
-				FullHttpRequest nettyRequest = createFullHttpRequest(headers);
-				channel.writeAndFlush(nettyRequest);
-			}
-			else {
-				responseFuture.setException(future.cause());
-			}
-		};
+    @Override
+    protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
+        return this.body;
+    }
 
-		this.bootstrap.connect(this.uri.getHost(), getPort(this.uri)).addListener(connectionListener);
-		return responseFuture;
-	}
+    @Override
+    protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
+        final SettableListenableFuture<ClientHttpResponse> responseFuture = new SettableListenableFuture<>();
 
-	private FullHttpRequest createFullHttpRequest(HttpHeaders headers) {
-		io.netty.handler.codec.http.HttpMethod nettyMethod =
-				io.netty.handler.codec.http.HttpMethod.valueOf(this.method.name());
+        ChannelFutureListener connectionListener = future -> {
+            if (future.isSuccess()) {
+                Channel channel = future.channel();
+                channel.pipeline().addLast(new RequestExecuteHandler(responseFuture));
+                FullHttpRequest nettyRequest = createFullHttpRequest(headers);
+                channel.writeAndFlush(nettyRequest);
+            } else {
+                responseFuture.setException(future.cause());
+            }
+        };
 
-		String authority = this.uri.getRawAuthority();
-		String path = this.uri.toString().substring(this.uri.toString().indexOf(authority) + authority.length());
-		FullHttpRequest nettyRequest = new DefaultFullHttpRequest(
-				HttpVersion.HTTP_1_1, nettyMethod, path, this.body.buffer());
+        this.bootstrap.connect(this.uri.getHost(), getPort(this.uri)).addListener(connectionListener);
+        return responseFuture;
+    }
 
-		nettyRequest.headers().set(HttpHeaders.HOST, this.uri.getHost() + ":" + getPort(this.uri));
-		nettyRequest.headers().set(HttpHeaders.CONNECTION, "close");
-		headers.forEach((headerName, headerValues) -> nettyRequest.headers().add(headerName, headerValues));
-		if (!nettyRequest.headers().contains(HttpHeaders.CONTENT_LENGTH) && this.body.buffer().readableBytes() > 0) {
-			nettyRequest.headers().set(HttpHeaders.CONTENT_LENGTH, this.body.buffer().readableBytes());
-		}
+    private FullHttpRequest createFullHttpRequest(HttpHeaders headers) {
+        io.netty.handler.codec.http.HttpMethod nettyMethod =
+                io.netty.handler.codec.http.HttpMethod.valueOf(this.method.name());
 
-		return nettyRequest;
-	}
+        String authority = this.uri.getRawAuthority();
+        String path = this.uri.toString().substring(this.uri.toString().indexOf(authority) + authority.length());
+        FullHttpRequest nettyRequest = new DefaultFullHttpRequest(
+                HttpVersion.HTTP_1_1, nettyMethod, path, this.body.buffer());
 
-	private static int getPort(URI uri) {
-		int port = uri.getPort();
-		if (port == -1) {
-			if ("http".equalsIgnoreCase(uri.getScheme())) {
-				port = 80;
-			}
-			else if ("https".equalsIgnoreCase(uri.getScheme())) {
-				port = 443;
-			}
-		}
-		return port;
-	}
+        nettyRequest.headers().set(HttpHeaders.HOST, this.uri.getHost() + ":" + getPort(this.uri));
+        nettyRequest.headers().set(HttpHeaders.CONNECTION, "close");
+        headers.forEach((headerName, headerValues) -> nettyRequest.headers().add(headerName, headerValues));
+        if (!nettyRequest.headers().contains(HttpHeaders.CONTENT_LENGTH) && this.body.buffer().readableBytes() > 0) {
+            nettyRequest.headers().set(HttpHeaders.CONTENT_LENGTH, this.body.buffer().readableBytes());
+        }
 
+        return nettyRequest;
+    }
 
-	/**
-	 * A SimpleChannelInboundHandler to update the given SettableListenableFuture.
-	 */
-	private static class RequestExecuteHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
+    /**
+     * A SimpleChannelInboundHandler to update the given SettableListenableFuture.
+     */
+    private static class RequestExecuteHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
-		private final SettableListenableFuture<ClientHttpResponse> responseFuture;
+        private final SettableListenableFuture<ClientHttpResponse> responseFuture;
 
-		public RequestExecuteHandler(SettableListenableFuture<ClientHttpResponse> responseFuture) {
-			this.responseFuture = responseFuture;
-		}
+        public RequestExecuteHandler(SettableListenableFuture<ClientHttpResponse> responseFuture) {
+            this.responseFuture = responseFuture;
+        }
 
-		@Override
-		protected void channelRead0(ChannelHandlerContext context, FullHttpResponse response) throws Exception {
-			this.responseFuture.set(new Netty4ClientHttpResponse(context, response));
-		}
+        @Override
+        protected void channelRead0(ChannelHandlerContext context, FullHttpResponse response) throws Exception {
+            this.responseFuture.set(new Netty4ClientHttpResponse(context, response));
+        }
 
-		@Override
-		public void exceptionCaught(ChannelHandlerContext context, Throwable cause) throws Exception {
-			this.responseFuture.setException(cause);
-		}
-	}
+        @Override
+        public void exceptionCaught(ChannelHandlerContext context, Throwable cause) throws Exception {
+            this.responseFuture.setException(cause);
+        }
+    }
 
 }

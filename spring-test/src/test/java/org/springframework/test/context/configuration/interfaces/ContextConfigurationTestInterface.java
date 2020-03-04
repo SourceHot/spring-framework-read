@@ -28,12 +28,12 @@ import org.springframework.tests.sample.beans.Employee;
 @ContextConfiguration(classes = Config.class)
 interface ContextConfigurationTestInterface {
 
-	static class Config {
+    static class Config {
 
-		@Bean
-		Employee employee() {
-			return new Employee("Dilbert");
-		}
-	}
+        @Bean
+        Employee employee() {
+            return new Employee("Dilbert");
+        }
+    }
 
 }

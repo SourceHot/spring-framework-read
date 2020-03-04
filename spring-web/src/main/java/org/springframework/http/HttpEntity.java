@@ -46,125 +46,129 @@ import org.springframework.util.ObjectUtils;
  *   return new HttpEntity&lt;String&gt;("Hello World", responseHeaders);
  * }
  * </pre>
- *
- *
+ * <p>
+ * <p>
  * http实体,主要存放数据:
  * <ol>
  *     <li>头信息,headers{@link HttpHeaders}</li>
  *     <li>数据信息,Body</li>
  * </ol>
  * 该类主要应用与 web 项目做返回值
+ *
+ * @param <T> the body type
  * @author Arjen Poutsma
  * @author Juergen Hoeller
- * @since 3.0.2
- * @param <T> the body type
  * @see org.springframework.web.client.RestTemplate
  * @see #getBody()
  * @see #getHeaders()
+ * @since 3.0.2
  */
 public class HttpEntity<T> {
 
-	/**
-	 * The empty {@code HttpEntity}, with no body or headers.
-	 */
-	public static final HttpEntity<?> EMPTY = new HttpEntity<>();
+    /**
+     * The empty {@code HttpEntity}, with no body or headers.
+     */
+    public static final HttpEntity<?> EMPTY = new HttpEntity<>();
 
 
-	private final HttpHeaders headers;
+    private final HttpHeaders headers;
 
-	@Nullable
-	private final T body;
-
-
-	/**
-	 * Create a new, empty {@code HttpEntity}.
-	 */
-	protected HttpEntity() {
-		this(null, null);
-	}
-
-	/**
-	 * Create a new {@code HttpEntity} with the given body and no headers.
-	 * @param body the entity body
-	 */
-	public HttpEntity(T body) {
-		this(body, null);
-	}
-
-	/**
-	 * Create a new {@code HttpEntity} with the given headers and no body.
-	 * @param headers the entity headers
-	 */
-	public HttpEntity(MultiValueMap<String, String> headers) {
-		this(null, headers);
-	}
-
-	/**
-	 * Create a new {@code HttpEntity} with the given body and headers.
-	 * @param body the entity body
-	 * @param headers the entity headers
-	 */
-	public HttpEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers) {
-		this.body = body;
-		HttpHeaders tempHeaders = new HttpHeaders();
-		if (headers != null) {
-			tempHeaders.putAll(headers);
-		}
-		this.headers = HttpHeaders.readOnlyHttpHeaders(tempHeaders);
-	}
+    @Nullable
+    private final T body;
 
 
-	/**
-	 * Returns the headers of this entity.
-	 */
-	public HttpHeaders getHeaders() {
-		return this.headers;
-	}
+    /**
+     * Create a new, empty {@code HttpEntity}.
+     */
+    protected HttpEntity() {
+        this(null, null);
+    }
 
-	/**
-	 * Returns the body of this entity.
-	 */
-	@Nullable
-	public T getBody() {
-		return this.body;
-	}
+    /**
+     * Create a new {@code HttpEntity} with the given body and no headers.
+     *
+     * @param body the entity body
+     */
+    public HttpEntity(T body) {
+        this(body, null);
+    }
 
-	/**
-	 * Indicates whether this entity has a body.
-	 */
-	public boolean hasBody() {
-		return (this.body != null);
-	}
+    /**
+     * Create a new {@code HttpEntity} with the given headers and no body.
+     *
+     * @param headers the entity headers
+     */
+    public HttpEntity(MultiValueMap<String, String> headers) {
+        this(null, headers);
+    }
+
+    /**
+     * Create a new {@code HttpEntity} with the given body and headers.
+     *
+     * @param body    the entity body
+     * @param headers the entity headers
+     */
+    public HttpEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers) {
+        this.body = body;
+        HttpHeaders tempHeaders = new HttpHeaders();
+        if (headers != null) {
+            tempHeaders.putAll(headers);
+        }
+        this.headers = HttpHeaders.readOnlyHttpHeaders(tempHeaders);
+    }
 
 
-	@Override
-	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (other == null || other.getClass() != getClass()) {
-			return false;
-		}
-		HttpEntity<?> otherEntity = (HttpEntity<?>) other;
-		return (ObjectUtils.nullSafeEquals(this.headers, otherEntity.headers) &&
-				ObjectUtils.nullSafeEquals(this.body, otherEntity.body));
-	}
+    /**
+     * Returns the headers of this entity.
+     */
+    public HttpHeaders getHeaders() {
+        return this.headers;
+    }
 
-	@Override
-	public int hashCode() {
-		return (ObjectUtils.nullSafeHashCode(this.headers) * 29 + ObjectUtils.nullSafeHashCode(this.body));
-	}
+    /**
+     * Returns the body of this entity.
+     */
+    @Nullable
+    public T getBody() {
+        return this.body;
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder("<");
-		if (this.body != null) {
-			builder.append(this.body);
-			builder.append(',');
-		}
-		builder.append(this.headers);
-		builder.append('>');
-		return builder.toString();
-	}
+    /**
+     * Indicates whether this entity has a body.
+     */
+    public boolean hasBody() {
+        return (this.body != null);
+    }
+
+
+    @Override
+    public boolean equals(@Nullable Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || other.getClass() != getClass()) {
+            return false;
+        }
+        HttpEntity<?> otherEntity = (HttpEntity<?>) other;
+        return (ObjectUtils.nullSafeEquals(this.headers, otherEntity.headers) &&
+                ObjectUtils.nullSafeEquals(this.body, otherEntity.body));
+    }
+
+    @Override
+    public int hashCode() {
+        return (ObjectUtils.nullSafeHashCode(this.headers) * 29 + ObjectUtils.nullSafeHashCode(this.body));
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("<");
+        if (this.body != null) {
+            builder.append(this.body);
+            builder.append(',');
+        }
+        builder.append(this.headers);
+        builder.append('>');
+        return builder.toString();
+    }
 
 }

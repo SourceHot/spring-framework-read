@@ -16,14 +16,13 @@
 
 package org.springframework.lang;
 
+import javax.annotation.Nonnull;
+import javax.annotation.meta.TypeQualifierDefault;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import javax.annotation.Nonnull;
-import javax.annotation.meta.TypeQualifierDefault;
 
 /**
  * A common Spring annotation to declare that fields are to be considered as
@@ -36,10 +35,10 @@ import javax.annotation.meta.TypeQualifierDefault;
  * annotations at field level.
  *
  * @author Sebastien Deleuze
- * @since 5.0
  * @see NonNullApi
  * @see Nullable
  * @see NonNull
+ * @since 5.0
  */
 @Target(ElementType.PACKAGE)
 @Retention(RetentionPolicy.RUNTIME)

@@ -31,21 +31,23 @@ import org.springframework.core.NestedCheckedException;
 @SuppressWarnings("serial")
 public class MetaDataAccessException extends NestedCheckedException {
 
-	/**
-	 * Constructor for MetaDataAccessException.
-	 * @param msg the detail message
-	 */
-	public MetaDataAccessException(String msg) {
-		super(msg);
-	}
+    /**
+     * Constructor for MetaDataAccessException.
+     *
+     * @param msg the detail message
+     */
+    public MetaDataAccessException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Constructor for MetaDataAccessException.
-	 * @param msg the detail message
-	 * @param cause the root cause from the data access API in use
-	 */
-	public MetaDataAccessException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Constructor for MetaDataAccessException.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause from the data access API in use
+     */
+    public MetaDataAccessException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

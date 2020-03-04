@@ -16,17 +16,15 @@
 
 package org.springframework.orm.jpa.vendor;
 
-import java.lang.reflect.Method;
-
-import javax.persistence.EntityManagerFactory;
-
 import org.hibernate.SessionFactory;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+
+import javax.persistence.EntityManagerFactory;
+import java.lang.reflect.Method;
 
 /**
  * Simple {@code FactoryBean} that exposes the underlying {@link SessionFactory}
@@ -50,44 +48,43 @@ import org.springframework.util.ReflectionUtils;
  *     return emf.unwrap(SessionFactory.class);
  * }
  * </pre>
- *
+ * <p>
  * Please note: Since Hibernate 5.2 changed its {@code SessionFactory} interface to extend JPA's
  * {@code EntityManagerFactory}, you may get conflicts when injecting by type, with both the
  * original factory and your custom {@code SessionFactory} matching {@code EntityManagerFactory}.
  * An explicit qualifier for the original factory (as indicated above) is recommended here.
  *
  * @author Juergen Hoeller
- * @since 3.1
  * @see #setPersistenceUnitName
  * @see #setEntityManagerFactory
+ * @since 3.1
  * @deprecated as of Spring Framework 4.3.12 against Hibernate 5.2, in favor of a custom solution
  * based on {@link EntityManagerFactory#unwrap} with explicit qualifiers and/or primary markers
  */
 @Deprecated
 public class HibernateJpaSessionFactoryBean extends EntityManagerFactoryAccessor implements FactoryBean<SessionFactory> {
 
-	@Override
-	@Nullable
-	public SessionFactory getObject() {
-		EntityManagerFactory emf = getEntityManagerFactory();
-		Assert.state(emf != null, "EntityManagerFactory must not be null");
-		try {
-			Method getSessionFactory = emf.getClass().getMethod("getSessionFactory");
-			return (SessionFactory) ReflectionUtils.invokeMethod(getSessionFactory, emf);
-		}
-		catch (NoSuchMethodException ex) {
-			throw new IllegalStateException("No compatible Hibernate EntityManagerFactory found: " + ex);
-		}
-	}
+    @Override
+    @Nullable
+    public SessionFactory getObject() {
+        EntityManagerFactory emf = getEntityManagerFactory();
+        Assert.state(emf != null, "EntityManagerFactory must not be null");
+        try {
+            Method getSessionFactory = emf.getClass().getMethod("getSessionFactory");
+            return (SessionFactory) ReflectionUtils.invokeMethod(getSessionFactory, emf);
+        } catch (NoSuchMethodException ex) {
+            throw new IllegalStateException("No compatible Hibernate EntityManagerFactory found: " + ex);
+        }
+    }
 
-	@Override
-	public Class<?> getObjectType() {
-		return SessionFactory.class;
-	}
+    @Override
+    public Class<?> getObjectType() {
+        return SessionFactory.class;
+    }
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
+    @Override
+    public boolean isSingleton() {
+        return true;
+    }
 
 }

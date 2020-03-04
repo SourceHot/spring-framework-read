@@ -22,10 +22,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.tests.sample.beans.Pet;
-
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * Integration tests that verify support for
@@ -41,35 +41,35 @@ import static org.testng.Assert.*;
 @ContextConfiguration
 public class AnnotationConfigTestNGSpringContextTests extends AbstractTestNGSpringContextTests {
 
-	@Autowired
-	Employee employee;
+    @Autowired
+    Employee employee;
 
-	@Autowired
-	Pet pet;
+    @Autowired
+    Pet pet;
 
-	@Test
-	void autowiringFromConfigClass() {
-		assertNotNull(employee, "The employee should have been autowired.");
-		assertEquals(employee.getName(), "John Smith");
+    @Test
+    void autowiringFromConfigClass() {
+        assertNotNull(employee, "The employee should have been autowired.");
+        assertEquals(employee.getName(), "John Smith");
 
-		assertNotNull(pet, "The pet should have been autowired.");
-		assertEquals(pet.getName(), "Fido");
-	}
+        assertNotNull(pet, "The pet should have been autowired.");
+        assertEquals(pet.getName(), "Fido");
+    }
 
 
-	@Configuration
-	static class Config {
+    @Configuration
+    static class Config {
 
-		@Bean
-		Employee employee() {
-			return new Employee("John Smith");
-		}
+        @Bean
+        Employee employee() {
+            return new Employee("John Smith");
+        }
 
-		@Bean
-		Pet pet() {
-			return new Pet("Fido");
-		}
+        @Bean
+        Pet pet() {
+            return new Pet("Fido");
+        }
 
-	}
+    }
 
 }

@@ -18,7 +18,7 @@ package org.springframework.orm.jpa;
 
 import org.junit.Test;
 
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * @author Rod Johnson
@@ -26,18 +26,18 @@ import static org.mockito.BDDMockito.*;
  */
 public class EntityManagerFactoryBeanSupportTests extends AbstractEntityManagerFactoryBeanTests {
 
-	@Test
-	public void testHookIsCalled() throws Exception {
-		DummyEntityManagerFactoryBean demf = new DummyEntityManagerFactoryBean(mockEmf);
+    @Test
+    public void testHookIsCalled() throws Exception {
+        DummyEntityManagerFactoryBean demf = new DummyEntityManagerFactoryBean(mockEmf);
 
-		demf.afterPropertiesSet();
+        demf.afterPropertiesSet();
 
-		checkInvariants(demf);
+        checkInvariants(demf);
 
-		// Should trigger close method expected by EntityManagerFactory mock
-		demf.destroy();
+        // Should trigger close method expected by EntityManagerFactory mock
+        demf.destroy();
 
-		verify(mockEmf).close();
-	}
+        verify(mockEmf).close();
+    }
 
 }

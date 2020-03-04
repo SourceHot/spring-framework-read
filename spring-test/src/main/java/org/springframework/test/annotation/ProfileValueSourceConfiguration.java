@@ -33,10 +33,10 @@ import java.lang.annotation.Target;
  * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
  *
  * @author Sam Brannen
- * @since 2.5
  * @see ProfileValueSource
  * @see IfProfileValue
  * @see ProfileValueUtils
+ * @since 2.5
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -44,12 +44,12 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface ProfileValueSourceConfiguration {
 
-	/**
-	 * The type of {@link ProfileValueSource} to use when retrieving
-	 * <em>profile values</em>.
-	 *
-	 * @see SystemProfileValueSource
-	 */
-	Class<? extends ProfileValueSource> value() default SystemProfileValueSource.class;
+    /**
+     * The type of {@link ProfileValueSource} to use when retrieving
+     * <em>profile values</em>.
+     *
+     * @see SystemProfileValueSource
+     */
+    Class<? extends ProfileValueSource> value() default SystemProfileValueSource.class;
 
 }

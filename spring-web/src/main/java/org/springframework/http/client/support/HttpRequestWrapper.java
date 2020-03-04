@@ -16,77 +16,79 @@
 
 package org.springframework.http.client.support;
 
-import java.net.URI;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import java.net.URI;
+
 /**
  * Provides a convenient implementation of the {@link HttpRequest} interface
  * that can be overridden to adapt the request.
  *
  * <p>These methods default to calling through to the wrapped request object.
- *
+ * <p>
  * HttpRequest 的包装对象
+ *
  * @author Arjen Poutsma
  * @since 3.1
  */
 public class HttpRequestWrapper implements HttpRequest {
 
-	private final HttpRequest request;
+    private final HttpRequest request;
 
 
-	/**
-	 * Create a new {@code HttpRequest} wrapping the given request object.
-	 * @param request the request object to be wrapped
-	 */
-	public HttpRequestWrapper(HttpRequest request) {
-		Assert.notNull(request, "HttpRequest must not be null");
-		this.request = request;
-	}
+    /**
+     * Create a new {@code HttpRequest} wrapping the given request object.
+     *
+     * @param request the request object to be wrapped
+     */
+    public HttpRequestWrapper(HttpRequest request) {
+        Assert.notNull(request, "HttpRequest must not be null");
+        this.request = request;
+    }
 
 
-	/**
-	 * Return the wrapped request.
-	 */
-	public HttpRequest getRequest() {
-		return this.request;
-	}
+    /**
+     * Return the wrapped request.
+     */
+    public HttpRequest getRequest() {
+        return this.request;
+    }
 
-	/**
-	 * Return the method of the wrapped request.
-	 */
-	@Override
-	@Nullable
-	public HttpMethod getMethod() {
-		return this.request.getMethod();
-	}
+    /**
+     * Return the method of the wrapped request.
+     */
+    @Override
+    @Nullable
+    public HttpMethod getMethod() {
+        return this.request.getMethod();
+    }
 
-	/**
-	 * Return the method value of the wrapped request.
-	 */
-	@Override
-	public String getMethodValue() {
-		return this.request.getMethodValue();
-	}
+    /**
+     * Return the method value of the wrapped request.
+     */
+    @Override
+    public String getMethodValue() {
+        return this.request.getMethodValue();
+    }
 
-	/**
-	 * Return the URI of the wrapped request.
-	 */
-	@Override
-	public URI getURI() {
-		return this.request.getURI();
-	}
+    /**
+     * Return the URI of the wrapped request.
+     */
+    @Override
+    public URI getURI() {
+        return this.request.getURI();
+    }
 
-	/**
-	 * Return the headers of the wrapped request.
-	 */
-	@Override
-	public HttpHeaders getHeaders() {
-		return this.request.getHeaders();
-	}
+    /**
+     * Return the headers of the wrapped request.
+     */
+    @Override
+    public HttpHeaders getHeaders() {
+        return this.request.getHeaders();
+    }
 
 }

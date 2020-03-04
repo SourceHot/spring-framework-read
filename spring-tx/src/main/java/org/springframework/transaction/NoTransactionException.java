@@ -28,21 +28,23 @@ package org.springframework.transaction;
 @SuppressWarnings("serial")
 public class NoTransactionException extends TransactionUsageException {
 
-	/**
-	 * Constructor for NoTransactionException.
-	 * @param msg the detail message
-	 */
-	public NoTransactionException(String msg) {
-		super(msg);
-	}
+    /**
+     * Constructor for NoTransactionException.
+     *
+     * @param msg the detail message
+     */
+    public NoTransactionException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Constructor for NoTransactionException.
-	 * @param msg the detail message
-	 * @param cause the root cause from the transaction API in use
-	 */
-	public NoTransactionException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Constructor for NoTransactionException.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause from the transaction API in use
+     */
+    public NoTransactionException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

@@ -16,8 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -26,6 +24,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Simple method invoker bean: just invoking a target method, not expecting a result
@@ -60,77 +60,76 @@ import org.springframework.util.ClassUtils;
  * &lt;/bean></pre>
  *
  * @author Juergen Hoeller
- * @since 4.0.3
  * @see MethodInvokingFactoryBean
  * @see org.springframework.util.MethodInvoker
+ * @since 4.0.3
  */
 public class MethodInvokingBean extends ArgumentConvertingMethodInvoker
-		implements BeanClassLoaderAware, BeanFactoryAware, InitializingBean {
+        implements BeanClassLoaderAware, BeanFactoryAware, InitializingBean {
 
-	@Nullable
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+    @Nullable
+    private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	@Nullable
-	private ConfigurableBeanFactory beanFactory;
-
-
-	@Override
-	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = classLoader;
-	}
-
-	@Override
-	protected Class<?> resolveClassName(String className) throws ClassNotFoundException {
-		return ClassUtils.forName(className, this.beanClassLoader);
-	}
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
-		if (beanFactory instanceof ConfigurableBeanFactory) {
-			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
-		}
-	}
-
-	/**
-	 * Obtain the TypeConverter from the BeanFactory that this bean runs in,
-	 * if possible.
-	 * @see ConfigurableBeanFactory#getTypeConverter()
-	 */
-	@Override
-	protected TypeConverter getDefaultTypeConverter() {
-		if (this.beanFactory != null) {
-			return this.beanFactory.getTypeConverter();
-		}
-		else {
-			return super.getDefaultTypeConverter();
-		}
-	}
+    @Nullable
+    private ConfigurableBeanFactory beanFactory;
 
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		prepare();
-		invokeWithTargetException();
-	}
+    @Override
+    public void setBeanClassLoader(ClassLoader classLoader) {
+        this.beanClassLoader = classLoader;
+    }
 
-	/**
-	 * Perform the invocation and convert InvocationTargetException
-	 * into the underlying target exception.
-	 */
-	@Nullable
-	protected Object invokeWithTargetException() throws Exception {
-		try {
-			return invoke();
-		}
-		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof Exception) {
-				throw (Exception) ex.getTargetException();
-			}
-			if (ex.getTargetException() instanceof Error) {
-				throw (Error) ex.getTargetException();
-			}
-			throw ex;
-		}
-	}
+    @Override
+    protected Class<?> resolveClassName(String className) throws ClassNotFoundException {
+        return ClassUtils.forName(className, this.beanClassLoader);
+    }
+
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) {
+        if (beanFactory instanceof ConfigurableBeanFactory) {
+            this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+        }
+    }
+
+    /**
+     * Obtain the TypeConverter from the BeanFactory that this bean runs in,
+     * if possible.
+     *
+     * @see ConfigurableBeanFactory#getTypeConverter()
+     */
+    @Override
+    protected TypeConverter getDefaultTypeConverter() {
+        if (this.beanFactory != null) {
+            return this.beanFactory.getTypeConverter();
+        } else {
+            return super.getDefaultTypeConverter();
+        }
+    }
+
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        prepare();
+        invokeWithTargetException();
+    }
+
+    /**
+     * Perform the invocation and convert InvocationTargetException
+     * into the underlying target exception.
+     */
+    @Nullable
+    protected Object invokeWithTargetException() throws Exception {
+        try {
+            return invoke();
+        } catch (InvocationTargetException ex) {
+            if (ex.getTargetException() instanceof Exception) {
+                throw (Exception) ex.getTargetException();
+            }
+            if (ex.getTargetException() instanceof Error) {
+                throw (Error) ex.getTargetException();
+            }
+            throw ex;
+        }
+    }
 
 }

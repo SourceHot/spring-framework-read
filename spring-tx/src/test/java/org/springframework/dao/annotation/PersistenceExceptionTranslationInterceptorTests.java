@@ -32,14 +32,14 @@ import org.springframework.stereotype.Repository;
  */
 public class PersistenceExceptionTranslationInterceptorTests extends PersistenceExceptionTranslationAdvisorTests {
 
-	@Override
-	protected void addPersistenceExceptionTranslation(ProxyFactory pf, PersistenceExceptionTranslator pet) {
-		if (AnnotationUtils.findAnnotation(pf.getTargetClass(), Repository.class) != null) {
-			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-			bf.registerBeanDefinition("peti", new RootBeanDefinition(PersistenceExceptionTranslationInterceptor.class));
-			bf.registerSingleton("pet", pet);
-			pf.addAdvice((PersistenceExceptionTranslationInterceptor) bf.getBean("peti"));
-		}
-	}
+    @Override
+    protected void addPersistenceExceptionTranslation(ProxyFactory pf, PersistenceExceptionTranslator pet) {
+        if (AnnotationUtils.findAnnotation(pf.getTargetClass(), Repository.class) != null) {
+            DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+            bf.registerBeanDefinition("peti", new RootBeanDefinition(PersistenceExceptionTranslationInterceptor.class));
+            bf.registerSingleton("pet", pet);
+            pf.addAdvice((PersistenceExceptionTranslationInterceptor) bf.getBean("peti"));
+        }
+    }
 
 }

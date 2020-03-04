@@ -29,19 +29,19 @@ import java.sql.SQLException;
  */
 public class PostgresTableMetaDataProvider extends GenericTableMetaDataProvider {
 
-	public PostgresTableMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
-		super(databaseMetaData);
-	}
+    public PostgresTableMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
+        super(databaseMetaData);
+    }
 
 
-	@Override
-	public boolean isGetGeneratedKeysSimulated() {
-		return true;
-	}
+    @Override
+    public boolean isGetGeneratedKeysSimulated() {
+        return true;
+    }
 
-	@Override
-	public String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
-		return "RETURNING " + keyColumnName;
-	}
+    @Override
+    public String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
+        return "RETURNING " + keyColumnName;
+    }
 
 }

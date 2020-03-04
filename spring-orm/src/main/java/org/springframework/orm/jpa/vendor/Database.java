@@ -28,35 +28,39 @@ package org.springframework.orm.jpa.vendor;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 2.0
  * @see AbstractJpaVendorAdapter#setDatabase
+ * @since 2.0
  */
 public enum Database {
 
-	DEFAULT,
+    DEFAULT,
 
-	DB2,
+    DB2,
 
-	DERBY,
+    DERBY,
 
-	/** @since 2.5.5 */
-	H2,
+    /**
+     * @since 2.5.5
+     */
+    H2,
 
-	/** @since 5.1 */
-	HANA,
+    /**
+     * @since 5.1
+     */
+    HANA,
 
-	HSQL,
+    HSQL,
 
-	INFORMIX,
+    INFORMIX,
 
-	MYSQL,
+    MYSQL,
 
-	ORACLE,
+    ORACLE,
 
-	POSTGRESQL,
+    POSTGRESQL,
 
-	SQL_SERVER,
+    SQL_SERVER,
 
-	SYBASE
+    SYBASE
 
 }

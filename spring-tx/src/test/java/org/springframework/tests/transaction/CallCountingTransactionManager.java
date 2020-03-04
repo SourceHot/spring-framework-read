@@ -27,38 +27,38 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 @SuppressWarnings("serial")
 public class CallCountingTransactionManager extends AbstractPlatformTransactionManager {
 
-	public TransactionDefinition lastDefinition;
-	public int begun;
-	public int commits;
-	public int rollbacks;
-	public int inflight;
+    public TransactionDefinition lastDefinition;
+    public int begun;
+    public int commits;
+    public int rollbacks;
+    public int inflight;
 
-	@Override
-	protected Object doGetTransaction() {
-		return new Object();
-	}
+    @Override
+    protected Object doGetTransaction() {
+        return new Object();
+    }
 
-	@Override
-	protected void doBegin(Object transaction, TransactionDefinition definition) {
-		this.lastDefinition = definition;
-		++begun;
-		++inflight;
-	}
+    @Override
+    protected void doBegin(Object transaction, TransactionDefinition definition) {
+        this.lastDefinition = definition;
+        ++begun;
+        ++inflight;
+    }
 
-	@Override
-	protected void doCommit(DefaultTransactionStatus status) {
-		++commits;
-		--inflight;
-	}
+    @Override
+    protected void doCommit(DefaultTransactionStatus status) {
+        ++commits;
+        --inflight;
+    }
 
-	@Override
-	protected void doRollback(DefaultTransactionStatus status) {
-		++rollbacks;
-		--inflight;
-	}
+    @Override
+    protected void doRollback(DefaultTransactionStatus status) {
+        ++rollbacks;
+        --inflight;
+    }
 
-	public void clear() {
-		begun = commits = rollbacks = inflight = 0;
-	}
+    public void clear() {
+        begun = commits = rollbacks = inflight = 0;
+    }
 
 }

@@ -24,8 +24,8 @@ package org.springframework.test.context.junit.jupiter.comics;
  */
 public class Cat extends Character {
 
-	public Cat(String name) {
-		super(name);
-	}
+    public Cat(String name) {
+        super(name);
+    }
 
 }

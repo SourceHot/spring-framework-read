@@ -16,19 +16,22 @@
 
 package org.springframework.http.converter.smile;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
-import static org.junit.Assert.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Jackson 2.x Smile converter tests.
@@ -37,125 +40,125 @@ import org.springframework.http.MockHttpOutputMessage;
  */
 public class MappingJackson2SmileHttpMessageConverterTests {
 
-	private final MappingJackson2SmileHttpMessageConverter converter = new MappingJackson2SmileHttpMessageConverter();
-	private final ObjectMapper mapper = new ObjectMapper(new SmileFactory());
+    private final MappingJackson2SmileHttpMessageConverter converter = new MappingJackson2SmileHttpMessageConverter();
+    private final ObjectMapper mapper = new ObjectMapper(new SmileFactory());
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
-
-	@Test
-	public void canRead() {
-		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "x-jackson-smile")));
-		assertFalse(converter.canRead(MyBean.class, new MediaType("application", "json")));
-		assertFalse(converter.canRead(MyBean.class, new MediaType("application", "xml")));
-	}
-
-	@Test
-	public void canWrite() {
-		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "x-jackson-smile")));
-		assertFalse(converter.canWrite(MyBean.class, new MediaType("application", "json")));
-		assertFalse(converter.canWrite(MyBean.class, new MediaType("application", "xml")));
-	}
-
-	@Test
-	public void read() throws IOException {
-		MyBean body = new MyBean();
-		body.setString("Foo");
-		body.setNumber(42);
-		body.setFraction(42F);
-		body.setArray(new String[]{"Foo", "Bar"});
-		body.setBool(true);
-		body.setBytes(new byte[]{0x1, 0x2});
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(mapper.writeValueAsBytes(body));
-		inputMessage.getHeaders().setContentType(new MediaType("application", "x-jackson-smile"));
-		MyBean result = (MyBean) converter.read(MyBean.class, inputMessage);
-		assertEquals("Foo", result.getString());
-		assertEquals(42, result.getNumber());
-		assertEquals(42F, result.getFraction(), 0F);
-		assertArrayEquals(new String[]{"Foo", "Bar"}, result.getArray());
-		assertTrue(result.isBool());
-		assertArrayEquals(new byte[]{0x1, 0x2}, result.getBytes());
-	}
-
-	@Test
-	public void write() throws IOException {
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		MyBean body = new MyBean();
-		body.setString("Foo");
-		body.setNumber(42);
-		body.setFraction(42F);
-		body.setArray(new String[]{"Foo", "Bar"});
-		body.setBool(true);
-		body.setBytes(new byte[]{0x1, 0x2});
-		converter.write(body, null, outputMessage);
-		assertArrayEquals(mapper.writeValueAsBytes(body), outputMessage.getBodyAsBytes());
-		assertEquals("Invalid content-type", new MediaType("application", "x-jackson-smile", StandardCharsets.UTF_8),
-				outputMessage.getHeaders().getContentType());
-	}
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
 
-	public static class MyBean {
+    @Test
+    public void canRead() {
+        assertTrue(converter.canRead(MyBean.class, new MediaType("application", "x-jackson-smile")));
+        assertFalse(converter.canRead(MyBean.class, new MediaType("application", "json")));
+        assertFalse(converter.canRead(MyBean.class, new MediaType("application", "xml")));
+    }
 
-		private String string;
+    @Test
+    public void canWrite() {
+        assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "x-jackson-smile")));
+        assertFalse(converter.canWrite(MyBean.class, new MediaType("application", "json")));
+        assertFalse(converter.canWrite(MyBean.class, new MediaType("application", "xml")));
+    }
 
-		private int number;
+    @Test
+    public void read() throws IOException {
+        MyBean body = new MyBean();
+        body.setString("Foo");
+        body.setNumber(42);
+        body.setFraction(42F);
+        body.setArray(new String[]{"Foo", "Bar"});
+        body.setBool(true);
+        body.setBytes(new byte[]{0x1, 0x2});
+        MockHttpInputMessage inputMessage = new MockHttpInputMessage(mapper.writeValueAsBytes(body));
+        inputMessage.getHeaders().setContentType(new MediaType("application", "x-jackson-smile"));
+        MyBean result = (MyBean) converter.read(MyBean.class, inputMessage);
+        assertEquals("Foo", result.getString());
+        assertEquals(42, result.getNumber());
+        assertEquals(42F, result.getFraction(), 0F);
+        assertArrayEquals(new String[]{"Foo", "Bar"}, result.getArray());
+        assertTrue(result.isBool());
+        assertArrayEquals(new byte[]{0x1, 0x2}, result.getBytes());
+    }
 
-		private float fraction;
+    @Test
+    public void write() throws IOException {
+        MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+        MyBean body = new MyBean();
+        body.setString("Foo");
+        body.setNumber(42);
+        body.setFraction(42F);
+        body.setArray(new String[]{"Foo", "Bar"});
+        body.setBool(true);
+        body.setBytes(new byte[]{0x1, 0x2});
+        converter.write(body, null, outputMessage);
+        assertArrayEquals(mapper.writeValueAsBytes(body), outputMessage.getBodyAsBytes());
+        assertEquals("Invalid content-type", new MediaType("application", "x-jackson-smile", StandardCharsets.UTF_8),
+                outputMessage.getHeaders().getContentType());
+    }
 
-		private String[] array;
 
-		private boolean bool;
+    public static class MyBean {
 
-		private byte[] bytes;
+        private String string;
 
-		public byte[] getBytes() {
-			return bytes;
-		}
+        private int number;
 
-		public void setBytes(byte[] bytes) {
-			this.bytes = bytes;
-		}
+        private float fraction;
 
-		public boolean isBool() {
-			return bool;
-		}
+        private String[] array;
 
-		public void setBool(boolean bool) {
-			this.bool = bool;
-		}
+        private boolean bool;
 
-		public String getString() {
-			return string;
-		}
+        private byte[] bytes;
 
-		public void setString(String string) {
-			this.string = string;
-		}
+        public byte[] getBytes() {
+            return bytes;
+        }
 
-		public int getNumber() {
-			return number;
-		}
+        public void setBytes(byte[] bytes) {
+            this.bytes = bytes;
+        }
 
-		public void setNumber(int number) {
-			this.number = number;
-		}
+        public boolean isBool() {
+            return bool;
+        }
 
-		public float getFraction() {
-			return fraction;
-		}
+        public void setBool(boolean bool) {
+            this.bool = bool;
+        }
 
-		public void setFraction(float fraction) {
-			this.fraction = fraction;
-		}
+        public String getString() {
+            return string;
+        }
 
-		public String[] getArray() {
-			return array;
-		}
+        public void setString(String string) {
+            this.string = string;
+        }
 
-		public void setArray(String[] array) {
-			this.array = array;
-		}
-	}
+        public int getNumber() {
+            return number;
+        }
+
+        public void setNumber(int number) {
+            this.number = number;
+        }
+
+        public float getFraction() {
+            return fraction;
+        }
+
+        public void setFraction(float fraction) {
+            this.fraction = fraction;
+        }
+
+        public String[] getArray() {
+            return array;
+        }
+
+        public void setArray(String[] array) {
+            this.array = array;
+        }
+    }
 
 }

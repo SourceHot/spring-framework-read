@@ -25,19 +25,20 @@ package org.springframework.jms.support.destination;
  */
 public interface CachingDestinationResolver extends DestinationResolver {
 
-	/**
-	 * Remove the destination with the given name from the cache
-	 * (if cached by this resolver in the first place).
-	 * <p>To be called if access to the specified destination failed,
-	 * assuming that the JMS Destination object might have become invalid.
-	 * @param destinationName the name of the destination
-	 */
-	void removeFromCache(String destinationName);
+    /**
+     * Remove the destination with the given name from the cache
+     * (if cached by this resolver in the first place).
+     * <p>To be called if access to the specified destination failed,
+     * assuming that the JMS Destination object might have become invalid.
+     *
+     * @param destinationName the name of the destination
+     */
+    void removeFromCache(String destinationName);
 
-	/**
-	 * Clear the entire destination cache.
-	 * <p>To be called in case of general JMS provider failure.
-	 */
-	void clearCache();
+    /**
+     * Clear the entire destination cache.
+     * <p>To be called in case of general JMS provider failure.
+     */
+    void clearCache();
 
 }

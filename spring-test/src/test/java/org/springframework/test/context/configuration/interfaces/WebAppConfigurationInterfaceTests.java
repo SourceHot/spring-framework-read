@@ -18,12 +18,11 @@ package org.springframework.test.context.configuration.interfaces;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Sam Brannen
@@ -32,13 +31,13 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 public class WebAppConfigurationInterfaceTests implements WebAppConfigurationTestInterface {
 
-	@Autowired
-	WebApplicationContext wac;
+    @Autowired
+    WebApplicationContext wac;
 
 
-	@Test
-	public void wacLoaded() {
-		assertNotNull(wac);
-	}
+    @Test
+    public void wacLoaded() {
+        assertNotNull(wac);
+    }
 
 }

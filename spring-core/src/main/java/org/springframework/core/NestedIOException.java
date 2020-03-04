@@ -16,9 +16,9 @@
 
 package org.springframework.core;
 
-import java.io.IOException;
-
 import org.springframework.lang.Nullable;
+
+import java.io.IOException;
 
 /**
  * Subclass of {@link IOException} that properly handles a root cause,
@@ -31,49 +31,51 @@ import org.springframework.lang.Nullable;
  * class is unavoidable, as this class needs to derive from IOException.
  *
  * @author Juergen Hoeller
- * @since 2.0
  * @see #getMessage
  * @see #printStackTrace
  * @see org.springframework.core.NestedCheckedException
  * @see org.springframework.core.NestedRuntimeException
+ * @since 2.0
  */
 @SuppressWarnings("serial")
 public class NestedIOException extends IOException {
 
-	static {
-		// Eagerly load the NestedExceptionUtils class to avoid classloader deadlock
-		// issues on OSGi when calling getMessage(). Reported by Don Brown; SPR-5607.
-		NestedExceptionUtils.class.getName();
-	}
+    static {
+        // Eagerly load the NestedExceptionUtils class to avoid classloader deadlock
+        // issues on OSGi when calling getMessage(). Reported by Don Brown; SPR-5607.
+        NestedExceptionUtils.class.getName();
+    }
 
 
-	/**
-	 * Construct a {@code NestedIOException} with the specified detail message.
-	 * @param msg the detail message
-	 */
-	public NestedIOException(String msg) {
-		super(msg);
-	}
+    /**
+     * Construct a {@code NestedIOException} with the specified detail message.
+     *
+     * @param msg the detail message
+     */
+    public NestedIOException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Construct a {@code NestedIOException} with the specified detail message
-	 * and nested exception.
-	 * @param msg the detail message
-	 * @param cause the nested exception
-	 */
-	public NestedIOException(@Nullable String msg, @Nullable Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Construct a {@code NestedIOException} with the specified detail message
+     * and nested exception.
+     *
+     * @param msg   the detail message
+     * @param cause the nested exception
+     */
+    public NestedIOException(@Nullable String msg, @Nullable Throwable cause) {
+        super(msg, cause);
+    }
 
 
-	/**
-	 * Return the detail message, including the message from the nested exception
-	 * if there is one.
-	 */
-	@Override
-	@Nullable
-	public String getMessage() {
-		return NestedExceptionUtils.buildMessage(super.getMessage(), getCause());
-	}
+    /**
+     * Return the detail message, including the message from the nested exception
+     * if there is one.
+     */
+    @Override
+    @Nullable
+    public String getMessage() {
+        return NestedExceptionUtils.buildMessage(super.getMessage(), getCause());
+    }
 
 }

@@ -27,34 +27,34 @@ import org.springframework.lang.Nullable;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @since 2.0
  * @see #getNestedComponents()
  * @see PointcutComponentDefinition
+ * @since 2.0
  */
 public class AspectComponentDefinition extends CompositeComponentDefinition {
 
-	private final BeanDefinition[] beanDefinitions;
+    private final BeanDefinition[] beanDefinitions;
 
-	private final BeanReference[] beanReferences;
-
-
-	public AspectComponentDefinition(String aspectName, @Nullable BeanDefinition[] beanDefinitions,
-			@Nullable BeanReference[] beanReferences, @Nullable Object source) {
-
-		super(aspectName, source);
-		this.beanDefinitions = (beanDefinitions != null ? beanDefinitions : new BeanDefinition[0]);
-		this.beanReferences = (beanReferences != null ? beanReferences : new BeanReference[0]);
-	}
+    private final BeanReference[] beanReferences;
 
 
-	@Override
-	public BeanDefinition[] getBeanDefinitions() {
-		return this.beanDefinitions;
-	}
+    public AspectComponentDefinition(String aspectName, @Nullable BeanDefinition[] beanDefinitions,
+                                     @Nullable BeanReference[] beanReferences, @Nullable Object source) {
 
-	@Override
-	public BeanReference[] getBeanReferences() {
-		return this.beanReferences;
-	}
+        super(aspectName, source);
+        this.beanDefinitions = (beanDefinitions != null ? beanDefinitions : new BeanDefinition[0]);
+        this.beanReferences = (beanReferences != null ? beanReferences : new BeanReference[0]);
+    }
+
+
+    @Override
+    public BeanDefinition[] getBeanDefinitions() {
+        return this.beanDefinitions;
+    }
+
+    @Override
+    public BeanReference[] getBeanReferences() {
+        return this.beanReferences;
+    }
 
 }

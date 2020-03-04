@@ -16,14 +16,13 @@
 
 package org.springframework.util.xml;
 
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.sax.SAXSource;
-
+import org.springframework.lang.Nullable;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
-import org.springframework.lang.Nullable;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.sax.SAXSource;
 
 /**
  * Implementation of the {@code Source} tagging interface for StAX readers. Can be constructed with
@@ -40,86 +39,92 @@ import org.springframework.lang.Nullable;
  * or {@link #setInputSource(InputSource)} will result in {@code UnsupportedOperationException #setInputSource(InputSource)} will result in {@code UnsupportedOperationExceptions}.
  *
  * @author Arjen Poutsma
- * @since 3.0
  * @see XMLEventReader
  * @see XMLStreamReader
  * @see javax.xml.transform.Transformer
+ * @since 3.0
  */
 class StaxSource extends SAXSource {
 
-	@Nullable
-	private XMLEventReader eventReader;
+    @Nullable
+    private XMLEventReader eventReader;
 
-	@Nullable
-	private XMLStreamReader streamReader;
-
-
-	/**
-	 * Construct a new instance of the {@code StaxSource} with the specified {@code XMLEventReader}.
-	 * The supplied event reader must be in {@code XMLStreamConstants.START_DOCUMENT} or
-	 * {@code XMLStreamConstants.START_ELEMENT} state.
-	 * @param eventReader the {@code XMLEventReader} to read from
-	 * @throws IllegalStateException if the reader is not at the start of a document or element
-	 */
-	StaxSource(XMLEventReader eventReader) {
-		super(new StaxEventXMLReader(eventReader), new InputSource());
-		this.eventReader = eventReader;
-	}
-
-	/**
-	 * Construct a new instance of the {@code StaxSource} with the specified {@code XMLStreamReader}.
-	 * The supplied stream reader must be in {@code XMLStreamConstants.START_DOCUMENT} or
-	 * {@code XMLStreamConstants.START_ELEMENT} state.
-	 * @param streamReader the {@code XMLStreamReader} to read from
-	 * @throws IllegalStateException if the reader is not at the start of a document or element
-	 */
-	StaxSource(XMLStreamReader streamReader) {
-		super(new StaxStreamXMLReader(streamReader), new InputSource());
-		this.streamReader = streamReader;
-	}
+    @Nullable
+    private XMLStreamReader streamReader;
 
 
-	/**
-	 * Return the {@code XMLEventReader} used by this {@code StaxSource}.
-	 * <p>If this {@code StaxSource} was created with an {@code XMLStreamReader},
-	 * the result will be {@code null}.
-	 * @return the StAX event reader used by this source
-	 * @see StaxSource#StaxSource(javax.xml.stream.XMLEventReader)
-	 */
-	@Nullable
-	XMLEventReader getXMLEventReader() {
-		return this.eventReader;
-	}
+    /**
+     * Construct a new instance of the {@code StaxSource} with the specified {@code XMLEventReader}.
+     * The supplied event reader must be in {@code XMLStreamConstants.START_DOCUMENT} or
+     * {@code XMLStreamConstants.START_ELEMENT} state.
+     *
+     * @param eventReader the {@code XMLEventReader} to read from
+     * @throws IllegalStateException if the reader is not at the start of a document or element
+     */
+    StaxSource(XMLEventReader eventReader) {
+        super(new StaxEventXMLReader(eventReader), new InputSource());
+        this.eventReader = eventReader;
+    }
 
-	/**
-	 * Return the {@code XMLStreamReader} used by this {@code StaxSource}.
-	 * <p>If this {@code StaxSource} was created with an {@code XMLEventReader},
-	 * the result will be {@code null}.
-	 * @return the StAX event reader used by this source
-	 * @see StaxSource#StaxSource(javax.xml.stream.XMLEventReader)
-	 */
-	@Nullable
-	XMLStreamReader getXMLStreamReader() {
-		return this.streamReader;
-	}
+    /**
+     * Construct a new instance of the {@code StaxSource} with the specified {@code XMLStreamReader}.
+     * The supplied stream reader must be in {@code XMLStreamConstants.START_DOCUMENT} or
+     * {@code XMLStreamConstants.START_ELEMENT} state.
+     *
+     * @param streamReader the {@code XMLStreamReader} to read from
+     * @throws IllegalStateException if the reader is not at the start of a document or element
+     */
+    StaxSource(XMLStreamReader streamReader) {
+        super(new StaxStreamXMLReader(streamReader), new InputSource());
+        this.streamReader = streamReader;
+    }
 
 
-	/**
-	 * Throws an {@code UnsupportedOperationException}.
-	 * @throws UnsupportedOperationException always
-	 */
-	@Override
-	public void setInputSource(InputSource inputSource) {
-		throw new UnsupportedOperationException("setInputSource is not supported");
-	}
+    /**
+     * Return the {@code XMLEventReader} used by this {@code StaxSource}.
+     * <p>If this {@code StaxSource} was created with an {@code XMLStreamReader},
+     * the result will be {@code null}.
+     *
+     * @return the StAX event reader used by this source
+     * @see StaxSource#StaxSource(javax.xml.stream.XMLEventReader)
+     */
+    @Nullable
+    XMLEventReader getXMLEventReader() {
+        return this.eventReader;
+    }
 
-	/**
-	 * Throws an {@code UnsupportedOperationException}.
-	 * @throws UnsupportedOperationException always
-	 */
-	@Override
-	public void setXMLReader(XMLReader reader) {
-		throw new UnsupportedOperationException("setXMLReader is not supported");
-	}
+    /**
+     * Return the {@code XMLStreamReader} used by this {@code StaxSource}.
+     * <p>If this {@code StaxSource} was created with an {@code XMLEventReader},
+     * the result will be {@code null}.
+     *
+     * @return the StAX event reader used by this source
+     * @see StaxSource#StaxSource(javax.xml.stream.XMLEventReader)
+     */
+    @Nullable
+    XMLStreamReader getXMLStreamReader() {
+        return this.streamReader;
+    }
+
+
+    /**
+     * Throws an {@code UnsupportedOperationException}.
+     *
+     * @throws UnsupportedOperationException always
+     */
+    @Override
+    public void setInputSource(InputSource inputSource) {
+        throw new UnsupportedOperationException("setInputSource is not supported");
+    }
+
+    /**
+     * Throws an {@code UnsupportedOperationException}.
+     *
+     * @throws UnsupportedOperationException always
+     */
+    @Override
+    public void setXMLReader(XMLReader reader) {
+        throw new UnsupportedOperationException("setXMLReader is not supported");
+    }
 
 }

@@ -24,20 +24,20 @@ import java.util.Currency;
  * objects. Exposes the currency code as text representation of a Currency object.
  *
  * @author Juergen Hoeller
- * @since 3.0
  * @see java.util.Currency
+ * @since 3.0
  */
 public class CurrencyEditor extends PropertyEditorSupport {
 
-	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
-		setValue(Currency.getInstance(text));
-	}
+    @Override
+    public String getAsText() {
+        Currency value = (Currency) getValue();
+        return (value != null ? value.getCurrencyCode() : "");
+    }
 
-	@Override
-	public String getAsText() {
-		Currency value = (Currency) getValue();
-		return (value != null ? value.getCurrencyCode() : "");
-	}
+    @Override
+    public void setAsText(String text) throws IllegalArgumentException {
+        setValue(Currency.getInstance(text));
+    }
 
 }

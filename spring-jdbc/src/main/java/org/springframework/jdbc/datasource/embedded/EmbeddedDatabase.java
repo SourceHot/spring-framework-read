@@ -31,9 +31,9 @@ import javax.sql.DataSource;
  */
 public interface EmbeddedDatabase extends DataSource {
 
-	/**
-	 * Shut down this embedded database.
-	 */
-	void shutdown();
+    /**
+     * Shut down this embedded database.
+     */
+    void shutdown();
 
 }

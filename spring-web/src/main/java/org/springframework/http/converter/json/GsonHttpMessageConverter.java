@@ -16,15 +16,14 @@
 
 package org.springframework.http.converter.json;
 
+import com.google.gson.Gson;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-
-import com.google.gson.Gson;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}
@@ -39,72 +38,71 @@ import org.springframework.util.Assert;
  *
  * @author Roy Clarkson
  * @author Juergen Hoeller
- * @since 4.1
  * @see com.google.gson.Gson
  * @see com.google.gson.GsonBuilder
  * @see #setGson
+ * @since 4.1
  */
 public class GsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 
-	private Gson gson;
+    private Gson gson;
 
 
-	/**
-	 * Construct a new {@code GsonHttpMessageConverter} with default configuration.
-	 */
-	public GsonHttpMessageConverter() {
-		this.gson = new Gson();
-	}
+    /**
+     * Construct a new {@code GsonHttpMessageConverter} with default configuration.
+     */
+    public GsonHttpMessageConverter() {
+        this.gson = new Gson();
+    }
 
-	/**
-	 * Construct a new {@code GsonHttpMessageConverter} with the given delegate.
-	 * @param gson the Gson instance to use
-	 * @since 5.0
-	 */
-	public GsonHttpMessageConverter(Gson gson) {
-		Assert.notNull(gson, "A Gson instance is required");
-		this.gson = gson;
-	}
+    /**
+     * Construct a new {@code GsonHttpMessageConverter} with the given delegate.
+     *
+     * @param gson the Gson instance to use
+     * @since 5.0
+     */
+    public GsonHttpMessageConverter(Gson gson) {
+        Assert.notNull(gson, "A Gson instance is required");
+        this.gson = gson;
+    }
 
+    /**
+     * Return the configured {@code Gson} instance for this converter.
+     */
+    public Gson getGson() {
+        return this.gson;
+    }
 
-	/**
-	 * Set the {@code Gson} instance to use.
-	 * If not set, a default {@link Gson#Gson() Gson} instance will be used.
-	 * <p>Setting a custom-configured {@code Gson} is one way to take further
-	 * control of the JSON serialization process.
-	 * @see #GsonHttpMessageConverter(Gson)
-	 */
-	public void setGson(Gson gson) {
-		Assert.notNull(gson, "A Gson instance is required");
-		this.gson = gson;
-	}
+    /**
+     * Set the {@code Gson} instance to use.
+     * If not set, a default {@link Gson#Gson() Gson} instance will be used.
+     * <p>Setting a custom-configured {@code Gson} is one way to take further
+     * control of the JSON serialization process.
+     *
+     * @see #GsonHttpMessageConverter(Gson)
+     */
+    public void setGson(Gson gson) {
+        Assert.notNull(gson, "A Gson instance is required");
+        this.gson = gson;
+    }
 
-	/**
-	 * Return the configured {@code Gson} instance for this converter.
-	 */
-	public Gson getGson() {
-		return this.gson;
-	}
+    @Override
+    protected Object readInternal(Type resolvedType, Reader reader) throws Exception {
+        return getGson().fromJson(reader, resolvedType);
+    }
 
-
-	@Override
-	protected Object readInternal(Type resolvedType, Reader reader) throws Exception {
-		return getGson().fromJson(reader, resolvedType);
-	}
-
-	@Override
-	protected void writeInternal(Object o, @Nullable Type type, Writer writer) throws Exception {
-		// In Gson, toJson with a type argument will exclusively use that given type,
-		// ignoring the actual type of the object... which might be more specific,
-		// e.g. a subclass of the specified type which includes additional fields.
-		// As a consequence, we're only passing in parameterized type declarations
-		// which might contain extra generics that the object instance doesn't retain.
-		if (type instanceof ParameterizedType) {
-			getGson().toJson(o, type, writer);
-		}
-		else {
-			getGson().toJson(o, writer);
-		}
-	}
+    @Override
+    protected void writeInternal(Object o, @Nullable Type type, Writer writer) throws Exception {
+        // In Gson, toJson with a type argument will exclusively use that given type,
+        // ignoring the actual type of the object... which might be more specific,
+        // e.g. a subclass of the specified type which includes additional fields.
+        // As a consequence, we're only passing in parameterized type declarations
+        // which might contain extra generics that the object instance doesn't retain.
+        if (type instanceof ParameterizedType) {
+            getGson().toJson(o, type, writer);
+        } else {
+            getGson().toJson(o, writer);
+        }
+    }
 
 }

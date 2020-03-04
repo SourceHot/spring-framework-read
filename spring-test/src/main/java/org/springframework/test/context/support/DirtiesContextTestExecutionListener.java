@@ -48,52 +48,52 @@ import static org.springframework.test.annotation.DirtiesContext.MethodMode.AFTE
  * {@code DependencyInjectionTestExecutionListener}.
  *
  * @author Sam Brannen
- * @since 2.5
  * @see DirtiesContext
  * @see DirtiesContextBeforeModesTestExecutionListener
+ * @since 2.5
  */
 public class DirtiesContextTestExecutionListener extends AbstractDirtiesContextTestExecutionListener {
 
-	/**
-	 * Returns {@code 3000}.
-	 */
-	@Override
-	public final int getOrder() {
-		return 3000;
-	}
+    /**
+     * Returns {@code 3000}.
+     */
+    @Override
+    public final int getOrder() {
+        return 3000;
+    }
 
-	/**
-	 * If the current test method of the supplied {@linkplain TestContext test
-	 * context} is annotated with {@code @DirtiesContext} and the {@linkplain
-	 * DirtiesContext#methodMode() method mode} is set to {@link
-	 * MethodMode#AFTER_METHOD AFTER_METHOD}, or if the test class is
-	 * annotated with {@code @DirtiesContext} and the {@linkplain
-	 * DirtiesContext#classMode() class mode} is set to {@link
-	 * ClassMode#AFTER_EACH_TEST_METHOD AFTER_EACH_TEST_METHOD}, the
-	 * {@linkplain ApplicationContext application context} of the test context
-	 * will be {@linkplain TestContext#markApplicationContextDirty marked as dirty} and the
-	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
-	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to {@code true}.
-	 */
-	@Override
-	public void afterTestMethod(TestContext testContext) throws Exception {
-		beforeOrAfterTestMethod(testContext, AFTER_METHOD, AFTER_EACH_TEST_METHOD);
-	}
+    /**
+     * If the current test method of the supplied {@linkplain TestContext test
+     * context} is annotated with {@code @DirtiesContext} and the {@linkplain
+     * DirtiesContext#methodMode() method mode} is set to {@link
+     * MethodMode#AFTER_METHOD AFTER_METHOD}, or if the test class is
+     * annotated with {@code @DirtiesContext} and the {@linkplain
+     * DirtiesContext#classMode() class mode} is set to {@link
+     * ClassMode#AFTER_EACH_TEST_METHOD AFTER_EACH_TEST_METHOD}, the
+     * {@linkplain ApplicationContext application context} of the test context
+     * will be {@linkplain TestContext#markApplicationContextDirty marked as dirty} and the
+     * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
+     * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to {@code true}.
+     */
+    @Override
+    public void afterTestMethod(TestContext testContext) throws Exception {
+        beforeOrAfterTestMethod(testContext, AFTER_METHOD, AFTER_EACH_TEST_METHOD);
+    }
 
-	/**
-	 * If the test class of the supplied {@linkplain TestContext test context}
-	 * is annotated with {@code @DirtiesContext} and the {@linkplain
-	 * DirtiesContext#classMode() class mode} is set to {@link
-	 * ClassMode#AFTER_CLASS AFTER_CLASS}, the {@linkplain ApplicationContext
-	 * application context} of the test context will be
-	 * {@linkplain TestContext#markApplicationContextDirty marked as dirty}, and the
-	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
-	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to
-	 * {@code true}.
-	 */
-	@Override
-	public void afterTestClass(TestContext testContext) throws Exception {
-		beforeOrAfterTestClass(testContext, AFTER_CLASS);
-	}
+    /**
+     * If the test class of the supplied {@linkplain TestContext test context}
+     * is annotated with {@code @DirtiesContext} and the {@linkplain
+     * DirtiesContext#classMode() class mode} is set to {@link
+     * ClassMode#AFTER_CLASS AFTER_CLASS}, the {@linkplain ApplicationContext
+     * application context} of the test context will be
+     * {@linkplain TestContext#markApplicationContextDirty marked as dirty}, and the
+     * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
+     * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to
+     * {@code true}.
+     */
+    @Override
+    public void afterTestClass(TestContext testContext) throws Exception {
+        beforeOrAfterTestClass(testContext, AFTER_CLASS);
+    }
 
 }

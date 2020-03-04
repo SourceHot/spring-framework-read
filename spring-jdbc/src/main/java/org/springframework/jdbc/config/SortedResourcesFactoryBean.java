@@ -16,11 +16,6 @@
 
 package org.springframework.jdbc.config;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -29,6 +24,11 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * {@link FactoryBean} implementation that takes a list of location Strings
@@ -41,50 +41,49 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  */
 public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> implements ResourceLoaderAware {
 
-	private final List<String> locations;
+    private final List<String> locations;
 
-	private ResourcePatternResolver resourcePatternResolver;
-
-
-	public SortedResourcesFactoryBean(List<String> locations) {
-		this.locations = locations;
-		this.resourcePatternResolver = new PathMatchingResourcePatternResolver();
-	}
-
-	public SortedResourcesFactoryBean(ResourceLoader resourceLoader, List<String> locations) {
-		this.locations = locations;
-		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
-	}
+    private ResourcePatternResolver resourcePatternResolver;
 
 
-	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
-	}
+    public SortedResourcesFactoryBean(List<String> locations) {
+        this.locations = locations;
+        this.resourcePatternResolver = new PathMatchingResourcePatternResolver();
+    }
+
+    public SortedResourcesFactoryBean(ResourceLoader resourceLoader, List<String> locations) {
+        this.locations = locations;
+        this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
+    }
 
 
-	@Override
-	public Class<? extends Resource[]> getObjectType() {
-		return Resource[].class;
-	}
+    @Override
+    public void setResourceLoader(ResourceLoader resourceLoader) {
+        this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
+    }
 
-	@Override
-	protected Resource[] createInstance() throws Exception {
-		List<Resource> scripts = new ArrayList<>();
-		for (String location : this.locations) {
-			List<Resource> resources = new ArrayList<>(
-					Arrays.asList(this.resourcePatternResolver.getResources(location)));
-			resources.sort((r1, r2) -> {
-				try {
-					return r1.getURL().toString().compareTo(r2.getURL().toString());
-				}
-				catch (IOException ex) {
-					return 0;
-				}
-			});
-			scripts.addAll(resources);
-		}
-		return scripts.toArray(new Resource[0]);
-	}
+
+    @Override
+    public Class<? extends Resource[]> getObjectType() {
+        return Resource[].class;
+    }
+
+    @Override
+    protected Resource[] createInstance() throws Exception {
+        List<Resource> scripts = new ArrayList<>();
+        for (String location : this.locations) {
+            List<Resource> resources = new ArrayList<>(
+                    Arrays.asList(this.resourcePatternResolver.getResources(location)));
+            resources.sort((r1, r2) -> {
+                try {
+                    return r1.getURL().toString().compareTo(r2.getURL().toString());
+                } catch (IOException ex) {
+                    return 0;
+                }
+            });
+            scripts.addAll(resources);
+        }
+        return scripts.toArray(new Resource[0]);
+    }
 
 }

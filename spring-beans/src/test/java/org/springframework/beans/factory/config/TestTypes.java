@@ -23,35 +23,36 @@ import org.springframework.beans.factory.ObjectFactory;
  *
  * @author Chris Beams
  */
-final class TestTypes {}
+final class TestTypes {
+}
 
 /**
  * @author Juergen Hoeller
  */
 class NoOpScope implements Scope {
 
-	@Override
-	public Object get(String name, ObjectFactory<?> objectFactory) {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public Object get(String name, ObjectFactory<?> objectFactory) {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public Object remove(String name) {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public Object remove(String name) {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public void registerDestructionCallback(String name, Runnable callback) {
-	}
+    @Override
+    public void registerDestructionCallback(String name, Runnable callback) {
+    }
 
-	@Override
-	public Object resolveContextualObject(String key) {
-		return null;
-	}
+    @Override
+    public Object resolveContextualObject(String key) {
+        return null;
+    }
 
-	@Override
-	public String getConversationId() {
-		return null;
-	}
+    @Override
+    public String getConversationId() {
+        return null;
+    }
 
 }

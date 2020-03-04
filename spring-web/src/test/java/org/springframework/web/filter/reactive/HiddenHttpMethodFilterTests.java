@@ -16,13 +16,8 @@
 
 package org.springframework.web.filter.reactive;
 
-import java.time.Duration;
-
 import org.hamcrest.Matchers;
 import org.junit.Test;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -30,101 +25,106 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import java.time.Duration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 /**
  * Tests for {@link HiddenHttpMethodFilter}.
+ *
  * @author Greg Turnquist
  * @author Rossen Stoyanchev
  */
 public class HiddenHttpMethodFilterTests {
 
-	private final HiddenHttpMethodFilter filter = new HiddenHttpMethodFilter();
+    private final HiddenHttpMethodFilter filter = new HiddenHttpMethodFilter();
 
-	private final TestWebFilterChain filterChain = new TestWebFilterChain();
-
-
-	@Test
-	public void filterWithParameter() {
-		postForm("_method=DELETE").block(Duration.ZERO);
-		assertEquals(HttpMethod.DELETE, this.filterChain.getHttpMethod());
-	}
-
-	@Test
-	public void filterWithParameterMethodNotAllowed() {
-		postForm("_method=TRACE").block(Duration.ZERO);
-		assertEquals(HttpMethod.POST, this.filterChain.getHttpMethod());
-	}
-
-	@Test
-	public void filterWithNoParameter() {
-		postForm("").block(Duration.ZERO);
-		assertEquals(HttpMethod.POST, this.filterChain.getHttpMethod());
-	}
-
-	@Test
-	public void filterWithEmptyStringParameter() {
-		postForm("_method=").block(Duration.ZERO);
-		assertEquals(HttpMethod.POST, this.filterChain.getHttpMethod());
-	}
-
-	@Test
-	public void filterWithDifferentMethodParam() {
-		this.filter.setMethodParamName("_foo");
-		postForm("_foo=DELETE").block(Duration.ZERO);
-		assertEquals(HttpMethod.DELETE, this.filterChain.getHttpMethod());
-	}
-
-	@Test
-	public void filterWithInvalidMethodValue() {
-		StepVerifier.create(postForm("_method=INVALID"))
-				.consumeErrorWith(error -> {
-					assertThat(error, Matchers.instanceOf(IllegalArgumentException.class));
-					assertEquals("HttpMethod 'INVALID' not supported", error.getMessage());
-				})
-				.verify();
-	}
-
-	@Test
-	public void filterWithHttpPut() {
-
-		ServerWebExchange exchange = MockServerWebExchange.from(
-				MockServerHttpRequest.put("/")
-						.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-						.body("_method=DELETE"));
-
-		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
-		assertEquals(HttpMethod.PUT, this.filterChain.getHttpMethod());
-	}
+    private final TestWebFilterChain filterChain = new TestWebFilterChain();
 
 
-	private Mono<Void> postForm(String body) {
+    @Test
+    public void filterWithParameter() {
+        postForm("_method=DELETE").block(Duration.ZERO);
+        assertEquals(HttpMethod.DELETE, this.filterChain.getHttpMethod());
+    }
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(
-				MockServerHttpRequest.post("/")
-						.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-						.body(body));
+    @Test
+    public void filterWithParameterMethodNotAllowed() {
+        postForm("_method=TRACE").block(Duration.ZERO);
+        assertEquals(HttpMethod.POST, this.filterChain.getHttpMethod());
+    }
 
-		return this.filter.filter(exchange, this.filterChain);
-	}
+    @Test
+    public void filterWithNoParameter() {
+        postForm("").block(Duration.ZERO);
+        assertEquals(HttpMethod.POST, this.filterChain.getHttpMethod());
+    }
+
+    @Test
+    public void filterWithEmptyStringParameter() {
+        postForm("_method=").block(Duration.ZERO);
+        assertEquals(HttpMethod.POST, this.filterChain.getHttpMethod());
+    }
+
+    @Test
+    public void filterWithDifferentMethodParam() {
+        this.filter.setMethodParamName("_foo");
+        postForm("_foo=DELETE").block(Duration.ZERO);
+        assertEquals(HttpMethod.DELETE, this.filterChain.getHttpMethod());
+    }
+
+    @Test
+    public void filterWithInvalidMethodValue() {
+        StepVerifier.create(postForm("_method=INVALID"))
+                .consumeErrorWith(error -> {
+                    assertThat(error, Matchers.instanceOf(IllegalArgumentException.class));
+                    assertEquals("HttpMethod 'INVALID' not supported", error.getMessage());
+                })
+                .verify();
+    }
+
+    @Test
+    public void filterWithHttpPut() {
+
+        ServerWebExchange exchange = MockServerWebExchange.from(
+                MockServerHttpRequest.put("/")
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                        .body("_method=DELETE"));
+
+        this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
+        assertEquals(HttpMethod.PUT, this.filterChain.getHttpMethod());
+    }
 
 
-	private static class TestWebFilterChain implements WebFilterChain {
+    private Mono<Void> postForm(String body) {
 
-		private HttpMethod httpMethod;
+        MockServerWebExchange exchange = MockServerWebExchange.from(
+                MockServerHttpRequest.post("/")
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                        .body(body));
+
+        return this.filter.filter(exchange, this.filterChain);
+    }
 
 
-		public HttpMethod getHttpMethod() {
-			return this.httpMethod;
-		}
+    private static class TestWebFilterChain implements WebFilterChain {
 
-		@Override
-		public Mono<Void> filter(ServerWebExchange exchange) {
-			this.httpMethod = exchange.getRequest().getMethod();
-			return Mono.empty();
-		}
-	}
+        private HttpMethod httpMethod;
+
+
+        public HttpMethod getHttpMethod() {
+            return this.httpMethod;
+        }
+
+        @Override
+        public Mono<Void> filter(ServerWebExchange exchange) {
+            this.httpMethod = exchange.getRequest().getMethod();
+            return Mono.empty();
+        }
+    }
 
 }

@@ -16,16 +16,15 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.w3c.dom.Attr;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.Conventions;
 import org.springframework.lang.Nullable;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Simple {@code NamespaceHandler} implementation that maps custom attributes
@@ -37,7 +36,7 @@ import org.springframework.lang.Nullable;
  *
  * <pre class="code">
  * &lt;bean id=&quot;rob&quot; class=&quot;..TestBean&quot; p:name=&quot;Rob Harrop&quot; p:spouse-ref=&quot;sally&quot;/&gt;</pre>
- *
+ * <p>
  * Here the '{@code p:name}' corresponds directly to the '{@code name}'
  * property on class '{@code TestBean}'. The '{@code p:spouse-ref}'
  * attributes corresponds to the '{@code spouse}' property and, rather
@@ -50,41 +49,40 @@ import org.springframework.lang.Nullable;
  */
 public class SimplePropertyNamespaceHandler implements NamespaceHandler {
 
-	private static final String REF_SUFFIX = "-ref";
+    private static final String REF_SUFFIX = "-ref";
 
 
-	@Override
-	public void init() {
-	}
+    @Override
+    public void init() {
+    }
 
-	@Override
-	@Nullable
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		parserContext.getReaderContext().error(
-				"Class [" + getClass().getName() + "] does not support custom elements.", element);
-		return null;
-	}
+    @Override
+    @Nullable
+    public BeanDefinition parse(Element element, ParserContext parserContext) {
+        parserContext.getReaderContext().error(
+                "Class [" + getClass().getName() + "] does not support custom elements.", element);
+        return null;
+    }
 
-	@Override
-	public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
-		if (node instanceof Attr) {
-			Attr attr = (Attr) node;
-			String propertyName = parserContext.getDelegate().getLocalName(attr);
-			String propertyValue = attr.getValue();
-			MutablePropertyValues pvs = definition.getBeanDefinition().getPropertyValues();
-			if (pvs.contains(propertyName)) {
-				parserContext.getReaderContext().error("Property '" + propertyName + "' is already defined using " +
-						"both <property> and inline syntax. Only one approach may be used per property.", attr);
-			}
-			if (propertyName.endsWith(REF_SUFFIX)) {
-				propertyName = propertyName.substring(0, propertyName.length() - REF_SUFFIX.length());
-				pvs.add(Conventions.attributeNameToPropertyName(propertyName), new RuntimeBeanReference(propertyValue));
-			}
-			else {
-				pvs.add(Conventions.attributeNameToPropertyName(propertyName), propertyValue);
-			}
-		}
-		return definition;
-	}
+    @Override
+    public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
+        if (node instanceof Attr) {
+            Attr attr = (Attr) node;
+            String propertyName = parserContext.getDelegate().getLocalName(attr);
+            String propertyValue = attr.getValue();
+            MutablePropertyValues pvs = definition.getBeanDefinition().getPropertyValues();
+            if (pvs.contains(propertyName)) {
+                parserContext.getReaderContext().error("Property '" + propertyName + "' is already defined using " +
+                        "both <property> and inline syntax. Only one approach may be used per property.", attr);
+            }
+            if (propertyName.endsWith(REF_SUFFIX)) {
+                propertyName = propertyName.substring(0, propertyName.length() - REF_SUFFIX.length());
+                pvs.add(Conventions.attributeNameToPropertyName(propertyName), new RuntimeBeanReference(propertyValue));
+            } else {
+                pvs.add(Conventions.attributeNameToPropertyName(propertyName), propertyValue);
+            }
+        }
+        return definition;
+    }
 
 }

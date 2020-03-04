@@ -16,12 +16,9 @@
 
 package org.springframework.web.context.support;
 
-import java.io.IOException;
-
 import groovy.lang.GroovyObject;
 import groovy.lang.GroovySystem;
 import groovy.lang.MetaClass;
-
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
@@ -29,6 +26,8 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.lang.Nullable;
+
+import java.io.IOException;
 
 /**
  * {@link org.springframework.web.context.WebApplicationContext} implementation which takes
@@ -60,130 +59,137 @@ import org.springframework.lang.Nullable;
  * for ContextLoader or "contextClass" init-param for FrameworkServlet.
  *
  * @author Juergen Hoeller
- * @since 4.1
  * @see #setNamespace
  * @see #setConfigLocations
  * @see org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader
  * @see org.springframework.web.context.ContextLoader#initWebApplicationContext
  * @see org.springframework.web.servlet.FrameworkServlet#initWebApplicationContext
+ * @since 4.1
  */
 public class GroovyWebApplicationContext extends AbstractRefreshableWebApplicationContext implements GroovyObject {
 
-	/** Default config location for the root context. */
-	public static final String DEFAULT_CONFIG_LOCATION = "/WEB-INF/applicationContext.groovy";
+    /**
+     * Default config location for the root context.
+     */
+    public static final String DEFAULT_CONFIG_LOCATION = "/WEB-INF/applicationContext.groovy";
 
-	/** Default prefix for building a config location for a namespace. */
-	public static final String DEFAULT_CONFIG_LOCATION_PREFIX = "/WEB-INF/";
+    /**
+     * Default prefix for building a config location for a namespace.
+     */
+    public static final String DEFAULT_CONFIG_LOCATION_PREFIX = "/WEB-INF/";
 
-	/** Default suffix for building a config location for a namespace. */
-	public static final String DEFAULT_CONFIG_LOCATION_SUFFIX = ".groovy";
-
-
-	private final BeanWrapper contextWrapper = new BeanWrapperImpl(this);
-
-	private MetaClass metaClass = GroovySystem.getMetaClassRegistry().getMetaClass(getClass());
-
-
-	/**
-	 * Loads the bean definitions via an GroovyBeanDefinitionReader.
-	 * @see org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader
-	 * @see #initBeanDefinitionReader
-	 * @see #loadBeanDefinitions
-	 */
-	@Override
-	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws BeansException, IOException {
-		// Create a new XmlBeanDefinitionReader for the given BeanFactory.
-		GroovyBeanDefinitionReader beanDefinitionReader = new GroovyBeanDefinitionReader(beanFactory);
-
-		// Configure the bean definition reader with this context's
-		// resource loading environment.
-		beanDefinitionReader.setEnvironment(getEnvironment());
-		beanDefinitionReader.setResourceLoader(this);
-
-		// Allow a subclass to provide custom initialization of the reader,
-		// then proceed with actually loading the bean definitions.
-		initBeanDefinitionReader(beanDefinitionReader);
-		loadBeanDefinitions(beanDefinitionReader);
-	}
-
-	/**
-	 * Initialize the bean definition reader used for loading the bean
-	 * definitions of this context. Default implementation is empty.
-	 * <p>Can be overridden in subclasses.
-	 * @param beanDefinitionReader the bean definition reader used by this context
-	 */
-	protected void initBeanDefinitionReader(GroovyBeanDefinitionReader beanDefinitionReader) {
-	}
-
-	/**
-	 * Load the bean definitions with the given GroovyBeanDefinitionReader.
-	 * <p>The lifecycle of the bean factory is handled by the refreshBeanFactory method;
-	 * therefore this method is just supposed to load and/or register bean definitions.
-	 * <p>Delegates to a ResourcePatternResolver for resolving location patterns
-	 * into Resource instances.
-	 * @throws IOException if the required Groovy script or XML file isn't found
-	 * @see #refreshBeanFactory
-	 * @see #getConfigLocations
-	 * @see #getResources
-	 * @see #getResourcePatternResolver
-	 */
-	protected void loadBeanDefinitions(GroovyBeanDefinitionReader reader) throws IOException {
-		String[] configLocations = getConfigLocations();
-		if (configLocations != null) {
-			for (String configLocation : configLocations) {
-				reader.loadBeanDefinitions(configLocation);
-			}
-		}
-	}
-
-	/**
-	 * The default location for the root context is "/WEB-INF/applicationContext.groovy",
-	 * and "/WEB-INF/test-servlet.groovy" for a context with the namespace "test-servlet"
-	 * (like for a DispatcherServlet instance with the servlet-name "test").
-	 */
-	@Override
-	protected String[] getDefaultConfigLocations() {
-		if (getNamespace() != null) {
-			return new String[] {DEFAULT_CONFIG_LOCATION_PREFIX + getNamespace() + DEFAULT_CONFIG_LOCATION_SUFFIX};
-		}
-		else {
-			return new String[] {DEFAULT_CONFIG_LOCATION};
-		}
-	}
+    /**
+     * Default suffix for building a config location for a namespace.
+     */
+    public static final String DEFAULT_CONFIG_LOCATION_SUFFIX = ".groovy";
 
 
-	// Implementation of the GroovyObject interface
+    private final BeanWrapper contextWrapper = new BeanWrapperImpl(this);
 
-	@Override
-	public void setMetaClass(MetaClass metaClass) {
-		this.metaClass = metaClass;
-	}
+    private MetaClass metaClass = GroovySystem.getMetaClassRegistry().getMetaClass(getClass());
 
-	@Override
-	public MetaClass getMetaClass() {
-		return this.metaClass;
-	}
 
-	@Override
-	public Object invokeMethod(String name, Object args) {
-		return this.metaClass.invokeMethod(this, name, args);
-	}
+    /**
+     * Loads the bean definitions via an GroovyBeanDefinitionReader.
+     *
+     * @see org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader
+     * @see #initBeanDefinitionReader
+     * @see #loadBeanDefinitions
+     */
+    @Override
+    protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws BeansException, IOException {
+        // Create a new XmlBeanDefinitionReader for the given BeanFactory.
+        GroovyBeanDefinitionReader beanDefinitionReader = new GroovyBeanDefinitionReader(beanFactory);
 
-	@Override
-	public void setProperty(String property, Object newValue) {
-		this.metaClass.setProperty(this, property, newValue);
-	}
+        // Configure the bean definition reader with this context's
+        // resource loading environment.
+        beanDefinitionReader.setEnvironment(getEnvironment());
+        beanDefinitionReader.setResourceLoader(this);
 
-	@Override
-	@Nullable
-	public Object getProperty(String property) {
-		if (containsBean(property)) {
-			return getBean(property);
-		}
-		else if (this.contextWrapper.isReadableProperty(property)) {
-			return this.contextWrapper.getPropertyValue(property);
-		}
-		throw new NoSuchBeanDefinitionException(property);
-	}
+        // Allow a subclass to provide custom initialization of the reader,
+        // then proceed with actually loading the bean definitions.
+        initBeanDefinitionReader(beanDefinitionReader);
+        loadBeanDefinitions(beanDefinitionReader);
+    }
+
+    /**
+     * Initialize the bean definition reader used for loading the bean
+     * definitions of this context. Default implementation is empty.
+     * <p>Can be overridden in subclasses.
+     *
+     * @param beanDefinitionReader the bean definition reader used by this context
+     */
+    protected void initBeanDefinitionReader(GroovyBeanDefinitionReader beanDefinitionReader) {
+    }
+
+    /**
+     * Load the bean definitions with the given GroovyBeanDefinitionReader.
+     * <p>The lifecycle of the bean factory is handled by the refreshBeanFactory method;
+     * therefore this method is just supposed to load and/or register bean definitions.
+     * <p>Delegates to a ResourcePatternResolver for resolving location patterns
+     * into Resource instances.
+     *
+     * @throws IOException if the required Groovy script or XML file isn't found
+     * @see #refreshBeanFactory
+     * @see #getConfigLocations
+     * @see #getResources
+     * @see #getResourcePatternResolver
+     */
+    protected void loadBeanDefinitions(GroovyBeanDefinitionReader reader) throws IOException {
+        String[] configLocations = getConfigLocations();
+        if (configLocations != null) {
+            for (String configLocation : configLocations) {
+                reader.loadBeanDefinitions(configLocation);
+            }
+        }
+    }
+
+    /**
+     * The default location for the root context is "/WEB-INF/applicationContext.groovy",
+     * and "/WEB-INF/test-servlet.groovy" for a context with the namespace "test-servlet"
+     * (like for a DispatcherServlet instance with the servlet-name "test").
+     */
+    @Override
+    protected String[] getDefaultConfigLocations() {
+        if (getNamespace() != null) {
+            return new String[]{DEFAULT_CONFIG_LOCATION_PREFIX + getNamespace() + DEFAULT_CONFIG_LOCATION_SUFFIX};
+        } else {
+            return new String[]{DEFAULT_CONFIG_LOCATION};
+        }
+    }
+
+
+    // Implementation of the GroovyObject interface
+
+    @Override
+    public MetaClass getMetaClass() {
+        return this.metaClass;
+    }
+
+    @Override
+    public void setMetaClass(MetaClass metaClass) {
+        this.metaClass = metaClass;
+    }
+
+    @Override
+    public Object invokeMethod(String name, Object args) {
+        return this.metaClass.invokeMethod(this, name, args);
+    }
+
+    @Override
+    public void setProperty(String property, Object newValue) {
+        this.metaClass.setProperty(this, property, newValue);
+    }
+
+    @Override
+    @Nullable
+    public Object getProperty(String property) {
+        if (containsBean(property)) {
+            return getBean(property);
+        } else if (this.contextWrapper.isReadableProperty(property)) {
+            return this.contextWrapper.getPropertyValue(property);
+        }
+        throw new NoSuchBeanDefinitionException(property);
+    }
 
 }

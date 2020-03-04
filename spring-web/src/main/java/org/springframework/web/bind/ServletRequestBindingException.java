@@ -32,21 +32,23 @@ import org.springframework.web.util.NestedServletException;
 @SuppressWarnings("serial")
 public class ServletRequestBindingException extends NestedServletException {
 
-	/**
-	 * Constructor for ServletRequestBindingException.
-	 * @param msg the detail message
-	 */
-	public ServletRequestBindingException(String msg) {
-		super(msg);
-	}
+    /**
+     * Constructor for ServletRequestBindingException.
+     *
+     * @param msg the detail message
+     */
+    public ServletRequestBindingException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Constructor for ServletRequestBindingException.
-	 * @param msg the detail message
-	 * @param cause the root cause
-	 */
-	public ServletRequestBindingException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Constructor for ServletRequestBindingException.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause
+     */
+    public ServletRequestBindingException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

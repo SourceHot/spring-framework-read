@@ -16,6 +16,11 @@
 
 package org.springframework.http.client;
 
+import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
@@ -23,20 +28,16 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.springframework.core.task.AsyncListenableTaskExecutor;
-import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-
 /**
  * {@link ClientHttpRequestFactory} implementation that uses standard JDK facilities.
- *
+ * <p>
  * 实现{@link ClientHttpRequestFactory},从包导入上看可以知道是一个java 网络通讯实现
+ *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
- * @since 3.0
  * @see java.net.HttpURLConnection
  * @see HttpComponentsClientHttpRequestFactory
+ * @since 3.0
  */
 @SuppressWarnings("deprecation")
 public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory {
@@ -161,6 +162,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 
     /**
      * 创建一个链接并且返回请求
+     *
      * @param uri        the URI to create a request for
      * @param httpMethod the HTTP method to execute
      * @return
@@ -176,8 +178,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
         if (this.bufferRequestBody) {
             // 请求封装
             return new SimpleBufferingClientHttpRequest(connection, this.outputStreaming);
-        }
-        else {
+        } else {
             // 请求封装
             return new SimpleStreamingClientHttpRequest(connection, this.chunkSize, this.outputStreaming);
         }
@@ -197,8 +198,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
         if (this.bufferRequestBody) {
             return new SimpleBufferingAsyncClientHttpRequest(
                     connection, this.outputStreaming, this.taskExecutor);
-        }
-        else {
+        } else {
             return new SimpleStreamingAsyncClientHttpRequest(
                     connection, this.chunkSize, this.outputStreaming, this.taskExecutor);
         }
@@ -242,16 +242,14 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 
         if ("GET".equals(httpMethod)) {
             connection.setInstanceFollowRedirects(true);
-        }
-        else {
+        } else {
             connection.setInstanceFollowRedirects(false);
         }
 
         if ("POST".equals(httpMethod) || "PUT".equals(httpMethod) ||
                 "PATCH".equals(httpMethod) || "DELETE".equals(httpMethod)) {
             connection.setDoOutput(true);
-        }
-        else {
+        } else {
             connection.setDoOutput(false);
         }
 

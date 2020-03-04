@@ -34,19 +34,20 @@ import org.springframework.web.method.HandlerMethod;
  * MvcUriComponentsBuilder#fromMappingName} or in JSPs through the "mvcUrl"
  * function registered by the Spring tag library.
  *
+ * @param <T> the mapping type
  * @author Rossen Stoyanchev
  * @since 4.1
- * @param <T> the mapping type
  */
 @FunctionalInterface
 public interface HandlerMethodMappingNamingStrategy<T> {
 
-	/**
-	 * Determine the name for the given HandlerMethod and mapping.
-	 * @param handlerMethod the handler method
-	 * @param mapping the mapping
-	 * @return the name
-	 */
-	String getName(HandlerMethod handlerMethod, T mapping);
+    /**
+     * Determine the name for the given HandlerMethod and mapping.
+     *
+     * @param handlerMethod the handler method
+     * @param mapping       the mapping
+     * @return the name
+     */
+    String getName(HandlerMethod handlerMethod, T mapping);
 
 }

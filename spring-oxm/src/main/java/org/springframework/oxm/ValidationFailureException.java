@@ -25,22 +25,24 @@ package org.springframework.oxm;
 @SuppressWarnings("serial")
 public class ValidationFailureException extends XmlMappingException {
 
-	/**
-	 * Construct a {@code ValidationFailureException} with the specified detail message.
-	 * @param msg the detail message
-	 */
-	public ValidationFailureException(String msg) {
-		super(msg);
-	}
+    /**
+     * Construct a {@code ValidationFailureException} with the specified detail message.
+     *
+     * @param msg the detail message
+     */
+    public ValidationFailureException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Construct a {@code ValidationFailureException} with the specified detail message
-	 * and nested exception.
-	 * @param msg the detail message
-	 * @param cause the nested exception
-	 */
-	public ValidationFailureException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Construct a {@code ValidationFailureException} with the specified detail message
+     * and nested exception.
+     *
+     * @param msg   the detail message
+     * @param cause the nested exception
+     */
+    public ValidationFailureException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

@@ -16,12 +16,11 @@
 
 package org.springframework.core;
 
-import java.util.function.Function;
-
 import org.reactivestreams.Publisher;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.function.Function;
 
 /**
  * Adapter for a Reactive Streams {@link Publisher} to and from an async/reactive
@@ -34,91 +33,94 @@ import org.springframework.util.Assert;
  */
 public class ReactiveAdapter {
 
-	private final ReactiveTypeDescriptor descriptor;
+    private final ReactiveTypeDescriptor descriptor;
 
-	private final Function<Object, Publisher<?>> toPublisherFunction;
+    private final Function<Object, Publisher<?>> toPublisherFunction;
 
-	private final Function<Publisher<?>, Object> fromPublisherFunction;
-
-
-	/**
-	 * Constructor for an adapter with functions to convert the target reactive
-	 * or async type to and from a Reactive Streams Publisher.
-	 * @param descriptor the reactive type descriptor
-	 * @param toPublisherFunction adapter to a Publisher
-	 * @param fromPublisherFunction adapter from a Publisher
-	 */
-	public ReactiveAdapter(ReactiveTypeDescriptor descriptor,
-			Function<Object, Publisher<?>> toPublisherFunction,
-			Function<Publisher<?>, Object> fromPublisherFunction) {
-
-		Assert.notNull(descriptor, "'descriptor' is required");
-		Assert.notNull(toPublisherFunction, "'toPublisherFunction' is required");
-		Assert.notNull(fromPublisherFunction, "'fromPublisherFunction' is required");
-
-		this.descriptor = descriptor;
-		this.toPublisherFunction = toPublisherFunction;
-		this.fromPublisherFunction = fromPublisherFunction;
-	}
+    private final Function<Publisher<?>, Object> fromPublisherFunction;
 
 
-	/**
-	 * Return the descriptor of the reactive type for the adapter.
-	 */
-	public ReactiveTypeDescriptor getDescriptor() {
-		return this.descriptor;
-	}
+    /**
+     * Constructor for an adapter with functions to convert the target reactive
+     * or async type to and from a Reactive Streams Publisher.
+     *
+     * @param descriptor            the reactive type descriptor
+     * @param toPublisherFunction   adapter to a Publisher
+     * @param fromPublisherFunction adapter from a Publisher
+     */
+    public ReactiveAdapter(ReactiveTypeDescriptor descriptor,
+                           Function<Object, Publisher<?>> toPublisherFunction,
+                           Function<Publisher<?>, Object> fromPublisherFunction) {
 
-	/**
-	 * Shortcut for {@code getDescriptor().getReactiveType()}.
-	 */
-	public Class<?> getReactiveType() {
-		return getDescriptor().getReactiveType();
-	}
+        Assert.notNull(descriptor, "'descriptor' is required");
+        Assert.notNull(toPublisherFunction, "'toPublisherFunction' is required");
+        Assert.notNull(fromPublisherFunction, "'fromPublisherFunction' is required");
 
-	/**
-	 * Shortcut for {@code getDescriptor().isMultiValue()}.
-	 */
-	public boolean isMultiValue() {
-		return getDescriptor().isMultiValue();
-	}
-
-	/**
-	 * Shortcut for {@code getDescriptor().isNoValue()}.
-	 */
-	public boolean isNoValue() {
-		return getDescriptor().isNoValue();
-	}
-
-	/**
-	 * Shortcut for {@code getDescriptor().supportsEmpty()}.
-	 */
-	public boolean supportsEmpty() {
-		return getDescriptor().supportsEmpty();
-	}
+        this.descriptor = descriptor;
+        this.toPublisherFunction = toPublisherFunction;
+        this.fromPublisherFunction = fromPublisherFunction;
+    }
 
 
-	/**
-	 * Adapt the given instance to a Reactive Streams {@code Publisher}.
-	 * @param source the source object to adapt from; if the given object is
-	 * {@code null}, {@link ReactiveTypeDescriptor#getEmptyValue()} is used.
-	 * @return the Publisher representing the adaptation
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> Publisher<T> toPublisher(@Nullable Object source) {
-		if (source == null) {
-			source = getDescriptor().getEmptyValue();
-		}
-		return (Publisher<T>) this.toPublisherFunction.apply(source);
-	}
+    /**
+     * Return the descriptor of the reactive type for the adapter.
+     */
+    public ReactiveTypeDescriptor getDescriptor() {
+        return this.descriptor;
+    }
 
-	/**
-	 * Adapt from the given Reactive Streams Publisher.
-	 * @param publisher the publisher to adapt from
-	 * @return the reactive type instance representing the adapted publisher
-	 */
-	public Object fromPublisher(Publisher<?> publisher) {
-		return this.fromPublisherFunction.apply(publisher);
-	}
+    /**
+     * Shortcut for {@code getDescriptor().getReactiveType()}.
+     */
+    public Class<?> getReactiveType() {
+        return getDescriptor().getReactiveType();
+    }
+
+    /**
+     * Shortcut for {@code getDescriptor().isMultiValue()}.
+     */
+    public boolean isMultiValue() {
+        return getDescriptor().isMultiValue();
+    }
+
+    /**
+     * Shortcut for {@code getDescriptor().isNoValue()}.
+     */
+    public boolean isNoValue() {
+        return getDescriptor().isNoValue();
+    }
+
+    /**
+     * Shortcut for {@code getDescriptor().supportsEmpty()}.
+     */
+    public boolean supportsEmpty() {
+        return getDescriptor().supportsEmpty();
+    }
+
+
+    /**
+     * Adapt the given instance to a Reactive Streams {@code Publisher}.
+     *
+     * @param source the source object to adapt from; if the given object is
+     *               {@code null}, {@link ReactiveTypeDescriptor#getEmptyValue()} is used.
+     * @return the Publisher representing the adaptation
+     */
+    @SuppressWarnings("unchecked")
+    public <T> Publisher<T> toPublisher(@Nullable Object source) {
+        if (source == null) {
+            source = getDescriptor().getEmptyValue();
+        }
+        return (Publisher<T>) this.toPublisherFunction.apply(source);
+    }
+
+    /**
+     * Adapt from the given Reactive Streams Publisher.
+     *
+     * @param publisher the publisher to adapt from
+     * @return the reactive type instance representing the adapted publisher
+     */
+    public Object fromPublisher(Publisher<?> publisher) {
+        return this.fromPublisherFunction.apply(publisher);
+    }
 
 }

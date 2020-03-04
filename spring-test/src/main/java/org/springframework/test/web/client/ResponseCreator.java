@@ -16,12 +16,12 @@
 
 package org.springframework.test.web.client;
 
-import java.io.IOException;
-
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
+
+import java.io.IOException;
 
 /**
  * A contract for creating a {@link ClientHttpResponse}.
@@ -33,10 +33,11 @@ import org.springframework.test.web.client.response.MockRestResponseCreators;
 @FunctionalInterface
 public interface ResponseCreator {
 
-	/**
-	 * Create a response for the given request.
-	 * @param request the request
-	 */
-	ClientHttpResponse createResponse(@Nullable ClientHttpRequest request) throws IOException;
+    /**
+     * Create a response for the given request.
+     *
+     * @param request the request
+     */
+    ClientHttpResponse createResponse(@Nullable ClientHttpRequest request) throws IOException;
 
 }

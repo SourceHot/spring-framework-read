@@ -34,9 +34,9 @@ import java.lang.annotation.Target;
  * declarations of {@code @BootstrapWith}.
  *
  * @author Sam Brannen
- * @since 4.1
  * @see BootstrapContext
  * @see TestContextBootstrapper
+ * @since 4.1
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -44,10 +44,10 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface BootstrapWith {
 
-	/**
-	 * The {@link TestContextBootstrapper} to use to bootstrap the <em>Spring
-	 * TestContext Framework</em>.
-	 */
-	Class<? extends TestContextBootstrapper> value() default TestContextBootstrapper.class;
+    /**
+     * The {@link TestContextBootstrapper} to use to bootstrap the <em>Spring
+     * TestContext Framework</em>.
+     */
+    Class<? extends TestContextBootstrapper> value() default TestContextBootstrapper.class;
 
 }

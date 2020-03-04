@@ -16,11 +16,11 @@
 
 package org.springframework.jdbc.core;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.lang.Nullable;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Callback interface used by {@link JdbcTemplate}'s query methods.
@@ -39,29 +39,30 @@ import org.springframework.lang.Nullable;
  * access stateful resources (such as output streams when streaming LOB
  * contents) or keep result state within the object.
  *
+ * @param <T> the result type
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since April 24, 2003
- * @param <T> the result type
  * @see JdbcTemplate
  * @see RowCallbackHandler
  * @see RowMapper
  * @see org.springframework.jdbc.core.support.AbstractLobStreamingResultSetExtractor
+ * @since April 24, 2003
  */
 @FunctionalInterface
 public interface ResultSetExtractor<T> {
 
-	/**
-	 * Implementations must implement this method to process the entire ResultSet.
-	 * @param rs the ResultSet to extract data from. Implementations should
-	 * not close this: it will be closed by the calling JdbcTemplate.
-	 * @return an arbitrary result object, or {@code null} if none
-	 * (the extractor will typically be stateful in the latter case).
-	 * @throws SQLException if a SQLException is encountered getting column
-	 * values or navigating (that is, there's no need to catch SQLException)
-	 * @throws DataAccessException in case of custom exceptions
-	 */
-	@Nullable
-	T extractData(ResultSet rs) throws SQLException, DataAccessException;
+    /**
+     * Implementations must implement this method to process the entire ResultSet.
+     *
+     * @param rs the ResultSet to extract data from. Implementations should
+     *           not close this: it will be closed by the calling JdbcTemplate.
+     * @return an arbitrary result object, or {@code null} if none
+     * (the extractor will typically be stateful in the latter case).
+     * @throws SQLException        if a SQLException is encountered getting column
+     *                             values or navigating (that is, there's no need to catch SQLException)
+     * @throws DataAccessException in case of custom exceptions
+     */
+    @Nullable
+    T extractData(ResultSet rs) throws SQLException, DataAccessException;
 
 }

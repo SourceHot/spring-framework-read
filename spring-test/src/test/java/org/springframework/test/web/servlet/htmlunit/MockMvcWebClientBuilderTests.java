@@ -16,12 +16,6 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
-import java.io.IOException;
-import java.net.URL;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
@@ -30,7 +24,6 @@ import com.gargoylesoftware.htmlunit.util.Cookie;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -49,8 +42,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URL;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
 
 /**
  * Integration tests for {@link MockMvcWebClientBuilder}.
@@ -65,129 +64,129 @@ import static org.junit.Assert.*;
 @WebAppConfiguration
 public class MockMvcWebClientBuilderTests {
 
-	@Autowired
-	private WebApplicationContext wac;
+    @Autowired
+    private WebApplicationContext wac;
 
-	private MockMvc mockMvc;
-
-
-	@Before
-	public void setup() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-	}
+    private MockMvc mockMvc;
 
 
-	@Test(expected = IllegalArgumentException.class)
-	public void mockMvcSetupNull() {
-		MockMvcWebClientBuilder.mockMvcSetup(null);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void webAppContextSetupNull() {
-		MockMvcWebClientBuilder.webAppContextSetup(null);
-	}
-
-	@Test
-	public void mockMvcSetupWithDefaultWebClientDelegate() throws Exception {
-		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
-
-		assertMockMvcUsed(client, "http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed(client, "https://example.com/"));
-	}
-
-	@Test
-	public void mockMvcSetupWithCustomWebClientDelegate() throws Exception {
-		WebClient otherClient = new WebClient();
-		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherClient).build();
-
-		assertMockMvcUsed(client, "http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed(client, "https://example.com/"));
-	}
-
-	@Test // SPR-14066
-	public void cookieManagerShared() throws Exception {
-		this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
-		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
-
-		assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("NA"));
-		client.getCookieManager().addCookie(new Cookie("localhost", "cookie", "cookieManagerShared"));
-		assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("cookieManagerShared"));
-	}
-
-	@Test // SPR-14265
-	public void cookiesAreManaged() throws Exception {
-		this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
-		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
-
-		assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("NA"));
-		assertThat(postResponse(client, "http://localhost/?cookie=foo").getContentAsString(), equalTo("Set"));
-		assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("foo"));
-		assertThat(deleteResponse(client, "http://localhost/").getContentAsString(), equalTo("Delete"));
-		assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("NA"));
-	}
-
-	private void assertMockMvcUsed(WebClient client, String url) throws Exception {
-		assertThat(getResponse(client, url).getContentAsString(), equalTo("mvc"));
-	}
-
-	private void assertMockMvcNotUsed(WebClient client, String url) throws Exception {
-		assertThat(getResponse(client, url).getContentAsString(), not(equalTo("mvc")));
-	}
-
-	private WebResponse getResponse(WebClient client, String url) throws IOException {
-		return createResponse(client, new WebRequest(new URL(url)));
-	}
-
-	private WebResponse postResponse(WebClient client, String url) throws IOException {
-		return createResponse(client, new WebRequest(new URL(url), HttpMethod.POST));
-	}
-
-	private WebResponse deleteResponse(WebClient client, String url) throws IOException {
-		return createResponse(client, new WebRequest(new URL(url), HttpMethod.DELETE));
-	}
-
-	private WebResponse createResponse(WebClient client, WebRequest request) throws IOException {
-		return client.getWebConnection().getResponse(request);
-	}
+    @Before
+    public void setup() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+    }
 
 
-	@Configuration
-	@EnableWebMvc
-	static class Config {
+    @Test(expected = IllegalArgumentException.class)
+    public void mockMvcSetupNull() {
+        MockMvcWebClientBuilder.mockMvcSetup(null);
+    }
 
-		@RestController
-		static class ContextPathController {
+    @Test(expected = IllegalArgumentException.class)
+    public void webAppContextSetupNull() {
+        MockMvcWebClientBuilder.webAppContextSetup(null);
+    }
 
-			@RequestMapping
-			public String contextPath(HttpServletRequest request) {
-				return "mvc";
-			}
-		}
-	}
+    @Test
+    public void mockMvcSetupWithDefaultWebClientDelegate() throws Exception {
+        WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
 
-	@RestController
-	static class CookieController {
+        assertMockMvcUsed(client, "http://localhost/test");
+        Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed(client, "https://example.com/"));
+    }
 
-		static final String COOKIE_NAME = "cookie";
+    @Test
+    public void mockMvcSetupWithCustomWebClientDelegate() throws Exception {
+        WebClient otherClient = new WebClient();
+        WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherClient).build();
 
-		@RequestMapping(path = "/", produces = "text/plain")
-		String cookie(@CookieValue(name = COOKIE_NAME, defaultValue = "NA") String cookie) {
-			return cookie;
-		}
+        assertMockMvcUsed(client, "http://localhost/test");
+        Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed(client, "https://example.com/"));
+    }
 
-		@PostMapping(path = "/", produces = "text/plain")
-		String setCookie(@RequestParam String cookie, HttpServletResponse response) {
-			response.addCookie(new javax.servlet.http.Cookie(COOKIE_NAME, cookie));
-			return "Set";
-		}
+    @Test // SPR-14066
+    public void cookieManagerShared() throws Exception {
+        this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
+        WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
 
-		@DeleteMapping(path = "/", produces = "text/plain")
-		String deleteCookie(HttpServletResponse response) {
-			javax.servlet.http.Cookie cookie = new javax.servlet.http.Cookie(COOKIE_NAME, "");
-			cookie.setMaxAge(0);
-			response.addCookie(cookie);
-			return "Delete";
-		}
-	}
+        assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("NA"));
+        client.getCookieManager().addCookie(new Cookie("localhost", "cookie", "cookieManagerShared"));
+        assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("cookieManagerShared"));
+    }
+
+    @Test // SPR-14265
+    public void cookiesAreManaged() throws Exception {
+        this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
+        WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
+
+        assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("NA"));
+        assertThat(postResponse(client, "http://localhost/?cookie=foo").getContentAsString(), equalTo("Set"));
+        assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("foo"));
+        assertThat(deleteResponse(client, "http://localhost/").getContentAsString(), equalTo("Delete"));
+        assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("NA"));
+    }
+
+    private void assertMockMvcUsed(WebClient client, String url) throws Exception {
+        assertThat(getResponse(client, url).getContentAsString(), equalTo("mvc"));
+    }
+
+    private void assertMockMvcNotUsed(WebClient client, String url) throws Exception {
+        assertThat(getResponse(client, url).getContentAsString(), not(equalTo("mvc")));
+    }
+
+    private WebResponse getResponse(WebClient client, String url) throws IOException {
+        return createResponse(client, new WebRequest(new URL(url)));
+    }
+
+    private WebResponse postResponse(WebClient client, String url) throws IOException {
+        return createResponse(client, new WebRequest(new URL(url), HttpMethod.POST));
+    }
+
+    private WebResponse deleteResponse(WebClient client, String url) throws IOException {
+        return createResponse(client, new WebRequest(new URL(url), HttpMethod.DELETE));
+    }
+
+    private WebResponse createResponse(WebClient client, WebRequest request) throws IOException {
+        return client.getWebConnection().getResponse(request);
+    }
+
+
+    @Configuration
+    @EnableWebMvc
+    static class Config {
+
+        @RestController
+        static class ContextPathController {
+
+            @RequestMapping
+            public String contextPath(HttpServletRequest request) {
+                return "mvc";
+            }
+        }
+    }
+
+    @RestController
+    static class CookieController {
+
+        static final String COOKIE_NAME = "cookie";
+
+        @RequestMapping(path = "/", produces = "text/plain")
+        String cookie(@CookieValue(name = COOKIE_NAME, defaultValue = "NA") String cookie) {
+            return cookie;
+        }
+
+        @PostMapping(path = "/", produces = "text/plain")
+        String setCookie(@RequestParam String cookie, HttpServletResponse response) {
+            response.addCookie(new javax.servlet.http.Cookie(COOKIE_NAME, cookie));
+            return "Set";
+        }
+
+        @DeleteMapping(path = "/", produces = "text/plain")
+        String deleteCookie(HttpServletResponse response) {
+            javax.servlet.http.Cookie cookie = new javax.servlet.http.Cookie(COOKIE_NAME, "");
+            cookie.setMaxAge(0);
+            response.addCookie(cookie);
+            return "Delete";
+        }
+    }
 
 }

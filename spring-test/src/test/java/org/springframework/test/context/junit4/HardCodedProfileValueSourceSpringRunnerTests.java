@@ -17,7 +17,6 @@
 package org.springframework.test.context.junit4;
 
 import org.junit.BeforeClass;
-
 import org.springframework.test.annotation.ProfileValueSource;
 import org.springframework.test.annotation.ProfileValueSourceConfiguration;
 
@@ -32,26 +31,26 @@ import org.springframework.test.annotation.ProfileValueSourceConfiguration;
  * </p>
  *
  * @author Sam Brannen
- * @since 2.5
  * @see EnabledAndIgnoredSpringRunnerTests
+ * @since 2.5
  */
 @ProfileValueSourceConfiguration(HardCodedProfileValueSourceSpringRunnerTests.HardCodedProfileValueSource.class)
 public class HardCodedProfileValueSourceSpringRunnerTests extends EnabledAndIgnoredSpringRunnerTests {
 
-	@BeforeClass
-	public static void setProfileValue() {
-		numTestsExecuted = 0;
-		// Set the system property to something other than VALUE as a sanity
-		// check.
-		System.setProperty(NAME, "999999999999");
-	}
+    @BeforeClass
+    public static void setProfileValue() {
+        numTestsExecuted = 0;
+        // Set the system property to something other than VALUE as a sanity
+        // check.
+        System.setProperty(NAME, "999999999999");
+    }
 
 
-	public static class HardCodedProfileValueSource implements ProfileValueSource {
+    public static class HardCodedProfileValueSource implements ProfileValueSource {
 
-		@Override
-		public String get(final String key) {
-			return (key.equals(NAME) ? VALUE : null);
-		}
-	}
+        @Override
+        public String get(final String key) {
+            return (key.equals(NAME) ? VALUE : null);
+        }
+    }
 }

@@ -16,13 +16,13 @@
 
 package org.springframework.beans.factory.config;
 
-import java.io.IOException;
-import java.util.Properties;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.support.PropertiesLoaderSupport;
 import org.springframework.lang.Nullable;
+
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  * Allows for making a properties file from a classpath location available
@@ -44,65 +44,63 @@ import org.springframework.lang.Nullable;
  * @see java.util.Properties
  */
 public class PropertiesFactoryBean extends PropertiesLoaderSupport
-		implements FactoryBean<Properties>, InitializingBean {
+        implements FactoryBean<Properties>, InitializingBean {
 
-	private boolean singleton = true;
+    private boolean singleton = true;
 
-	@Nullable
-	private Properties singletonInstance;
+    @Nullable
+    private Properties singletonInstance;
 
+    @Override
+    public final boolean isSingleton() {
+        return this.singleton;
+    }
 
-	/**
-	 * Set whether a shared 'singleton' Properties instance should be
-	 * created, or rather a new Properties instance on each request.
-	 * <p>Default is "true" (a shared singleton).
-	 */
-	public final void setSingleton(boolean singleton) {
-		this.singleton = singleton;
-	}
+    /**
+     * Set whether a shared 'singleton' Properties instance should be
+     * created, or rather a new Properties instance on each request.
+     * <p>Default is "true" (a shared singleton).
+     */
+    public final void setSingleton(boolean singleton) {
+        this.singleton = singleton;
+    }
 
-	@Override
-	public final boolean isSingleton() {
-		return this.singleton;
-	}
+    @Override
+    public final void afterPropertiesSet() throws IOException {
+        if (this.singleton) {
+            this.singletonInstance = createProperties();
+        }
+    }
 
+    @Override
+    @Nullable
+    public final Properties getObject() throws IOException {
+        if (this.singleton) {
+            return this.singletonInstance;
+        } else {
+            return createProperties();
+        }
+    }
 
-	@Override
-	public final void afterPropertiesSet() throws IOException {
-		if (this.singleton) {
-			this.singletonInstance = createProperties();
-		}
-	}
-
-	@Override
-	@Nullable
-	public final Properties getObject() throws IOException {
-		if (this.singleton) {
-			return this.singletonInstance;
-		}
-		else {
-			return createProperties();
-		}
-	}
-
-	@Override
-	public Class<Properties> getObjectType() {
-		return Properties.class;
-	}
+    @Override
+    public Class<Properties> getObjectType() {
+        return Properties.class;
+    }
 
 
-	/**
-	 * Template method that subclasses may override to construct the object
-	 * returned by this factory. The default implementation returns the
-	 * plain merged Properties instance.
-	 * <p>Invoked on initialization of this FactoryBean in case of a
-	 * shared singleton; else, on each {@link #getObject()} call.
-	 * @return the object returned by this factory
-	 * @throws IOException if an exception occurred during properties loading
-	 * @see #mergeProperties()
-	 */
-	protected Properties createProperties() throws IOException {
-		return mergeProperties();
-	}
+    /**
+     * Template method that subclasses may override to construct the object
+     * returned by this factory. The default implementation returns the
+     * plain merged Properties instance.
+     * <p>Invoked on initialization of this FactoryBean in case of a
+     * shared singleton; else, on each {@link #getObject()} call.
+     *
+     * @return the object returned by this factory
+     * @throws IOException if an exception occurred during properties loading
+     * @see #mergeProperties()
+     */
+    protected Properties createProperties() throws IOException {
+        return mergeProperties();
+    }
 
 }

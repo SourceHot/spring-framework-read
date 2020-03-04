@@ -16,20 +16,22 @@
 
 package org.springframework.orm.jpa.hibernate;
 
-import java.util.List;
-
 import org.hibernate.FlushMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.junit.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.domain.Person;
 
-import static org.junit.Assert.*;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Hibernate-specific JPA tests with native SessionFactory setup and getCurrentSession interaction.
@@ -39,60 +41,60 @@ import static org.junit.Assert.*;
  */
 public class HibernateNativeEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 
-	@Autowired
-	private SessionFactory sessionFactory;
+    @Autowired
+    private SessionFactory sessionFactory;
 
-	@Autowired
-	private ApplicationContext applicationContext;
-
-
-	@Override
-	protected String[] getConfigLocations() {
-		return new String[] {"/org/springframework/orm/jpa/hibernate/hibernate-manager-native.xml",
-				"/org/springframework/orm/jpa/memdb.xml", "/org/springframework/orm/jpa/inject.xml"};
-	}
+    @Autowired
+    private ApplicationContext applicationContext;
 
 
-	@Test
-	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
-		assertFalse("Must not have introduced config interface", entityManagerFactory instanceof EntityManagerFactoryInfo);
-	}
+    @Override
+    protected String[] getConfigLocations() {
+        return new String[]{"/org/springframework/orm/jpa/hibernate/hibernate-manager-native.xml",
+                "/org/springframework/orm/jpa/memdb.xml", "/org/springframework/orm/jpa/inject.xml"};
+    }
 
-	@Test
-	@SuppressWarnings("unchecked")
-	public void testEntityListener() {
-		String firstName = "Tony";
-		insertPerson(firstName);
 
-		List<Person> people = sharedEntityManager.createQuery("select p from Person as p").getResultList();
-		assertEquals(1, people.size());
-		assertEquals(firstName, people.get(0).getFirstName());
-		assertSame(applicationContext, people.get(0).postLoaded);
-	}
+    @Test
+    public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
+        assertFalse("Must not have introduced config interface", entityManagerFactory instanceof EntityManagerFactoryInfo);
+    }
 
-	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void testCurrentSession() {
-		String firstName = "Tony";
-		insertPerson(firstName);
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testEntityListener() {
+        String firstName = "Tony";
+        insertPerson(firstName);
 
-		Query q = sessionFactory.getCurrentSession().createQuery("select p from Person as p");
-		List<Person> people = q.getResultList();
-		assertEquals(1, people.size());
-		assertEquals(firstName, people.get(0).getFirstName());
-		assertSame(applicationContext, people.get(0).postLoaded);
-	}
+        List<Person> people = sharedEntityManager.createQuery("select p from Person as p").getResultList();
+        assertEquals(1, people.size());
+        assertEquals(firstName, people.get(0).getFirstName());
+        assertSame(applicationContext, people.get(0).postLoaded);
+    }
 
-	@Test  // SPR-16956
-	public void testReadOnly() {
-		assertSame(FlushMode.AUTO, sessionFactory.getCurrentSession().getHibernateFlushMode());
-		assertFalse(sessionFactory.getCurrentSession().isDefaultReadOnly());
-		endTransaction();
+    @Test
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void testCurrentSession() {
+        String firstName = "Tony";
+        insertPerson(firstName);
 
-		this.transactionDefinition.setReadOnly(true);
-		startNewTransaction();
-		assertSame(FlushMode.MANUAL, sessionFactory.getCurrentSession().getHibernateFlushMode());
-		assertTrue(sessionFactory.getCurrentSession().isDefaultReadOnly());
-	}
+        Query q = sessionFactory.getCurrentSession().createQuery("select p from Person as p");
+        List<Person> people = q.getResultList();
+        assertEquals(1, people.size());
+        assertEquals(firstName, people.get(0).getFirstName());
+        assertSame(applicationContext, people.get(0).postLoaded);
+    }
+
+    @Test  // SPR-16956
+    public void testReadOnly() {
+        assertSame(FlushMode.AUTO, sessionFactory.getCurrentSession().getHibernateFlushMode());
+        assertFalse(sessionFactory.getCurrentSession().isDefaultReadOnly());
+        endTransaction();
+
+        this.transactionDefinition.setReadOnly(true);
+        startNewTransaction();
+        assertSame(FlushMode.MANUAL, sessionFactory.getCurrentSession().getHibernateFlushMode());
+        assertTrue(sessionFactory.getCurrentSession().isDefaultReadOnly());
+    }
 
 }

@@ -31,97 +31,97 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class HasMap {
 
-	private Map<?, ?> map;
+    private Map<?, ?> map;
 
-	private Set<?> set;
+    private Set<?> set;
 
-	private Properties props;
+    private Properties props;
 
-	private Object[] objectArray;
+    private Object[] objectArray;
 
-	private Integer[] intArray;
+    private Integer[] intArray;
 
-	private Class<?>[] classArray;
+    private Class<?>[] classArray;
 
-	private List<Class<?>> classList;
+    private List<Class<?>> classList;
 
-	private IdentityHashMap identityMap;
+    private IdentityHashMap identityMap;
 
-	private CopyOnWriteArraySet concurrentSet;
+    private CopyOnWriteArraySet concurrentSet;
 
-	private HasMap() {
-	}
+    private HasMap() {
+    }
 
-	public Map<?, ?> getMap() {
-		return map;
-	}
+    public Map<?, ?> getMap() {
+        return map;
+    }
 
-	public void setMap(Map<?, ?> map) {
-		this.map = map;
-	}
+    public void setMap(Map<?, ?> map) {
+        this.map = map;
+    }
 
-	public Set<?> getSet() {
-		return set;
-	}
+    public Set<?> getSet() {
+        return set;
+    }
 
-	public void setSet(Set<?> set) {
-		this.set = set;
-	}
+    public void setSet(Set<?> set) {
+        this.set = set;
+    }
 
-	public Properties getProps() {
-		return props;
-	}
+    public Properties getProps() {
+        return props;
+    }
 
-	public void setProps(Properties props) {
-		this.props = props;
-	}
+    public void setProps(Properties props) {
+        this.props = props;
+    }
 
-	public Object[] getObjectArray() {
-		return objectArray;
-	}
+    public Object[] getObjectArray() {
+        return objectArray;
+    }
 
-	public void setObjectArray(Object[] objectArray) {
-		this.objectArray = objectArray;
-	}
+    public void setObjectArray(Object[] objectArray) {
+        this.objectArray = objectArray;
+    }
 
-	public Integer[] getIntegerArray() {
-		return intArray;
-	}
+    public Integer[] getIntegerArray() {
+        return intArray;
+    }
 
-	public void setIntegerArray(Integer[] is) {
-		intArray = is;
-	}
+    public void setIntegerArray(Integer[] is) {
+        intArray = is;
+    }
 
-	public Class<?>[] getClassArray() {
-		return classArray;
-	}
+    public Class<?>[] getClassArray() {
+        return classArray;
+    }
 
-	public void setClassArray(Class<?>[] classArray) {
-		this.classArray = classArray;
-	}
+    public void setClassArray(Class<?>[] classArray) {
+        this.classArray = classArray;
+    }
 
-	public List<Class<?>> getClassList() {
-		return classList;
-	}
+    public List<Class<?>> getClassList() {
+        return classList;
+    }
 
-	public void setClassList(List<Class<?>> classList) {
-		this.classList = classList;
-	}
+    public void setClassList(List<Class<?>> classList) {
+        this.classList = classList;
+    }
 
-	public IdentityHashMap getIdentityMap() {
-		return identityMap;
-	}
+    public IdentityHashMap getIdentityMap() {
+        return identityMap;
+    }
 
-	public void setIdentityMap(IdentityHashMap identityMap) {
-		this.identityMap = identityMap;
-	}
+    public void setIdentityMap(IdentityHashMap identityMap) {
+        this.identityMap = identityMap;
+    }
 
-	public CopyOnWriteArraySet getConcurrentSet() {
-		return concurrentSet;
-	}
+    public CopyOnWriteArraySet getConcurrentSet() {
+        return concurrentSet;
+    }
 
-	public void setConcurrentSet(CopyOnWriteArraySet concurrentSet) {
-		this.concurrentSet = concurrentSet;
-	}
+    public void setConcurrentSet(CopyOnWriteArraySet concurrentSet) {
+        this.concurrentSet = concurrentSet;
+    }
 
 }

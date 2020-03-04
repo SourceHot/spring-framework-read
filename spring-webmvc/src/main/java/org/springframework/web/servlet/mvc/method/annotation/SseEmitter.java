@@ -16,18 +16,18 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * A specialization of {@link ResponseBodyEmitter} for sending
@@ -39,225 +39,228 @@ import org.springframework.util.StringUtils;
  */
 public class SseEmitter extends ResponseBodyEmitter {
 
-	static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
+    static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
 
-	static final MediaType TEXT_EVENTSTREAM = new MediaType("text", "event-stream", StandardCharsets.UTF_8);
-
-
-	/**
-	 * Create a new SseEmitter instance.
-	 */
-	public SseEmitter() {
-		super();
-	}
-
-	/**
-	 * Create a SseEmitter with a custom timeout value.
-	 * <p>By default not set in which case the default configured in the MVC
-	 * Java Config or the MVC namespace is used, or if that's not set, then the
-	 * timeout depends on the default of the underlying server.
-	 * @param timeout timeout value in milliseconds
-	 * @since 4.2.2
-	 */
-	public SseEmitter(Long timeout) {
-		super(timeout);
-	}
+    static final MediaType TEXT_EVENTSTREAM = new MediaType("text", "event-stream", StandardCharsets.UTF_8);
 
 
-	@Override
-	protected void extendResponse(ServerHttpResponse outputMessage) {
-		super.extendResponse(outputMessage);
+    /**
+     * Create a new SseEmitter instance.
+     */
+    public SseEmitter() {
+        super();
+    }
 
-		HttpHeaders headers = outputMessage.getHeaders();
-		if (headers.getContentType() == null) {
-			headers.setContentType(TEXT_EVENTSTREAM);
-		}
-	}
+    /**
+     * Create a SseEmitter with a custom timeout value.
+     * <p>By default not set in which case the default configured in the MVC
+     * Java Config or the MVC namespace is used, or if that's not set, then the
+     * timeout depends on the default of the underlying server.
+     *
+     * @param timeout timeout value in milliseconds
+     * @since 4.2.2
+     */
+    public SseEmitter(Long timeout) {
+        super(timeout);
+    }
 
-	/**
-	 * Send the object formatted as a single SSE "data" line. It's equivalent to:
-	 * <pre>
-	 * // static import of SseEmitter.*
-	 *
-	 * SseEmitter emitter = new SseEmitter();
-	 * emitter.send(event().data(myObject));
-	 * </pre>
-	 * <p>Please, see {@link ResponseBodyEmitter#send(Object) parent Javadoc}
-	 * for important notes on exception handling.
-	 * @param object the object to write
-	 * @throws IOException raised when an I/O error occurs
-	 * @throws java.lang.IllegalStateException wraps any other errors
-	 */
-	@Override
-	public void send(Object object) throws IOException {
-		send(object, null);
-	}
+    public static SseEventBuilder event() {
+        return new SseEventBuilderImpl();
+    }
 
-	/**
-	 * Send the object formatted as a single SSE "data" line. It's equivalent to:
-	 * <pre>
-	 * // static import of SseEmitter.*
-	 *
-	 * SseEmitter emitter = new SseEmitter();
-	 * emitter.send(event().data(myObject, MediaType.APPLICATION_JSON));
-	 * </pre>
-	 * <p>Please, see {@link ResponseBodyEmitter#send(Object) parent Javadoc}
-	 * for important notes on exception handling.
-	 * @param object the object to write
-	 * @param mediaType a MediaType hint for selecting an HttpMessageConverter
-	 * @throws IOException raised when an I/O error occurs
-	 */
-	@Override
-	public void send(Object object, @Nullable MediaType mediaType) throws IOException {
-		send(event().data(object, mediaType));
-	}
+    @Override
+    protected void extendResponse(ServerHttpResponse outputMessage) {
+        super.extendResponse(outputMessage);
 
-	/**
-	 * Send an SSE event prepared with the given builder. For example:
-	 * <pre>
-	 * // static import of SseEmitter
-	 * SseEmitter emitter = new SseEmitter();
-	 * emitter.send(event().name("update").id("1").data(myObject));
-	 * </pre>
-	 * @param builder a builder for an SSE formatted event.
-	 * @throws IOException raised when an I/O error occurs
-	 */
-	public void send(SseEventBuilder builder) throws IOException {
-		Set<DataWithMediaType> dataToSend = builder.build();
-		synchronized (this) {
-			for (DataWithMediaType entry : dataToSend) {
-				super.send(entry.getData(), entry.getMediaType());
-			}
-		}
-	}
+        HttpHeaders headers = outputMessage.getHeaders();
+        if (headers.getContentType() == null) {
+            headers.setContentType(TEXT_EVENTSTREAM);
+        }
+    }
 
-	@Override
-	public String toString() {
-		return "SseEmitter@" + ObjectUtils.getIdentityHexString(this);
-	}
+    /**
+     * Send the object formatted as a single SSE "data" line. It's equivalent to:
+     * <pre>
+     * // static import of SseEmitter.*
+     *
+     * SseEmitter emitter = new SseEmitter();
+     * emitter.send(event().data(myObject));
+     * </pre>
+     * <p>Please, see {@link ResponseBodyEmitter#send(Object) parent Javadoc}
+     * for important notes on exception handling.
+     *
+     * @param object the object to write
+     * @throws IOException                     raised when an I/O error occurs
+     * @throws java.lang.IllegalStateException wraps any other errors
+     */
+    @Override
+    public void send(Object object) throws IOException {
+        send(object, null);
+    }
 
+    /**
+     * Send the object formatted as a single SSE "data" line. It's equivalent to:
+     * <pre>
+     * // static import of SseEmitter.*
+     *
+     * SseEmitter emitter = new SseEmitter();
+     * emitter.send(event().data(myObject, MediaType.APPLICATION_JSON));
+     * </pre>
+     * <p>Please, see {@link ResponseBodyEmitter#send(Object) parent Javadoc}
+     * for important notes on exception handling.
+     *
+     * @param object    the object to write
+     * @param mediaType a MediaType hint for selecting an HttpMessageConverter
+     * @throws IOException raised when an I/O error occurs
+     */
+    @Override
+    public void send(Object object, @Nullable MediaType mediaType) throws IOException {
+        send(event().data(object, mediaType));
+    }
 
-	public static SseEventBuilder event() {
-		return new SseEventBuilderImpl();
-	}
+    /**
+     * Send an SSE event prepared with the given builder. For example:
+     * <pre>
+     * // static import of SseEmitter
+     * SseEmitter emitter = new SseEmitter();
+     * emitter.send(event().name("update").id("1").data(myObject));
+     * </pre>
+     *
+     * @param builder a builder for an SSE formatted event.
+     * @throws IOException raised when an I/O error occurs
+     */
+    public void send(SseEventBuilder builder) throws IOException {
+        Set<DataWithMediaType> dataToSend = builder.build();
+        synchronized (this) {
+            for (DataWithMediaType entry : dataToSend) {
+                super.send(entry.getData(), entry.getMediaType());
+            }
+        }
+    }
 
-
-	/**
-	 * A builder for an SSE event.
-	 */
-	public interface SseEventBuilder {
-
-		/**
-		 * Add an SSE "id" line.
-		 */
-		SseEventBuilder id(String id);
-
-		/**
-		 * Add an SSE "event" line.
-		 */
-		SseEventBuilder name(String eventName);
-
-		/**
-		 * Add an SSE "retry" line.
-		 */
-		SseEventBuilder reconnectTime(long reconnectTimeMillis);
-
-		/**
-		 * Add an SSE "comment" line.
-		 */
-		SseEventBuilder comment(String comment);
-
-		/**
-		 * Add an SSE "data" line.
-		 */
-		SseEventBuilder data(Object object);
-
-		/**
-		 * Add an SSE "data" line.
-		 */
-		SseEventBuilder data(Object object, @Nullable MediaType mediaType);
-
-		/**
-		 * Return one or more Object-MediaType  pairs to write via
-		 * {@link #send(Object, MediaType)}.
-		 * @since 4.2.3
-		 */
-		Set<DataWithMediaType> build();
-	}
+    @Override
+    public String toString() {
+        return "SseEmitter@" + ObjectUtils.getIdentityHexString(this);
+    }
 
 
-	/**
-	 * Default implementation of SseEventBuilder.
-	 */
-	private static class SseEventBuilderImpl implements SseEventBuilder {
+    /**
+     * A builder for an SSE event.
+     */
+    public interface SseEventBuilder {
 
-		private final Set<DataWithMediaType> dataToSend = new LinkedHashSet<>(4);
+        /**
+         * Add an SSE "id" line.
+         */
+        SseEventBuilder id(String id);
 
-		@Nullable
-		private StringBuilder sb;
+        /**
+         * Add an SSE "event" line.
+         */
+        SseEventBuilder name(String eventName);
 
-		@Override
-		public SseEventBuilder id(String id) {
-			append("id:").append(id).append("\n");
-			return this;
-		}
+        /**
+         * Add an SSE "retry" line.
+         */
+        SseEventBuilder reconnectTime(long reconnectTimeMillis);
 
-		@Override
-		public SseEventBuilder name(String name) {
-			append("event:").append(name).append("\n");
-			return this;
-		}
+        /**
+         * Add an SSE "comment" line.
+         */
+        SseEventBuilder comment(String comment);
 
-		@Override
-		public SseEventBuilder reconnectTime(long reconnectTimeMillis) {
-			append("retry:").append(String.valueOf(reconnectTimeMillis)).append("\n");
-			return this;
-		}
+        /**
+         * Add an SSE "data" line.
+         */
+        SseEventBuilder data(Object object);
 
-		@Override
-		public SseEventBuilder comment(String comment) {
-			append(":").append(comment).append("\n");
-			return this;
-		}
+        /**
+         * Add an SSE "data" line.
+         */
+        SseEventBuilder data(Object object, @Nullable MediaType mediaType);
 
-		@Override
-		public SseEventBuilder data(Object object) {
-			return data(object, null);
-		}
+        /**
+         * Return one or more Object-MediaType  pairs to write via
+         * {@link #send(Object, MediaType)}.
+         *
+         * @since 4.2.3
+         */
+        Set<DataWithMediaType> build();
+    }
 
-		@Override
-		public SseEventBuilder data(Object object, @Nullable MediaType mediaType) {
-			append("data:");
-			saveAppendedText();
-			this.dataToSend.add(new DataWithMediaType(object, mediaType));
-			append("\n");
-			return this;
-		}
 
-		SseEventBuilderImpl append(String text) {
-			if (this.sb == null) {
-				this.sb = new StringBuilder();
-			}
-			this.sb.append(text);
-			return this;
-		}
+    /**
+     * Default implementation of SseEventBuilder.
+     */
+    private static class SseEventBuilderImpl implements SseEventBuilder {
 
-		@Override
-		public Set<DataWithMediaType> build() {
-			if (!StringUtils.hasLength(this.sb) && this.dataToSend.isEmpty()) {
-				return Collections.emptySet();
-			}
-			append("\n");
-			saveAppendedText();
-			return this.dataToSend;
-		}
+        private final Set<DataWithMediaType> dataToSend = new LinkedHashSet<>(4);
 
-		private void saveAppendedText() {
-			if (this.sb != null) {
-				this.dataToSend.add(new DataWithMediaType(this.sb.toString(), TEXT_PLAIN));
-				this.sb = null;
-			}
-		}
-	}
+        @Nullable
+        private StringBuilder sb;
+
+        @Override
+        public SseEventBuilder id(String id) {
+            append("id:").append(id).append("\n");
+            return this;
+        }
+
+        @Override
+        public SseEventBuilder name(String name) {
+            append("event:").append(name).append("\n");
+            return this;
+        }
+
+        @Override
+        public SseEventBuilder reconnectTime(long reconnectTimeMillis) {
+            append("retry:").append(String.valueOf(reconnectTimeMillis)).append("\n");
+            return this;
+        }
+
+        @Override
+        public SseEventBuilder comment(String comment) {
+            append(":").append(comment).append("\n");
+            return this;
+        }
+
+        @Override
+        public SseEventBuilder data(Object object) {
+            return data(object, null);
+        }
+
+        @Override
+        public SseEventBuilder data(Object object, @Nullable MediaType mediaType) {
+            append("data:");
+            saveAppendedText();
+            this.dataToSend.add(new DataWithMediaType(object, mediaType));
+            append("\n");
+            return this;
+        }
+
+        SseEventBuilderImpl append(String text) {
+            if (this.sb == null) {
+                this.sb = new StringBuilder();
+            }
+            this.sb.append(text);
+            return this;
+        }
+
+        @Override
+        public Set<DataWithMediaType> build() {
+            if (!StringUtils.hasLength(this.sb) && this.dataToSend.isEmpty()) {
+                return Collections.emptySet();
+            }
+            append("\n");
+            saveAppendedText();
+            return this.dataToSend;
+        }
+
+        private void saveAppendedText() {
+            if (this.sb != null) {
+                this.dataToSend.add(new DataWithMediaType(this.sb.toString(), TEXT_PLAIN));
+                this.sb = null;
+            }
+        }
+    }
 
 }

@@ -17,7 +17,6 @@
 package org.springframework.test.web.client.samples;
 
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
@@ -27,10 +26,11 @@ import org.springframework.test.web.Person;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
  * Examples to demonstrate writing client-side REST tests with Spring MVC Test.
@@ -44,100 +44,99 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @SuppressWarnings("deprecation")
 public class SampleAsyncTests {
 
-	private final org.springframework.web.client.AsyncRestTemplate restTemplate = new org.springframework.web.client.AsyncRestTemplate();
+    private final org.springframework.web.client.AsyncRestTemplate restTemplate = new org.springframework.web.client.AsyncRestTemplate();
 
-	private final MockRestServiceServer mockServer = MockRestServiceServer.createServer(this.restTemplate);
+    private final MockRestServiceServer mockServer = MockRestServiceServer.createServer(this.restTemplate);
 
 
-	@Test
-	public void performGet() throws Exception {
+    @Test
+    public void performGet() throws Exception {
 
-		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
+        String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
-		this.mockServer.expect(requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
-			.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
+        this.mockServer.expect(requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-		@SuppressWarnings("unused")
-		ListenableFuture<ResponseEntity<Person>> ludwig =
-				this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
+        @SuppressWarnings("unused")
+        ListenableFuture<ResponseEntity<Person>> ludwig =
+                this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
 
-		// We are only validating the request. The response is mocked out.
-		// person.getName().equals("Ludwig van Beethoven")
-		// person.getDouble().equals(1.6035)
+        // We are only validating the request. The response is mocked out.
+        // person.getName().equals("Ludwig van Beethoven")
+        // person.getDouble().equals(1.6035)
 
-		this.mockServer.verify();
-	}
+        this.mockServer.verify();
+    }
 
-	@Test
-	public void performGetManyTimes() throws Exception {
+    @Test
+    public void performGetManyTimes() throws Exception {
 
-		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
+        String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
-		this.mockServer.expect(manyTimes(), requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
-				.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
+        this.mockServer.expect(manyTimes(), requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-		@SuppressWarnings("unused")
-		ListenableFuture<ResponseEntity<Person>> ludwig =
-				this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
+        @SuppressWarnings("unused")
+        ListenableFuture<ResponseEntity<Person>> ludwig =
+                this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
 
-		// We are only validating the request. The response is mocked out.
-		// person.getName().equals("Ludwig van Beethoven")
-		// person.getDouble().equals(1.6035)
+        // We are only validating the request. The response is mocked out.
+        // person.getName().equals("Ludwig van Beethoven")
+        // person.getDouble().equals(1.6035)
 
-		this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
-		this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
-		this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
-		this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
+        this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
+        this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
+        this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
+        this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
 
-		this.mockServer.verify();
-	}
+        this.mockServer.verify();
+    }
 
-	@Test
-	public void performGetWithResponseBodyFromFile() throws Exception {
+    @Test
+    public void performGetWithResponseBodyFromFile() throws Exception {
 
-		Resource responseBody = new ClassPathResource("ludwig.json", this.getClass());
+        Resource responseBody = new ClassPathResource("ludwig.json", this.getClass());
 
-		this.mockServer.expect(requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
-			.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
+        this.mockServer.expect(requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
-		@SuppressWarnings("unused")
-		ListenableFuture<ResponseEntity<Person>> ludwig =
-				this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
+        @SuppressWarnings("unused")
+        ListenableFuture<ResponseEntity<Person>> ludwig =
+                this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
 
-		// hotel.getId() == 42
-		// hotel.getName().equals("Holiday Inn")
+        // hotel.getId() == 42
+        // hotel.getName().equals("Holiday Inn")
 
-		this.mockServer.verify();
-	}
+        this.mockServer.verify();
+    }
 
-	@Test
-	public void verify() {
+    @Test
+    public void verify() {
 
-		this.mockServer.expect(requestTo("/number")).andExpect(method(HttpMethod.GET))
-			.andRespond(withSuccess("1", MediaType.TEXT_PLAIN));
+        this.mockServer.expect(requestTo("/number")).andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess("1", MediaType.TEXT_PLAIN));
 
-		this.mockServer.expect(requestTo("/number")).andExpect(method(HttpMethod.GET))
-			.andRespond(withSuccess("2", MediaType.TEXT_PLAIN));
+        this.mockServer.expect(requestTo("/number")).andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess("2", MediaType.TEXT_PLAIN));
 
-		this.mockServer.expect(requestTo("/number")).andExpect(method(HttpMethod.GET))
-			.andRespond(withSuccess("4", MediaType.TEXT_PLAIN));
+        this.mockServer.expect(requestTo("/number")).andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess("4", MediaType.TEXT_PLAIN));
 
-		this.mockServer.expect(requestTo("/number")).andExpect(method(HttpMethod.GET))
-			.andRespond(withSuccess("8", MediaType.TEXT_PLAIN));
+        this.mockServer.expect(requestTo("/number")).andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess("8", MediaType.TEXT_PLAIN));
 
-		@SuppressWarnings("unused")
-		ListenableFuture<ResponseEntity<String>> result = this.restTemplate.getForEntity("/number", String.class);
-		// result == "1"
+        @SuppressWarnings("unused")
+        ListenableFuture<ResponseEntity<String>> result = this.restTemplate.getForEntity("/number", String.class);
+        // result == "1"
 
-		result = this.restTemplate.getForEntity("/number", String.class);
-		// result == "2"
+        result = this.restTemplate.getForEntity("/number", String.class);
+        // result == "2"
 
-		try {
-			this.mockServer.verify();
-		}
-		catch (AssertionError error) {
-			assertTrue(error.getMessage(), error.getMessage().contains("2 unsatisfied expectation(s)"));
-		}
-	}
+        try {
+            this.mockServer.verify();
+        } catch (AssertionError error) {
+            assertTrue(error.getMessage(), error.getMessage().contains("2 unsatisfied expectation(s)"));
+        }
+    }
 
 }

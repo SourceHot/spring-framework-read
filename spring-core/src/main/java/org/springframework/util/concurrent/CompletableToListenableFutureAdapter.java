@@ -26,82 +26,82 @@ import java.util.concurrent.TimeoutException;
  * Adapts a {@link CompletableFuture} or {@link CompletionStage} into a
  * Spring {@link ListenableFuture}.
  *
+ * @param <T> the result type returned by this Future's {@code get} method
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @since 4.2
- * @param <T> the result type returned by this Future's {@code get} method
  */
 public class CompletableToListenableFutureAdapter<T> implements ListenableFuture<T> {
 
-	private final CompletableFuture<T> completableFuture;
+    private final CompletableFuture<T> completableFuture;
 
-	private final ListenableFutureCallbackRegistry<T> callbacks = new ListenableFutureCallbackRegistry<>();
-
-
-	/**
-	 * Create a new adapter for the given {@link CompletionStage}.
-	 * @since 4.3.7
-	 */
-	public CompletableToListenableFutureAdapter(CompletionStage<T> completionStage) {
-		this(completionStage.toCompletableFuture());
-	}
-
-	/**
-	 * Create a new adapter for the given {@link CompletableFuture}.
-	 */
-	public CompletableToListenableFutureAdapter(CompletableFuture<T> completableFuture) {
-		this.completableFuture = completableFuture;
-		this.completableFuture.whenComplete((result, ex) -> {
-			if (ex != null) {
-				this.callbacks.failure(ex);
-			}
-			else {
-				this.callbacks.success(result);
-			}
-		});
-	}
+    private final ListenableFutureCallbackRegistry<T> callbacks = new ListenableFutureCallbackRegistry<>();
 
 
-	@Override
-	public void addCallback(ListenableFutureCallback<? super T> callback) {
-		this.callbacks.addCallback(callback);
-	}
+    /**
+     * Create a new adapter for the given {@link CompletionStage}.
+     *
+     * @since 4.3.7
+     */
+    public CompletableToListenableFutureAdapter(CompletionStage<T> completionStage) {
+        this(completionStage.toCompletableFuture());
+    }
 
-	@Override
-	public void addCallback(SuccessCallback<? super T> successCallback, FailureCallback failureCallback) {
-		this.callbacks.addSuccessCallback(successCallback);
-		this.callbacks.addFailureCallback(failureCallback);
-	}
+    /**
+     * Create a new adapter for the given {@link CompletableFuture}.
+     */
+    public CompletableToListenableFutureAdapter(CompletableFuture<T> completableFuture) {
+        this.completableFuture = completableFuture;
+        this.completableFuture.whenComplete((result, ex) -> {
+            if (ex != null) {
+                this.callbacks.failure(ex);
+            } else {
+                this.callbacks.success(result);
+            }
+        });
+    }
 
-	@Override
-	public CompletableFuture<T> completable() {
-		return this.completableFuture;
-	}
+
+    @Override
+    public void addCallback(ListenableFutureCallback<? super T> callback) {
+        this.callbacks.addCallback(callback);
+    }
+
+    @Override
+    public void addCallback(SuccessCallback<? super T> successCallback, FailureCallback failureCallback) {
+        this.callbacks.addSuccessCallback(successCallback);
+        this.callbacks.addFailureCallback(failureCallback);
+    }
+
+    @Override
+    public CompletableFuture<T> completable() {
+        return this.completableFuture;
+    }
 
 
-	@Override
-	public boolean cancel(boolean mayInterruptIfRunning) {
-		return this.completableFuture.cancel(mayInterruptIfRunning);
-	}
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return this.completableFuture.cancel(mayInterruptIfRunning);
+    }
 
-	@Override
-	public boolean isCancelled() {
-		return this.completableFuture.isCancelled();
-	}
+    @Override
+    public boolean isCancelled() {
+        return this.completableFuture.isCancelled();
+    }
 
-	@Override
-	public boolean isDone() {
-		return this.completableFuture.isDone();
-	}
+    @Override
+    public boolean isDone() {
+        return this.completableFuture.isDone();
+    }
 
-	@Override
-	public T get() throws InterruptedException, ExecutionException {
-		return this.completableFuture.get();
-	}
+    @Override
+    public T get() throws InterruptedException, ExecutionException {
+        return this.completableFuture.get();
+    }
 
-	@Override
-	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-		return this.completableFuture.get(timeout, unit);
-	}
+    @Override
+    public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        return this.completableFuture.get(timeout, unit);
+    }
 
 }

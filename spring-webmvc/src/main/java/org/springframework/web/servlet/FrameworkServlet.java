@@ -969,8 +969,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
     /**
      * Delegate POST requests to {@link #processRequest}.
+     * <p>
+     * 处理post请求
      *
-	 * 处理post请求
      * @see #doService
      */
     @Override

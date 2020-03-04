@@ -22,19 +22,19 @@ import org.springframework.context.annotation.Configuration;
  * Not an actual <em>test case</em>.
  *
  * @author Sam Brannen
- * @since 3.1
  * @see AnnotationConfigContextLoaderTests
+ * @since 3.1
  */
 public class NonStaticConfigInnerClassesTestCase {
 
-	// Intentionally not static
-	@Configuration
-	class FooConfig {
-	}
+    // Intentionally not static
+    @Configuration
+    class FooConfig {
+    }
 
-	// Intentionally not static
-	@Configuration
-	class BarConfig {
-	}
+    // Intentionally not static
+    @Configuration
+    class BarConfig {
+    }
 
 }

@@ -23,14 +23,14 @@ package org.springframework.beans.factory;
  * bean name in objects used with Spring IoC and Spring AOP.
  *
  * @author Rod Johnson
- * @since 2.0
  * @see BeanNameAware
+ * @since 2.0
  */
 public interface NamedBean {
 
-	/**
-	 * Return the name of this bean in a Spring bean factory, if known.
-	 */
-	String getBeanName();
+    /**
+     * Return the name of this bean in a Spring bean factory, if known.
+     */
+    String getBeanName();
 
 }

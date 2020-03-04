@@ -16,162 +16,168 @@
 
 package org.springframework.test.context.cache;
 
-import java.util.List;
-import java.util.Map;
-
 import org.junit.Test;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static java.util.Arrays.*;
-import static java.util.stream.Collectors.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for the LRU eviction policy in {@link DefaultContextCache}.
  *
  * @author Sam Brannen
- * @since 4.3
  * @see ContextCacheTests
+ * @since 4.3
  */
 public class LruContextCacheTests {
 
-	private static final MergedContextConfiguration abcConfig = config(Abc.class);
-	private static final MergedContextConfiguration fooConfig = config(Foo.class);
-	private static final MergedContextConfiguration barConfig = config(Bar.class);
-	private static final MergedContextConfiguration bazConfig = config(Baz.class);
+    private static final MergedContextConfiguration abcConfig = config(Abc.class);
+    private static final MergedContextConfiguration fooConfig = config(Foo.class);
+    private static final MergedContextConfiguration barConfig = config(Bar.class);
+    private static final MergedContextConfiguration bazConfig = config(Baz.class);
 
 
-	private final ConfigurableApplicationContext abcContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext fooContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext barContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext bazContext = mock(ConfigurableApplicationContext.class);
+    private final ConfigurableApplicationContext abcContext = mock(ConfigurableApplicationContext.class);
+    private final ConfigurableApplicationContext fooContext = mock(ConfigurableApplicationContext.class);
+    private final ConfigurableApplicationContext barContext = mock(ConfigurableApplicationContext.class);
+    private final ConfigurableApplicationContext bazContext = mock(ConfigurableApplicationContext.class);
 
+    private static MergedContextConfiguration config(Class<?> clazz) {
+        return new MergedContextConfiguration(null, null, new Class<?>[]{clazz}, null, null);
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void maxCacheSizeNegativeOne() {
-		new DefaultContextCache(-1);
-	}
+    @SuppressWarnings("unchecked")
+    private static void assertCacheContents(DefaultContextCache cache, String... expectedNames) {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void maxCacheSizeZero() {
-		new DefaultContextCache(0);
-	}
+        Map<MergedContextConfiguration, ApplicationContext> contextMap =
+                (Map<MergedContextConfiguration, ApplicationContext>) ReflectionTestUtils.getField(cache, "contextMap");
 
-	@Test
-	public void maxCacheSizeOne() {
-		DefaultContextCache cache = new DefaultContextCache(1);
-		assertEquals(0, cache.size());
-		assertEquals(1, cache.getMaxSize());
+        // @formatter:off
+        List<String> actualNames = contextMap.keySet().stream()
+                .map(cfg -> cfg.getClasses()[0])
+                .map(Class::getSimpleName)
+                .collect(toList());
+        // @formatter:on
 
-		cache.put(fooConfig, fooContext);
-		assertCacheContents(cache, "Foo");
+        assertEquals(asList(expectedNames), actualNames);
+    }
 
-		cache.put(fooConfig, fooContext);
-		assertCacheContents(cache, "Foo");
+    @Test(expected = IllegalArgumentException.class)
+    public void maxCacheSizeNegativeOne() {
+        new DefaultContextCache(-1);
+    }
 
-		cache.put(barConfig, barContext);
-		assertCacheContents(cache, "Bar");
+    @Test(expected = IllegalArgumentException.class)
+    public void maxCacheSizeZero() {
+        new DefaultContextCache(0);
+    }
 
-		cache.put(fooConfig, fooContext);
-		assertCacheContents(cache, "Foo");
-	}
+    @Test
+    public void maxCacheSizeOne() {
+        DefaultContextCache cache = new DefaultContextCache(1);
+        assertEquals(0, cache.size());
+        assertEquals(1, cache.getMaxSize());
 
-	@Test
-	public void maxCacheSizeThree() {
-		DefaultContextCache cache = new DefaultContextCache(3);
-		assertEquals(0, cache.size());
-		assertEquals(3, cache.getMaxSize());
+        cache.put(fooConfig, fooContext);
+        assertCacheContents(cache, "Foo");
 
-		cache.put(fooConfig, fooContext);
-		assertCacheContents(cache, "Foo");
+        cache.put(fooConfig, fooContext);
+        assertCacheContents(cache, "Foo");
 
-		cache.put(fooConfig, fooContext);
-		assertCacheContents(cache, "Foo");
+        cache.put(barConfig, barContext);
+        assertCacheContents(cache, "Bar");
 
-		cache.put(barConfig, barContext);
-		assertCacheContents(cache, "Foo", "Bar");
+        cache.put(fooConfig, fooContext);
+        assertCacheContents(cache, "Foo");
+    }
 
-		cache.put(bazConfig, bazContext);
-		assertCacheContents(cache, "Foo", "Bar", "Baz");
+    @Test
+    public void maxCacheSizeThree() {
+        DefaultContextCache cache = new DefaultContextCache(3);
+        assertEquals(0, cache.size());
+        assertEquals(3, cache.getMaxSize());
 
-		cache.put(abcConfig, abcContext);
-		assertCacheContents(cache, "Bar", "Baz", "Abc");
-	}
+        cache.put(fooConfig, fooContext);
+        assertCacheContents(cache, "Foo");
 
-	@Test
-	public void ensureLruOrderingIsUpdated() {
-		DefaultContextCache cache = new DefaultContextCache(3);
+        cache.put(fooConfig, fooContext);
+        assertCacheContents(cache, "Foo");
 
-		// Note: when a new entry is added it is considered the MRU entry and inserted at the tail.
-		cache.put(fooConfig, fooContext);
-		cache.put(barConfig, barContext);
-		cache.put(bazConfig, bazContext);
-		assertCacheContents(cache, "Foo", "Bar", "Baz");
+        cache.put(barConfig, barContext);
+        assertCacheContents(cache, "Foo", "Bar");
 
-		// Note: the MRU entry is moved to the tail when accessed.
-		cache.get(fooConfig);
-		assertCacheContents(cache, "Bar", "Baz", "Foo");
+        cache.put(bazConfig, bazContext);
+        assertCacheContents(cache, "Foo", "Bar", "Baz");
 
-		cache.get(barConfig);
-		assertCacheContents(cache, "Baz", "Foo", "Bar");
+        cache.put(abcConfig, abcContext);
+        assertCacheContents(cache, "Bar", "Baz", "Abc");
+    }
 
-		cache.get(bazConfig);
-		assertCacheContents(cache, "Foo", "Bar", "Baz");
+    @Test
+    public void ensureLruOrderingIsUpdated() {
+        DefaultContextCache cache = new DefaultContextCache(3);
 
-		cache.get(barConfig);
-		assertCacheContents(cache, "Foo", "Baz", "Bar");
-	}
+        // Note: when a new entry is added it is considered the MRU entry and inserted at the tail.
+        cache.put(fooConfig, fooContext);
+        cache.put(barConfig, barContext);
+        cache.put(bazConfig, bazContext);
+        assertCacheContents(cache, "Foo", "Bar", "Baz");
 
-	@Test
-	public void ensureEvictedContextsAreClosed() {
-		DefaultContextCache cache = new DefaultContextCache(2);
+        // Note: the MRU entry is moved to the tail when accessed.
+        cache.get(fooConfig);
+        assertCacheContents(cache, "Bar", "Baz", "Foo");
 
-		cache.put(fooConfig, fooContext);
-		cache.put(barConfig, barContext);
-		assertCacheContents(cache, "Foo", "Bar");
+        cache.get(barConfig);
+        assertCacheContents(cache, "Baz", "Foo", "Bar");
 
-		cache.put(bazConfig, bazContext);
-		assertCacheContents(cache, "Bar", "Baz");
-		verify(fooContext, times(1)).close();
+        cache.get(bazConfig);
+        assertCacheContents(cache, "Foo", "Bar", "Baz");
 
-		cache.put(abcConfig, abcContext);
-		assertCacheContents(cache, "Baz", "Abc");
-		verify(barContext, times(1)).close();
+        cache.get(barConfig);
+        assertCacheContents(cache, "Foo", "Baz", "Bar");
+    }
 
-		verify(abcContext, never()).close();
-		verify(bazContext, never()).close();
-	}
+    @Test
+    public void ensureEvictedContextsAreClosed() {
+        DefaultContextCache cache = new DefaultContextCache(2);
 
+        cache.put(fooConfig, fooContext);
+        cache.put(barConfig, barContext);
+        assertCacheContents(cache, "Foo", "Bar");
 
-	private static MergedContextConfiguration config(Class<?> clazz) {
-		return new MergedContextConfiguration(null, null, new Class<?>[] { clazz }, null, null);
-	}
+        cache.put(bazConfig, bazContext);
+        assertCacheContents(cache, "Bar", "Baz");
+        verify(fooContext, times(1)).close();
 
-	@SuppressWarnings("unchecked")
-	private static void assertCacheContents(DefaultContextCache cache, String... expectedNames) {
+        cache.put(abcConfig, abcContext);
+        assertCacheContents(cache, "Baz", "Abc");
+        verify(barContext, times(1)).close();
 
-		Map<MergedContextConfiguration, ApplicationContext> contextMap =
-				(Map<MergedContextConfiguration, ApplicationContext>) ReflectionTestUtils.getField(cache, "contextMap");
+        verify(abcContext, never()).close();
+        verify(bazContext, never()).close();
+    }
 
-		// @formatter:off
-		List<String> actualNames = contextMap.keySet().stream()
-			.map(cfg -> cfg.getClasses()[0])
-			.map(Class::getSimpleName)
-			.collect(toList());
-		// @formatter:on
+    private static class Abc {
+    }
 
-		assertEquals(asList(expectedNames), actualNames);
-	}
+    private static class Foo {
+    }
 
+    private static class Bar {
+    }
 
-	private static class Abc {}
-	private static class Foo {}
-	private static class Bar {}
-	private static class Baz {}
+    private static class Baz {
+    }
 
 }

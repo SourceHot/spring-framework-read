@@ -27,24 +27,25 @@ package org.springframework.transaction;
 @SuppressWarnings("serial")
 public class InvalidTimeoutException extends TransactionUsageException {
 
-	private final int timeout;
+    private final int timeout;
 
 
-	/**
-	 * Constructor for InvalidTimeoutException.
-	 * @param msg the detail message
-	 * @param timeout the invalid timeout value
-	 */
-	public InvalidTimeoutException(String msg, int timeout) {
-		super(msg);
-		this.timeout = timeout;
-	}
+    /**
+     * Constructor for InvalidTimeoutException.
+     *
+     * @param msg     the detail message
+     * @param timeout the invalid timeout value
+     */
+    public InvalidTimeoutException(String msg, int timeout) {
+        super(msg);
+        this.timeout = timeout;
+    }
 
-	/**
-	 * Return the invalid timeout value.
-	 */
-	public int getTimeout() {
-		return this.timeout;
-	}
+    /**
+     * Return the invalid timeout value.
+     */
+    public int getTimeout() {
+        return this.timeout;
+    }
 
 }

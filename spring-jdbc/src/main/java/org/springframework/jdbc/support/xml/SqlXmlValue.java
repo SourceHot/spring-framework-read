@@ -25,8 +25,8 @@ import org.springframework.jdbc.support.SqlValue;
  * the corresponding statement has been executed.
  *
  * @author Thomas Risberg
- * @since 2.5.5
  * @see org.springframework.jdbc.support.SqlValue
+ * @since 2.5.5
  */
 public interface SqlXmlValue extends SqlValue {
 

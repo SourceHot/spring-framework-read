@@ -16,11 +16,10 @@
 
 package org.springframework.transaction.config;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.w3c.dom.Element;
 
 /**
  * Parser for the &lt;tx:jta-transaction-manager/&gt; XML configuration element,
@@ -29,20 +28,20 @@ import org.springframework.beans.factory.xml.ParserContext;
  *
  * @author Juergen Hoeller
  * @author Christian Dupuis
- * @since 2.5
  * @see org.springframework.transaction.jta.WebLogicJtaTransactionManager
  * @see org.springframework.transaction.jta.WebSphereUowTransactionManager
+ * @since 2.5
  */
-public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser  {
+public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-	@Override
-	protected String getBeanClassName(Element element) {
-		return JtaTransactionManagerFactoryBean.resolveJtaTransactionManagerClassName();
-	}
+    @Override
+    protected String getBeanClassName(Element element) {
+        return JtaTransactionManagerFactoryBean.resolveJtaTransactionManagerClassName();
+    }
 
-	@Override
-	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
-		return TxNamespaceHandler.DEFAULT_TRANSACTION_MANAGER_BEAN_NAME;
-	}
+    @Override
+    protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
+        return TxNamespaceHandler.DEFAULT_TRANSACTION_MANAGER_BEAN_NAME;
+    }
 
 }

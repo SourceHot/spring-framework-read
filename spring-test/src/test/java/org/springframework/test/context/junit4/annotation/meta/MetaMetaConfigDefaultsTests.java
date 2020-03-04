@@ -18,11 +18,10 @@ package org.springframework.test.context.junit4.annotation.meta;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Integration tests for meta-meta-annotation support, relying on default attribute
@@ -36,12 +35,12 @@ import static org.junit.Assert.*;
 @MetaMetaConfig
 public class MetaMetaConfigDefaultsTests {
 
-	@Autowired
-	private String foo;
+    @Autowired
+    private String foo;
 
 
-	@Test
-	public void foo() {
-		assertEquals("Production Foo", foo);
-	}
+    @Test
+    public void foo() {
+        assertEquals("Production Foo", foo);
+    }
 }

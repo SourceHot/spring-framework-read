@@ -28,36 +28,38 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class MaxUploadSizeExceededException extends MultipartException {
 
-	private final long maxUploadSize;
+    private final long maxUploadSize;
 
 
-	/**
-	 * Constructor for MaxUploadSizeExceededException.
-	 * @param maxUploadSize the maximum upload size allowed,
-	 * or -1 if the size limit isn't known
-	 */
-	public MaxUploadSizeExceededException(long maxUploadSize) {
-		this(maxUploadSize, null);
-	}
+    /**
+     * Constructor for MaxUploadSizeExceededException.
+     *
+     * @param maxUploadSize the maximum upload size allowed,
+     *                      or -1 if the size limit isn't known
+     */
+    public MaxUploadSizeExceededException(long maxUploadSize) {
+        this(maxUploadSize, null);
+    }
 
-	/**
-	 * Constructor for MaxUploadSizeExceededException.
-	 * @param maxUploadSize the maximum upload size allowed,
-	 * or -1 if the size limit isn't known
-	 * @param ex root cause from multipart parsing API in use
-	 */
-	public MaxUploadSizeExceededException(long maxUploadSize, @Nullable Throwable ex) {
-		super("Maximum upload size " + (maxUploadSize >= 0 ? "of " + maxUploadSize + " bytes " : "") + "exceeded", ex);
-		this.maxUploadSize = maxUploadSize;
-	}
+    /**
+     * Constructor for MaxUploadSizeExceededException.
+     *
+     * @param maxUploadSize the maximum upload size allowed,
+     *                      or -1 if the size limit isn't known
+     * @param ex            root cause from multipart parsing API in use
+     */
+    public MaxUploadSizeExceededException(long maxUploadSize, @Nullable Throwable ex) {
+        super("Maximum upload size " + (maxUploadSize >= 0 ? "of " + maxUploadSize + " bytes " : "") + "exceeded", ex);
+        this.maxUploadSize = maxUploadSize;
+    }
 
 
-	/**
-	 * Return the maximum upload size allowed,
-	 * or -1 if the size limit isn't known.
-	 */
-	public long getMaxUploadSize() {
-		return this.maxUploadSize;
-	}
+    /**
+     * Return the maximum upload size allowed,
+     * or -1 if the size limit isn't known.
+     */
+    public long getMaxUploadSize() {
+        return this.maxUploadSize;
+    }
 
 }

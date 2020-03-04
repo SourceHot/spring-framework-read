@@ -38,37 +38,35 @@ import org.springframework.test.context.support.DefaultTestContextBootstrapper;
  */
 public class WebTestContextBootstrapper extends DefaultTestContextBootstrapper {
 
-	/**
-	 * Returns {@link WebDelegatingSmartContextLoader} if the supplied class is
-	 * annotated with {@link WebAppConfiguration @WebAppConfiguration} and
-	 * otherwise delegates to the superclass.
-	 */
-	@Override
-	protected Class<? extends ContextLoader> getDefaultContextLoaderClass(Class<?> testClass) {
-		if (AnnotatedElementUtils.hasAnnotation(testClass, WebAppConfiguration.class)) {
-			return WebDelegatingSmartContextLoader.class;
-		}
-		else {
-			return super.getDefaultContextLoaderClass(testClass);
-		}
-	}
+    /**
+     * Returns {@link WebDelegatingSmartContextLoader} if the supplied class is
+     * annotated with {@link WebAppConfiguration @WebAppConfiguration} and
+     * otherwise delegates to the superclass.
+     */
+    @Override
+    protected Class<? extends ContextLoader> getDefaultContextLoaderClass(Class<?> testClass) {
+        if (AnnotatedElementUtils.hasAnnotation(testClass, WebAppConfiguration.class)) {
+            return WebDelegatingSmartContextLoader.class;
+        } else {
+            return super.getDefaultContextLoaderClass(testClass);
+        }
+    }
 
-	/**
-	 * Returns a {@link WebMergedContextConfiguration} if the test class in the
-	 * supplied {@code MergedContextConfiguration} is annotated with
-	 * {@link WebAppConfiguration @WebAppConfiguration} and otherwise returns
-	 * the supplied instance unmodified.
-	 */
-	@Override
-	protected MergedContextConfiguration processMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
-		WebAppConfiguration webAppConfiguration =
-				AnnotatedElementUtils.findMergedAnnotation(mergedConfig.getTestClass(), WebAppConfiguration.class);
-		if (webAppConfiguration != null) {
-			return new WebMergedContextConfiguration(mergedConfig, webAppConfiguration.value());
-		}
-		else {
-			return mergedConfig;
-		}
-	}
+    /**
+     * Returns a {@link WebMergedContextConfiguration} if the test class in the
+     * supplied {@code MergedContextConfiguration} is annotated with
+     * {@link WebAppConfiguration @WebAppConfiguration} and otherwise returns
+     * the supplied instance unmodified.
+     */
+    @Override
+    protected MergedContextConfiguration processMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
+        WebAppConfiguration webAppConfiguration =
+                AnnotatedElementUtils.findMergedAnnotation(mergedConfig.getTestClass(), WebAppConfiguration.class);
+        if (webAppConfiguration != null) {
+            return new WebMergedContextConfiguration(mergedConfig, webAppConfiguration.value());
+        } else {
+            return mergedConfig;
+        }
+    }
 
 }

@@ -27,126 +27,131 @@ import org.springframework.util.Assert;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 2.0
  * @see BeanWiringInfoResolver
  * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
  * @see org.springframework.beans.factory.annotation.Configurable
+ * @since 2.0
  */
 public class BeanWiringInfo {
 
-	/**
-	 * Constant that indicates autowiring bean properties by name.
-	 * @see #BeanWiringInfo(int, boolean)
-	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_BY_NAME
-	 */
-	public static final int AUTOWIRE_BY_NAME = AutowireCapableBeanFactory.AUTOWIRE_BY_NAME;
+    /**
+     * Constant that indicates autowiring bean properties by name.
+     *
+     * @see #BeanWiringInfo(int, boolean)
+     * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_BY_NAME
+     */
+    public static final int AUTOWIRE_BY_NAME = AutowireCapableBeanFactory.AUTOWIRE_BY_NAME;
 
-	/**
-	 * Constant that indicates autowiring bean properties by type.
-	 * @see #BeanWiringInfo(int, boolean)
-	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_BY_TYPE
-	 */
-	public static final int AUTOWIRE_BY_TYPE = AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
-
-
-	@Nullable
-	private String beanName;
-
-	private boolean isDefaultBeanName = false;
-
-	private int autowireMode = AutowireCapableBeanFactory.AUTOWIRE_NO;
-
-	private boolean dependencyCheck = false;
+    /**
+     * Constant that indicates autowiring bean properties by type.
+     *
+     * @see #BeanWiringInfo(int, boolean)
+     * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_BY_TYPE
+     */
+    public static final int AUTOWIRE_BY_TYPE = AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
 
 
-	/**
-	 * Create a default BeanWiringInfo that suggests plain initialization of
-	 * factory and post-processor callbacks that the bean class may expect.
-	 */
-	public BeanWiringInfo() {
-	}
+    @Nullable
+    private String beanName;
 
-	/**
-	 * Create a new BeanWiringInfo that points to the given bean name.
-	 * @param beanName the name of the bean definition to take the property values from
-	 * @throws IllegalArgumentException if the supplied beanName is {@code null},
-	 * is empty, or consists wholly of whitespace
-	 */
-	public BeanWiringInfo(String beanName) {
-		this(beanName, false);
-	}
+    private boolean isDefaultBeanName = false;
 
-	/**
-	 * Create a new BeanWiringInfo that points to the given bean name.
-	 * @param beanName the name of the bean definition to take the property values from
-	 * @param isDefaultBeanName whether the given bean name is a suggested
-	 * default bean name, not necessarily matching an actual bean definition
-	 * @throws IllegalArgumentException if the supplied beanName is {@code null},
-	 * is empty, or consists wholly of whitespace
-	 */
-	public BeanWiringInfo(String beanName, boolean isDefaultBeanName) {
-		Assert.hasText(beanName, "'beanName' must not be empty");
-		this.beanName = beanName;
-		this.isDefaultBeanName = isDefaultBeanName;
-	}
+    private int autowireMode = AutowireCapableBeanFactory.AUTOWIRE_NO;
 
-	/**
-	 * Create a new BeanWiringInfo that indicates autowiring.
-	 * @param autowireMode one of the constants {@link #AUTOWIRE_BY_NAME} /
-	 * {@link #AUTOWIRE_BY_TYPE}
-	 * @param dependencyCheck whether to perform a dependency check for object
-	 * references in the bean instance (after autowiring)
-	 * @throws IllegalArgumentException if the supplied {@code autowireMode}
-	 * is not one of the allowed values
-	 * @see #AUTOWIRE_BY_NAME
-	 * @see #AUTOWIRE_BY_TYPE
-	 */
-	public BeanWiringInfo(int autowireMode, boolean dependencyCheck) {
-		if (autowireMode != AUTOWIRE_BY_NAME && autowireMode != AUTOWIRE_BY_TYPE) {
-			throw new IllegalArgumentException("Only constants AUTOWIRE_BY_NAME and AUTOWIRE_BY_TYPE supported");
-		}
-		this.autowireMode = autowireMode;
-		this.dependencyCheck = dependencyCheck;
-	}
+    private boolean dependencyCheck = false;
 
 
-	/**
-	 * Return whether this BeanWiringInfo indicates autowiring.
-	 */
-	public boolean indicatesAutowiring() {
-		return (this.beanName == null);
-	}
+    /**
+     * Create a default BeanWiringInfo that suggests plain initialization of
+     * factory and post-processor callbacks that the bean class may expect.
+     */
+    public BeanWiringInfo() {
+    }
 
-	/**
-	 * Return the specific bean name that this BeanWiringInfo points to, if any.
-	 */
-	@Nullable
-	public String getBeanName() {
-		return this.beanName;
-	}
+    /**
+     * Create a new BeanWiringInfo that points to the given bean name.
+     *
+     * @param beanName the name of the bean definition to take the property values from
+     * @throws IllegalArgumentException if the supplied beanName is {@code null},
+     *                                  is empty, or consists wholly of whitespace
+     */
+    public BeanWiringInfo(String beanName) {
+        this(beanName, false);
+    }
 
-	/**
-	 * Return whether the specific bean name is a suggested default bean name,
-	 * not necessarily matching an actual bean definition in the factory.
-	 */
-	public boolean isDefaultBeanName() {
-		return this.isDefaultBeanName;
-	}
+    /**
+     * Create a new BeanWiringInfo that points to the given bean name.
+     *
+     * @param beanName          the name of the bean definition to take the property values from
+     * @param isDefaultBeanName whether the given bean name is a suggested
+     *                          default bean name, not necessarily matching an actual bean definition
+     * @throws IllegalArgumentException if the supplied beanName is {@code null},
+     *                                  is empty, or consists wholly of whitespace
+     */
+    public BeanWiringInfo(String beanName, boolean isDefaultBeanName) {
+        Assert.hasText(beanName, "'beanName' must not be empty");
+        this.beanName = beanName;
+        this.isDefaultBeanName = isDefaultBeanName;
+    }
 
-	/**
-	 * Return one of the constants {@link #AUTOWIRE_BY_NAME} /
-	 * {@link #AUTOWIRE_BY_TYPE}, if autowiring is indicated.
-	 */
-	public int getAutowireMode() {
-		return this.autowireMode;
-	}
+    /**
+     * Create a new BeanWiringInfo that indicates autowiring.
+     *
+     * @param autowireMode    one of the constants {@link #AUTOWIRE_BY_NAME} /
+     *                        {@link #AUTOWIRE_BY_TYPE}
+     * @param dependencyCheck whether to perform a dependency check for object
+     *                        references in the bean instance (after autowiring)
+     * @throws IllegalArgumentException if the supplied {@code autowireMode}
+     *                                  is not one of the allowed values
+     * @see #AUTOWIRE_BY_NAME
+     * @see #AUTOWIRE_BY_TYPE
+     */
+    public BeanWiringInfo(int autowireMode, boolean dependencyCheck) {
+        if (autowireMode != AUTOWIRE_BY_NAME && autowireMode != AUTOWIRE_BY_TYPE) {
+            throw new IllegalArgumentException("Only constants AUTOWIRE_BY_NAME and AUTOWIRE_BY_TYPE supported");
+        }
+        this.autowireMode = autowireMode;
+        this.dependencyCheck = dependencyCheck;
+    }
 
-	/**
-	 * Return whether to perform a dependency check for object references
-	 * in the bean instance (after autowiring).
-	 */
-	public boolean getDependencyCheck() {
-		return this.dependencyCheck;
-	}
+
+    /**
+     * Return whether this BeanWiringInfo indicates autowiring.
+     */
+    public boolean indicatesAutowiring() {
+        return (this.beanName == null);
+    }
+
+    /**
+     * Return the specific bean name that this BeanWiringInfo points to, if any.
+     */
+    @Nullable
+    public String getBeanName() {
+        return this.beanName;
+    }
+
+    /**
+     * Return whether the specific bean name is a suggested default bean name,
+     * not necessarily matching an actual bean definition in the factory.
+     */
+    public boolean isDefaultBeanName() {
+        return this.isDefaultBeanName;
+    }
+
+    /**
+     * Return one of the constants {@link #AUTOWIRE_BY_NAME} /
+     * {@link #AUTOWIRE_BY_TYPE}, if autowiring is indicated.
+     */
+    public int getAutowireMode() {
+        return this.autowireMode;
+    }
+
+    /**
+     * Return whether to perform a dependency check for object references
+     * in the bean instance (after autowiring).
+     */
+    public boolean getDependencyCheck() {
+        return this.dependencyCheck;
+    }
 
 }

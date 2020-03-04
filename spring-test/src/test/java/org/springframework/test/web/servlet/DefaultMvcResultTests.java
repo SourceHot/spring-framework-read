@@ -16,11 +16,10 @@
 
 package org.springframework.test.web.servlet;
 
-import java.util.concurrent.CountDownLatch;
-
 import org.junit.Test;
-
 import org.springframework.mock.web.MockHttpServletRequest;
+
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Test fixture for {@link DefaultMvcResult}.
@@ -29,18 +28,18 @@ import org.springframework.mock.web.MockHttpServletRequest;
  */
 public class DefaultMvcResultTests {
 
-	private final DefaultMvcResult mvcResult = new DefaultMvcResult(new MockHttpServletRequest(), null);
+    private final DefaultMvcResult mvcResult = new DefaultMvcResult(new MockHttpServletRequest(), null);
 
-	@Test
-	public void getAsyncResultSuccess() {
-		this.mvcResult.setAsyncResult("Foo");
-		this.mvcResult.setAsyncDispatchLatch(new CountDownLatch(0));
-		this.mvcResult.getAsyncResult();
-	}
+    @Test
+    public void getAsyncResultSuccess() {
+        this.mvcResult.setAsyncResult("Foo");
+        this.mvcResult.setAsyncDispatchLatch(new CountDownLatch(0));
+        this.mvcResult.getAsyncResult();
+    }
 
-	@Test(expected = IllegalStateException.class)
-	public void getAsyncResultFailure() {
-		this.mvcResult.getAsyncResult(0);
-	}
+    @Test(expected = IllegalStateException.class)
+    public void getAsyncResultFailure() {
+        this.mvcResult.getAsyncResult(0);
+    }
 
 }

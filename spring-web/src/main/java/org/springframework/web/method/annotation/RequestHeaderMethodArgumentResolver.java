@@ -16,8 +16,6 @@
 
 package org.springframework.web.method.annotation;
 
-import java.util.Map;
-
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
@@ -27,6 +25,8 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.context.request.NativeWebRequest;
+
+import java.util.Map;
 
 /**
  * Resolves method arguments annotated with {@code @RequestHeader} except for
@@ -46,53 +46,53 @@ import org.springframework.web.context.request.NativeWebRequest;
  */
 public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
-	/**
-	 * Create a new {@link RequestHeaderMethodArgumentResolver} instance.
-	 * @param beanFactory a bean factory to use for resolving  ${...}
-	 * placeholder and #{...} SpEL expressions in default values;
-	 * or {@code null} if default values are not expected to have expressions
-	 */
-	public RequestHeaderMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory) {
-		super(beanFactory);
-	}
+    /**
+     * Create a new {@link RequestHeaderMethodArgumentResolver} instance.
+     *
+     * @param beanFactory a bean factory to use for resolving  ${...}
+     *                    placeholder and #{...} SpEL expressions in default values;
+     *                    or {@code null} if default values are not expected to have expressions
+     */
+    public RequestHeaderMethodArgumentResolver(@Nullable ConfigurableBeanFactory beanFactory) {
+        super(beanFactory);
+    }
 
 
-	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
-		return (parameter.hasParameterAnnotation(RequestHeader.class) &&
-				!Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType()));
-	}
+    @Override
+    public boolean supportsParameter(MethodParameter parameter) {
+        return (parameter.hasParameterAnnotation(RequestHeader.class) &&
+                !Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType()));
+    }
 
-	@Override
-	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		RequestHeader ann = parameter.getParameterAnnotation(RequestHeader.class);
-		Assert.state(ann != null, "No RequestHeader annotation");
-		return new RequestHeaderNamedValueInfo(ann);
-	}
+    @Override
+    protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
+        RequestHeader ann = parameter.getParameterAnnotation(RequestHeader.class);
+        Assert.state(ann != null, "No RequestHeader annotation");
+        return new RequestHeaderNamedValueInfo(ann);
+    }
 
-	@Override
-	@Nullable
-	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
-		String[] headerValues = request.getHeaderValues(name);
-		if (headerValues != null) {
-			return (headerValues.length == 1 ? headerValues[0] : headerValues);
-		}
-		else {
-			return null;
-		}
-	}
+    @Override
+    @Nullable
+    protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
+        String[] headerValues = request.getHeaderValues(name);
+        if (headerValues != null) {
+            return (headerValues.length == 1 ? headerValues[0] : headerValues);
+        } else {
+            return null;
+        }
+    }
 
-	@Override
-	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
-		throw new MissingRequestHeaderException(name, parameter);
-	}
+    @Override
+    protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
+        throw new MissingRequestHeaderException(name, parameter);
+    }
 
 
-	private static final class RequestHeaderNamedValueInfo extends NamedValueInfo {
+    private static final class RequestHeaderNamedValueInfo extends NamedValueInfo {
 
-		private RequestHeaderNamedValueInfo(RequestHeader annotation) {
-			super(annotation.name(), annotation.required(), annotation.defaultValue());
-		}
-	}
+        private RequestHeaderNamedValueInfo(RequestHeader annotation) {
+            super(annotation.name(), annotation.required(), annotation.defaultValue());
+        }
+    }
 
 }

@@ -24,8 +24,8 @@ package org.springframework.test.context.junit.jupiter.comics;
  */
 public class Dog extends Character {
 
-	public Dog(String name) {
-		super(name);
-	}
+    public Dog(String name) {
+        super(name);
+    }
 
 }

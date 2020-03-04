@@ -16,11 +16,11 @@
 
 package org.springframework.web.client;
 
-import java.io.IOException;
-import java.net.URI;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
+
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * Strategy interface used by the {@link RestTemplate} to determine
@@ -36,6 +36,7 @@ public interface ResponseErrorHandler {
      * <p>Implementations will typically inspect the
      * {@link ClientHttpResponse#getStatusCode() HttpStatus} of the response.
      * response 是否有错误
+     *
      * @param response the response to inspect
      * @return {@code true} if the response indicates an error; {@code false} otherwise
      * @throws IOException in case of I/O errors
@@ -47,6 +48,7 @@ public interface ResponseErrorHandler {
      * <p>This method is only called when {@link #hasError(ClientHttpResponse)}
      * has returned {@code true}.
      * 存在 {@link #hasError(ClientHttpResponse)} 时候调用
+     *
      * @param response the response with the error
      * @throws IOException in case of I/O errors
      */
@@ -55,8 +57,9 @@ public interface ResponseErrorHandler {
     /**
      * Alternative to {@link #handleError(ClientHttpResponse)} with extra
      * information providing access to the request URL and HTTP method.
-     * @param url the request URL
-     * @param method the HTTP method
+     *
+     * @param url      the request URL
+     * @param method   the HTTP method
      * @param response the response with the error
      * @throws IOException in case of I/O errors
      * @since 5.0

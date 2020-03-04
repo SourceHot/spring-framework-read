@@ -23,8 +23,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Steve Souza
@@ -32,55 +35,54 @@ import static org.mockito.BDDMockito.*;
  */
 public class JamonPerformanceMonitorInterceptorTests {
 
-	private final JamonPerformanceMonitorInterceptor interceptor = new JamonPerformanceMonitorInterceptor();
+    private final JamonPerformanceMonitorInterceptor interceptor = new JamonPerformanceMonitorInterceptor();
 
-	private final MethodInvocation mi = mock(MethodInvocation.class);
+    private final MethodInvocation mi = mock(MethodInvocation.class);
 
-	private final Log log = mock(Log.class);
-
-
-	@Before
-	public void setUp() {
-		MonitorFactory.reset();
-	}
-
-	@After
-	public void tearDown() {
-		MonitorFactory.reset();
-	}
+    private final Log log = mock(Log.class);
 
 
-	@Test
-	public void testInvokeUnderTraceWithNormalProcessing() throws Throwable {
-		given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
+    @Before
+    public void setUp() {
+        MonitorFactory.reset();
+    }
 
-		interceptor.invokeUnderTrace(mi, log);
+    @After
+    public void tearDown() {
+        MonitorFactory.reset();
+    }
 
-		assertTrue("jamon must track the method being invoked", MonitorFactory.getNumRows() > 0);
-		assertTrue("The jamon report must contain the toString method that was invoked",
-				MonitorFactory.getReport().contains("toString"));
-	}
 
-	@Test
-	public void testInvokeUnderTraceWithExceptionTracking() throws Throwable {
-		given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
-		given(mi.proceed()).willThrow(new IllegalArgumentException());
+    @Test
+    public void testInvokeUnderTraceWithNormalProcessing() throws Throwable {
+        given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
 
-		try {
-			interceptor.invokeUnderTrace(mi, log);
-			fail("Must have propagated the IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+        interceptor.invokeUnderTrace(mi, log);
 
-		assertEquals("Monitors must exist for the method invocation and 2 exceptions",
-				3, MonitorFactory.getNumRows());
-		assertTrue("The jamon report must contain the toString method that was invoked",
-				MonitorFactory.getReport().contains("toString"));
-		assertTrue("The jamon report must contain the generic exception: " + MonitorFactory.EXCEPTIONS_LABEL,
-				MonitorFactory.getReport().contains(MonitorFactory.EXCEPTIONS_LABEL));
-		assertTrue("The jamon report must contain the specific exception: IllegalArgumentException'",
-				MonitorFactory.getReport().contains("IllegalArgumentException"));
-	}
+        assertTrue("jamon must track the method being invoked", MonitorFactory.getNumRows() > 0);
+        assertTrue("The jamon report must contain the toString method that was invoked",
+                MonitorFactory.getReport().contains("toString"));
+    }
+
+    @Test
+    public void testInvokeUnderTraceWithExceptionTracking() throws Throwable {
+        given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
+        given(mi.proceed()).willThrow(new IllegalArgumentException());
+
+        try {
+            interceptor.invokeUnderTrace(mi, log);
+            fail("Must have propagated the IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {
+        }
+
+        assertEquals("Monitors must exist for the method invocation and 2 exceptions",
+                3, MonitorFactory.getNumRows());
+        assertTrue("The jamon report must contain the toString method that was invoked",
+                MonitorFactory.getReport().contains("toString"));
+        assertTrue("The jamon report must contain the generic exception: " + MonitorFactory.EXCEPTIONS_LABEL,
+                MonitorFactory.getReport().contains(MonitorFactory.EXCEPTIONS_LABEL));
+        assertTrue("The jamon report must contain the specific exception: IllegalArgumentException'",
+                MonitorFactory.getReport().contains("IllegalArgumentException"));
+    }
 
 }

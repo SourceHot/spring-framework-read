@@ -130,8 +130,8 @@ public final class CollectionFactory {
             return new ArrayList<>(capacity);
         } else if (collection instanceof EnumSet) {
             // Cast is necessary for compilation in Eclipse 4.4.1.
-			// 拷贝对象
-			Collection<E> enumSet = (Collection<E>) EnumSet.copyOf((EnumSet) collection);
+            // 拷贝对象
+            Collection<E> enumSet = (Collection<E>) EnumSet.copyOf((EnumSet) collection);
             enumSet.clear();
             return enumSet;
         } else if (collection instanceof SortedSet) {

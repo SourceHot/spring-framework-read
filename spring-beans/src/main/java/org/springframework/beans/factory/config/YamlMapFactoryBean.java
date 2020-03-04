@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Factory for a {@code Map} that reads from a YAML source, preserving the
@@ -41,7 +41,7 @@ import org.springframework.lang.Nullable;
  *    one: two
  * three: four
  * </pre>
- *
+ * <p>
  * plus (later in the list)
  *
  * <pre class="code">
@@ -50,7 +50,7 @@ import org.springframework.lang.Nullable;
  *    one: 2
  * five: six
  * </pre>
- *
+ * <p>
  * results in an effective input of
  *
  * <pre class="code">
@@ -60,7 +60,7 @@ import org.springframework.lang.Nullable;
  * three: four
  * five: six
  * </pre>
- *
+ * <p>
  * Note that the value of "foo" in the first document is not simply replaced
  * with the value in the second, but its nested values are merged.
  *
@@ -72,73 +72,72 @@ import org.springframework.lang.Nullable;
  */
 public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map<String, Object>>, InitializingBean {
 
-	private boolean singleton = true;
+    private boolean singleton = true;
 
-	@Nullable
-	private Map<String, Object> map;
+    @Nullable
+    private Map<String, Object> map;
+
+    @Override
+    public boolean isSingleton() {
+        return this.singleton;
+    }
+
+    /**
+     * Set if a singleton should be created, or a new object on each request
+     * otherwise. Default is {@code true} (a singleton).
+     */
+    public void setSingleton(boolean singleton) {
+        this.singleton = singleton;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        if (isSingleton()) {
+            this.map = createMap();
+        }
+    }
+
+    @Override
+    @Nullable
+    public Map<String, Object> getObject() {
+        return (this.map != null ? this.map : createMap());
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return Map.class;
+    }
 
 
-	/**
-	 * Set if a singleton should be created, or a new object on each request
-	 * otherwise. Default is {@code true} (a singleton).
-	 */
-	public void setSingleton(boolean singleton) {
-		this.singleton = singleton;
-	}
+    /**
+     * Template method that subclasses may override to construct the object
+     * returned by this factory.
+     * <p>Invoked lazily the first time {@link #getObject()} is invoked in
+     * case of a shared singleton; else, on each {@link #getObject()} call.
+     * <p>The default implementation returns the merged {@code Map} instance.
+     *
+     * @return the object returned by this factory
+     * @see #process(MatchCallback)
+     */
+    protected Map<String, Object> createMap() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        process((properties, map) -> merge(result, map));
+        return result;
+    }
 
-	@Override
-	public boolean isSingleton() {
-		return this.singleton;
-	}
-
-	@Override
-	public void afterPropertiesSet() {
-		if (isSingleton()) {
-			this.map = createMap();
-		}
-	}
-
-	@Override
-	@Nullable
-	public Map<String, Object> getObject() {
-		return (this.map != null ? this.map : createMap());
-	}
-
-	@Override
-	public Class<?> getObjectType() {
-		return Map.class;
-	}
-
-
-	/**
-	 * Template method that subclasses may override to construct the object
-	 * returned by this factory.
-	 * <p>Invoked lazily the first time {@link #getObject()} is invoked in
-	 * case of a shared singleton; else, on each {@link #getObject()} call.
-	 * <p>The default implementation returns the merged {@code Map} instance.
-	 * @return the object returned by this factory
-	 * @see #process(MatchCallback)
-	 */
-	protected Map<String, Object> createMap() {
-		Map<String, Object> result = new LinkedHashMap<>();
-		process((properties, map) -> merge(result, map));
-		return result;
-	}
-
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	private void merge(Map<String, Object> output, Map<String, Object> map) {
-		map.forEach((key, value) -> {
-			Object existing = output.get(key);
-			if (value instanceof Map && existing instanceof Map) {
-				// Inner cast required by Eclipse IDE.
-				Map<String, Object> result = new LinkedHashMap<>((Map<String, Object>) existing);
-				merge(result, (Map) value);
-				output.put(key, result);
-			}
-			else {
-				output.put(key, value);
-			}
-		});
-	}
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private void merge(Map<String, Object> output, Map<String, Object> map) {
+        map.forEach((key, value) -> {
+            Object existing = output.get(key);
+            if (value instanceof Map && existing instanceof Map) {
+                // Inner cast required by Eclipse IDE.
+                Map<String, Object> result = new LinkedHashMap<>((Map<String, Object>) existing);
+                merge(result, (Map) value);
+                output.put(key, result);
+            } else {
+                output.put(key, value);
+            }
+        });
+    }
 
 }

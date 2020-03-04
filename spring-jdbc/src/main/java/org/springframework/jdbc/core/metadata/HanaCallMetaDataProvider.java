@@ -29,15 +29,15 @@ import java.sql.SQLException;
  */
 public class HanaCallMetaDataProvider extends GenericCallMetaDataProvider {
 
-	public HanaCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
-		super(databaseMetaData);
-	}
+    public HanaCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
+        super(databaseMetaData);
+    }
 
 
-	@Override
-	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
-		super.initializeWithMetaData(databaseMetaData);
-		setStoresUpperCaseIdentifiers(false);
-	}
+    @Override
+    public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
+        super.initializeWithMetaData(databaseMetaData);
+        setStoresUpperCaseIdentifiers(false);
+    }
 
 }

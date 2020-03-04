@@ -16,6 +16,8 @@
 
 package org.springframework.core;
 
+import org.junit.Test;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -25,12 +27,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.core.GenericTypeResolver.*;
-import static org.springframework.util.ReflectionUtils.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.springframework.core.GenericTypeResolver.getTypeVariableMap;
+import static org.springframework.core.GenericTypeResolver.resolveReturnTypeArgument;
+import static org.springframework.core.GenericTypeResolver.resolveType;
+import static org.springframework.core.GenericTypeResolver.resolveTypeArgument;
+import static org.springframework.util.ReflectionUtils.findMethod;
 
 /**
  * @author Juergen Hoeller
@@ -39,289 +45,291 @@ import static org.springframework.util.ReflectionUtils.*;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class GenericTypeResolverTests {
 
-	@Test
-	public void simpleInterfaceType() {
-		assertEquals(String.class, resolveTypeArgument(MySimpleInterfaceType.class, MyInterfaceType.class));
-	}
+    @Test
+    public void simpleInterfaceType() {
+        assertEquals(String.class, resolveTypeArgument(MySimpleInterfaceType.class, MyInterfaceType.class));
+    }
 
-	@Test
-	public void simpleCollectionInterfaceType() {
-		assertEquals(Collection.class, resolveTypeArgument(MyCollectionInterfaceType.class, MyInterfaceType.class));
-	}
+    @Test
+    public void simpleCollectionInterfaceType() {
+        assertEquals(Collection.class, resolveTypeArgument(MyCollectionInterfaceType.class, MyInterfaceType.class));
+    }
 
-	@Test
-	public void simpleSuperclassType() {
-		assertEquals(String.class, resolveTypeArgument(MySimpleSuperclassType.class, MySuperclassType.class));
-	}
+    @Test
+    public void simpleSuperclassType() {
+        assertEquals(String.class, resolveTypeArgument(MySimpleSuperclassType.class, MySuperclassType.class));
+    }
 
-	@Test
-	public void simpleCollectionSuperclassType() {
-		assertEquals(Collection.class, resolveTypeArgument(MyCollectionSuperclassType.class, MySuperclassType.class));
-	}
+    @Test
+    public void simpleCollectionSuperclassType() {
+        assertEquals(Collection.class, resolveTypeArgument(MyCollectionSuperclassType.class, MySuperclassType.class));
+    }
 
-	@Test
-	public void nullIfNotResolvable() {
-		GenericClass<String> obj = new GenericClass<>();
-		assertNull(resolveTypeArgument(obj.getClass(), GenericClass.class));
-	}
+    @Test
+    public void nullIfNotResolvable() {
+        GenericClass<String> obj = new GenericClass<>();
+        assertNull(resolveTypeArgument(obj.getClass(), GenericClass.class));
+    }
 
-	@Test
-	public void methodReturnTypes() {
-		assertEquals(Integer.class,
-				resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "integer"), MyInterfaceType.class));
-		assertEquals(String.class,
-				resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "string"), MyInterfaceType.class));
-		assertEquals(null, resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "raw"), MyInterfaceType.class));
-		assertEquals(null,
-				resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "object"), MyInterfaceType.class));
-	}
+    @Test
+    public void methodReturnTypes() {
+        assertEquals(Integer.class,
+                resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "integer"), MyInterfaceType.class));
+        assertEquals(String.class,
+                resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "string"), MyInterfaceType.class));
+        assertEquals(null, resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "raw"), MyInterfaceType.class));
+        assertEquals(null,
+                resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "object"), MyInterfaceType.class));
+    }
 
-	@Test
-	public void testResolveType() {
-		Method intMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerInputMessage", MyInterfaceType.class);
-		MethodParameter intMessageMethodParam = new MethodParameter(intMessageMethod, 0);
-		assertEquals(MyInterfaceType.class,
-				resolveType(intMessageMethodParam.getGenericParameterType(), new HashMap<>()));
+    @Test
+    public void testResolveType() {
+        Method intMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerInputMessage", MyInterfaceType.class);
+        MethodParameter intMessageMethodParam = new MethodParameter(intMessageMethod, 0);
+        assertEquals(MyInterfaceType.class,
+                resolveType(intMessageMethodParam.getGenericParameterType(), new HashMap<>()));
 
-		Method intArrMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerArrayInputMessage",
-				MyInterfaceType[].class);
-		MethodParameter intArrMessageMethodParam = new MethodParameter(intArrMessageMethod, 0);
-		assertEquals(MyInterfaceType[].class,
-				resolveType(intArrMessageMethodParam.getGenericParameterType(), new HashMap<>()));
+        Method intArrMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerArrayInputMessage",
+                MyInterfaceType[].class);
+        MethodParameter intArrMessageMethodParam = new MethodParameter(intArrMessageMethod, 0);
+        assertEquals(MyInterfaceType[].class,
+                resolveType(intArrMessageMethodParam.getGenericParameterType(), new HashMap<>()));
 
-		Method genericArrMessageMethod = findMethod(MySimpleTypeWithMethods.class, "readGenericArrayInputMessage",
-				Object[].class);
-		MethodParameter genericArrMessageMethodParam = new MethodParameter(genericArrMessageMethod, 0);
-		Map<TypeVariable, Type> varMap = getTypeVariableMap(MySimpleTypeWithMethods.class);
-		assertEquals(Integer[].class, resolveType(genericArrMessageMethodParam.getGenericParameterType(), varMap));
-	}
+        Method genericArrMessageMethod = findMethod(MySimpleTypeWithMethods.class, "readGenericArrayInputMessage",
+                Object[].class);
+        MethodParameter genericArrMessageMethodParam = new MethodParameter(genericArrMessageMethod, 0);
+        Map<TypeVariable, Type> varMap = getTypeVariableMap(MySimpleTypeWithMethods.class);
+        assertEquals(Integer[].class, resolveType(genericArrMessageMethodParam.getGenericParameterType(), varMap));
+    }
 
-	@Test
-	public void testBoundParameterizedType() {
-		assertEquals(B.class, resolveTypeArgument(TestImpl.class, TestIfc.class));
-	}
+    @Test
+    public void testBoundParameterizedType() {
+        assertEquals(B.class, resolveTypeArgument(TestImpl.class, TestIfc.class));
+    }
 
-	@Test
-	public void testGetTypeVariableMap() throws Exception {
-		Map<TypeVariable, Type> map;
+    @Test
+    public void testGetTypeVariableMap() throws Exception {
+        Map<TypeVariable, Type> map;
 
-		map = GenericTypeResolver.getTypeVariableMap(MySimpleInterfaceType.class);
-		assertThat(map.toString(), equalTo("{T=class java.lang.String}"));
+        map = GenericTypeResolver.getTypeVariableMap(MySimpleInterfaceType.class);
+        assertThat(map.toString(), equalTo("{T=class java.lang.String}"));
 
-		map = GenericTypeResolver.getTypeVariableMap(MyCollectionInterfaceType.class);
-		assertThat(map.toString(), equalTo("{T=java.util.Collection<java.lang.String>}"));
+        map = GenericTypeResolver.getTypeVariableMap(MyCollectionInterfaceType.class);
+        assertThat(map.toString(), equalTo("{T=java.util.Collection<java.lang.String>}"));
 
-		map = GenericTypeResolver.getTypeVariableMap(MyCollectionSuperclassType.class);
-		assertThat(map.toString(), equalTo("{T=java.util.Collection<java.lang.String>}"));
+        map = GenericTypeResolver.getTypeVariableMap(MyCollectionSuperclassType.class);
+        assertThat(map.toString(), equalTo("{T=java.util.Collection<java.lang.String>}"));
 
-		map = GenericTypeResolver.getTypeVariableMap(MySimpleTypeWithMethods.class);
-		assertThat(map.toString(), equalTo("{T=class java.lang.Integer}"));
+        map = GenericTypeResolver.getTypeVariableMap(MySimpleTypeWithMethods.class);
+        assertThat(map.toString(), equalTo("{T=class java.lang.Integer}"));
 
-		map = GenericTypeResolver.getTypeVariableMap(TopLevelClass.class);
-		assertThat(map.toString(), equalTo("{}"));
+        map = GenericTypeResolver.getTypeVariableMap(TopLevelClass.class);
+        assertThat(map.toString(), equalTo("{}"));
 
-		map = GenericTypeResolver.getTypeVariableMap(TypedTopLevelClass.class);
-		assertThat(map.toString(), equalTo("{T=class java.lang.Integer}"));
+        map = GenericTypeResolver.getTypeVariableMap(TypedTopLevelClass.class);
+        assertThat(map.toString(), equalTo("{T=class java.lang.Integer}"));
 
-		map = GenericTypeResolver.getTypeVariableMap(TypedTopLevelClass.TypedNested.class);
-		assertThat(map.size(), equalTo(2));
-		Type t = null;
-		Type x = null;
-		for (Map.Entry<TypeVariable, Type> entry : map.entrySet()) {
-			if (entry.getKey().toString().equals("T")) {
-				t = entry.getValue();
-			}
-			else {
-				x = entry.getValue();
-			}
-		}
-		assertThat(t, equalTo((Type) Integer.class));
-		assertThat(x, equalTo((Type) Long.class));
-	}
+        map = GenericTypeResolver.getTypeVariableMap(TypedTopLevelClass.TypedNested.class);
+        assertThat(map.size(), equalTo(2));
+        Type t = null;
+        Type x = null;
+        for (Map.Entry<TypeVariable, Type> entry : map.entrySet()) {
+            if (entry.getKey().toString().equals("T")) {
+                t = entry.getValue();
+            } else {
+                x = entry.getValue();
+            }
+        }
+        assertThat(t, equalTo((Type) Integer.class));
+        assertThat(x, equalTo((Type) Long.class));
+    }
 
-	@Test  // SPR-11030
-	public void getGenericsCannotBeResolved() throws Exception {
-		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(List.class, Iterable.class);
-		assertNull(resolved);
-	}
+    @Test  // SPR-11030
+    public void getGenericsCannotBeResolved() throws Exception {
+        Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(List.class, Iterable.class);
+        assertNull(resolved);
+    }
 
-	@Test  // SPR-11052
-	public void getRawMapTypeCannotBeResolved() throws Exception {
-		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(Map.class, Map.class);
-		assertNull(resolved);
-	}
+    @Test  // SPR-11052
+    public void getRawMapTypeCannotBeResolved() throws Exception {
+        Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(Map.class, Map.class);
+        assertNull(resolved);
+    }
 
-	@Test  // SPR-11044
-	public void getGenericsOnArrayFromParamCannotBeResolved() throws Exception {
-		MethodParameter methodParameter = MethodParameter.forExecutable(
-				WithArrayBase.class.getDeclaredMethod("array", Object[].class), 0);
-		Class<?> resolved = GenericTypeResolver.resolveParameterType(methodParameter, WithArray.class);
-		assertThat(resolved, equalTo((Class<?>) Object[].class));
-	}
+    @Test  // SPR-11044
+    public void getGenericsOnArrayFromParamCannotBeResolved() throws Exception {
+        MethodParameter methodParameter = MethodParameter.forExecutable(
+                WithArrayBase.class.getDeclaredMethod("array", Object[].class), 0);
+        Class<?> resolved = GenericTypeResolver.resolveParameterType(methodParameter, WithArray.class);
+        assertThat(resolved, equalTo((Class<?>) Object[].class));
+    }
 
-	@Test  // SPR-11044
-	public void getGenericsOnArrayFromReturnCannotBeResolved() throws Exception {
-		Class<?> resolved = GenericTypeResolver.resolveReturnType(
-				WithArrayBase.class.getDeclaredMethod("array", Object[].class), WithArray.class);
-		assertThat(resolved, equalTo((Class<?>) Object[].class));
-	}
+    @Test  // SPR-11044
+    public void getGenericsOnArrayFromReturnCannotBeResolved() throws Exception {
+        Class<?> resolved = GenericTypeResolver.resolveReturnType(
+                WithArrayBase.class.getDeclaredMethod("array", Object[].class), WithArray.class);
+        assertThat(resolved, equalTo((Class<?>) Object[].class));
+    }
 
-	@Test  // SPR-11763
-	public void resolveIncompleteTypeVariables() {
-		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(IdFixingRepository.class, Repository.class);
-		assertNotNull(resolved);
-		assertEquals(2, resolved.length);
-		assertEquals(Object.class, resolved[0]);
-		assertEquals(Long.class, resolved[1]);
-	}
+    @Test  // SPR-11763
+    public void resolveIncompleteTypeVariables() {
+        Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(IdFixingRepository.class, Repository.class);
+        assertNotNull(resolved);
+        assertEquals(2, resolved.length);
+        assertEquals(Object.class, resolved[0]);
+        assertEquals(Long.class, resolved[1]);
+    }
 
 
-	public interface MyInterfaceType<T> {
-	}
+    public interface MyInterfaceType<T> {
+    }
 
-	public class MySimpleInterfaceType implements MyInterfaceType<String> {
-	}
+    interface Repository<T, ID extends Serializable> {
+    }
 
-	public class MyCollectionInterfaceType implements MyInterfaceType<Collection<String>> {
-	}
+    interface IdFixingRepository<T> extends Repository<T, Long> {
+    }
 
-	public abstract class MySuperclassType<T> {
-	}
+    public static class MyTypeWithMethods<T> {
 
-	public class MySimpleSuperclassType extends MySuperclassType<String> {
-	}
+        /**
+         * Simulates a factory method that wraps the supplied object in a proxy of the
+         * same type.
+         */
+        public static <T> T createProxy(T object) {
+            return null;
+        }
 
-	public class MyCollectionSuperclassType extends MySuperclassType<Collection<String>> {
-	}
+        /**
+         * Similar to {@link #createProxy(Object)} but adds an additional argument before
+         * the argument of type {@code T}. Note that they may potentially be of the same
+         * time when invoked!
+         */
+        public static <T> T createNamedProxy(String name, T object) {
+            return null;
+        }
 
-	public static class MyTypeWithMethods<T> {
+        /**
+         * Simulates factory methods found in libraries such as Mockito and EasyMock.
+         */
+        public static <MOCK> MOCK createMock(Class<MOCK> toMock) {
+            return null;
+        }
 
-		public MyInterfaceType<Integer> integer() {
-			return null;
-		}
+        /**
+         * Similar to {@link #createMock(Class)} but adds an additional method argument
+         * before the parameterized argument.
+         */
+        public static <T> T createNamedMock(String name, Class<T> toMock) {
+            return null;
+        }
 
-		public MySimpleInterfaceType string() {
-			return null;
-		}
+        /**
+         * Similar to {@link #createNamedMock(String, Class)} but adds an additional
+         * parameterized type.
+         */
+        public static <V extends Object, T> T createVMock(V name, Class<T> toMock) {
+            return null;
+        }
 
-		public Object object() {
-			return null;
-		}
+        /**
+         * Extract some value of the type supported by the interface (i.e., by a concrete,
+         * non-generic implementation of the interface).
+         */
+        public static <T> T extractValueFrom(MyInterfaceType<T> myInterfaceType) {
+            return null;
+        }
 
-		public MyInterfaceType raw() {
-			return null;
-		}
+        /**
+         * Extract some magic value from the supplied map.
+         */
+        public static <K, V> V extractMagicValue(Map<K, V> map) {
+            return null;
+        }
 
-		public String notParameterized() {
-			return null;
-		}
+        public MyInterfaceType<Integer> integer() {
+            return null;
+        }
 
-		public String notParameterizedWithArguments(Integer x, Boolean b) {
-			return null;
-		}
+        public MySimpleInterfaceType string() {
+            return null;
+        }
 
-		/**
-		 * Simulates a factory method that wraps the supplied object in a proxy of the
-		 * same type.
-		 */
-		public static <T> T createProxy(T object) {
-			return null;
-		}
+        public Object object() {
+            return null;
+        }
 
-		/**
-		 * Similar to {@link #createProxy(Object)} but adds an additional argument before
-		 * the argument of type {@code T}. Note that they may potentially be of the same
-		 * time when invoked!
-		 */
-		public static <T> T createNamedProxy(String name, T object) {
-			return null;
-		}
+        public MyInterfaceType raw() {
+            return null;
+        }
 
-		/**
-		 * Simulates factory methods found in libraries such as Mockito and EasyMock.
-		 */
-		public static <MOCK> MOCK createMock(Class<MOCK> toMock) {
-			return null;
-		}
+        public String notParameterized() {
+            return null;
+        }
 
-		/**
-		 * Similar to {@link #createMock(Class)} but adds an additional method argument
-		 * before the parameterized argument.
-		 */
-		public static <T> T createNamedMock(String name, Class<T> toMock) {
-			return null;
-		}
+        public String notParameterizedWithArguments(Integer x, Boolean b) {
+            return null;
+        }
 
-		/**
-		 * Similar to {@link #createNamedMock(String, Class)} but adds an additional
-		 * parameterized type.
-		 */
-		public static <V extends Object, T> T createVMock(V name, Class<T> toMock) {
-			return null;
-		}
+        public void readIntegerInputMessage(MyInterfaceType<Integer> message) {
+        }
 
-		/**
-		 * Extract some value of the type supported by the interface (i.e., by a concrete,
-		 * non-generic implementation of the interface).
-		 */
-		public static <T> T extractValueFrom(MyInterfaceType<T> myInterfaceType) {
-			return null;
-		}
+        public void readIntegerArrayInputMessage(MyInterfaceType<Integer>[] message) {
+        }
 
-		/**
-		 * Extract some magic value from the supplied map.
-		 */
-		public static <K, V> V extractMagicValue(Map<K, V> map) {
-			return null;
-		}
+        public void readGenericArrayInputMessage(T[] message) {
+        }
+    }
 
-		public void readIntegerInputMessage(MyInterfaceType<Integer> message) {
-		}
+    public static class MySimpleTypeWithMethods extends MyTypeWithMethods<Integer> {
+    }
 
-		public void readIntegerArrayInputMessage(MyInterfaceType<Integer>[] message) {
-		}
+    static class GenericClass<T> {
+    }
 
-		public void readGenericArrayInputMessage(T[] message) {
-		}
-	}
+    static class TopLevelClass<T> {
+        class Nested<X> {
+        }
+    }
 
-	public static class MySimpleTypeWithMethods extends MyTypeWithMethods<Integer> {
-	}
+    static class TypedTopLevelClass extends TopLevelClass<Integer> {
+        class TypedNested extends Nested<Long> {
+        }
+    }
 
-	static class GenericClass<T> {
-	}
+    static abstract class WithArrayBase<T> {
 
-	class A{}
+        public abstract T[] array(T... args);
+    }
 
-	class B<T>{}
+    static abstract class WithArray<T> extends WithArrayBase<T> {
+    }
 
-	class TestIfc<T>{}
+    public class MySimpleInterfaceType implements MyInterfaceType<String> {
+    }
 
-	class TestImpl<I extends A, T extends B<I>> extends TestIfc<T>{
-	}
+    public class MyCollectionInterfaceType implements MyInterfaceType<Collection<String>> {
+    }
 
-	static class TopLevelClass<T> {
-		class Nested<X> {
-		}
-	}
+    public abstract class MySuperclassType<T> {
+    }
 
-	static class TypedTopLevelClass extends TopLevelClass<Integer> {
-		class TypedNested extends Nested<Long> {
-		}
-	}
+    public class MySimpleSuperclassType extends MySuperclassType<String> {
+    }
 
-	static abstract class WithArrayBase<T> {
+    public class MyCollectionSuperclassType extends MySuperclassType<Collection<String>> {
+    }
 
-		public abstract T[] array(T... args);
-	}
+    class A {
+    }
 
-	static abstract class WithArray<T> extends WithArrayBase<T> {
-	}
+    class B<T> {
+    }
 
-	interface Repository<T, ID extends Serializable> {
-	}
+    class TestIfc<T> {
+    }
 
-	interface IdFixingRepository<T> extends Repository<T, Long> {
-	}
+    class TestImpl<I extends A, T extends B<I>> extends TestIfc<T> {
+    }
 
 }

@@ -48,9 +48,10 @@ public final class MethodIntrospector {
      * Select methods on the given target type based on the lookup of associated metadata.
      * <p>Callers define methods of interest through the {@link MetadataLookup} parameter,
      * allowing to collect the associated metadata into the result map.
+     * <p>
+     * <p>
+     * 选择method 根据
      *
-	 *
-	 * 选择method 根据
      * @param targetType     the target type to search methods on
      * @param metadataLookup a {@link MetadataLookup} callback to inspect methods of interest,
      *                       returning non-null metadata to be associated with a given method if there is a match,

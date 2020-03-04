@@ -29,8 +29,8 @@ import java.lang.annotation.Target;
  * class (which, by default, checks for the presence of this annotation).
  *
  * @author Rob Harrop
- * @since 2.0
  * @see RequiredAnnotationBeanPostProcessor
+ * @since 2.0
  * @deprecated as of 5.1, in favor of using constructor injection for required settings
  * (or a custom {@link org.springframework.beans.factory.InitializingBean} implementation)
  */

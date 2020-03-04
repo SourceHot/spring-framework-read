@@ -16,15 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.ResourceBundle;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessor;
@@ -38,6 +29,15 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
 
 /**
  * Bean definition reader for a simple properties format.
@@ -71,487 +71,472 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @since 26.11.2003
  * @see DefaultListableBeanFactory
+ * @since 26.11.2003
  */
 public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
-	/**
-	 * Value of a T/F attribute that represents true.
-	 * Anything else represents false. Case seNsItive.
-	 */
-	public static final String TRUE_VALUE = "true";
+    /**
+     * Value of a T/F attribute that represents true.
+     * Anything else represents false. Case seNsItive.
+     */
+    public static final String TRUE_VALUE = "true";
 
-	/**
-	 * Separator between bean name and property name.
-	 * We follow normal Java conventions.
-	 */
-	public static final String SEPARATOR = ".";
+    /**
+     * Separator between bean name and property name.
+     * We follow normal Java conventions.
+     */
+    public static final String SEPARATOR = ".";
 
-	/**
-	 * Special key to distinguish {@code owner.(class)=com.myapp.MyClass}.
-	 */
-	public static final String CLASS_KEY = "(class)";
+    /**
+     * Special key to distinguish {@code owner.(class)=com.myapp.MyClass}.
+     */
+    public static final String CLASS_KEY = "(class)";
 
-	/**
-	 * Special key to distinguish {@code owner.(parent)=parentBeanName}.
-	 */
-	public static final String PARENT_KEY = "(parent)";
+    /**
+     * Special key to distinguish {@code owner.(parent)=parentBeanName}.
+     */
+    public static final String PARENT_KEY = "(parent)";
 
-	/**
-	 * Special key to distinguish {@code owner.(scope)=prototype}.
-	 * Default is "true".
-	 */
-	public static final String SCOPE_KEY = "(scope)";
+    /**
+     * Special key to distinguish {@code owner.(scope)=prototype}.
+     * Default is "true".
+     */
+    public static final String SCOPE_KEY = "(scope)";
 
-	/**
-	 * Special key to distinguish {@code owner.(singleton)=false}.
-	 * Default is "true".
-	 */
-	public static final String SINGLETON_KEY = "(singleton)";
+    /**
+     * Special key to distinguish {@code owner.(singleton)=false}.
+     * Default is "true".
+     */
+    public static final String SINGLETON_KEY = "(singleton)";
 
-	/**
-	 * Special key to distinguish {@code owner.(abstract)=true}
-	 * Default is "false".
-	 */
-	public static final String ABSTRACT_KEY = "(abstract)";
+    /**
+     * Special key to distinguish {@code owner.(abstract)=true}
+     * Default is "false".
+     */
+    public static final String ABSTRACT_KEY = "(abstract)";
 
-	/**
-	 * Special key to distinguish {@code owner.(lazy-init)=true}
-	 * Default is "false".
-	 */
-	public static final String LAZY_INIT_KEY = "(lazy-init)";
+    /**
+     * Special key to distinguish {@code owner.(lazy-init)=true}
+     * Default is "false".
+     */
+    public static final String LAZY_INIT_KEY = "(lazy-init)";
 
-	/**
-	 * Property suffix for references to other beans in the current
-	 * BeanFactory: e.g. {@code owner.dog(ref)=fido}.
-	 * Whether this is a reference to a singleton or a prototype
-	 * will depend on the definition of the target bean.
-	 */
-	public static final String REF_SUFFIX = "(ref)";
+    /**
+     * Property suffix for references to other beans in the current
+     * BeanFactory: e.g. {@code owner.dog(ref)=fido}.
+     * Whether this is a reference to a singleton or a prototype
+     * will depend on the definition of the target bean.
+     */
+    public static final String REF_SUFFIX = "(ref)";
 
-	/**
-	 * Prefix before values referencing other beans.
-	 */
-	public static final String REF_PREFIX = "*";
+    /**
+     * Prefix before values referencing other beans.
+     */
+    public static final String REF_PREFIX = "*";
 
-	/**
-	 * Prefix used to denote a constructor argument definition.
-	 */
-	public static final String CONSTRUCTOR_ARG_PREFIX = "$";
-
-
-	@Nullable
-	private String defaultParentBean;
-
-	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
+    /**
+     * Prefix used to denote a constructor argument definition.
+     */
+    public static final String CONSTRUCTOR_ARG_PREFIX = "$";
 
 
-	/**
-	 * Create new PropertiesBeanDefinitionReader for the given bean factory.
-	 *
-	 * @param registry the BeanFactory to load bean definitions into,
-	 *                 in the form of a BeanDefinitionRegistry
-	 */
-	public PropertiesBeanDefinitionReader(BeanDefinitionRegistry registry) {
-		super(registry);
-	}
+    @Nullable
+    private String defaultParentBean;
 
-	/**
-	 * Return the default parent bean for this bean factory.
-	 */
-	@Nullable
-	public String getDefaultParentBean() {
-		return this.defaultParentBean;
-	}
-
-	/**
-	 * Set the default parent bean for this bean factory.
-	 * If a child bean definition handled by this factory provides neither
-	 * a parent nor a class attribute, this default value gets used.
-	 * <p>Can be used e.g. for view definition files, to define a parent
-	 * with a default view class and common attributes for all views.
-	 * View definitions that define their own parent or carry their own
-	 * class can still override this.
-	 * <p>Strictly speaking, the rule that a default parent setting does
-	 * not apply to a bean definition that carries a class is there for
-	 * backwards compatibility reasons. It still matches the typical use case.
-	 */
-	public void setDefaultParentBean(@Nullable String defaultParentBean) {
-		this.defaultParentBean = defaultParentBean;
-	}
-
-	/**
-	 * Return the PropertiesPersister to use for parsing properties files.
-	 */
-	public PropertiesPersister getPropertiesPersister() {
-		return this.propertiesPersister;
-	}
-
-	/**
-	 * Set the PropertiesPersister to use for parsing properties files.
-	 * The default is DefaultPropertiesPersister.
-	 *
-	 * @see org.springframework.util.DefaultPropertiesPersister
-	 */
-	public void setPropertiesPersister(@Nullable PropertiesPersister propertiesPersister) {
-		this.propertiesPersister =
-				(propertiesPersister != null ? propertiesPersister : new DefaultPropertiesPersister());
-	}
-
-	/**
-	 * Load bean definitions from the specified properties file,
-	 * using all property keys (i.e. not filtering by prefix).
-	 *
-	 * 加载bean定义文件
-	 * @param resource the resource descriptor for the properties file
-	 * @return the number of bean definitions found
-	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
-	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource, String)
-	 */
-	@Override
-	public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
-		return loadBeanDefinitions(new EncodedResource(resource), null);
-	}
-
-	/**
-	 * Load bean definitions from the specified properties file.
-	 *
-	 * @param resource the resource descriptor for the properties file
-	 * @param prefix   a filter within the keys in the map: e.g. 'beans.'
-	 *                 (can be empty or {@code null})
-	 * @return the number of bean definitions found
-	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
-	 */
-	public int loadBeanDefinitions(Resource resource, @Nullable String prefix) throws BeanDefinitionStoreException {
-		return loadBeanDefinitions(new EncodedResource(resource), prefix);
-	}
-
-	/**
-	 * Load bean definitions from the specified properties file.
-	 *
-	 * @param encodedResource the resource descriptor for the properties file,
-	 *                        allowing to specify an encoding to use for parsing the file
-	 * @return the number of bean definitions found
-	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
-	 */
-	public int loadBeanDefinitions(EncodedResource encodedResource) throws BeanDefinitionStoreException {
-		return loadBeanDefinitions(encodedResource, null);
-	}
-
-	/**
-	 * Load bean definitions from the specified properties file.
-	 *
-	 * @param encodedResource the resource descriptor for the properties file,
-	 *                        allowing to specify an encoding to use for parsing the file
-	 * @param prefix          a filter within the keys in the map: e.g. 'beans.'
-	 *                        (can be empty or {@code null})
-	 * @return the number of bean definitions found
-	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
-	 */
-	public int loadBeanDefinitions(EncodedResource encodedResource, @Nullable String prefix)
-			throws BeanDefinitionStoreException {
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Loading properties bean definitions from " + encodedResource);
-		}
-
-		Properties props = new Properties();
-		try {
-			try (InputStream is = encodedResource.getResource().getInputStream()) {
-				if (encodedResource.getEncoding() != null) {
-					getPropertiesPersister().load(props, new InputStreamReader(is, encodedResource.getEncoding()));
-				}
-				else {
-					getPropertiesPersister().load(props, is);
-				}
-			}
-
-			// 获取bean的定义数量
-			int count = registerBeanDefinitions(props, prefix, encodedResource.getResource().getDescription());
-			if (logger.isDebugEnabled()) {
-				logger.debug("Loaded " + count + " bean definitions from " + encodedResource);
-			}
-			return count;
-		}
-		catch (IOException ex) {
-			throw new BeanDefinitionStoreException("Could not parse properties from " + encodedResource.getResource(), ex);
-		}
-	}
-
-	/**
-	 * Register bean definitions contained in a resource bundle,
-	 * using all property keys (i.e. not filtering by prefix).
-	 *
-	 * @param rb the ResourceBundle to load from
-	 * @return the number of bean definitions found
-	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
-	 * @see #registerBeanDefinitions(java.util.ResourceBundle, String)
-	 */
-	public int registerBeanDefinitions(ResourceBundle rb) throws BeanDefinitionStoreException {
-		return registerBeanDefinitions(rb, null);
-	}
-
-	/**
-	 * Register bean definitions contained in a ResourceBundle.
-	 * <p>Similar syntax as for a Map. This method is useful to enable
-	 * standard Java internationalization support.
-	 *
-	 * @param rb     the ResourceBundle to load from
-	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
-	 *               (can be empty or {@code null})
-	 * @return the number of bean definitions found
-	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
-	 */
-	public int registerBeanDefinitions(ResourceBundle rb, @Nullable String prefix) throws BeanDefinitionStoreException {
-		// Simply create a map and call overloaded method.
-		Map<String, Object> map = new HashMap<>();
-		Enumeration<String> keys = rb.getKeys();
-		while (keys.hasMoreElements()) {
-			String key = keys.nextElement();
-			map.put(key, rb.getObject(key));
-		}
-		return registerBeanDefinitions(map, prefix);
-	}
+    private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
 
 
-	/**
-	 * Register bean definitions contained in a Map, using all property keys (i.e. not
-	 * filtering by prefix).
-	 *
-	 * @param map a map of {@code name} to {@code property} (String or Object). Property
-	 *            values will be strings if coming from a Properties file etc. Property names
-	 *            (keys) <b>must</b> be Strings. Class keys must be Strings.
-	 * @return the number of bean definitions found
-	 * @throws BeansException in case of loading or parsing errors
-	 * @see #registerBeanDefinitions(java.util.Map, String, String)
-	 */
-	public int registerBeanDefinitions(Map<?, ?> map) throws BeansException {
-		return registerBeanDefinitions(map, null);
-	}
+    /**
+     * Create new PropertiesBeanDefinitionReader for the given bean factory.
+     *
+     * @param registry the BeanFactory to load bean definitions into,
+     *                 in the form of a BeanDefinitionRegistry
+     */
+    public PropertiesBeanDefinitionReader(BeanDefinitionRegistry registry) {
+        super(registry);
+    }
 
-	/**
-	 * Register bean definitions contained in a Map.
-	 * Ignore ineligible properties.
-	 *
-	 * 注册bean定义
-	 * @param map    a map of {@code name} to {@code property} (String or Object). Property
-	 *               values will be strings if coming from a Properties file etc. Property names
-	 *               (keys) <b>must</b> be Strings. Class keys must be Strings.
-	 *
-	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
-	 *               (can be empty or {@code null})
-	 * @return the number of bean definitions found
-	 * @throws BeansException in case of loading or parsing errors
-	 */
-	public int registerBeanDefinitions(Map<?, ?> map, @Nullable String prefix) throws BeansException {
-		return registerBeanDefinitions(map, prefix, "Map " + map);
-	}
+    /**
+     * Return the default parent bean for this bean factory.
+     */
+    @Nullable
+    public String getDefaultParentBean() {
+        return this.defaultParentBean;
+    }
 
-	/**
-	 * Register bean definitions contained in a Map.
-	 * Ignore ineligible properties.
-	 *
-	 * @param map                 a map of {@code name} to {@code property} (String or Object). Property
-	 *                            values will be strings if coming from a Properties file etc. Property names
-	 *                            (keys) <b>must</b> be Strings. Class keys must be Strings.
-	 *                            key是beanName value是class
-	 * @param prefix              a filter within the keys in the map: e.g. 'beans.'
-	 *                            (can be empty or {@code null})
-	 *                            前缀
-	 * @param resourceDescription description of the resource that the
-	 *                            Map came from (for logging purposes)
-	 * @return the number of bean definitions found
-	 * @throws BeansException in case of loading or parsing errors
-	 * @see #registerBeanDefinitions(Map, String)
-	 */
-	public int registerBeanDefinitions(Map<?, ?> map, @Nullable String prefix, String resourceDescription)
-			throws BeansException {
+    /**
+     * Set the default parent bean for this bean factory.
+     * If a child bean definition handled by this factory provides neither
+     * a parent nor a class attribute, this default value gets used.
+     * <p>Can be used e.g. for view definition files, to define a parent
+     * with a default view class and common attributes for all views.
+     * View definitions that define their own parent or carry their own
+     * class can still override this.
+     * <p>Strictly speaking, the rule that a default parent setting does
+     * not apply to a bean definition that carries a class is there for
+     * backwards compatibility reasons. It still matches the typical use case.
+     */
+    public void setDefaultParentBean(@Nullable String defaultParentBean) {
+        this.defaultParentBean = defaultParentBean;
+    }
 
-		if (prefix == null) {
-			prefix = "";
-		}
-		int beanCount = 0;
+    /**
+     * Return the PropertiesPersister to use for parsing properties files.
+     */
+    public PropertiesPersister getPropertiesPersister() {
+        return this.propertiesPersister;
+    }
 
-		for (Object key : map.keySet()) {
-			if (!(key instanceof String)) {
-				throw new IllegalArgumentException("Illegal key [" + key + "]: only Strings allowed");
-			}
-			String keyString = (String) key;
-			if (keyString.startsWith(prefix)) {
-				// Key is of form: prefix<name>.property
-				String nameAndProperty = keyString.substring(prefix.length());
-				// Find dot before property name, ignoring dots in property keys.
-				int sepIdx = -1;
-				int propKeyIdx = nameAndProperty.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX);
-				if (propKeyIdx != -1) {
-					sepIdx = nameAndProperty.lastIndexOf(SEPARATOR, propKeyIdx);
-				}
-				else {
-					sepIdx = nameAndProperty.lastIndexOf(SEPARATOR);
-				}
-				if (sepIdx != -1) {
-					String beanName = nameAndProperty.substring(0, sepIdx);
-					if (logger.isTraceEnabled()) {
-						logger.trace("Found bean name '" + beanName + "'");
-					}
-					if (!getRegistry().containsBeanDefinition(beanName)) {
-						// If we haven't already registered it...
-						// bean 注册
-						registerBeanDefinition(beanName, map, prefix + beanName, resourceDescription);
-						// bean累加数量
-						++beanCount;
-					}
-				}
-				else {
-					// Ignore it: It wasn't a valid bean name and property,
-					// although it did start with the required prefix.
-					if (logger.isDebugEnabled()) {
-						logger.debug("Invalid bean name and property [" + nameAndProperty + "]");
-					}
-				}
-			}
-		}
+    /**
+     * Set the PropertiesPersister to use for parsing properties files.
+     * The default is DefaultPropertiesPersister.
+     *
+     * @see org.springframework.util.DefaultPropertiesPersister
+     */
+    public void setPropertiesPersister(@Nullable PropertiesPersister propertiesPersister) {
+        this.propertiesPersister =
+                (propertiesPersister != null ? propertiesPersister : new DefaultPropertiesPersister());
+    }
 
-		return beanCount;
-	}
+    /**
+     * Load bean definitions from the specified properties file,
+     * using all property keys (i.e. not filtering by prefix).
+     * <p>
+     * 加载bean定义文件
+     *
+     * @param resource the resource descriptor for the properties file
+     * @return the number of bean definitions found
+     * @throws BeanDefinitionStoreException in case of loading or parsing errors
+     * @see #loadBeanDefinitions(org.springframework.core.io.Resource, String)
+     */
+    @Override
+    public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
+        return loadBeanDefinitions(new EncodedResource(resource), null);
+    }
 
-	/**
-	 * Get all property values, given a prefix (which will be stripped)
-	 * and add the bean they define to the factory with the given name.
-	 *
-	 * @param beanName            name of the bean to define
-	 * @param map                 a Map containing string pairs
-	 * @param prefix              prefix of each entry, which will be stripped
-	 * @param resourceDescription description of the resource that the
-	 *                            Map came from (for logging purposes)
-	 * @throws BeansException if the bean definition could not be parsed or registered
-	 */
-	protected void registerBeanDefinition(String beanName, Map<?, ?> map, String prefix, String resourceDescription)
-			throws BeansException {
+    /**
+     * Load bean definitions from the specified properties file.
+     *
+     * @param resource the resource descriptor for the properties file
+     * @param prefix   a filter within the keys in the map: e.g. 'beans.'
+     *                 (can be empty or {@code null})
+     * @return the number of bean definitions found
+     * @throws BeanDefinitionStoreException in case of loading or parsing errors
+     */
+    public int loadBeanDefinitions(Resource resource, @Nullable String prefix) throws BeanDefinitionStoreException {
+        return loadBeanDefinitions(new EncodedResource(resource), prefix);
+    }
 
-		// 类名
-		String className = null;
-		// 父级
-		String parent = null;
-		// 默认作用域
-		String scope = GenericBeanDefinition.SCOPE_SINGLETON;
-		boolean isAbstract = false;
-		boolean lazyInit = false;
+    /**
+     * Load bean definitions from the specified properties file.
+     *
+     * @param encodedResource the resource descriptor for the properties file,
+     *                        allowing to specify an encoding to use for parsing the file
+     * @return the number of bean definitions found
+     * @throws BeanDefinitionStoreException in case of loading or parsing errors
+     */
+    public int loadBeanDefinitions(EncodedResource encodedResource) throws BeanDefinitionStoreException {
+        return loadBeanDefinitions(encodedResource, null);
+    }
 
-		ConstructorArgumentValues cas = new ConstructorArgumentValues();
-		MutablePropertyValues pvs = new MutablePropertyValues();
+    /**
+     * Load bean definitions from the specified properties file.
+     *
+     * @param encodedResource the resource descriptor for the properties file,
+     *                        allowing to specify an encoding to use for parsing the file
+     * @param prefix          a filter within the keys in the map: e.g. 'beans.'
+     *                        (can be empty or {@code null})
+     * @return the number of bean definitions found
+     * @throws BeanDefinitionStoreException in case of loading or parsing errors
+     */
+    public int loadBeanDefinitions(EncodedResource encodedResource, @Nullable String prefix)
+            throws BeanDefinitionStoreException {
 
-		for (Map.Entry<?, ?> entry : map.entrySet()) {
-			String key = StringUtils.trimWhitespace((String) entry.getKey());
-			if (key.startsWith(prefix + SEPARATOR)) {
-				// 截取key
-				String property = key.substring(prefix.length() + SEPARATOR.length());
-				if (CLASS_KEY.equals(property)) {
-					// 设置className
-					className = StringUtils.trimWhitespace((String) entry.getValue());
-				}
-				else if (PARENT_KEY.equals(property)) {
-					// 设置父级
-					parent = StringUtils.trimWhitespace((String) entry.getValue());
-				}
-				else if (ABSTRACT_KEY.equals(property)) {
-					String val = StringUtils.trimWhitespace((String) entry.getValue());
-					isAbstract = TRUE_VALUE.equals(val);
-				}
-				else if (SCOPE_KEY.equals(property)) {
-					// Spring 2.0 style
-					scope = StringUtils.trimWhitespace((String) entry.getValue());
-				}
-				else if (SINGLETON_KEY.equals(property)) {
-					// Spring 1.2 style
-					String val = StringUtils.trimWhitespace((String) entry.getValue());
-					scope = ("".equals(val) || TRUE_VALUE.equals(val) ? GenericBeanDefinition.SCOPE_SINGLETON :
-							GenericBeanDefinition.SCOPE_PROTOTYPE);
-				}
-				else if (LAZY_INIT_KEY.equals(property)) {
-					String val = StringUtils.trimWhitespace((String) entry.getValue());
-					lazyInit = TRUE_VALUE.equals(val);
-				}
-				else if (property.startsWith(CONSTRUCTOR_ARG_PREFIX)) {
-					if (property.endsWith(REF_SUFFIX)) {
-						int index = Integer.parseInt(property.substring(1, property.length() - REF_SUFFIX.length()));
-						cas.addIndexedArgumentValue(index, new RuntimeBeanReference(entry.getValue().toString()));
-					}
-					else {
-						int index = Integer.parseInt(property.substring(1));
-						cas.addIndexedArgumentValue(index, readValue(entry));
-					}
-				}
-				else if (property.endsWith(REF_SUFFIX)) {
-					// This isn't a real property, but a reference to another prototype
-					// Extract property name: property is of form dog(ref)
-					property = property.substring(0, property.length() - REF_SUFFIX.length());
-					String ref = StringUtils.trimWhitespace((String) entry.getValue());
+        if (logger.isTraceEnabled()) {
+            logger.trace("Loading properties bean definitions from " + encodedResource);
+        }
 
-					// It doesn't matter if the referenced bean hasn't yet been registered:
-					// this will ensure that the reference is resolved at runtime.
-					Object val = new RuntimeBeanReference(ref);
-					pvs.add(property, val);
-				}
-				else {
-					// It's a normal bean property.
-					pvs.add(property, readValue(entry));
-				}
-			}
-		}
+        Properties props = new Properties();
+        try {
+            try (InputStream is = encodedResource.getResource().getInputStream()) {
+                if (encodedResource.getEncoding() != null) {
+                    getPropertiesPersister().load(props, new InputStreamReader(is, encodedResource.getEncoding()));
+                } else {
+                    getPropertiesPersister().load(props, is);
+                }
+            }
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Registering bean definition for bean name '" + beanName + "' with " + pvs);
-		}
+            // 获取bean的定义数量
+            int count = registerBeanDefinitions(props, prefix, encodedResource.getResource().getDescription());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Loaded " + count + " bean definitions from " + encodedResource);
+            }
+            return count;
+        } catch (IOException ex) {
+            throw new BeanDefinitionStoreException("Could not parse properties from " + encodedResource.getResource(), ex);
+        }
+    }
 
-		// Just use default parent if we're not dealing with the parent itself,
-		// and if there's no class name specified. The latter has to happen for
-		// backwards compatibility reasons.
-		if (parent == null && className == null && !beanName.equals(this.defaultParentBean)) {
-			parent = this.defaultParentBean;
-		}
+    /**
+     * Register bean definitions contained in a resource bundle,
+     * using all property keys (i.e. not filtering by prefix).
+     *
+     * @param rb the ResourceBundle to load from
+     * @return the number of bean definitions found
+     * @throws BeanDefinitionStoreException in case of loading or parsing errors
+     * @see #registerBeanDefinitions(java.util.ResourceBundle, String)
+     */
+    public int registerBeanDefinitions(ResourceBundle rb) throws BeanDefinitionStoreException {
+        return registerBeanDefinitions(rb, null);
+    }
 
-		try {
-			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
-					parent, className, getBeanClassLoader());
-			bd.setScope(scope);
-			bd.setAbstract(isAbstract);
-			bd.setLazyInit(lazyInit);
-			bd.setConstructorArgumentValues(cas);
-			bd.setPropertyValues(pvs);
-			getRegistry().registerBeanDefinition(beanName, bd);
-		}
-		catch (ClassNotFoundException ex) {
-			throw new CannotLoadBeanClassException(resourceDescription, beanName, className, ex);
-		}
-		catch (LinkageError err) {
-			throw new CannotLoadBeanClassException(resourceDescription, beanName, className, err);
-		}
-	}
+    /**
+     * Register bean definitions contained in a ResourceBundle.
+     * <p>Similar syntax as for a Map. This method is useful to enable
+     * standard Java internationalization support.
+     *
+     * @param rb     the ResourceBundle to load from
+     * @param prefix a filter within the keys in the map: e.g. 'beans.'
+     *               (can be empty or {@code null})
+     * @return the number of bean definitions found
+     * @throws BeanDefinitionStoreException in case of loading or parsing errors
+     */
+    public int registerBeanDefinitions(ResourceBundle rb, @Nullable String prefix) throws BeanDefinitionStoreException {
+        // Simply create a map and call overloaded method.
+        Map<String, Object> map = new HashMap<>();
+        Enumeration<String> keys = rb.getKeys();
+        while (keys.hasMoreElements()) {
+            String key = keys.nextElement();
+            map.put(key, rb.getObject(key));
+        }
+        return registerBeanDefinitions(map, prefix);
+    }
 
-	/**
-	 * Reads the value of the entry. Correctly interprets bean references for
-	 * values that are prefixed with an asterisk.
-	 */
-	private Object readValue(Map.Entry<?, ?> entry) {
-		Object val = entry.getValue();
-		if (val instanceof String) {
-			String strVal = (String) val;
-			// If it starts with a reference prefix...
-			if (strVal.startsWith(REF_PREFIX)) {
-				// Expand the reference.
-				String targetName = strVal.substring(1);
-				if (targetName.startsWith(REF_PREFIX)) {
-					// Escaped prefix -> use plain value.
-					val = targetName;
-				}
-				else {
-					val = new RuntimeBeanReference(targetName);
-				}
-			}
-		}
-		return val;
-	}
+
+    /**
+     * Register bean definitions contained in a Map, using all property keys (i.e. not
+     * filtering by prefix).
+     *
+     * @param map a map of {@code name} to {@code property} (String or Object). Property
+     *            values will be strings if coming from a Properties file etc. Property names
+     *            (keys) <b>must</b> be Strings. Class keys must be Strings.
+     * @return the number of bean definitions found
+     * @throws BeansException in case of loading or parsing errors
+     * @see #registerBeanDefinitions(java.util.Map, String, String)
+     */
+    public int registerBeanDefinitions(Map<?, ?> map) throws BeansException {
+        return registerBeanDefinitions(map, null);
+    }
+
+    /**
+     * Register bean definitions contained in a Map.
+     * Ignore ineligible properties.
+     * <p>
+     * 注册bean定义
+     *
+     * @param map    a map of {@code name} to {@code property} (String or Object). Property
+     *               values will be strings if coming from a Properties file etc. Property names
+     *               (keys) <b>must</b> be Strings. Class keys must be Strings.
+     * @param prefix a filter within the keys in the map: e.g. 'beans.'
+     *               (can be empty or {@code null})
+     * @return the number of bean definitions found
+     * @throws BeansException in case of loading or parsing errors
+     */
+    public int registerBeanDefinitions(Map<?, ?> map, @Nullable String prefix) throws BeansException {
+        return registerBeanDefinitions(map, prefix, "Map " + map);
+    }
+
+    /**
+     * Register bean definitions contained in a Map.
+     * Ignore ineligible properties.
+     *
+     * @param map                 a map of {@code name} to {@code property} (String or Object). Property
+     *                            values will be strings if coming from a Properties file etc. Property names
+     *                            (keys) <b>must</b> be Strings. Class keys must be Strings.
+     *                            key是beanName value是class
+     * @param prefix              a filter within the keys in the map: e.g. 'beans.'
+     *                            (can be empty or {@code null})
+     *                            前缀
+     * @param resourceDescription description of the resource that the
+     *                            Map came from (for logging purposes)
+     * @return the number of bean definitions found
+     * @throws BeansException in case of loading or parsing errors
+     * @see #registerBeanDefinitions(Map, String)
+     */
+    public int registerBeanDefinitions(Map<?, ?> map, @Nullable String prefix, String resourceDescription)
+            throws BeansException {
+
+        if (prefix == null) {
+            prefix = "";
+        }
+        int beanCount = 0;
+
+        for (Object key : map.keySet()) {
+            if (!(key instanceof String)) {
+                throw new IllegalArgumentException("Illegal key [" + key + "]: only Strings allowed");
+            }
+            String keyString = (String) key;
+            if (keyString.startsWith(prefix)) {
+                // Key is of form: prefix<name>.property
+                String nameAndProperty = keyString.substring(prefix.length());
+                // Find dot before property name, ignoring dots in property keys.
+                int sepIdx = -1;
+                int propKeyIdx = nameAndProperty.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX);
+                if (propKeyIdx != -1) {
+                    sepIdx = nameAndProperty.lastIndexOf(SEPARATOR, propKeyIdx);
+                } else {
+                    sepIdx = nameAndProperty.lastIndexOf(SEPARATOR);
+                }
+                if (sepIdx != -1) {
+                    String beanName = nameAndProperty.substring(0, sepIdx);
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Found bean name '" + beanName + "'");
+                    }
+                    if (!getRegistry().containsBeanDefinition(beanName)) {
+                        // If we haven't already registered it...
+                        // bean 注册
+                        registerBeanDefinition(beanName, map, prefix + beanName, resourceDescription);
+                        // bean累加数量
+                        ++beanCount;
+                    }
+                } else {
+                    // Ignore it: It wasn't a valid bean name and property,
+                    // although it did start with the required prefix.
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Invalid bean name and property [" + nameAndProperty + "]");
+                    }
+                }
+            }
+        }
+
+        return beanCount;
+    }
+
+    /**
+     * Get all property values, given a prefix (which will be stripped)
+     * and add the bean they define to the factory with the given name.
+     *
+     * @param beanName            name of the bean to define
+     * @param map                 a Map containing string pairs
+     * @param prefix              prefix of each entry, which will be stripped
+     * @param resourceDescription description of the resource that the
+     *                            Map came from (for logging purposes)
+     * @throws BeansException if the bean definition could not be parsed or registered
+     */
+    protected void registerBeanDefinition(String beanName, Map<?, ?> map, String prefix, String resourceDescription)
+            throws BeansException {
+
+        // 类名
+        String className = null;
+        // 父级
+        String parent = null;
+        // 默认作用域
+        String scope = GenericBeanDefinition.SCOPE_SINGLETON;
+        boolean isAbstract = false;
+        boolean lazyInit = false;
+
+        ConstructorArgumentValues cas = new ConstructorArgumentValues();
+        MutablePropertyValues pvs = new MutablePropertyValues();
+
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            String key = StringUtils.trimWhitespace((String) entry.getKey());
+            if (key.startsWith(prefix + SEPARATOR)) {
+                // 截取key
+                String property = key.substring(prefix.length() + SEPARATOR.length());
+                if (CLASS_KEY.equals(property)) {
+                    // 设置className
+                    className = StringUtils.trimWhitespace((String) entry.getValue());
+                } else if (PARENT_KEY.equals(property)) {
+                    // 设置父级
+                    parent = StringUtils.trimWhitespace((String) entry.getValue());
+                } else if (ABSTRACT_KEY.equals(property)) {
+                    String val = StringUtils.trimWhitespace((String) entry.getValue());
+                    isAbstract = TRUE_VALUE.equals(val);
+                } else if (SCOPE_KEY.equals(property)) {
+                    // Spring 2.0 style
+                    scope = StringUtils.trimWhitespace((String) entry.getValue());
+                } else if (SINGLETON_KEY.equals(property)) {
+                    // Spring 1.2 style
+                    String val = StringUtils.trimWhitespace((String) entry.getValue());
+                    scope = ("".equals(val) || TRUE_VALUE.equals(val) ? GenericBeanDefinition.SCOPE_SINGLETON :
+                            GenericBeanDefinition.SCOPE_PROTOTYPE);
+                } else if (LAZY_INIT_KEY.equals(property)) {
+                    String val = StringUtils.trimWhitespace((String) entry.getValue());
+                    lazyInit = TRUE_VALUE.equals(val);
+                } else if (property.startsWith(CONSTRUCTOR_ARG_PREFIX)) {
+                    if (property.endsWith(REF_SUFFIX)) {
+                        int index = Integer.parseInt(property.substring(1, property.length() - REF_SUFFIX.length()));
+                        cas.addIndexedArgumentValue(index, new RuntimeBeanReference(entry.getValue().toString()));
+                    } else {
+                        int index = Integer.parseInt(property.substring(1));
+                        cas.addIndexedArgumentValue(index, readValue(entry));
+                    }
+                } else if (property.endsWith(REF_SUFFIX)) {
+                    // This isn't a real property, but a reference to another prototype
+                    // Extract property name: property is of form dog(ref)
+                    property = property.substring(0, property.length() - REF_SUFFIX.length());
+                    String ref = StringUtils.trimWhitespace((String) entry.getValue());
+
+                    // It doesn't matter if the referenced bean hasn't yet been registered:
+                    // this will ensure that the reference is resolved at runtime.
+                    Object val = new RuntimeBeanReference(ref);
+                    pvs.add(property, val);
+                } else {
+                    // It's a normal bean property.
+                    pvs.add(property, readValue(entry));
+                }
+            }
+        }
+
+        if (logger.isTraceEnabled()) {
+            logger.trace("Registering bean definition for bean name '" + beanName + "' with " + pvs);
+        }
+
+        // Just use default parent if we're not dealing with the parent itself,
+        // and if there's no class name specified. The latter has to happen for
+        // backwards compatibility reasons.
+        if (parent == null && className == null && !beanName.equals(this.defaultParentBean)) {
+            parent = this.defaultParentBean;
+        }
+
+        try {
+            AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
+                    parent, className, getBeanClassLoader());
+            bd.setScope(scope);
+            bd.setAbstract(isAbstract);
+            bd.setLazyInit(lazyInit);
+            bd.setConstructorArgumentValues(cas);
+            bd.setPropertyValues(pvs);
+            getRegistry().registerBeanDefinition(beanName, bd);
+        } catch (ClassNotFoundException ex) {
+            throw new CannotLoadBeanClassException(resourceDescription, beanName, className, ex);
+        } catch (LinkageError err) {
+            throw new CannotLoadBeanClassException(resourceDescription, beanName, className, err);
+        }
+    }
+
+    /**
+     * Reads the value of the entry. Correctly interprets bean references for
+     * values that are prefixed with an asterisk.
+     */
+    private Object readValue(Map.Entry<?, ?> entry) {
+        Object val = entry.getValue();
+        if (val instanceof String) {
+            String strVal = (String) val;
+            // If it starts with a reference prefix...
+            if (strVal.startsWith(REF_PREFIX)) {
+                // Expand the reference.
+                String targetName = strVal.substring(1);
+                if (targetName.startsWith(REF_PREFIX)) {
+                    // Escaped prefix -> use plain value.
+                    val = targetName;
+                } else {
+                    val = new RuntimeBeanReference(targetName);
+                }
+            }
+        }
+        return val;
+    }
 
 }

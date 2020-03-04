@@ -32,17 +32,17 @@ import org.junit.runners.Suite.SuiteClasses;
 // Note: the following 'multi-line' layout is for enhanced code readability.
 @SuiteClasses({
 
-DefaultLocationsBaseTests.class,
+        DefaultLocationsBaseTests.class,
 
-DefaultLocationsInheritedTests.class,
+        DefaultLocationsInheritedTests.class,
 
-ExplicitLocationsBaseTests.class,
+        ExplicitLocationsBaseTests.class,
 
-ExplicitLocationsInheritedTests.class,
+        ExplicitLocationsInheritedTests.class,
 
-BeanOverridingDefaultLocationsInheritedTests.class,
+        BeanOverridingDefaultLocationsInheritedTests.class,
 
-BeanOverridingExplicitLocationsInheritedTests.class
+        BeanOverridingExplicitLocationsInheritedTests.class
 
 })
 public class Spr3896SuiteTests {

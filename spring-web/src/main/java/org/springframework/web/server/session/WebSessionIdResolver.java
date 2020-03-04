@@ -16,9 +16,9 @@
 
 package org.springframework.web.server.session;
 
-import java.util.List;
-
 import org.springframework.web.server.ServerWebExchange;
+
+import java.util.List;
 
 /**
  * Contract for session id resolution strategies. Allows for session id
@@ -26,29 +26,32 @@ import org.springframework.web.server.ServerWebExchange;
  * the session through the response.
  *
  * @author Rossen Stoyanchev
- * @since 5.0
  * @see CookieWebSessionIdResolver
+ * @since 5.0
  */
 public interface WebSessionIdResolver {
 
-	/**
-	 * Resolve the session id's associated with the request.
-	 * @param exchange the current exchange
-	 * @return the session id's or an empty list
-	 */
-	List<String> resolveSessionIds(ServerWebExchange exchange);
+    /**
+     * Resolve the session id's associated with the request.
+     *
+     * @param exchange the current exchange
+     * @return the session id's or an empty list
+     */
+    List<String> resolveSessionIds(ServerWebExchange exchange);
 
-	/**
-	 * Send the given session id to the client.
-	 * @param exchange the current exchange
-	 * @param sessionId the session id
-	 */
-	void setSessionId(ServerWebExchange exchange, String sessionId);
+    /**
+     * Send the given session id to the client.
+     *
+     * @param exchange  the current exchange
+     * @param sessionId the session id
+     */
+    void setSessionId(ServerWebExchange exchange, String sessionId);
 
-	/**
-	 * Instruct the client to end the current session.
-	 * @param exchange the current exchange
-	 */
-	void expireSession(ServerWebExchange exchange);
+    /**
+     * Instruct the client to end the current session.
+     *
+     * @param exchange the current exchange
+     */
+    void expireSession(ServerWebExchange exchange);
 
 }

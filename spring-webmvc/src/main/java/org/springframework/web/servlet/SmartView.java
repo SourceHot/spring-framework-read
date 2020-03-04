@@ -25,9 +25,9 @@ package org.springframework.web.servlet;
  */
 public interface SmartView extends View {
 
-	/**
-	 * Whether the view performs a redirect.
-	 */
-	boolean isRedirectView();
+    /**
+     * Whether the view performs a redirect.
+     */
+    boolean isRedirectView();
 
 }

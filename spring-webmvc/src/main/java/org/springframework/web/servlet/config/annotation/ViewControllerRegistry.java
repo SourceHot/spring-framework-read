@@ -16,21 +16,22 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Assists with the registration of simple automated controllers pre-configured
  * with status code and/or a view.
- *
+ * <p>
  * 视图控制器注册
+ *
  * @author Rossen Stoyanchev
  * @author Keith Donald
  * @since 3.1
@@ -60,8 +61,8 @@ public class ViewControllerRegistry {
      * <p>Patterns like {@code "/admin/**"} or {@code "/articles/{articlename:\\w+}"}
      * are allowed. See {@link org.springframework.util.AntPathMatcher} for more details on the
      * syntax.
-     *
-     *
+     * <p>
+     * <p>
      * 添加视图名称对应的url
      */
     public ViewControllerRegistration addViewController(String urlPath) {
@@ -76,8 +77,8 @@ public class ViewControllerRegistry {
      * to another URL. By default the redirect URL is expected to be relative to
      * the current ServletContext, i.e. as relative to the web application root.
      *
-     * @param urlPath 原始url
-     * @param redirectUrl  跳转url
+     * @param urlPath     原始url
+     * @param redirectUrl 跳转url
      * @since 4.1
      */
     public RedirectViewControllerRegistration addRedirectViewController(String urlPath, String redirectUrl) {

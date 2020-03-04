@@ -40,96 +40,95 @@ import org.springframework.util.Assert;
  */
 public final class ExpectedCount {
 
-	private final int minCount;
+    private final int minCount;
 
-	private final int maxCount;
-
-
-	/**
-	 * Private constructor.
-	 * See static factory methods in this class.
-	 */
-	private ExpectedCount(int minCount, int maxCount) {
-		Assert.isTrue(minCount >= 0, "minCount >= 0 is required");
-		Assert.isTrue(maxCount >= minCount, "maxCount >= minCount is required");
-		this.minCount = minCount;
-		this.maxCount = maxCount;
-	}
+    private final int maxCount;
 
 
-	/**
-	 * Return the {@code min} boundary of the expected count range.
-	 */
-	public int getMinCount() {
-		return this.minCount;
-	}
+    /**
+     * Private constructor.
+     * See static factory methods in this class.
+     */
+    private ExpectedCount(int minCount, int maxCount) {
+        Assert.isTrue(minCount >= 0, "minCount >= 0 is required");
+        Assert.isTrue(maxCount >= minCount, "maxCount >= minCount is required");
+        this.minCount = minCount;
+        this.maxCount = maxCount;
+    }
 
-	/**
-	 * Return the {@code max} boundary of the expected count range.
-	 */
-	public int getMaxCount() {
-		return this.maxCount;
-	}
+    /**
+     * Exactly once.
+     */
+    public static ExpectedCount once() {
+        return new ExpectedCount(1, 1);
+    }
 
+    /**
+     * Exactly twice.
+     */
+    public static ExpectedCount twice() {
+        return new ExpectedCount(2, 2);
+    }
 
-	/**
-	 * Exactly once.
-	 */
-	public static ExpectedCount once() {
-		return new ExpectedCount(1, 1);
-	}
+    /**
+     * Many times (range of 1..Integer.MAX_VALUE).
+     */
+    public static ExpectedCount manyTimes() {
+        return new ExpectedCount(1, Integer.MAX_VALUE);
+    }
 
-	/**
-	 * Exactly twice.
-	 */
-	public static ExpectedCount twice() {
-		return new ExpectedCount(2, 2);
-	}
+    /**
+     * Exactly N times.
+     */
+    public static ExpectedCount times(int count) {
+        Assert.isTrue(count >= 1, "'count' must be >= 1");
+        return new ExpectedCount(count, count);
+    }
 
-	/**
-	 * Many times (range of 1..Integer.MAX_VALUE).
-	 */
-	public static ExpectedCount manyTimes() {
-		return new ExpectedCount(1, Integer.MAX_VALUE);
-	}
+    /**
+     * At least {@code min} number of times.
+     */
+    public static ExpectedCount min(int min) {
+        Assert.isTrue(min >= 1, "'min' must be >= 1");
+        return new ExpectedCount(min, Integer.MAX_VALUE);
+    }
 
-	/**
-	 * Exactly N times.
-	 */
-	public static ExpectedCount times(int count) {
-		Assert.isTrue(count >= 1, "'count' must be >= 1");
-		return new ExpectedCount(count, count);
-	}
+    /**
+     * At most {@code max} number of times.
+     */
+    public static ExpectedCount max(int max) {
+        Assert.isTrue(max >= 1, "'max' must be >= 1");
+        return new ExpectedCount(1, max);
+    }
 
-	/**
-	 * At least {@code min} number of times.
-	 */
-	public static ExpectedCount min(int min) {
-		Assert.isTrue(min >= 1, "'min' must be >= 1");
-		return new ExpectedCount(min, Integer.MAX_VALUE);
-	}
+    /**
+     * No calls expected at all, i.e. min=0 and max=0.
+     *
+     * @since 4.3.6
+     */
+    public static ExpectedCount never() {
+        return new ExpectedCount(0, 0);
+    }
 
-	/**
-	 * At most {@code max} number of times.
-	 */
-	public static ExpectedCount max(int max) {
-		Assert.isTrue(max >= 1, "'max' must be >= 1");
-		return new ExpectedCount(1, max);
-	}
+    /**
+     * Between {@code min} and {@code max} number of times.
+     */
+    public static ExpectedCount between(int min, int max) {
+        return new ExpectedCount(min, max);
+    }
 
-	/**
-	 * No calls expected at all, i.e. min=0 and max=0.
-	 * @since 4.3.6
-	 */
-	public static ExpectedCount never() {
-		return new ExpectedCount(0, 0);
-	}
+    /**
+     * Return the {@code min} boundary of the expected count range.
+     */
+    public int getMinCount() {
+        return this.minCount;
+    }
 
-	/**
-	 * Between {@code min} and {@code max} number of times.
-	 */
-	public static ExpectedCount between(int min, int max) {
-		return new ExpectedCount(min, max);
-	}
+    /**
+     * Return the {@code max} boundary of the expected count range.
+     */
+    public int getMaxCount() {
+        return this.maxCount;
+    }
 
 }

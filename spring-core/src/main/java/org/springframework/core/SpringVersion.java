@@ -33,19 +33,20 @@ import org.springframework.lang.Nullable;
  */
 public final class SpringVersion {
 
-	private SpringVersion() {
-	}
+    private SpringVersion() {
+    }
 
 
-	/**
-	 * Return the full version string of the present Spring codebase,
-	 * or {@code null} if it cannot be determined.
-	 * @see Package#getImplementationVersion()
-	 */
-	@Nullable
-	public static String getVersion() {
-		Package pkg = SpringVersion.class.getPackage();
-		return (pkg != null ? pkg.getImplementationVersion() : null);
-	}
+    /**
+     * Return the full version string of the present Spring codebase,
+     * or {@code null} if it cannot be determined.
+     *
+     * @see Package#getImplementationVersion()
+     */
+    @Nullable
+    public static String getVersion() {
+        Package pkg = SpringVersion.class.getPackage();
+        return (pkg != null ? pkg.getImplementationVersion() : null);
+    }
 
 }

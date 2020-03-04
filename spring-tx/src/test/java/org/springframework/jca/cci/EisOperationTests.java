@@ -16,6 +16,11 @@
 
 package org.springframework.jca.cci;
 
+import org.junit.Test;
+import org.springframework.jca.cci.core.RecordCreator;
+import org.springframework.jca.cci.object.MappingRecordOperation;
+import org.springframework.jca.cci.object.SimpleRecordOperation;
+
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
@@ -24,14 +29,10 @@ import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 import javax.resource.cci.RecordFactory;
 
-import org.junit.Test;
-
-import org.springframework.jca.cci.core.RecordCreator;
-import org.springframework.jca.cci.object.MappingRecordOperation;
-import org.springframework.jca.cci.object.SimpleRecordOperation;
-
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertSame;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * @author Thierry Templier
@@ -39,176 +40,175 @@ import static org.mockito.BDDMockito.*;
  */
 public class EisOperationTests {
 
-	@Test
-	public void testSimpleRecordOperation() throws ResourceException {
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
-		Connection connection = mock(Connection.class);
-		Interaction interaction = mock(Interaction.class);
+    @Test
+    public void testSimpleRecordOperation() throws ResourceException {
+        ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+        Connection connection = mock(Connection.class);
+        Interaction interaction = mock(Interaction.class);
 
-		Record inputRecord = mock(Record.class);
-		Record outputRecord = mock(Record.class);
+        Record inputRecord = mock(Record.class);
+        Record outputRecord = mock(Record.class);
 
-		InteractionSpec interactionSpec = mock(InteractionSpec.class);
+        InteractionSpec interactionSpec = mock(InteractionSpec.class);
 
-		SimpleRecordOperation query = new SimpleRecordOperation(connectionFactory, interactionSpec);
+        SimpleRecordOperation query = new SimpleRecordOperation(connectionFactory, interactionSpec);
 
-		given(connectionFactory.getConnection()).willReturn(connection);
-		given(connection.createInteraction()).willReturn(interaction);
-		given(interaction.execute(interactionSpec, inputRecord)).willReturn(outputRecord);
+        given(connectionFactory.getConnection()).willReturn(connection);
+        given(connection.createInteraction()).willReturn(interaction);
+        given(interaction.execute(interactionSpec, inputRecord)).willReturn(outputRecord);
 
-		query.execute(inputRecord);
+        query.execute(inputRecord);
 
-		verify(interaction).execute(interactionSpec, inputRecord);
-		verify(interaction).close();
-		verify(connection).close();
-	}
+        verify(interaction).execute(interactionSpec, inputRecord);
+        verify(interaction).close();
+        verify(connection).close();
+    }
 
-	@Test
-	public void testSimpleRecordOperationWithExplicitOutputRecord() throws ResourceException {
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
-		Connection connection = mock(Connection.class);
-		Interaction interaction = mock(Interaction.class);
+    @Test
+    public void testSimpleRecordOperationWithExplicitOutputRecord() throws ResourceException {
+        ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+        Connection connection = mock(Connection.class);
+        Interaction interaction = mock(Interaction.class);
 
-		Record inputRecord = mock(Record.class);
-		Record outputRecord = mock(Record.class);
+        Record inputRecord = mock(Record.class);
+        Record outputRecord = mock(Record.class);
 
-		InteractionSpec interactionSpec = mock(InteractionSpec.class);
+        InteractionSpec interactionSpec = mock(InteractionSpec.class);
 
-		SimpleRecordOperation operation = new SimpleRecordOperation(connectionFactory, interactionSpec);
+        SimpleRecordOperation operation = new SimpleRecordOperation(connectionFactory, interactionSpec);
 
-		given(connectionFactory.getConnection()).willReturn(connection);
-		given(connection.createInteraction()).willReturn(interaction);
-		given(interaction.execute(interactionSpec, inputRecord, outputRecord)).willReturn(true);
+        given(connectionFactory.getConnection()).willReturn(connection);
+        given(connection.createInteraction()).willReturn(interaction);
+        given(interaction.execute(interactionSpec, inputRecord, outputRecord)).willReturn(true);
 
-		operation.execute(inputRecord, outputRecord);
+        operation.execute(inputRecord, outputRecord);
 
-		verify(interaction).execute(interactionSpec, inputRecord, outputRecord);
-		verify(interaction).close();
-		verify(connection).close();
-	}
+        verify(interaction).execute(interactionSpec, inputRecord, outputRecord);
+        verify(interaction).close();
+        verify(connection).close();
+    }
 
-	@Test
-	public void testSimpleRecordOperationWithInputOutputRecord() throws ResourceException {
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
-		Connection connection = mock(Connection.class);
-		Interaction interaction = mock(Interaction.class);
+    @Test
+    public void testSimpleRecordOperationWithInputOutputRecord() throws ResourceException {
+        ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+        Connection connection = mock(Connection.class);
+        Interaction interaction = mock(Interaction.class);
 
-		Record inputOutputRecord = mock(Record.class);
+        Record inputOutputRecord = mock(Record.class);
 
-		InteractionSpec interactionSpec = mock(InteractionSpec.class);
+        InteractionSpec interactionSpec = mock(InteractionSpec.class);
 
-		SimpleRecordOperation query = new SimpleRecordOperation(connectionFactory, interactionSpec);
+        SimpleRecordOperation query = new SimpleRecordOperation(connectionFactory, interactionSpec);
 
-		given(connectionFactory.getConnection()).willReturn(connection);
-		given(connection.createInteraction()).willReturn(interaction);
-		given(interaction.execute(interactionSpec, inputOutputRecord, inputOutputRecord)).willReturn(true);
+        given(connectionFactory.getConnection()).willReturn(connection);
+        given(connection.createInteraction()).willReturn(interaction);
+        given(interaction.execute(interactionSpec, inputOutputRecord, inputOutputRecord)).willReturn(true);
 
-		query.execute(inputOutputRecord, inputOutputRecord);
+        query.execute(inputOutputRecord, inputOutputRecord);
 
-		verify(interaction).execute(interactionSpec, inputOutputRecord, inputOutputRecord);
-		verify(interaction).close();
-		verify(connection).close();
-	}
+        verify(interaction).execute(interactionSpec, inputOutputRecord, inputOutputRecord);
+        verify(interaction).close();
+        verify(connection).close();
+    }
 
-	@Test
-	public void testMappingRecordOperation() throws ResourceException {
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
-		Connection connection = mock(Connection.class);
-		Interaction interaction = mock(Interaction.class);
-		RecordFactory recordFactory = mock(RecordFactory.class);
+    @Test
+    public void testMappingRecordOperation() throws ResourceException {
+        ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+        Connection connection = mock(Connection.class);
+        Interaction interaction = mock(Interaction.class);
+        RecordFactory recordFactory = mock(RecordFactory.class);
 
-		Record inputRecord = mock(Record.class);
-		Record outputRecord = mock(Record.class);
+        Record inputRecord = mock(Record.class);
+        Record outputRecord = mock(Record.class);
 
-		InteractionSpec interactionSpec = mock(InteractionSpec.class);
+        InteractionSpec interactionSpec = mock(InteractionSpec.class);
 
-		QueryCallDetector callDetector = mock(QueryCallDetector.class);
+        QueryCallDetector callDetector = mock(QueryCallDetector.class);
 
-		MappingRecordOperationImpl query = new MappingRecordOperationImpl(connectionFactory, interactionSpec);
-		query.setCallDetector(callDetector);
+        MappingRecordOperationImpl query = new MappingRecordOperationImpl(connectionFactory, interactionSpec);
+        query.setCallDetector(callDetector);
 
-		Object inObj = new Object();
-		Object outObj = new Object();
+        Object inObj = new Object();
+        Object outObj = new Object();
 
-		given(connectionFactory.getRecordFactory()).willReturn(recordFactory);
-		given(callDetector.callCreateInputRecord(recordFactory, inObj)).willReturn(inputRecord);
-		given(connectionFactory.getConnection()).willReturn(connection);
-		given(connection.createInteraction()).willReturn(interaction);
-		given(interaction.execute(interactionSpec, inputRecord)).willReturn(outputRecord);
-		given(callDetector.callExtractOutputData(outputRecord)).willReturn(outObj);
+        given(connectionFactory.getRecordFactory()).willReturn(recordFactory);
+        given(callDetector.callCreateInputRecord(recordFactory, inObj)).willReturn(inputRecord);
+        given(connectionFactory.getConnection()).willReturn(connection);
+        given(connection.createInteraction()).willReturn(interaction);
+        given(interaction.execute(interactionSpec, inputRecord)).willReturn(outputRecord);
+        given(callDetector.callExtractOutputData(outputRecord)).willReturn(outObj);
 
-		assertSame(outObj, query.execute(inObj));
-		verify(interaction).close();
-		verify(connection).close();
-	}
+        assertSame(outObj, query.execute(inObj));
+        verify(interaction).close();
+        verify(connection).close();
+    }
 
-	@Test
-	public void testMappingRecordOperationWithOutputRecordCreator() throws ResourceException {
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
-		Connection connection = mock(Connection.class);
-		Interaction interaction = mock(Interaction.class);
-		RecordFactory recordFactory = mock(RecordFactory.class);
+    @Test
+    public void testMappingRecordOperationWithOutputRecordCreator() throws ResourceException {
+        ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+        Connection connection = mock(Connection.class);
+        Interaction interaction = mock(Interaction.class);
+        RecordFactory recordFactory = mock(RecordFactory.class);
 
-		Record inputRecord = mock(Record.class);
-		Record outputRecord = mock(Record.class);
+        Record inputRecord = mock(Record.class);
+        Record outputRecord = mock(Record.class);
 
-		RecordCreator outputCreator = mock(RecordCreator.class);
+        RecordCreator outputCreator = mock(RecordCreator.class);
 
-		InteractionSpec interactionSpec = mock(InteractionSpec.class);
+        InteractionSpec interactionSpec = mock(InteractionSpec.class);
 
-		QueryCallDetector callDetector = mock(QueryCallDetector.class);
+        QueryCallDetector callDetector = mock(QueryCallDetector.class);
 
-		MappingRecordOperationImpl query = new MappingRecordOperationImpl(connectionFactory, interactionSpec);
-		query.setOutputRecordCreator(outputCreator);
-		query.setCallDetector(callDetector);
+        MappingRecordOperationImpl query = new MappingRecordOperationImpl(connectionFactory, interactionSpec);
+        query.setOutputRecordCreator(outputCreator);
+        query.setCallDetector(callDetector);
 
-		Object inObj = new Object();
-		Object outObj = new Object();
+        Object inObj = new Object();
+        Object outObj = new Object();
 
-		given(connectionFactory.getRecordFactory()).willReturn(recordFactory);
-		given(callDetector.callCreateInputRecord(recordFactory, inObj)).willReturn(inputRecord);
-		given(connectionFactory.getConnection()).willReturn(connection);
-		given(connection.createInteraction()).willReturn(interaction);
-		given(connectionFactory.getRecordFactory()).willReturn(recordFactory);
-		given(outputCreator.createRecord(recordFactory)).willReturn(outputRecord);
-		given(interaction.execute(interactionSpec, inputRecord, outputRecord)).willReturn(true);
-		given(callDetector.callExtractOutputData(outputRecord)).willReturn(outObj);
+        given(connectionFactory.getRecordFactory()).willReturn(recordFactory);
+        given(callDetector.callCreateInputRecord(recordFactory, inObj)).willReturn(inputRecord);
+        given(connectionFactory.getConnection()).willReturn(connection);
+        given(connection.createInteraction()).willReturn(interaction);
+        given(connectionFactory.getRecordFactory()).willReturn(recordFactory);
+        given(outputCreator.createRecord(recordFactory)).willReturn(outputRecord);
+        given(interaction.execute(interactionSpec, inputRecord, outputRecord)).willReturn(true);
+        given(callDetector.callExtractOutputData(outputRecord)).willReturn(outObj);
 
-		assertSame(outObj, query.execute(inObj));
-		verify(interaction).close();
-		verify(connection).close();
-	}
-
-
-	private class MappingRecordOperationImpl extends MappingRecordOperation {
-
-		private QueryCallDetector callDetector;
-
-		public MappingRecordOperationImpl(ConnectionFactory connectionFactory, InteractionSpec interactionSpec) {
-			super(connectionFactory, interactionSpec);
-		}
-
-		public void setCallDetector(QueryCallDetector callDetector) {
-			this.callDetector = callDetector;
-		}
-
-		@Override
-		protected Record createInputRecord(RecordFactory recordFactory, Object inputObject) {
-			return this.callDetector.callCreateInputRecord(recordFactory, inputObject);
-		}
-
-		@Override
-		protected Object extractOutputData(Record outputRecord) throws ResourceException {
-			return this.callDetector.callExtractOutputData(outputRecord);
-		}
-	}
+        assertSame(outObj, query.execute(inObj));
+        verify(interaction).close();
+        verify(connection).close();
+    }
 
 
-	private interface QueryCallDetector {
+    private interface QueryCallDetector {
 
-		Record callCreateInputRecord(RecordFactory recordFactory, Object inputObject);
+        Record callCreateInputRecord(RecordFactory recordFactory, Object inputObject);
 
-		Object callExtractOutputData(Record outputRecord);
-	}
+        Object callExtractOutputData(Record outputRecord);
+    }
+
+    private class MappingRecordOperationImpl extends MappingRecordOperation {
+
+        private QueryCallDetector callDetector;
+
+        public MappingRecordOperationImpl(ConnectionFactory connectionFactory, InteractionSpec interactionSpec) {
+            super(connectionFactory, interactionSpec);
+        }
+
+        public void setCallDetector(QueryCallDetector callDetector) {
+            this.callDetector = callDetector;
+        }
+
+        @Override
+        protected Record createInputRecord(RecordFactory recordFactory, Object inputObject) {
+            return this.callDetector.callCreateInputRecord(recordFactory, inputObject);
+        }
+
+        @Override
+        protected Object extractOutputData(Record outputRecord) throws ResourceException {
+            return this.callDetector.callExtractOutputData(outputRecord);
+        }
+    }
 
 }

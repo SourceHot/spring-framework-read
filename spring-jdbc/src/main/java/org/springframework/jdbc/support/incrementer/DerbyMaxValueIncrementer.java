@@ -35,7 +35,7 @@ import javax.sql.DataSource;
  * <pre class="code">create table tab (id int not null primary key, text varchar(100));
  * create table tab_sequence (value int generated always as identity, dummy char(1));
  * insert into tab_sequence (dummy) values(null);</pre>
- *
+ * <p>
  * If "cacheSize" is set, the intermediate values are served without querying the
  * database. If the server or your application is stopped or crashes or a transaction
  * is rolled back, the unused values will never be served. The maximum hole size in
@@ -55,69 +55,74 @@ import javax.sql.DataSource;
  */
 public class DerbyMaxValueIncrementer extends AbstractIdentityColumnMaxValueIncrementer {
 
-	/** The default for dummy name. */
-	private static final String DEFAULT_DUMMY_NAME = "dummy";
+    /**
+     * The default for dummy name.
+     */
+    private static final String DEFAULT_DUMMY_NAME = "dummy";
 
-	/** The name of the dummy column used for inserts. */
-	private String dummyName = DEFAULT_DUMMY_NAME;
-
-
-	/**
-	 * Default constructor for bean property style usage.
-	 * @see #setDataSource
-	 * @see #setIncrementerName
-	 * @see #setColumnName
-	 */
-	public DerbyMaxValueIncrementer() {
-	}
-
-	/**
-	 * Convenience constructor.
-	 * @param dataSource the DataSource to use
-	 * @param incrementerName the name of the sequence/table to use
-	 * @param columnName the name of the column in the sequence table to use
-	 */
-	public DerbyMaxValueIncrementer(DataSource dataSource, String incrementerName, String columnName) {
-		super(dataSource, incrementerName, columnName);
-		this.dummyName = DEFAULT_DUMMY_NAME;
-	}
-
-	/**
-	 * Convenience constructor.
-	 * @param dataSource the DataSource to use
-	 * @param incrementerName the name of the sequence/table to use
-	 * @param columnName the name of the column in the sequence table to use
-	 * @param dummyName the name of the dummy column used for inserts
-	 */
-	public DerbyMaxValueIncrementer(DataSource dataSource, String incrementerName, String columnName, String dummyName) {
-		super(dataSource, incrementerName, columnName);
-		this.dummyName = dummyName;
-	}
+    /**
+     * The name of the dummy column used for inserts.
+     */
+    private String dummyName = DEFAULT_DUMMY_NAME;
 
 
-	/**
-	 * Set the name of the dummy column.
-	 */
-	public void setDummyName(String dummyName) {
-		this.dummyName = dummyName;
-	}
+    /**
+     * Default constructor for bean property style usage.
+     *
+     * @see #setDataSource
+     * @see #setIncrementerName
+     * @see #setColumnName
+     */
+    public DerbyMaxValueIncrementer() {
+    }
 
-	/**
-	 * Return the name of the dummy column.
-	 */
-	public String getDummyName() {
-		return this.dummyName;
-	}
+    /**
+     * Convenience constructor.
+     *
+     * @param dataSource      the DataSource to use
+     * @param incrementerName the name of the sequence/table to use
+     * @param columnName      the name of the column in the sequence table to use
+     */
+    public DerbyMaxValueIncrementer(DataSource dataSource, String incrementerName, String columnName) {
+        super(dataSource, incrementerName, columnName);
+        this.dummyName = DEFAULT_DUMMY_NAME;
+    }
 
+    /**
+     * Convenience constructor.
+     *
+     * @param dataSource      the DataSource to use
+     * @param incrementerName the name of the sequence/table to use
+     * @param columnName      the name of the column in the sequence table to use
+     * @param dummyName       the name of the dummy column used for inserts
+     */
+    public DerbyMaxValueIncrementer(DataSource dataSource, String incrementerName, String columnName, String dummyName) {
+        super(dataSource, incrementerName, columnName);
+        this.dummyName = dummyName;
+    }
 
-	@Override
-	protected String getIncrementStatement() {
-		return "insert into " + getIncrementerName() + " (" + getDummyName() + ") values(null)";
-	}
+    /**
+     * Return the name of the dummy column.
+     */
+    public String getDummyName() {
+        return this.dummyName;
+    }
 
-	@Override
-	protected String getIdentityStatement() {
-		return "select IDENTITY_VAL_LOCAL() from " + getIncrementerName();
-	}
+    /**
+     * Set the name of the dummy column.
+     */
+    public void setDummyName(String dummyName) {
+        this.dummyName = dummyName;
+    }
+
+    @Override
+    protected String getIncrementStatement() {
+        return "insert into " + getIncrementerName() + " (" + getDummyName() + ") values(null)";
+    }
+
+    @Override
+    protected String getIdentityStatement() {
+        return "select IDENTITY_VAL_LOCAL() from " + getIncrementerName();
+    }
 
 }

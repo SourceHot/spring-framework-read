@@ -30,28 +30,30 @@ import org.springframework.util.MultiValueMap;
  */
 public interface ClientHttpResponse extends ReactiveHttpInputMessage {
 
-	/**
-	 * Return the HTTP status code as an {@link HttpStatus} enum value.
-	 * @return the HTTP status as an HttpStatus enum value (never {@code null})
-	 * @throws IllegalArgumentException in case of an unknown HTTP status code
-	 * @since #getRawStatusCode()
-	 * @see HttpStatus#valueOf(int)
-	 */
-	HttpStatus getStatusCode();
+    /**
+     * Return the HTTP status code as an {@link HttpStatus} enum value.
+     *
+     * @return the HTTP status as an HttpStatus enum value (never {@code null})
+     * @throws IllegalArgumentException in case of an unknown HTTP status code
+     * @see HttpStatus#valueOf(int)
+     * @since #getRawStatusCode()
+     */
+    HttpStatus getStatusCode();
 
-	/**
-	 * Return the HTTP status code (potentially non-standard and not
-	 * resolvable through the {@link HttpStatus} enum) as an integer.
-	 * @return the HTTP status as an integer value
-	 * @since 5.0.6
-	 * @see #getStatusCode()
-	 * @see HttpStatus#resolve(int)
-	 */
-	int getRawStatusCode();
+    /**
+     * Return the HTTP status code (potentially non-standard and not
+     * resolvable through the {@link HttpStatus} enum) as an integer.
+     *
+     * @return the HTTP status as an integer value
+     * @see #getStatusCode()
+     * @see HttpStatus#resolve(int)
+     * @since 5.0.6
+     */
+    int getRawStatusCode();
 
-	/**
-	 * Return a read-only map of response cookies received from the server.
-	 */
-	MultiValueMap<String, ResponseCookie> getCookies();
+    /**
+     * Return a read-only map of response cookies received from the server.
+     */
+    MultiValueMap<String, ResponseCookie> getCookies();
 
 }

@@ -16,10 +16,10 @@
 
 package org.springframework.util.comparator;
 
-import java.util.Comparator;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.Comparator;
 
 /**
  * Compares objects based on an arbitrary class order. Allows objects to be sorted based
@@ -31,43 +31,44 @@ import org.springframework.util.Assert;
  * {@code 0}. Consider combining with {@link Comparator#thenComparing(Comparator)}
  * if additional sorting is required.
  *
- * @author Phillip Webb
- * @since 3.2
  * @param <T> the type of objects that may be compared by this comparator
+ * @author Phillip Webb
  * @see Comparator#thenComparing(Comparator)
+ * @since 3.2
  */
 public class InstanceComparator<T> implements Comparator<T> {
 
-	private final Class<?>[] instanceOrder;
+    private final Class<?>[] instanceOrder;
 
 
-	/**
-	 * Create a new {@link InstanceComparator} instance.
-	 * @param instanceOrder the ordered list of classes that should be used when comparing
-	 * objects. Classes earlier in the list will be given a higher priority.
-	 */
-	public InstanceComparator(Class<?>... instanceOrder) {
-		Assert.notNull(instanceOrder, "'instanceOrder' array must not be null");
-		this.instanceOrder = instanceOrder;
-	}
+    /**
+     * Create a new {@link InstanceComparator} instance.
+     *
+     * @param instanceOrder the ordered list of classes that should be used when comparing
+     *                      objects. Classes earlier in the list will be given a higher priority.
+     */
+    public InstanceComparator(Class<?>... instanceOrder) {
+        Assert.notNull(instanceOrder, "'instanceOrder' array must not be null");
+        this.instanceOrder = instanceOrder;
+    }
 
 
-	@Override
-	public int compare(T o1, T o2) {
-		int i1 = getOrder(o1);
-		int i2 = getOrder(o2);
-		return (i1 < i2 ? -1 : (i1 == i2 ? 0 : 1));
-	}
+    @Override
+    public int compare(T o1, T o2) {
+        int i1 = getOrder(o1);
+        int i2 = getOrder(o2);
+        return (i1 < i2 ? -1 : (i1 == i2 ? 0 : 1));
+    }
 
-	private int getOrder(@Nullable T object) {
-		if (object != null) {
-			for (int i = 0; i < this.instanceOrder.length; i++) {
-				if (this.instanceOrder[i].isInstance(object)) {
-					return i;
-				}
-			}
-		}
-		return this.instanceOrder.length;
-	}
+    private int getOrder(@Nullable T object) {
+        if (object != null) {
+            for (int i = 0; i < this.instanceOrder.length; i++) {
+                if (this.instanceOrder[i].isInstance(object)) {
+                    return i;
+                }
+            }
+        }
+        return this.instanceOrder.length;
+    }
 
 }

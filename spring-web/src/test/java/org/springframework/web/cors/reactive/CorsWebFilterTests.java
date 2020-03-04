@@ -16,21 +16,19 @@
 package org.springframework.web.cors.reactive;
 
 
-import java.io.IOException;
-import java.util.Arrays;
-
-import javax.servlet.ServletException;
-
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
+
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -45,103 +43,103 @@ import static org.springframework.http.HttpHeaders.ORIGIN;
 
 /**
  * Unit tests for {@link CorsWebFilter}.
+ *
  * @author Sebastien Deleuze
  */
 public class CorsWebFilterTests {
 
-	private CorsWebFilter filter;
+    private final CorsConfiguration config = new CorsConfiguration();
+    private CorsWebFilter filter;
 
-	private final CorsConfiguration config = new CorsConfiguration();
+    @Before
+    public void setup() throws Exception {
+        config.setAllowedOrigins(Arrays.asList("https://domain1.com", "https://domain2.com"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST"));
+        config.setAllowedHeaders(Arrays.asList("header1", "header2"));
+        config.setExposedHeaders(Arrays.asList("header3", "header4"));
+        config.setMaxAge(123L);
+        config.setAllowCredentials(false);
+        filter = new CorsWebFilter(r -> config);
+    }
 
-	@Before
-	public void setup() throws Exception {
-		config.setAllowedOrigins(Arrays.asList("https://domain1.com", "https://domain2.com"));
-		config.setAllowedMethods(Arrays.asList("GET", "POST"));
-		config.setAllowedHeaders(Arrays.asList("header1", "header2"));
-		config.setExposedHeaders(Arrays.asList("header3", "header4"));
-		config.setMaxAge(123L);
-		config.setAllowCredentials(false);
-		filter = new CorsWebFilter(r -> config);
-	}
+    @Test
+    public void validActualRequest() {
+        WebFilterChain filterChain = (filterExchange) -> {
+            try {
+                HttpHeaders headers = filterExchange.getResponse().getHeaders();
+                assertEquals("https://domain2.com", headers.getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
+                assertEquals("header3, header4", headers.getFirst(ACCESS_CONTROL_EXPOSE_HEADERS));
+            } catch (AssertionError ex) {
+                return Mono.error(ex);
+            }
+            return Mono.empty();
 
-	@Test
-	public void validActualRequest() {
-		WebFilterChain filterChain = (filterExchange) -> {
-			try {
-				HttpHeaders headers = filterExchange.getResponse().getHeaders();
-				assertEquals("https://domain2.com", headers.getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
-				assertEquals("header3, header4", headers.getFirst(ACCESS_CONTROL_EXPOSE_HEADERS));
-			} catch (AssertionError ex) {
-				return Mono.error(ex);
-			}
-			return Mono.empty();
+        };
+        MockServerWebExchange exchange = MockServerWebExchange.from(
+                MockServerHttpRequest
+                        .get("https://domain1.com/test.html")
+                        .header(HOST, "domain1.com")
+                        .header(ORIGIN, "https://domain2.com")
+                        .header("header2", "foo"));
+        this.filter.filter(exchange, filterChain);
+    }
 
-		};
-		MockServerWebExchange exchange = MockServerWebExchange.from(
-				MockServerHttpRequest
-						.get("https://domain1.com/test.html")
-						.header(HOST, "domain1.com")
-						.header(ORIGIN, "https://domain2.com")
-						.header("header2", "foo"));
-		this.filter.filter(exchange, filterChain);
-	}
+    @Test
+    public void invalidActualRequest() throws ServletException, IOException {
+        MockServerWebExchange exchange = MockServerWebExchange.from(
+                MockServerHttpRequest
+                        .delete("https://domain1.com/test.html")
+                        .header(HOST, "domain1.com")
+                        .header(ORIGIN, "https://domain2.com")
+                        .header("header2", "foo"));
 
-	@Test
-	public void invalidActualRequest() throws ServletException, IOException {
-		MockServerWebExchange exchange = MockServerWebExchange.from(
-				MockServerHttpRequest
-						.delete("https://domain1.com/test.html")
-						.header(HOST, "domain1.com")
-						.header(ORIGIN, "https://domain2.com")
-						.header("header2", "foo"));
+        WebFilterChain filterChain = (filterExchange) -> Mono.error(
+                new AssertionError("Invalid requests must not be forwarded to the filter chain"));
+        filter.filter(exchange, filterChain);
 
-		WebFilterChain filterChain = (filterExchange) -> Mono.error(
-				new AssertionError("Invalid requests must not be forwarded to the filter chain"));
-		filter.filter(exchange, filterChain);
+        assertNull(exchange.getResponse().getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
+    }
 
-		assertNull(exchange.getResponse().getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
-	}
+    @Test
+    public void validPreFlightRequest() throws ServletException, IOException {
 
-	@Test
-	public void validPreFlightRequest() throws ServletException, IOException {
+        MockServerWebExchange exchange = MockServerWebExchange.from(
+                MockServerHttpRequest
+                        .options("https://domain1.com/test.html")
+                        .header(HOST, "domain1.com")
+                        .header(ORIGIN, "https://domain2.com")
+                        .header(ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.GET.name())
+                        .header(ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2")
+        );
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(
-				MockServerHttpRequest
-						.options("https://domain1.com/test.html")
-						.header(HOST, "domain1.com")
-						.header(ORIGIN, "https://domain2.com")
-						.header(ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.GET.name())
-						.header(ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2")
-		);
+        WebFilterChain filterChain = (filterExchange) -> Mono.error(
+                new AssertionError("Preflight requests must not be forwarded to the filter chain"));
+        filter.filter(exchange, filterChain);
 
-		WebFilterChain filterChain = (filterExchange) -> Mono.error(
-				new AssertionError("Preflight requests must not be forwarded to the filter chain"));
-		filter.filter(exchange, filterChain);
+        HttpHeaders headers = exchange.getResponse().getHeaders();
+        assertEquals("https://domain2.com", headers.getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
+        assertEquals("header1, header2", headers.getFirst(ACCESS_CONTROL_ALLOW_HEADERS));
+        assertEquals("header3, header4", headers.getFirst(ACCESS_CONTROL_EXPOSE_HEADERS));
+        assertEquals(123L, Long.parseLong(headers.getFirst(ACCESS_CONTROL_MAX_AGE)));
+    }
 
-		HttpHeaders headers = exchange.getResponse().getHeaders();
-		assertEquals("https://domain2.com", headers.getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals("header1, header2", headers.getFirst(ACCESS_CONTROL_ALLOW_HEADERS));
-		assertEquals("header3, header4", headers.getFirst(ACCESS_CONTROL_EXPOSE_HEADERS));
-		assertEquals(123L, Long.parseLong(headers.getFirst(ACCESS_CONTROL_MAX_AGE)));
-	}
+    @Test
+    public void invalidPreFlightRequest() throws ServletException, IOException {
 
-	@Test
-	public void invalidPreFlightRequest() throws ServletException, IOException {
+        MockServerWebExchange exchange = MockServerWebExchange.from(
+                MockServerHttpRequest
+                        .options("https://domain1.com/test.html")
+                        .header(HOST, "domain1.com")
+                        .header(ORIGIN, "https://domain2.com")
+                        .header(ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.DELETE.name())
+                        .header(ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2"));
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(
-				MockServerHttpRequest
-						.options("https://domain1.com/test.html")
-						.header(HOST, "domain1.com")
-						.header(ORIGIN, "https://domain2.com")
-						.header(ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.DELETE.name())
-						.header(ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2"));
+        WebFilterChain filterChain = (filterExchange) -> Mono.error(
+                new AssertionError("Preflight requests must not be forwarded to the filter chain"));
 
-		WebFilterChain filterChain = (filterExchange) -> Mono.error(
-				new AssertionError("Preflight requests must not be forwarded to the filter chain"));
+        filter.filter(exchange, filterChain);
 
-		filter.filter(exchange, filterChain);
-
-		assertNull(exchange.getResponse().getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
-	}
+        assertNull(exchange.getResponse().getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
+    }
 
 }

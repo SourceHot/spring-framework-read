@@ -143,8 +143,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
      */
     @SuppressWarnings("unchecked")
     public AutowiredAnnotationBeanPostProcessor() {
-		// 设置自动装配的注解类型
-		this.autowiredAnnotationTypes.add(Autowired.class);
+        // 设置自动装配的注解类型
+        this.autowiredAnnotationTypes.add(Autowired.class);
         this.autowiredAnnotationTypes.add(Value.class);
         try {
             this.autowiredAnnotationTypes.add((Class<? extends Annotation>)

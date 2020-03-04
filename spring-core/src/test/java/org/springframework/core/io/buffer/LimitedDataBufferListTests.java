@@ -15,49 +15,47 @@
  */
 package org.springframework.core.io.buffer;
 
-import java.nio.charset.StandardCharsets;
-
 import org.junit.Test;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link LimitedDataBufferList}.
+ *
  * @author Rossen Stoyanchev
  * @since 5.1.11
  */
 public class LimitedDataBufferListTests {
 
-	private final static DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+    private final static DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
+    private static DataBuffer toDataBuffer(String value) {
+        return bufferFactory.wrap(value.getBytes(StandardCharsets.UTF_8));
+    }
 
-	@Test
-	public void limitEnforced() {
-		try {
-			new LimitedDataBufferList(5).add(toDataBuffer("123456"));
-			fail();
-		}
-		catch (DataBufferLimitException ex) {
-			// Expected
-		}
-	}
+    @Test
+    public void limitEnforced() {
+        try {
+            new LimitedDataBufferList(5).add(toDataBuffer("123456"));
+            fail();
+        } catch (DataBufferLimitException ex) {
+            // Expected
+        }
+    }
 
-	@Test
-	public void limitIgnored() {
-		new LimitedDataBufferList(-1).add(toDataBuffer("123456"));
-	}
+    @Test
+    public void limitIgnored() {
+        new LimitedDataBufferList(-1).add(toDataBuffer("123456"));
+    }
 
-	@Test
-	public void clearResetsCount() {
-		LimitedDataBufferList list = new LimitedDataBufferList(5);
-		list.add(toDataBuffer("12345"));
-		list.clear();
-		list.add(toDataBuffer("12345"));
-	}
-
-
-	private static DataBuffer toDataBuffer(String value) {
-		return bufferFactory.wrap(value.getBytes(StandardCharsets.UTF_8));
-	}
+    @Test
+    public void clearResetsCount() {
+        LimitedDataBufferList list = new LimitedDataBufferList(5);
+        list.add(toDataBuffer("12345"));
+        list.clear();
+        list.add(toDataBuffer("12345"));
+    }
 
 }

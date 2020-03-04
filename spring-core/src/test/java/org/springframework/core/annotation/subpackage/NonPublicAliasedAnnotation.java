@@ -16,10 +16,10 @@
 
 package org.springframework.core.annotation.subpackage;
 
+import org.springframework.core.annotation.AliasFor;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import org.springframework.core.annotation.AliasFor;
 
 /**
  * Non-public mock of {@code org.springframework.web.bind.annotation.RequestMapping}.
@@ -30,11 +30,11 @@ import org.springframework.core.annotation.AliasFor;
 @Retention(RetentionPolicy.RUNTIME)
 @interface NonPublicAliasedAnnotation {
 
-	String name();
+    String name();
 
-	@AliasFor("path")
-	String value() default "";
+    @AliasFor("path")
+    String value() default "";
 
-	@AliasFor("value")
-	String path() default "";
+    @AliasFor("value")
+    String path() default "";
 }

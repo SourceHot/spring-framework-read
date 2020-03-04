@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.PopulatedSchemaDatabaseConfig;
@@ -47,49 +46,49 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestInstance(Lifecycle.PER_CLASS)
 class NestedTestsWithSqlScriptsAndJUnitJupiterTests {
 
-	@Autowired
-	JdbcTemplate jdbcTemplate;
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
-	@BeforeTransaction
-	@AfterTransaction
-	void checkInitialDatabaseState() {
-		assertEquals(0, countRowsInTable("user"));
-	}
+    @BeforeTransaction
+    @AfterTransaction
+    void checkInitialDatabaseState() {
+        assertEquals(0, countRowsInTable("user"));
+    }
 
-	@Test
-	@Sql("/org/springframework/test/context/jdbc/data.sql")
-	void sqlScripts() {
-		assertEquals(1, countRowsInTable("user"));
-	}
+    @Test
+    @Sql("/org/springframework/test/context/jdbc/data.sql")
+    void sqlScripts() {
+        assertEquals(1, countRowsInTable("user"));
+    }
 
-	private int countRowsInTable(String tableName) {
-		return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
-	}
+    private int countRowsInTable(String tableName) {
+        return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
+    }
 
-	@Nested
-	@SpringJUnitConfig(PopulatedSchemaDatabaseConfig.class)
-	@Transactional
-	class NestedTests {
+    @Nested
+    @SpringJUnitConfig(PopulatedSchemaDatabaseConfig.class)
+    @Transactional
+    class NestedTests {
 
-		@Autowired
-		JdbcTemplate jdbcTemplate;
+        @Autowired
+        JdbcTemplate jdbcTemplate;
 
-		@BeforeTransaction
-		@AfterTransaction
-		void checkInitialDatabaseState() {
-			assertEquals(0, countRowsInTable("user"));
-		}
+        @BeforeTransaction
+        @AfterTransaction
+        void checkInitialDatabaseState() {
+            assertEquals(0, countRowsInTable("user"));
+        }
 
-		@Test
-		@Sql("/org/springframework/test/context/jdbc/data.sql")
-		void nestedSqlScripts() {
-			assertEquals(1, countRowsInTable("user"));
-		}
+        @Test
+        @Sql("/org/springframework/test/context/jdbc/data.sql")
+        void nestedSqlScripts() {
+            assertEquals(1, countRowsInTable("user"));
+        }
 
-		private int countRowsInTable(String tableName) {
-			return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
-		}
+        private int countRowsInTable(String tableName) {
+            return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
+        }
 
-	}
+    }
 
 }

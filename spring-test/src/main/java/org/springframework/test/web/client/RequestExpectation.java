@@ -29,20 +29,21 @@ package org.springframework.test.web.client;
  */
 public interface RequestExpectation extends ResponseActions, RequestMatcher, ResponseCreator {
 
-	/**
-	 * Whether there is a remaining count of invocations for this expectation.
-	 */
-	boolean hasRemainingCount();
+    /**
+     * Whether there is a remaining count of invocations for this expectation.
+     */
+    boolean hasRemainingCount();
 
-	/**
-	 * Increase the matched request count and check we haven't passed the max count.
-	 * @since 5.0.3
-	 */
-	void incrementAndValidate();
+    /**
+     * Increase the matched request count and check we haven't passed the max count.
+     *
+     * @since 5.0.3
+     */
+    void incrementAndValidate();
 
-	/**
-	 * Whether the requirements for this request expectation have been met.
-	 */
-	boolean isSatisfied();
+    /**
+     * Whether the requirements for this request expectation have been met.
+     */
+    boolean isSatisfied();
 
 }

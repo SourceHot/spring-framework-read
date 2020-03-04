@@ -25,25 +25,28 @@ package org.springframework.core.io.buffer;
  */
 public interface PooledDataBuffer extends DataBuffer {
 
-	/**
-	 * Return {@code true} if this buffer is allocated;
-	 * {@code false} if it has been deallocated.
-	 * @since 5.1
-	 */
-	boolean isAllocated();
+    /**
+     * Return {@code true} if this buffer is allocated;
+     * {@code false} if it has been deallocated.
+     *
+     * @since 5.1
+     */
+    boolean isAllocated();
 
-	/**
-	 * Increase the reference count for this buffer by one.
-	 * @return this buffer
-	 */
-	PooledDataBuffer retain();
+    /**
+     * Increase the reference count for this buffer by one.
+     *
+     * @return this buffer
+     */
+    PooledDataBuffer retain();
 
-	/**
-	 * Decrease the reference count for this buffer by one,
-	 * and deallocate it once the count reaches zero.
-	 * @return {@code true} if the buffer was deallocated;
-	 * {@code false} otherwise
-	 */
-	boolean release();
+    /**
+     * Decrease the reference count for this buffer by one,
+     * and deallocate it once the count reaches zero.
+     *
+     * @return {@code true} if the buffer was deallocated;
+     * {@code false} otherwise
+     */
+    boolean release();
 
 }

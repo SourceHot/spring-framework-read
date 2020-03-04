@@ -30,28 +30,28 @@ import org.springframework.lang.Nullable;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @since 2.0
  * @see RequestContextHolder#currentRequestAttributes()
  * @see RequestAttributes#SCOPE_REQUEST
  * @see RequestContextListener
  * @see org.springframework.web.filter.RequestContextFilter
  * @see org.springframework.web.servlet.DispatcherServlet
+ * @since 2.0
  */
 public class RequestScope extends AbstractRequestAttributesScope {
 
-	@Override
-	protected int getScope() {
-		return RequestAttributes.SCOPE_REQUEST;
-	}
+    @Override
+    protected int getScope() {
+        return RequestAttributes.SCOPE_REQUEST;
+    }
 
-	/**
-	 * There is no conversation id concept for a request, so this method
-	 * returns {@code null}.
-	 */
-	@Override
-	@Nullable
-	public String getConversationId() {
-		return null;
-	}
+    /**
+     * There is no conversation id concept for a request, so this method
+     * returns {@code null}.
+     */
+    @Override
+    @Nullable
+    public String getConversationId() {
+        return null;
+    }
 
 }

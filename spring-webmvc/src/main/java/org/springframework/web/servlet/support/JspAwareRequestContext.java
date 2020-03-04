@@ -16,16 +16,15 @@
 
 package org.springframework.web.servlet.support;
 
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
+import org.springframework.lang.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.jstl.core.Config;
-
-import org.springframework.lang.Nullable;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * JSP-aware (and JSTL-aware) subclass of RequestContext, allowing for
@@ -35,94 +34,96 @@ import org.springframework.lang.Nullable;
  * scope, in addition to the fallback locale strategy provided by the base class.
  *
  * @author Juergen Hoeller
- * @since 1.1.4
  * @see #getFallbackLocale
+ * @since 1.1.4
  */
 public class JspAwareRequestContext extends RequestContext {
 
-	private PageContext pageContext;
+    private PageContext pageContext;
 
 
-	/**
-	 * Create a new JspAwareRequestContext for the given page context,
-	 * using the request attributes for Errors retrieval.
-	 * @param pageContext current JSP page context
-	 */
-	public JspAwareRequestContext(PageContext pageContext) {
-		this(pageContext, null);
-	}
+    /**
+     * Create a new JspAwareRequestContext for the given page context,
+     * using the request attributes for Errors retrieval.
+     *
+     * @param pageContext current JSP page context
+     */
+    public JspAwareRequestContext(PageContext pageContext) {
+        this(pageContext, null);
+    }
 
-	/**
-	 * Create a new JspAwareRequestContext for the given page context,
-	 * using the given model attributes for Errors retrieval.
-	 * @param pageContext current JSP page context
-	 * @param model the model attributes for the current view
-	 * (can be {@code null}, using the request attributes for Errors retrieval)
-	 */
-	public JspAwareRequestContext(PageContext pageContext, @Nullable Map<String, Object> model) {
-		super((HttpServletRequest) pageContext.getRequest(), (HttpServletResponse) pageContext.getResponse(),
-				pageContext.getServletContext(), model);
-		this.pageContext = pageContext;
-	}
-
-
-	/**
-	 * Return the underlying PageContext.
-	 * Only intended for cooperating classes in this package.
-	 */
-	protected final PageContext getPageContext() {
-		return this.pageContext;
-	}
-
-	/**
-	 * This implementation checks for a JSTL locale attribute in page,
-	 * request, session or application scope; if not found, returns the
-	 * {@code HttpServletRequest.getLocale()}.
-	 */
-	@Override
-	protected Locale getFallbackLocale() {
-		if (jstlPresent) {
-			Locale locale = JstlPageLocaleResolver.getJstlLocale(getPageContext());
-			if (locale != null) {
-				return locale;
-			}
-		}
-		return getRequest().getLocale();
-	}
-
-	/**
-	 * This implementation checks for a JSTL time zone attribute in page,
-	 * request, session or application scope; if not found, returns {@code null}.
-	 */
-	@Override
-	protected TimeZone getFallbackTimeZone() {
-		if (jstlPresent) {
-			TimeZone timeZone = JstlPageLocaleResolver.getJstlTimeZone(getPageContext());
-			if (timeZone != null) {
-				return timeZone;
-			}
-		}
-		return null;
-	}
+    /**
+     * Create a new JspAwareRequestContext for the given page context,
+     * using the given model attributes for Errors retrieval.
+     *
+     * @param pageContext current JSP page context
+     * @param model       the model attributes for the current view
+     *                    (can be {@code null}, using the request attributes for Errors retrieval)
+     */
+    public JspAwareRequestContext(PageContext pageContext, @Nullable Map<String, Object> model) {
+        super((HttpServletRequest) pageContext.getRequest(), (HttpServletResponse) pageContext.getResponse(),
+                pageContext.getServletContext(), model);
+        this.pageContext = pageContext;
+    }
 
 
-	/**
-	 * Inner class that isolates the JSTL dependency.
-	 * Just called to resolve the fallback locale if the JSTL API is present.
-	 */
-	private static class JstlPageLocaleResolver {
+    /**
+     * Return the underlying PageContext.
+     * Only intended for cooperating classes in this package.
+     */
+    protected final PageContext getPageContext() {
+        return this.pageContext;
+    }
 
-		@Nullable
-		public static Locale getJstlLocale(PageContext pageContext) {
-			Object localeObject = Config.find(pageContext, Config.FMT_LOCALE);
-			return (localeObject instanceof Locale ? (Locale) localeObject : null);
-		}
+    /**
+     * This implementation checks for a JSTL locale attribute in page,
+     * request, session or application scope; if not found, returns the
+     * {@code HttpServletRequest.getLocale()}.
+     */
+    @Override
+    protected Locale getFallbackLocale() {
+        if (jstlPresent) {
+            Locale locale = JstlPageLocaleResolver.getJstlLocale(getPageContext());
+            if (locale != null) {
+                return locale;
+            }
+        }
+        return getRequest().getLocale();
+    }
 
-		@Nullable
-		public static TimeZone getJstlTimeZone(PageContext pageContext) {
-			Object timeZoneObject = Config.find(pageContext, Config.FMT_TIME_ZONE);
-			return (timeZoneObject instanceof TimeZone ? (TimeZone) timeZoneObject : null);
-		}
-	}
+    /**
+     * This implementation checks for a JSTL time zone attribute in page,
+     * request, session or application scope; if not found, returns {@code null}.
+     */
+    @Override
+    protected TimeZone getFallbackTimeZone() {
+        if (jstlPresent) {
+            TimeZone timeZone = JstlPageLocaleResolver.getJstlTimeZone(getPageContext());
+            if (timeZone != null) {
+                return timeZone;
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * Inner class that isolates the JSTL dependency.
+     * Just called to resolve the fallback locale if the JSTL API is present.
+     */
+    private static class JstlPageLocaleResolver {
+
+        @Nullable
+        public static Locale getJstlLocale(PageContext pageContext) {
+            Object localeObject = Config.find(pageContext, Config.FMT_LOCALE);
+            return (localeObject instanceof Locale ? (Locale) localeObject : null);
+        }
+
+        @Nullable
+        public static TimeZone getJstlTimeZone(PageContext pageContext) {
+            Object timeZoneObject = Config.find(pageContext, Config.FMT_TIME_ZONE);
+            return (timeZoneObject instanceof TimeZone ? (TimeZone) timeZoneObject : null);
+        }
+    }
 
 }

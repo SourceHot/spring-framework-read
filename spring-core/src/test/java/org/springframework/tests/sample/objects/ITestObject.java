@@ -18,16 +18,16 @@ package org.springframework.tests.sample.objects;
 
 public interface ITestObject {
 
-	String getName();
+    String getName();
 
-	void setName(String name);
+    void setName(String name);
 
-	int getAge();
+    int getAge();
 
-	void setAge(int age);
+    void setAge(int age);
 
-	TestObject getSpouse();
+    TestObject getSpouse();
 
-	void setSpouse(TestObject spouse);
+    void setSpouse(TestObject spouse);
 
 }

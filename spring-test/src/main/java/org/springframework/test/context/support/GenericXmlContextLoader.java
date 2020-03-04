@@ -30,47 +30,49 @@ import org.springframework.util.ObjectUtils;
  * {@code "-context.xml"}.
  *
  * @author Sam Brannen
- * @since 2.5
  * @see XmlBeanDefinitionReader
  * @see GenericGroovyXmlContextLoader
  * @see AnnotationConfigContextLoader
+ * @since 2.5
  */
 public class GenericXmlContextLoader extends AbstractGenericContextLoader {
 
-	/**
-	 * Create a new {@link XmlBeanDefinitionReader}.
-	 * @return a new {@code XmlBeanDefinitionReader}
-	 */
-	@Override
-	protected BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context) {
-		return new XmlBeanDefinitionReader(context);
-	}
+    /**
+     * Create a new {@link XmlBeanDefinitionReader}.
+     *
+     * @return a new {@code XmlBeanDefinitionReader}
+     */
+    @Override
+    protected BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context) {
+        return new XmlBeanDefinitionReader(context);
+    }
 
-	/**
-	 * Returns {@code "-context.xml"} in order to support detection of a
-	 * default XML config file.
-	 */
-	@Override
-	protected String getResourceSuffix() {
-		return "-context.xml";
-	}
+    /**
+     * Returns {@code "-context.xml"} in order to support detection of a
+     * default XML config file.
+     */
+    @Override
+    protected String getResourceSuffix() {
+        return "-context.xml";
+    }
 
-	/**
-	 * Ensure that the supplied {@link MergedContextConfiguration} does not
-	 * contain {@link MergedContextConfiguration#getClasses() classes}.
-	 * @since 4.0.4
-	 * @see AbstractGenericContextLoader#validateMergedContextConfiguration
-	 */
-	@Override
-	protected void validateMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
-		if (mergedConfig.hasClasses()) {
-			String msg = String.format(
-				"Test class [%s] has been configured with @ContextConfiguration's 'classes' attribute %s, "
-						+ "but %s does not support annotated classes.", mergedConfig.getTestClass().getName(),
-				ObjectUtils.nullSafeToString(mergedConfig.getClasses()), getClass().getSimpleName());
-			logger.error(msg);
-			throw new IllegalStateException(msg);
-		}
-	}
+    /**
+     * Ensure that the supplied {@link MergedContextConfiguration} does not
+     * contain {@link MergedContextConfiguration#getClasses() classes}.
+     *
+     * @see AbstractGenericContextLoader#validateMergedContextConfiguration
+     * @since 4.0.4
+     */
+    @Override
+    protected void validateMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
+        if (mergedConfig.hasClasses()) {
+            String msg = String.format(
+                    "Test class [%s] has been configured with @ContextConfiguration's 'classes' attribute %s, "
+                            + "but %s does not support annotated classes.", mergedConfig.getTestClass().getName(),
+                    ObjectUtils.nullSafeToString(mergedConfig.getClasses()), getClass().getSimpleName());
+            logger.error(msg);
+            throw new IllegalStateException(msg);
+        }
+    }
 
 }

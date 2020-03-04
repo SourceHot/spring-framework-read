@@ -31,27 +31,29 @@ import javax.sql.DataSource;
 @Deprecated
 public class DB2MainframeSequenceMaxValueIncrementer extends AbstractSequenceMaxValueIncrementer {
 
-	/**
-	 * Default constructor for bean property style usage.
-	 * @see #setDataSource
-	 * @see #setIncrementerName
-	 */
-	public DB2MainframeSequenceMaxValueIncrementer() {
-	}
+    /**
+     * Default constructor for bean property style usage.
+     *
+     * @see #setDataSource
+     * @see #setIncrementerName
+     */
+    public DB2MainframeSequenceMaxValueIncrementer() {
+    }
 
-	/**
-	 * Convenience constructor.
-	 * @param dataSource the DataSource to use
-	 * @param incrementerName the name of the sequence/table to use
-	 */
-	public DB2MainframeSequenceMaxValueIncrementer(DataSource dataSource, String incrementerName) {
-		super(dataSource, incrementerName);
-	}
+    /**
+     * Convenience constructor.
+     *
+     * @param dataSource      the DataSource to use
+     * @param incrementerName the name of the sequence/table to use
+     */
+    public DB2MainframeSequenceMaxValueIncrementer(DataSource dataSource, String incrementerName) {
+        super(dataSource, incrementerName);
+    }
 
 
-	@Override
-	protected String getSequenceQuery() {
-		return "select next value for " + getIncrementerName() + " from sysibm.sysdummy1";
-	}
+    @Override
+    protected String getSequenceQuery() {
+        return "select next value for " + getIncrementerName() + " from sysibm.sysdummy1";
+    }
 
 }

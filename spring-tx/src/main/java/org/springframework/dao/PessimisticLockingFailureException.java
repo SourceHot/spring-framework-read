@@ -25,29 +25,31 @@ package org.springframework.dao;
  * CannotAcquireLockException and DeadlockLoserDataAccessException.
  *
  * @author Thomas Risberg
- * @since 1.2
  * @see CannotAcquireLockException
  * @see DeadlockLoserDataAccessException
  * @see OptimisticLockingFailureException
+ * @since 1.2
  */
 @SuppressWarnings("serial")
 public class PessimisticLockingFailureException extends ConcurrencyFailureException {
 
-	/**
-	 * Constructor for PessimisticLockingFailureException.
-	 * @param msg the detail message
-	 */
-	public PessimisticLockingFailureException(String msg) {
-		super(msg);
-	}
+    /**
+     * Constructor for PessimisticLockingFailureException.
+     *
+     * @param msg the detail message
+     */
+    public PessimisticLockingFailureException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Constructor for PessimisticLockingFailureException.
-	 * @param msg the detail message
-	 * @param cause the root cause from the data access API in use
-	 */
-	public PessimisticLockingFailureException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Constructor for PessimisticLockingFailureException.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause from the data access API in use
+     */
+    public PessimisticLockingFailureException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

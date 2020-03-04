@@ -16,10 +16,10 @@
 
 package org.springframework.core.task.support;
 
-import java.util.concurrent.Executor;
-
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.util.Assert;
+
+import java.util.concurrent.Executor;
 
 /**
  * Adapter that exposes the {@link java.util.concurrent.Executor} interface
@@ -31,28 +31,29 @@ import org.springframework.util.Assert;
  * solely exposing the standard Executor interface to a client.
  *
  * @author Juergen Hoeller
- * @since 2.5
  * @see java.util.concurrent.Executor
  * @see org.springframework.core.task.TaskExecutor
+ * @since 2.5
  */
 public class ConcurrentExecutorAdapter implements Executor {
 
-	private final TaskExecutor taskExecutor;
+    private final TaskExecutor taskExecutor;
 
 
-	/**
-	 * Create a new ConcurrentExecutorAdapter for the given Spring TaskExecutor.
-	 * @param taskExecutor the Spring TaskExecutor to wrap
-	 */
-	public ConcurrentExecutorAdapter(TaskExecutor taskExecutor) {
-		Assert.notNull(taskExecutor, "TaskExecutor must not be null");
-		this.taskExecutor = taskExecutor;
-	}
+    /**
+     * Create a new ConcurrentExecutorAdapter for the given Spring TaskExecutor.
+     *
+     * @param taskExecutor the Spring TaskExecutor to wrap
+     */
+    public ConcurrentExecutorAdapter(TaskExecutor taskExecutor) {
+        Assert.notNull(taskExecutor, "TaskExecutor must not be null");
+        this.taskExecutor = taskExecutor;
+    }
 
 
-	@Override
-	public void execute(Runnable command) {
-		this.taskExecutor.execute(command);
-	}
+    @Override
+    public void execute(Runnable command) {
+        this.taskExecutor.execute(command);
+    }
 
 }

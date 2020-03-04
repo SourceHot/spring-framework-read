@@ -25,8 +25,8 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class XmlRegObjectFactory {
 
-	@XmlElementDecl(name = "brand-airplane")
-	public JAXBElement<Airplane> createAirplane(Airplane airplane) {
-		return new JAXBElement<>(new QName("brand-airplane"), Airplane.class, null, airplane);
-	}
+    @XmlElementDecl(name = "brand-airplane")
+    public JAXBElement<Airplane> createAirplane(Airplane airplane) {
+        return new JAXBElement<>(new QName("brand-airplane"), Airplane.class, null, airplane);
+    }
 }

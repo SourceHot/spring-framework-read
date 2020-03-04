@@ -23,14 +23,14 @@ import javax.servlet.ServletContext;
  */
 public class ServletContextAwareBean implements ServletContextAware {
 
-	private ServletContext servletContext;
+    private ServletContext servletContext;
 
-	@Override
-	public void setServletContext(ServletContext servletContext) {
-		this.servletContext = servletContext;
-	}
+    public ServletContext getServletContext() {
+        return servletContext;
+    }
 
-	public ServletContext getServletContext() {
-		return servletContext;
-	}
+    @Override
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
+    }
 }

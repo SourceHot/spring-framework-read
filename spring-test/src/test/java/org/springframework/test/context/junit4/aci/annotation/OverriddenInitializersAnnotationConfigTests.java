@@ -17,12 +17,12 @@
 package org.springframework.test.context.junit4.aci.annotation;
 
 import org.junit.Test;
-
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.aci.DevProfileInitializer;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Integration tests that verify support for {@link ApplicationContextInitializer
@@ -35,11 +35,11 @@ import static org.junit.Assert.*;
 @ContextConfiguration(initializers = DevProfileInitializer.class, inheritInitializers = false)
 public class OverriddenInitializersAnnotationConfigTests extends SingleInitializerAnnotationConfigTests {
 
-	@Test
-	@Override
-	public void activeBeans() {
-		assertEquals("foo", foo);
-		assertNull(bar);
-		assertEquals("dev profile config", baz);
-	}
+    @Test
+    @Override
+    public void activeBeans() {
+        assertEquals("foo", foo);
+        assertNull(bar);
+        assertEquals("dev profile config", baz);
+    }
 }

@@ -16,12 +16,9 @@
 
 package org.springframework.test.context.junit4;
 
-import javax.annotation.Resource;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +30,14 @@ import org.springframework.tests.sample.beans.Pet;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.transaction.TransactionTestUtils.*;
+import javax.annotation.Resource;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
+import static org.springframework.test.transaction.TransactionTestUtils.inTransaction;
 
 /**
  * Combined integration test for {@link AbstractJUnit4SpringContextTests} and
@@ -45,153 +48,153 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
  */
 @ContextConfiguration
 public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTransactionalJUnit4SpringContextTests
-		implements BeanNameAware, InitializingBean {
+        implements BeanNameAware, InitializingBean {
 
-	private static final String JANE = "jane";
-	private static final String SUE = "sue";
-	private static final String YODA = "yoda";
+    private static final String JANE = "jane";
+    private static final String SUE = "sue";
+    private static final String YODA = "yoda";
 
-	private Employee employee;
+    private Employee employee;
 
-	@Autowired
-	private Pet pet;
+    @Autowired
+    private Pet pet;
 
-	@Autowired(required = false)
-	private Long nonrequiredLong;
+    @Autowired(required = false)
+    private Long nonrequiredLong;
 
-	@Resource
-	private String foo;
+    @Resource
+    private String foo;
 
-	private String bar;
+    private String bar;
 
-	private String beanName;
+    private String beanName;
 
-	private boolean beanInitialized = false;
-
-
-	@Autowired
-	private void setEmployee(Employee employee) {
-		this.employee = employee;
-	}
-
-	@Resource
-	private void setBar(String bar) {
-		this.bar = bar;
-	}
-
-	@Override
-	public void setBeanName(String beanName) {
-		this.beanName = beanName;
-	}
-
-	@Override
-	public void afterPropertiesSet() {
-		this.beanInitialized = true;
-	}
+    private boolean beanInitialized = false;
 
 
-	@Before
-	public void setUp() {
-		assertEquals("Verifying the number of rows in the person table before a test method.",
-				(inTransaction() ? 2 : 1), countRowsInPersonTable());
-	}
+    @Autowired
+    private void setEmployee(Employee employee) {
+        this.employee = employee;
+    }
 
-	@After
-	public void tearDown() {
-		assertEquals("Verifying the number of rows in the person table after a test method.",
-				(inTransaction() ? 4 : 1), countRowsInPersonTable());
-	}
+    @Resource
+    private void setBar(String bar) {
+        this.bar = bar;
+    }
 
-	@BeforeTransaction
-	public void beforeTransaction() {
-		assertEquals("Verifying the number of rows in the person table before a transactional test method.",
-				1, countRowsInPersonTable());
-		assertEquals("Adding yoda", 1, addPerson(YODA));
-	}
+    @Override
+    public void setBeanName(String beanName) {
+        this.beanName = beanName;
+    }
 
-	@AfterTransaction
-	public void afterTransaction() {
-		assertEquals("Deleting yoda", 1, deletePerson(YODA));
-		assertEquals("Verifying the number of rows in the person table after a transactional test method.",
-				1, countRowsInPersonTable());
-	}
+    @Override
+    public void afterPropertiesSet() {
+        this.beanInitialized = true;
+    }
 
 
-	@Test
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void verifyBeanNameSet() {
-		assertInTransaction(false);
-		assertTrue("The bean name of this test instance should have been set to the fully qualified class name " +
-				"due to BeanNameAware semantics.", this.beanName.startsWith(getClass().getName()));
-	}
+    @Before
+    public void setUp() {
+        assertEquals("Verifying the number of rows in the person table before a test method.",
+                (inTransaction() ? 2 : 1), countRowsInPersonTable());
+    }
 
-	@Test
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void verifyApplicationContext() {
-		assertInTransaction(false);
-		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
-				super.applicationContext);
-	}
+    @After
+    public void tearDown() {
+        assertEquals("Verifying the number of rows in the person table after a test method.",
+                (inTransaction() ? 4 : 1), countRowsInPersonTable());
+    }
 
-	@Test
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void verifyBeanInitialized() {
-		assertInTransaction(false);
-		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
-				this.beanInitialized);
-	}
+    @BeforeTransaction
+    public void beforeTransaction() {
+        assertEquals("Verifying the number of rows in the person table before a transactional test method.",
+                1, countRowsInPersonTable());
+        assertEquals("Adding yoda", 1, addPerson(YODA));
+    }
 
-	@Test
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void verifyAnnotationAutowiredFields() {
-		assertInTransaction(false);
-		assertNull("The nonrequiredLong property should NOT have been autowired.", this.nonrequiredLong);
-		assertNotNull("The pet field should have been autowired.", this.pet);
-		assertEquals("Fido", this.pet.getName());
-	}
-
-	@Test
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void verifyAnnotationAutowiredMethods() {
-		assertInTransaction(false);
-		assertNotNull("The employee setter method should have been autowired.", this.employee);
-		assertEquals("John Smith", this.employee.getName());
-	}
-
-	@Test
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void verifyResourceAnnotationWiredFields() {
-		assertInTransaction(false);
-		assertEquals("The foo field should have been wired via @Resource.", "Foo", this.foo);
-	}
-
-	@Test
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void verifyResourceAnnotationWiredMethods() {
-		assertInTransaction(false);
-		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
-	}
-
-	@Test
-	public void modifyTestDataWithinTransaction() {
-		assertInTransaction(true);
-		assertEquals("Adding jane", 1, addPerson(JANE));
-		assertEquals("Adding sue", 1, addPerson(SUE));
-		assertEquals("Verifying the number of rows in the person table in modifyTestDataWithinTransaction().",
-				4, countRowsInPersonTable());
-	}
+    @AfterTransaction
+    public void afterTransaction() {
+        assertEquals("Deleting yoda", 1, deletePerson(YODA));
+        assertEquals("Verifying the number of rows in the person table after a transactional test method.",
+                1, countRowsInPersonTable());
+    }
 
 
-	private int addPerson(String name) {
-		return super.jdbcTemplate.update("INSERT INTO person VALUES(?)", name);
-	}
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void verifyBeanNameSet() {
+        assertInTransaction(false);
+        assertTrue("The bean name of this test instance should have been set to the fully qualified class name " +
+                "due to BeanNameAware semantics.", this.beanName.startsWith(getClass().getName()));
+    }
 
-	private int deletePerson(String name) {
-		return super.jdbcTemplate.update("DELETE FROM person WHERE name=?", name);
-	}
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void verifyApplicationContext() {
+        assertInTransaction(false);
+        assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
+                super.applicationContext);
+    }
 
-	private int countRowsInPersonTable() {
-		return countRowsInTable("person");
-	}
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void verifyBeanInitialized() {
+        assertInTransaction(false);
+        assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
+                this.beanInitialized);
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void verifyAnnotationAutowiredFields() {
+        assertInTransaction(false);
+        assertNull("The nonrequiredLong property should NOT have been autowired.", this.nonrequiredLong);
+        assertNotNull("The pet field should have been autowired.", this.pet);
+        assertEquals("Fido", this.pet.getName());
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void verifyAnnotationAutowiredMethods() {
+        assertInTransaction(false);
+        assertNotNull("The employee setter method should have been autowired.", this.employee);
+        assertEquals("John Smith", this.employee.getName());
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void verifyResourceAnnotationWiredFields() {
+        assertInTransaction(false);
+        assertEquals("The foo field should have been wired via @Resource.", "Foo", this.foo);
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void verifyResourceAnnotationWiredMethods() {
+        assertInTransaction(false);
+        assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
+    }
+
+    @Test
+    public void modifyTestDataWithinTransaction() {
+        assertInTransaction(true);
+        assertEquals("Adding jane", 1, addPerson(JANE));
+        assertEquals("Adding sue", 1, addPerson(SUE));
+        assertEquals("Verifying the number of rows in the person table in modifyTestDataWithinTransaction().",
+                4, countRowsInPersonTable());
+    }
+
+
+    private int addPerson(String name) {
+        return super.jdbcTemplate.update("INSERT INTO person VALUES(?)", name);
+    }
+
+    private int deletePerson(String name) {
+        return super.jdbcTemplate.update("DELETE FROM person WHERE name=?", name);
+    }
+
+    private int countRowsInPersonTable() {
+        return countRowsInTable("person");
+    }
 
 }

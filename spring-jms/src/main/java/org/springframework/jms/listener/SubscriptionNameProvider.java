@@ -30,9 +30,9 @@ package org.springframework.jms.listener;
  */
 public interface SubscriptionNameProvider {
 
-	/**
-	 * Determine the subscription name for this message listener object.
-	 */
-	String getSubscriptionName();
+    /**
+     * Determine the subscription name for this message listener object.
+     */
+    String getSubscriptionName();
 
 }

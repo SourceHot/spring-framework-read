@@ -33,57 +33,59 @@ import javax.xml.ws.WebServiceProvider;
  * ships an internal HTTP server.
  *
  * @author Juergen Hoeller
- * @since 2.5
  * @see javax.jws.WebService
  * @see javax.xml.ws.Endpoint#publish(String)
+ * @since 2.5
  */
 public class SimpleJaxWsServiceExporter extends AbstractJaxWsServiceExporter {
 
-	/**
-	 * The default base address.
-	 */
-	public static final String DEFAULT_BASE_ADDRESS = "http://localhost:8080/";
+    /**
+     * The default base address.
+     */
+    public static final String DEFAULT_BASE_ADDRESS = "http://localhost:8080/";
 
-	private String baseAddress = DEFAULT_BASE_ADDRESS;
-
-
-	/**
-	 * Set the base address for exported services.
-	 * Default is "http://localhost:8080/".
-	 * <p>For each actual publication address, the service name will be
-	 * appended to this base address. E.g. service name "OrderService"
-	 * -> "http://localhost:8080/OrderService".
-	 * @see javax.xml.ws.Endpoint#publish(String)
-	 * @see javax.jws.WebService#serviceName()
-	 */
-	public void setBaseAddress(String baseAddress) {
-		this.baseAddress = baseAddress;
-	}
+    private String baseAddress = DEFAULT_BASE_ADDRESS;
 
 
-	@Override
-	protected void publishEndpoint(Endpoint endpoint, WebService annotation) {
-		endpoint.publish(calculateEndpointAddress(endpoint, annotation.serviceName()));
-	}
+    /**
+     * Set the base address for exported services.
+     * Default is "http://localhost:8080/".
+     * <p>For each actual publication address, the service name will be
+     * appended to this base address. E.g. service name "OrderService"
+     * -> "http://localhost:8080/OrderService".
+     *
+     * @see javax.xml.ws.Endpoint#publish(String)
+     * @see javax.jws.WebService#serviceName()
+     */
+    public void setBaseAddress(String baseAddress) {
+        this.baseAddress = baseAddress;
+    }
 
-	@Override
-	protected void publishEndpoint(Endpoint endpoint, WebServiceProvider annotation) {
-		endpoint.publish(calculateEndpointAddress(endpoint, annotation.serviceName()));
-	}
 
-	/**
-	 * Calculate the full endpoint address for the given endpoint.
-	 * @param endpoint the JAX-WS Provider Endpoint object
-	 * @param serviceName the given service name
-	 * @return the full endpoint address
-	 */
-	protected String calculateEndpointAddress(Endpoint endpoint, String serviceName) {
-		String fullAddress = this.baseAddress + serviceName;
-		if (endpoint.getClass().getName().startsWith("weblogic.")) {
-			// Workaround for WebLogic 10.3
-			fullAddress = fullAddress + "/";
-		}
-		return fullAddress;
-	}
+    @Override
+    protected void publishEndpoint(Endpoint endpoint, WebService annotation) {
+        endpoint.publish(calculateEndpointAddress(endpoint, annotation.serviceName()));
+    }
+
+    @Override
+    protected void publishEndpoint(Endpoint endpoint, WebServiceProvider annotation) {
+        endpoint.publish(calculateEndpointAddress(endpoint, annotation.serviceName()));
+    }
+
+    /**
+     * Calculate the full endpoint address for the given endpoint.
+     *
+     * @param endpoint    the JAX-WS Provider Endpoint object
+     * @param serviceName the given service name
+     * @return the full endpoint address
+     */
+    protected String calculateEndpointAddress(Endpoint endpoint, String serviceName) {
+        String fullAddress = this.baseAddress + serviceName;
+        if (endpoint.getClass().getName().startsWith("weblogic.")) {
+            // Workaround for WebLogic 10.3
+            fullAddress = fullAddress + "/";
+        }
+        return fullAddress;
+    }
 
 }

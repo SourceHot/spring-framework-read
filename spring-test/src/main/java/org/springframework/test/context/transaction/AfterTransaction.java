@@ -38,9 +38,9 @@ import java.lang.annotation.Target;
  * declared on Java 8 based interface default methods.
  *
  * @author Sam Brannen
- * @since 2.5
  * @see org.springframework.transaction.annotation.Transactional
  * @see BeforeTransaction
+ * @since 2.5
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)

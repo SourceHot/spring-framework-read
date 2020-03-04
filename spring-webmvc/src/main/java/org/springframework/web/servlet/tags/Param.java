@@ -26,52 +26,50 @@ import org.springframework.lang.Nullable;
  * been encoded or escaped.
  *
  * @author Scott Andrews
- * @since 3.0
  * @see ParamTag
+ * @since 3.0
  */
 public class Param {
 
-	@Nullable
-	private String name;
+    @Nullable
+    private String name;
 
-	@Nullable
-	private String value;
+    @Nullable
+    private String value;
 
+    /**
+     * Return the raw parameter name.
+     */
+    @Nullable
+    public String getName() {
+        return this.name;
+    }
 
-	/**
-	 * Set the raw name of the parameter.
-	 */
-	public void setName(@Nullable String name) {
-		this.name = name;
-	}
+    /**
+     * Set the raw name of the parameter.
+     */
+    public void setName(@Nullable String name) {
+        this.name = name;
+    }
 
-	/**
-	 * Return the raw parameter name.
-	 */
-	@Nullable
-	public String getName() {
-		return this.name;
-	}
+    /**
+     * Return the raw parameter value.
+     */
+    @Nullable
+    public String getValue() {
+        return this.value;
+    }
 
-	/**
-	 * Set the raw value of the parameter.
-	 */
-	public void setValue(@Nullable String value) {
-		this.value = value;
-	}
+    /**
+     * Set the raw value of the parameter.
+     */
+    public void setValue(@Nullable String value) {
+        this.value = value;
+    }
 
-	/**
-	 * Return the raw parameter value.
-	 */
-	@Nullable
-	public String getValue() {
-		return this.value;
-	}
-
-
-	@Override
-	public String toString() {
-		return "JSP Tag Param: name '" + this.name + "', value '" + this.value + "'";
-	}
+    @Override
+    public String toString() {
+        return "JSP Tag Param: name '" + this.name + "', value '" + this.value + "'";
+    }
 
 }

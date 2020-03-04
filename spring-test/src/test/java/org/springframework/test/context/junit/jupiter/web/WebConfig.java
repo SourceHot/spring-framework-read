@@ -28,9 +28,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableWebMvc
 class WebConfig {
 
-	@Bean
-	PersonController personController() {
-		return new PersonController();
-	}
+    @Bean
+    PersonController personController() {
+        return new PersonController();
+    }
 
 }

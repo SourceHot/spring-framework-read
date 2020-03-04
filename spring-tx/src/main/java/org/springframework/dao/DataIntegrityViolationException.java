@@ -27,21 +27,23 @@ package org.springframework.dao;
 @SuppressWarnings("serial")
 public class DataIntegrityViolationException extends NonTransientDataAccessException {
 
-	/**
-	 * Constructor for DataIntegrityViolationException.
-	 * @param msg the detail message
-	 */
-	public DataIntegrityViolationException(String msg) {
-		super(msg);
-	}
+    /**
+     * Constructor for DataIntegrityViolationException.
+     *
+     * @param msg the detail message
+     */
+    public DataIntegrityViolationException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Constructor for DataIntegrityViolationException.
-	 * @param msg the detail message
-	 * @param cause the root cause from the data access API in use
-	 */
-	public DataIntegrityViolationException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Constructor for DataIntegrityViolationException.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause from the data access API in use
+     */
+    public DataIntegrityViolationException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

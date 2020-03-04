@@ -27,67 +27,66 @@ package org.springframework.transaction;
 @SuppressWarnings("serial")
 public class HeuristicCompletionException extends TransactionException {
 
-	/**
-	 * Unknown outcome state.
-	 */
-	public static final int STATE_UNKNOWN = 0;
+    /**
+     * Unknown outcome state.
+     */
+    public static final int STATE_UNKNOWN = 0;
 
-	/**
-	 * Committed outcome state.
-	 */
-	public static final int STATE_COMMITTED = 1;
+    /**
+     * Committed outcome state.
+     */
+    public static final int STATE_COMMITTED = 1;
 
-	/**
-	 * Rolledback outcome state.
-	 */
-	public static final int STATE_ROLLED_BACK = 2;
+    /**
+     * Rolledback outcome state.
+     */
+    public static final int STATE_ROLLED_BACK = 2;
 
-	/**
-	 * Mixed outcome state.
-	 */
-	public static final int STATE_MIXED = 3;
-
-
-	public static String getStateString(int state) {
-		switch (state) {
-			case STATE_COMMITTED:
-				return "committed";
-			case STATE_ROLLED_BACK:
-				return "rolled back";
-			case STATE_MIXED:
-				return "mixed";
-			default:
-				return "unknown";
-		}
-	}
+    /**
+     * Mixed outcome state.
+     */
+    public static final int STATE_MIXED = 3;
+    /**
+     * The outcome state of the transaction: have some or all resources been committed?
+     */
+    private final int outcomeState;
 
 
-	/**
-	 * The outcome state of the transaction: have some or all resources been committed?
-	 */
-	private final int outcomeState;
+    /**
+     * Constructor for HeuristicCompletionException.
+     *
+     * @param outcomeState the outcome state of the transaction
+     * @param cause        the root cause from the transaction API in use
+     */
+    public HeuristicCompletionException(int outcomeState, Throwable cause) {
+        super("Heuristic completion: outcome state is " + getStateString(outcomeState), cause);
+        this.outcomeState = outcomeState;
+    }
 
+    public static String getStateString(int state) {
+        switch (state) {
+            case STATE_COMMITTED:
+                return "committed";
+            case STATE_ROLLED_BACK:
+                return "rolled back";
+            case STATE_MIXED:
+                return "mixed";
+            default:
+                return "unknown";
+        }
+    }
 
-	/**
-	 * Constructor for HeuristicCompletionException.
-	 * @param outcomeState the outcome state of the transaction
-	 * @param cause the root cause from the transaction API in use
-	 */
-	public HeuristicCompletionException(int outcomeState, Throwable cause) {
-		super("Heuristic completion: outcome state is " + getStateString(outcomeState), cause);
-		this.outcomeState = outcomeState;
-	}
-
-	/**
-	 * Return the outcome state of the transaction state,
-	 * as one of the constants in this class.
-	 * @see #STATE_UNKNOWN
-	 * @see #STATE_COMMITTED
-	 * @see #STATE_ROLLED_BACK
-	 * @see #STATE_MIXED
-	 */
-	public int getOutcomeState() {
-		return this.outcomeState;
-	}
+    /**
+     * Return the outcome state of the transaction state,
+     * as one of the constants in this class.
+     *
+     * @see #STATE_UNKNOWN
+     * @see #STATE_COMMITTED
+     * @see #STATE_ROLLED_BACK
+     * @see #STATE_MIXED
+     */
+    public int getOutcomeState() {
+        return this.outcomeState;
+    }
 
 }

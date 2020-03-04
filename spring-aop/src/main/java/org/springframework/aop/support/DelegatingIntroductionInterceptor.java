@@ -17,7 +17,6 @@
 package org.springframework.aop.support;
 
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.ProxyMethodInvocation;
@@ -45,95 +44,97 @@ import org.springframework.util.Assert;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 16.11.2003
  * @see #suppressInterface
  * @see DelegatePerTargetObjectIntroductionInterceptor
+ * @since 16.11.2003
  */
 @SuppressWarnings("serial")
 public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
-		implements IntroductionInterceptor {
+        implements IntroductionInterceptor {
 
-	/**
-	 * Object that actually implements the interfaces.
-	 * May be "this" if a subclass implements the introduced interfaces.
-	 */
-	@Nullable
-	private Object delegate;
-
-
-	/**
-	 * Construct a new DelegatingIntroductionInterceptor, providing
-	 * a delegate that implements the interfaces to be introduced.
-	 * @param delegate the delegate that implements the introduced interfaces
-	 */
-	public DelegatingIntroductionInterceptor(Object delegate) {
-		init(delegate);
-	}
-
-	/**
-	 * Construct a new DelegatingIntroductionInterceptor.
-	 * The delegate will be the subclass, which must implement
-	 * additional interfaces.
-	 */
-	protected DelegatingIntroductionInterceptor() {
-		init(this);
-	}
+    /**
+     * Object that actually implements the interfaces.
+     * May be "this" if a subclass implements the introduced interfaces.
+     */
+    @Nullable
+    private Object delegate;
 
 
-	/**
-	 * Both constructors use this init method, as it is impossible to pass
-	 * a "this" reference from one constructor to another.
-	 * @param delegate the delegate object
-	 */
-	private void init(Object delegate) {
-		Assert.notNull(delegate, "Delegate must not be null");
-		this.delegate = delegate;
-		implementInterfacesOnObject(delegate);
+    /**
+     * Construct a new DelegatingIntroductionInterceptor, providing
+     * a delegate that implements the interfaces to be introduced.
+     *
+     * @param delegate the delegate that implements the introduced interfaces
+     */
+    public DelegatingIntroductionInterceptor(Object delegate) {
+        init(delegate);
+    }
 
-		// We don't want to expose the control interface
-		suppressInterface(IntroductionInterceptor.class);
-		suppressInterface(DynamicIntroductionAdvice.class);
-	}
+    /**
+     * Construct a new DelegatingIntroductionInterceptor.
+     * The delegate will be the subclass, which must implement
+     * additional interfaces.
+     */
+    protected DelegatingIntroductionInterceptor() {
+        init(this);
+    }
 
 
-	/**
-	 * Subclasses may need to override this if they want to perform custom
-	 * behaviour in around advice. However, subclasses should invoke this
-	 * method, which handles introduced interfaces and forwarding to the target.
-	 */
-	@Override
-	@Nullable
-	public Object invoke(MethodInvocation mi) throws Throwable {
-		if (isMethodOnIntroducedInterface(mi)) {
-			// Using the following method rather than direct reflection, we
-			// get correct handling of InvocationTargetException
-			// if the introduced method throws an exception.
-			Object retVal = AopUtils.invokeJoinpointUsingReflection(this.delegate, mi.getMethod(), mi.getArguments());
+    /**
+     * Both constructors use this init method, as it is impossible to pass
+     * a "this" reference from one constructor to another.
+     *
+     * @param delegate the delegate object
+     */
+    private void init(Object delegate) {
+        Assert.notNull(delegate, "Delegate must not be null");
+        this.delegate = delegate;
+        implementInterfacesOnObject(delegate);
 
-			// Massage return value if possible: if the delegate returned itself,
-			// we really want to return the proxy.
-			if (retVal == this.delegate && mi instanceof ProxyMethodInvocation) {
-				Object proxy = ((ProxyMethodInvocation) mi).getProxy();
-				if (mi.getMethod().getReturnType().isInstance(proxy)) {
-					retVal = proxy;
-				}
-			}
-			return retVal;
-		}
+        // We don't want to expose the control interface
+        suppressInterface(IntroductionInterceptor.class);
+        suppressInterface(DynamicIntroductionAdvice.class);
+    }
 
-		return doProceed(mi);
-	}
 
-	/**
-	 * Proceed with the supplied {@link org.aopalliance.intercept.MethodInterceptor}.
-	 * Subclasses can override this method to intercept method invocations on the
-	 * target object which is useful when an introduction needs to monitor the object
-	 * that it is introduced into. This method is <strong>never</strong> called for
-	 * {@link MethodInvocation MethodInvocations} on the introduced interfaces.
-	 */
-	protected Object doProceed(MethodInvocation mi) throws Throwable {
-		// If we get here, just pass the invocation on.
-		return mi.proceed();
-	}
+    /**
+     * Subclasses may need to override this if they want to perform custom
+     * behaviour in around advice. However, subclasses should invoke this
+     * method, which handles introduced interfaces and forwarding to the target.
+     */
+    @Override
+    @Nullable
+    public Object invoke(MethodInvocation mi) throws Throwable {
+        if (isMethodOnIntroducedInterface(mi)) {
+            // Using the following method rather than direct reflection, we
+            // get correct handling of InvocationTargetException
+            // if the introduced method throws an exception.
+            Object retVal = AopUtils.invokeJoinpointUsingReflection(this.delegate, mi.getMethod(), mi.getArguments());
+
+            // Massage return value if possible: if the delegate returned itself,
+            // we really want to return the proxy.
+            if (retVal == this.delegate && mi instanceof ProxyMethodInvocation) {
+                Object proxy = ((ProxyMethodInvocation) mi).getProxy();
+                if (mi.getMethod().getReturnType().isInstance(proxy)) {
+                    retVal = proxy;
+                }
+            }
+            return retVal;
+        }
+
+        return doProceed(mi);
+    }
+
+    /**
+     * Proceed with the supplied {@link org.aopalliance.intercept.MethodInterceptor}.
+     * Subclasses can override this method to intercept method invocations on the
+     * target object which is useful when an introduction needs to monitor the object
+     * that it is introduced into. This method is <strong>never</strong> called for
+     * {@link MethodInvocation MethodInvocations} on the introduced interfaces.
+     */
+    protected Object doProceed(MethodInvocation mi) throws Throwable {
+        // If we get here, just pass the invocation on.
+        return mi.proceed();
+    }
 
 }

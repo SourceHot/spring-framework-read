@@ -16,10 +16,6 @@
 
 package org.springframework.web.context.support;
 
-import java.io.File;
-
-import javax.servlet.ServletContext;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.lang.Nullable;
@@ -27,6 +23,9 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.WebUtils;
+
+import javax.servlet.ServletContext;
+import java.io.File;
 
 /**
  * Convenient superclass for application objects running in a {@link WebApplicationContext}.
@@ -38,8 +37,8 @@ import org.springframework.web.util.WebUtils;
  * in case of {@link ServletContext} access etc typically being needed.
  *
  * @author Juergen Hoeller
- * @since 28.08.2003
  * @see SpringBeanAutowiringSupport
+ * @since 28.08.2003
  */
 public abstract class WebApplicationObjectSupport extends ApplicationObjectSupport implements ServletContextAware {
 
@@ -82,8 +81,9 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
      * <p>The default implementation is empty. Called by
      * {@link #initApplicationContext(org.springframework.context.ApplicationContext)}
      * as well as {@link #setServletContext(javax.servlet.ServletContext)}.
-     *
+     * <p>
      * 初始化servlet上下文
+     *
      * @param servletContext the ServletContext that this application object runs in
      *                       (never {@code null})
      */
@@ -108,12 +108,10 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
         if (ctx instanceof WebApplicationContext) {
             // 强制转换
             return (WebApplicationContext) getApplicationContext();
-        }
-        else if (isContextRequired()) {
+        } else if (isContextRequired()) {
             throw new IllegalStateException("WebApplicationObjectSupport instance [" + this +
                     "] does not run in a WebApplicationContext but in: " + ctx);
-        }
-        else {
+        } else {
             return null;
         }
     }

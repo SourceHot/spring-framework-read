@@ -18,7 +18,6 @@ package org.springframework.test.context.junit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -27,7 +26,8 @@ import org.springframework.test.context.support.DefaultTestContextBootstrapper;
 import org.springframework.test.context.support.GenericPropertiesContextLoader;
 import org.springframework.tests.sample.beans.Pet;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Integration tests which verify that a subclass of {@link DefaultTestContextBootstrapper}
@@ -42,29 +42,29 @@ import static org.junit.Assert.*;
 @ContextConfiguration("PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests-context.properties")
 public class CustomDefaultContextLoaderClassSpringRunnerTests {
 
-	@Autowired
-	private Pet cat;
+    @Autowired
+    private Pet cat;
 
-	@Autowired
-	private String testString;
-
-
-	@Test
-	public void verifyAnnotationAutowiredFields() {
-		assertNotNull("The cat field should have been autowired.", this.cat);
-		assertEquals("Garfield", this.cat.getName());
-
-		assertNotNull("The testString field should have been autowired.", this.testString);
-		assertEquals("Test String", this.testString);
-	}
+    @Autowired
+    private String testString;
 
 
-	public static class PropertiesBasedTestContextBootstrapper extends DefaultTestContextBootstrapper {
+    @Test
+    public void verifyAnnotationAutowiredFields() {
+        assertNotNull("The cat field should have been autowired.", this.cat);
+        assertEquals("Garfield", this.cat.getName());
 
-		@Override
-		protected Class<? extends ContextLoader> getDefaultContextLoaderClass(Class<?> testClass) {
-			return GenericPropertiesContextLoader.class;
-		}
-	}
+        assertNotNull("The testString field should have been autowired.", this.testString);
+        assertEquals("Test String", this.testString);
+    }
+
+
+    public static class PropertiesBasedTestContextBootstrapper extends DefaultTestContextBootstrapper {
+
+        @Override
+        protected Class<? extends ContextLoader> getDefaultContextLoaderClass(Class<?> testClass) {
+            return GenericPropertiesContextLoader.class;
+        }
+    }
 
 }

@@ -24,15 +24,16 @@ import org.springframework.lang.Nullable;
  * <p>A text may contain {@code ${...}} placeholders, to be resolved as system properties:
  * e.g. {@code ${user.dir}}. Default values can be supplied using the ":" separator
  * between key and value.
- *
+ * <p>
  * 定义了 一些系统级别的变量
+ *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Dave Syer
- * @since 1.2.5
  * @see #PLACEHOLDER_PREFIX
  * @see #PLACEHOLDER_SUFFIX
  * @see System#getProperty(String)
+ * @since 1.2.5
  */
 public abstract class SystemPropertyUtils {
 
@@ -117,8 +118,7 @@ public abstract class SystemPropertyUtils {
                     propVal = System.getenv(placeholderName);
                 }
                 return propVal;
-            }
-            catch (Throwable ex) {
+            } catch (Throwable ex) {
                 System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" +
                         this.text + "] as system property: " + ex);
                 return null;

@@ -16,9 +16,9 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import javax.jms.Destination;
-
 import org.springframework.jca.StubActivationSpec;
+
+import javax.jms.Destination;
 
 /**
  * StubActivationSpec which implements all required and optional properties (see
@@ -30,65 +30,65 @@ import org.springframework.jca.StubActivationSpec;
  */
 public class StubJmsActivationSpec extends StubActivationSpec {
 
-	private String destinationType;
+    private String destinationType;
 
-	private String subscriptionDurability;
+    private String subscriptionDurability;
 
-	private String subscriptionName;
+    private String subscriptionName;
 
-	private String clientId;
+    private String clientId;
 
-	private String messageSelector;
+    private String messageSelector;
 
-	private String acknowledgeMode;
+    private String acknowledgeMode;
 
 
-	public String getDestinationType() {
-		return destinationType;
-	}
+    public String getDestinationType() {
+        return destinationType;
+    }
 
-	public void setDestinationType(String destinationType) {
-		this.destinationType = destinationType;
-	}
+    public void setDestinationType(String destinationType) {
+        this.destinationType = destinationType;
+    }
 
-	public String getSubscriptionDurability() {
-		return subscriptionDurability;
-	}
+    public String getSubscriptionDurability() {
+        return subscriptionDurability;
+    }
 
-	public void setSubscriptionDurability(String subscriptionDurability) {
-		this.subscriptionDurability = subscriptionDurability;
-	}
+    public void setSubscriptionDurability(String subscriptionDurability) {
+        this.subscriptionDurability = subscriptionDurability;
+    }
 
-	public String getSubscriptionName() {
-		return subscriptionName;
-	}
+    public String getSubscriptionName() {
+        return subscriptionName;
+    }
 
-	public void setSubscriptionName(String subscriptionName) {
-		this.subscriptionName = subscriptionName;
-	}
+    public void setSubscriptionName(String subscriptionName) {
+        this.subscriptionName = subscriptionName;
+    }
 
-	public String getClientId() {
-		return clientId;
-	}
+    public String getClientId() {
+        return clientId;
+    }
 
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
 
-	public String getMessageSelector() {
-		return messageSelector;
-	}
+    public String getMessageSelector() {
+        return messageSelector;
+    }
 
-	public void setMessageSelector(String messageSelector) {
-		this.messageSelector = messageSelector;
-	}
+    public void setMessageSelector(String messageSelector) {
+        this.messageSelector = messageSelector;
+    }
 
-	public String getAcknowledgeMode() {
-		return acknowledgeMode;
-	}
+    public String getAcknowledgeMode() {
+        return acknowledgeMode;
+    }
 
-	public void setAcknowledgeMode(String acknowledgeMode) {
-		this.acknowledgeMode = acknowledgeMode;
-	}
+    public void setAcknowledgeMode(String acknowledgeMode) {
+        this.acknowledgeMode = acknowledgeMode;
+    }
 
 }

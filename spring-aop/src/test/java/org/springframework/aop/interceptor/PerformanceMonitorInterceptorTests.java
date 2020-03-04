@@ -20,8 +20,12 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * @author Rob Harrop
@@ -30,50 +34,49 @@ import static org.mockito.BDDMockito.*;
  */
 public class PerformanceMonitorInterceptorTests {
 
-	@Test
-	public void testSuffixAndPrefixAssignment() {
-		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor();
+    @Test
+    public void testSuffixAndPrefixAssignment() {
+        PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor();
 
-		assertNotNull(interceptor.getPrefix());
-		assertNotNull(interceptor.getSuffix());
+        assertNotNull(interceptor.getPrefix());
+        assertNotNull(interceptor.getSuffix());
 
-		interceptor.setPrefix(null);
-		interceptor.setSuffix(null);
+        interceptor.setPrefix(null);
+        interceptor.setSuffix(null);
 
-		assertNotNull(interceptor.getPrefix());
-		assertNotNull(interceptor.getSuffix());
-	}
+        assertNotNull(interceptor.getPrefix());
+        assertNotNull(interceptor.getSuffix());
+    }
 
-	@Test
-	public void testSunnyDayPathLogsPerformanceMetricsCorrectly() throws Throwable {
-		MethodInvocation mi = mock(MethodInvocation.class);
-		given(mi.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
+    @Test
+    public void testSunnyDayPathLogsPerformanceMetricsCorrectly() throws Throwable {
+        MethodInvocation mi = mock(MethodInvocation.class);
+        given(mi.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
 
-		Log log = mock(Log.class);
+        Log log = mock(Log.class);
 
-		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor(true);
-		interceptor.invokeUnderTrace(mi, log);
+        PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor(true);
+        interceptor.invokeUnderTrace(mi, log);
 
-		verify(log).trace(anyString());
-	}
+        verify(log).trace(anyString());
+    }
 
-	@Test
-	public void testExceptionPathStillLogsPerformanceMetricsCorrectly() throws Throwable {
-		MethodInvocation mi = mock(MethodInvocation.class);
+    @Test
+    public void testExceptionPathStillLogsPerformanceMetricsCorrectly() throws Throwable {
+        MethodInvocation mi = mock(MethodInvocation.class);
 
-		given(mi.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
-		given(mi.proceed()).willThrow(new IllegalArgumentException());
-		Log log = mock(Log.class);
+        given(mi.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
+        given(mi.proceed()).willThrow(new IllegalArgumentException());
+        Log log = mock(Log.class);
 
-		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor(true);
-		try {
-			interceptor.invokeUnderTrace(mi, log);
-			fail("Must have propagated the IllegalArgumentException.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+        PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor(true);
+        try {
+            interceptor.invokeUnderTrace(mi, log);
+            fail("Must have propagated the IllegalArgumentException.");
+        } catch (IllegalArgumentException expected) {
+        }
 
-		verify(log).trace(anyString());
-	}
+        verify(log).trace(anyString());
+    }
 
 }

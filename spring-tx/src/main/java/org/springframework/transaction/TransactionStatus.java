@@ -30,70 +30,73 @@ import java.io.Flushable;
  * is only available if supported by the underlying transaction manager.
  *
  * @author Juergen Hoeller
- * @since 27.03.2003
  * @see #setRollbackOnly()
  * @see PlatformTransactionManager#getTransaction
  * @see org.springframework.transaction.support.TransactionCallback#doInTransaction
  * @see org.springframework.transaction.interceptor.TransactionInterceptor#currentTransactionStatus()
+ * @since 27.03.2003
  */
 public interface TransactionStatus extends SavepointManager, Flushable {
 
-	/**
-	 * Return whether the present transaction is new; otherwise participating
-	 * in an existing transaction, or potentially not running in an actual
-	 * transaction in the first place.
-	 */
-	boolean isNewTransaction();
+    /**
+     * Return whether the present transaction is new; otherwise participating
+     * in an existing transaction, or potentially not running in an actual
+     * transaction in the first place.
+     */
+    boolean isNewTransaction();
 
-	/**
-	 * Return whether this transaction internally carries a savepoint,
-	 * that is, has been created as nested transaction based on a savepoint.
-	 * <p>This method is mainly here for diagnostic purposes, alongside
-	 * {@link #isNewTransaction()}. For programmatic handling of custom
-	 * savepoints, use the operations provided by {@link SavepointManager}.
-	 * @see #isNewTransaction()
-	 * @see #createSavepoint()
-	 * @see #rollbackToSavepoint(Object)
-	 * @see #releaseSavepoint(Object)
-	 */
-	boolean hasSavepoint();
+    /**
+     * Return whether this transaction internally carries a savepoint,
+     * that is, has been created as nested transaction based on a savepoint.
+     * <p>This method is mainly here for diagnostic purposes, alongside
+     * {@link #isNewTransaction()}. For programmatic handling of custom
+     * savepoints, use the operations provided by {@link SavepointManager}.
+     *
+     * @see #isNewTransaction()
+     * @see #createSavepoint()
+     * @see #rollbackToSavepoint(Object)
+     * @see #releaseSavepoint(Object)
+     */
+    boolean hasSavepoint();
 
-	/**
-	 * Set the transaction rollback-only. This instructs the transaction manager
-	 * that the only possible outcome of the transaction may be a rollback, as
-	 * alternative to throwing an exception which would in turn trigger a rollback.
-	 * <p>This is mainly intended for transactions managed by
-	 * {@link org.springframework.transaction.support.TransactionTemplate} or
-	 * {@link org.springframework.transaction.interceptor.TransactionInterceptor},
-	 * where the actual commit/rollback decision is made by the container.
-	 * @see org.springframework.transaction.support.TransactionCallback#doInTransaction
-	 * @see org.springframework.transaction.interceptor.TransactionAttribute#rollbackOn
-	 */
-	void setRollbackOnly();
+    /**
+     * Set the transaction rollback-only. This instructs the transaction manager
+     * that the only possible outcome of the transaction may be a rollback, as
+     * alternative to throwing an exception which would in turn trigger a rollback.
+     * <p>This is mainly intended for transactions managed by
+     * {@link org.springframework.transaction.support.TransactionTemplate} or
+     * {@link org.springframework.transaction.interceptor.TransactionInterceptor},
+     * where the actual commit/rollback decision is made by the container.
+     *
+     * @see org.springframework.transaction.support.TransactionCallback#doInTransaction
+     * @see org.springframework.transaction.interceptor.TransactionAttribute#rollbackOn
+     */
+    void setRollbackOnly();
 
-	/**
-	 * Return whether the transaction has been marked as rollback-only
-	 * (either by the application or by the transaction infrastructure).
-	 */
-	boolean isRollbackOnly();
+    /**
+     * Return whether the transaction has been marked as rollback-only
+     * (either by the application or by the transaction infrastructure).
+     */
+    boolean isRollbackOnly();
 
-	/**
-	 * Flush the underlying session to the datastore, if applicable:
-	 * for example, all affected Hibernate/JPA sessions.
-	 * <p>This is effectively just a hint and may be a no-op if the underlying
-	 * transaction manager does not have a flush concept. A flush signal may
-	 * get applied to the primary resource or to transaction synchronizations,
-	 * depending on the underlying resource.
-	 */
-	@Override
-	void flush();
+    /**
+     * Flush the underlying session to the datastore, if applicable:
+     * for example, all affected Hibernate/JPA sessions.
+     * <p>This is effectively just a hint and may be a no-op if the underlying
+     * transaction manager does not have a flush concept. A flush signal may
+     * get applied to the primary resource or to transaction synchronizations,
+     * depending on the underlying resource.
+     */
+    @Override
+    void flush();
 
-	/**
-	 * Return whether this transaction is completed, that is,
-	 * whether it has already been committed or rolled back.
-	 * @see PlatformTransactionManager#commit
-	 * @see PlatformTransactionManager#rollback
-	 */
-	boolean isCompleted();
+    /**
+     * Return whether this transaction is completed, that is,
+     * whether it has already been committed or rolled back.
+     *
+     * @see PlatformTransactionManager#commit
+     * @see PlatformTransactionManager#rollback
+     */
+    boolean isCompleted();
 
 }

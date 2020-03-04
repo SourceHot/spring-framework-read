@@ -34,14 +34,14 @@ import java.lang.annotation.Target;
  * <em>composed annotations</em>.
  *
  * @author Stephane Nicoll
- * @since 4.2
  * @see JmsListener
+ * @since 4.2
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface JmsListeners {
 
-	JmsListener[] value();
+    JmsListener[] value();
 
 }

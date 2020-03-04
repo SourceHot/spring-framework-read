@@ -16,9 +16,8 @@
 
 package org.springframework.oxm.config;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
+import org.w3c.dom.Element;
 
 /**
  * Parser for the {@code <oxm:jibx-marshaller/>} element.
@@ -30,9 +29,9 @@ import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
 @Deprecated
 class JibxMarshallerBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
-	@Override
-	protected String getBeanClassName(Element element) {
-		return "org.springframework.oxm.jibx.JibxMarshaller";
-	}
+    @Override
+    protected String getBeanClassName(Element element) {
+        return "org.springframework.oxm.jibx.JibxMarshaller";
+    }
 
 }

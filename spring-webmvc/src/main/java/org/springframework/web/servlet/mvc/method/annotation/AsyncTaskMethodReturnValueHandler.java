@@ -33,34 +33,34 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class AsyncTaskMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	@Nullable
-	private final BeanFactory beanFactory;
+    @Nullable
+    private final BeanFactory beanFactory;
 
 
-	public AsyncTaskMethodReturnValueHandler(@Nullable BeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
-	}
+    public AsyncTaskMethodReturnValueHandler(@Nullable BeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
+    }
 
 
-	@Override
-	public boolean supportsReturnType(MethodParameter returnType) {
-		return WebAsyncTask.class.isAssignableFrom(returnType.getParameterType());
-	}
+    @Override
+    public boolean supportsReturnType(MethodParameter returnType) {
+        return WebAsyncTask.class.isAssignableFrom(returnType.getParameterType());
+    }
 
-	@Override
-	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
-			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
+    @Override
+    public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
+                                  ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
-		if (returnValue == null) {
-			mavContainer.setRequestHandled(true);
-			return;
-		}
+        if (returnValue == null) {
+            mavContainer.setRequestHandled(true);
+            return;
+        }
 
-		WebAsyncTask<?> webAsyncTask = (WebAsyncTask<?>) returnValue;
-		if (this.beanFactory != null) {
-			webAsyncTask.setBeanFactory(this.beanFactory);
-		}
-		WebAsyncUtils.getAsyncManager(webRequest).startCallableProcessing(webAsyncTask, mavContainer);
-	}
+        WebAsyncTask<?> webAsyncTask = (WebAsyncTask<?>) returnValue;
+        if (this.beanFactory != null) {
+            webAsyncTask.setBeanFactory(this.beanFactory);
+        }
+        WebAsyncUtils.getAsyncManager(webRequest).startCallableProcessing(webAsyncTask, mavContainer);
+    }
 
 }

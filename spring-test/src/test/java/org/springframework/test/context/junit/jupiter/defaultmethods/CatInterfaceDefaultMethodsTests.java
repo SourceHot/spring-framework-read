@@ -33,14 +33,14 @@ import org.springframework.test.context.junit.jupiter.comics.Cat;
  */
 class CatInterfaceDefaultMethodsTests implements GenericComicCharactersInterfaceDefaultMethodsTests<Cat> {
 
-	@Override
-	public int getExpectedNumCharacters() {
-		return 2;
-	}
+    @Override
+    public int getExpectedNumCharacters() {
+        return 2;
+    }
 
-	@Override
-	public String getExpectedName() {
-		return "Catbert";
-	}
+    @Override
+    public String getExpectedName() {
+        return "Catbert";
+    }
 
 }

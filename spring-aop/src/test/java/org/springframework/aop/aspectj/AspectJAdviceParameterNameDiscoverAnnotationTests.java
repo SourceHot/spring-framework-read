@@ -29,16 +29,18 @@ import org.junit.Test;
  */
 public class AspectJAdviceParameterNameDiscoverAnnotationTests extends AspectJAdviceParameterNameDiscovererTests {
 
-	@Test
-	public void testAnnotationBinding() {
-		assertParameterNames(getMethod("pjpAndAnAnnotation"),
-				"execution(* *(..)) && @annotation(ann)",
-				new String[] {"thisJoinPoint","ann"});
-	}
+    @Test
+    public void testAnnotationBinding() {
+        assertParameterNames(getMethod("pjpAndAnAnnotation"),
+                "execution(* *(..)) && @annotation(ann)",
+                new String[]{"thisJoinPoint", "ann"});
+    }
 
 
-	public void pjpAndAnAnnotation(ProceedingJoinPoint pjp, MyAnnotation ann) {}
+    public void pjpAndAnAnnotation(ProceedingJoinPoint pjp, MyAnnotation ann) {
+    }
 
-	@interface MyAnnotation {}
+    @interface MyAnnotation {
+    }
 
 }

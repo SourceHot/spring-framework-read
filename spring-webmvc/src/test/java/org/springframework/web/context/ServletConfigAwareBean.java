@@ -23,14 +23,14 @@ import javax.servlet.ServletConfig;
  */
 public class ServletConfigAwareBean implements ServletConfigAware {
 
-	private ServletConfig servletConfig;
+    private ServletConfig servletConfig;
 
-	@Override
-	public void setServletConfig(ServletConfig servletConfig) {
-		this.servletConfig = servletConfig;
-	}
+    public ServletConfig getServletConfig() {
+        return servletConfig;
+    }
 
-	public ServletConfig getServletConfig() {
-		return servletConfig;
-	}
+    @Override
+    public void setServletConfig(ServletConfig servletConfig) {
+        this.servletConfig = servletConfig;
+    }
 }

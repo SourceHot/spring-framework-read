@@ -16,6 +16,10 @@
 
 package org.springframework.beans;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.junit.Test;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
@@ -24,11 +28,9 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Guillaume Poirier
@@ -38,115 +40,110 @@ import static org.junit.Assert.*;
  */
 public class ConcurrentBeanWrapperTests {
 
-	private final Log logger = LogFactory.getLog(getClass());
+    private final Log logger = LogFactory.getLog(getClass());
 
-	private Set<TestRun> set = Collections.synchronizedSet(new HashSet<TestRun>());
+    private Set<TestRun> set = Collections.synchronizedSet(new HashSet<TestRun>());
 
-	private Throwable ex = null;
+    private Throwable ex = null;
 
-	@Test
-	public void testSingleThread() {
-		for (int i = 0; i < 100; i++) {
-			performSet();
-		}
-	}
+    private static void performSet() {
+        TestBean bean = new TestBean();
 
-	@Test
-	public void testConcurrent() {
-		for (int i = 0; i < 10; i++) {
-			TestRun run = new TestRun(this);
-			set.add(run);
-			Thread t = new Thread(run);
-			t.setDaemon(true);
-			t.start();
-		}
-		logger.info("Thread creation over, " + set.size() + " still active.");
-		synchronized (this) {
-			while (!set.isEmpty() && ex == null) {
-				try {
-					wait();
-				}
-				catch (InterruptedException e) {
-					logger.info(e.toString());
-				}
-				logger.info(set.size() + " threads still active.");
-			}
-		}
-		if (ex != null) {
-			fail(ex.getMessage());
-		}
-	}
+        Properties p = (Properties) System.getProperties().clone();
 
-	private static void performSet() {
-		TestBean bean = new TestBean();
+        assertTrue("The System properties must not be empty", p.size() != 0);
 
-		Properties p = (Properties) System.getProperties().clone();
+        for (Iterator<?> i = p.entrySet().iterator(); i.hasNext(); ) {
+            i.next();
+            if (Math.random() > 0.9) {
+                i.remove();
+            }
+        }
 
-		assertTrue("The System properties must not be empty", p.size() != 0);
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        try {
+            p.store(buffer, null);
+        } catch (IOException e) {
+            // ByteArrayOutputStream does not throw
+            // any IOException
+        }
+        String value = new String(buffer.toByteArray());
 
-		for (Iterator<?> i = p.entrySet().iterator(); i.hasNext();) {
-			i.next();
-			if (Math.random() > 0.9) {
-				i.remove();
-			}
-		}
+        BeanWrapperImpl wrapper = new BeanWrapperImpl(bean);
+        wrapper.setPropertyValue("properties", value);
+        assertEquals(p, bean.getProperties());
+    }
 
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		try {
-			p.store(buffer, null);
-		}
-		catch (IOException e) {
-			// ByteArrayOutputStream does not throw
-			// any IOException
-		}
-		String value = new String(buffer.toByteArray());
+    @Test
+    public void testSingleThread() {
+        for (int i = 0; i < 100; i++) {
+            performSet();
+        }
+    }
 
-		BeanWrapperImpl wrapper = new BeanWrapperImpl(bean);
-		wrapper.setPropertyValue("properties", value);
-		assertEquals(p, bean.getProperties());
-	}
+    @Test
+    public void testConcurrent() {
+        for (int i = 0; i < 10; i++) {
+            TestRun run = new TestRun(this);
+            set.add(run);
+            Thread t = new Thread(run);
+            t.setDaemon(true);
+            t.start();
+        }
+        logger.info("Thread creation over, " + set.size() + " still active.");
+        synchronized (this) {
+            while (!set.isEmpty() && ex == null) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    logger.info(e.toString());
+                }
+                logger.info(set.size() + " threads still active.");
+            }
+        }
+        if (ex != null) {
+            fail(ex.getMessage());
+        }
+    }
 
+    private static class TestRun implements Runnable {
 
-	private static class TestRun implements Runnable {
+        private ConcurrentBeanWrapperTests test;
 
-		private ConcurrentBeanWrapperTests test;
+        public TestRun(ConcurrentBeanWrapperTests test) {
+            this.test = test;
+        }
 
-		public TestRun(ConcurrentBeanWrapperTests test) {
-			this.test = test;
-		}
-
-		@Override
-		public void run() {
-			try {
-				for (int i = 0; i < 100; i++) {
-					performSet();
-				}
-			}
-			catch (Throwable e) {
-				test.ex = e;
-			}
-			finally {
-				synchronized (test) {
-					test.set.remove(this);
-					test.notifyAll();
-				}
-			}
-		}
-	}
+        @Override
+        public void run() {
+            try {
+                for (int i = 0; i < 100; i++) {
+                    performSet();
+                }
+            } catch (Throwable e) {
+                test.ex = e;
+            } finally {
+                synchronized (test) {
+                    test.set.remove(this);
+                    test.notifyAll();
+                }
+            }
+        }
+    }
 
 
-	@SuppressWarnings("unused")
-	private static class TestBean {
+    @SuppressWarnings("unused")
+    private static class TestBean {
 
-		private Properties properties;
+        private Properties properties;
 
-		public Properties getProperties() {
-			return properties;
-		}
+        public Properties getProperties() {
+            return properties;
+        }
 
-		public void setProperties(Properties properties) {
-			this.properties = properties;
-		}
-	}
+        public void setProperties(Properties properties) {
+            this.properties = properties;
+        }
+    }
 
 }

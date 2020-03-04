@@ -24,35 +24,35 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @since 1.2.5
  * @see #setIncludeQueryString
  * @see #setBeforeMessagePrefix
  * @see #setBeforeMessageSuffix
  * @see #setAfterMessagePrefix
  * @see #setAfterMessageSuffix
  * @see org.apache.commons.logging.Log#debug(Object)
+ * @since 1.2.5
  */
 public class CommonsRequestLoggingFilter extends AbstractRequestLoggingFilter {
 
-	@Override
-	protected boolean shouldLog(HttpServletRequest request) {
-		return logger.isDebugEnabled();
-	}
+    @Override
+    protected boolean shouldLog(HttpServletRequest request) {
+        return logger.isDebugEnabled();
+    }
 
-	/**
-	 * Writes a log message before the request is processed.
-	 */
-	@Override
-	protected void beforeRequest(HttpServletRequest request, String message) {
-		logger.debug(message);
-	}
+    /**
+     * Writes a log message before the request is processed.
+     */
+    @Override
+    protected void beforeRequest(HttpServletRequest request, String message) {
+        logger.debug(message);
+    }
 
-	/**
-	 * Writes a log message after the request is processed.
-	 */
-	@Override
-	protected void afterRequest(HttpServletRequest request, String message) {
-		logger.debug(message);
-	}
+    /**
+     * Writes a log message after the request is processed.
+     */
+    @Override
+    protected void afterRequest(HttpServletRequest request, String message) {
+        logger.debug(message);
+    }
 
 }

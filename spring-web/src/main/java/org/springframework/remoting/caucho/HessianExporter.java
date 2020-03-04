@@ -16,12 +16,6 @@
 
 package org.springframework.remoting.caucho;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-
 import com.caucho.hessian.io.AbstractHessianInput;
 import com.caucho.hessian.io.AbstractHessianOutput;
 import com.caucho.hessian.io.Hessian2Input;
@@ -34,12 +28,17 @@ import com.caucho.hessian.io.HessianRemoteResolver;
 import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.hessian.server.HessianSkeleton;
 import org.apache.commons.logging.Log;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.util.Assert;
 import org.springframework.util.CommonsLogWriter;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 /**
  * General stream-based protocol exporter for a Hessian endpoint.
@@ -50,203 +49,198 @@ import org.springframework.util.CommonsLogWriter;
  * <b>Note: As of Spring 4.0, this exporter requires Hessian 4.0 or above.</b>
  *
  * @author Juergen Hoeller
- * @since 2.5.1
  * @see #invoke(java.io.InputStream, java.io.OutputStream)
  * @see HessianServiceExporter
+ * @since 2.5.1
  */
 public class HessianExporter extends RemoteExporter implements InitializingBean {
 
-	/**
-	 * The content type for hessian ({@code application/x-hessian}).
-	 */
-	public static final String CONTENT_TYPE_HESSIAN = "application/x-hessian";
+    /**
+     * The content type for hessian ({@code application/x-hessian}).
+     */
+    public static final String CONTENT_TYPE_HESSIAN = "application/x-hessian";
 
 
-	private SerializerFactory serializerFactory = new SerializerFactory();
+    private SerializerFactory serializerFactory = new SerializerFactory();
 
-	@Nullable
-	private HessianRemoteResolver remoteResolver;
+    @Nullable
+    private HessianRemoteResolver remoteResolver;
 
-	@Nullable
-	private Log debugLogger;
+    @Nullable
+    private Log debugLogger;
 
-	@Nullable
-	private HessianSkeleton skeleton;
-
-
-	/**
-	 * Specify the Hessian SerializerFactory to use.
-	 * <p>This will typically be passed in as an inner bean definition
-	 * of type {@code com.caucho.hessian.io.SerializerFactory},
-	 * with custom bean property values applied.
-	 */
-	public void setSerializerFactory(@Nullable SerializerFactory serializerFactory) {
-		this.serializerFactory = (serializerFactory != null ? serializerFactory : new SerializerFactory());
-	}
-
-	/**
-	 * Set whether to send the Java collection type for each serialized
-	 * collection. Default is "true".
-	 */
-	public void setSendCollectionType(boolean sendCollectionType) {
-		this.serializerFactory.setSendCollectionType(sendCollectionType);
-	}
-
-	/**
-	 * Set whether to allow non-serializable types as Hessian arguments
-	 * and return values. Default is "true".
-	 */
-	public void setAllowNonSerializable(boolean allowNonSerializable) {
-		this.serializerFactory.setAllowNonSerializable(allowNonSerializable);
-	}
-
-	/**
-	 * Specify a custom HessianRemoteResolver to use for resolving remote
-	 * object references.
-	 */
-	public void setRemoteResolver(HessianRemoteResolver remoteResolver) {
-		this.remoteResolver = remoteResolver;
-	}
-
-	/**
-	 * Set whether Hessian's debug mode should be enabled, logging to
-	 * this exporter's Commons Logging log. Default is "false".
-	 * @see com.caucho.hessian.client.HessianProxyFactory#setDebug
-	 */
-	public void setDebug(boolean debug) {
-		this.debugLogger = (debug ? logger : null);
-	}
+    @Nullable
+    private HessianSkeleton skeleton;
 
 
-	@Override
-	public void afterPropertiesSet() {
-		prepare();
-	}
+    /**
+     * Specify the Hessian SerializerFactory to use.
+     * <p>This will typically be passed in as an inner bean definition
+     * of type {@code com.caucho.hessian.io.SerializerFactory},
+     * with custom bean property values applied.
+     */
+    public void setSerializerFactory(@Nullable SerializerFactory serializerFactory) {
+        this.serializerFactory = (serializerFactory != null ? serializerFactory : new SerializerFactory());
+    }
 
-	/**
-	 * Initialize this exporter.
-	 */
-	public void prepare() {
-		checkService();
-		checkServiceInterface();
-		this.skeleton = new HessianSkeleton(getProxyForService(), getServiceInterface());
-	}
+    /**
+     * Set whether to send the Java collection type for each serialized
+     * collection. Default is "true".
+     */
+    public void setSendCollectionType(boolean sendCollectionType) {
+        this.serializerFactory.setSendCollectionType(sendCollectionType);
+    }
+
+    /**
+     * Set whether to allow non-serializable types as Hessian arguments
+     * and return values. Default is "true".
+     */
+    public void setAllowNonSerializable(boolean allowNonSerializable) {
+        this.serializerFactory.setAllowNonSerializable(allowNonSerializable);
+    }
+
+    /**
+     * Specify a custom HessianRemoteResolver to use for resolving remote
+     * object references.
+     */
+    public void setRemoteResolver(HessianRemoteResolver remoteResolver) {
+        this.remoteResolver = remoteResolver;
+    }
+
+    /**
+     * Set whether Hessian's debug mode should be enabled, logging to
+     * this exporter's Commons Logging log. Default is "false".
+     *
+     * @see com.caucho.hessian.client.HessianProxyFactory#setDebug
+     */
+    public void setDebug(boolean debug) {
+        this.debugLogger = (debug ? logger : null);
+    }
 
 
-	/**
-	 * Perform an invocation on the exported object.
-	 * @param inputStream the request stream
-	 * @param outputStream the response stream
-	 * @throws Throwable if invocation failed
-	 */
-	public void invoke(InputStream inputStream, OutputStream outputStream) throws Throwable {
-		Assert.notNull(this.skeleton, "Hessian exporter has not been initialized");
-		doInvoke(this.skeleton, inputStream, outputStream);
-	}
+    @Override
+    public void afterPropertiesSet() {
+        prepare();
+    }
 
-	/**
-	 * Actually invoke the skeleton with the given streams.
-	 * @param skeleton the skeleton to invoke
-	 * @param inputStream the request stream
-	 * @param outputStream the response stream
-	 * @throws Throwable if invocation failed
-	 */
-	protected void doInvoke(HessianSkeleton skeleton, InputStream inputStream, OutputStream outputStream)
-			throws Throwable {
+    /**
+     * Initialize this exporter.
+     */
+    public void prepare() {
+        checkService();
+        checkServiceInterface();
+        this.skeleton = new HessianSkeleton(getProxyForService(), getServiceInterface());
+    }
 
-		ClassLoader originalClassLoader = overrideThreadContextClassLoader();
-		try {
-			InputStream isToUse = inputStream;
-			OutputStream osToUse = outputStream;
 
-			if (this.debugLogger != null && this.debugLogger.isDebugEnabled()) {
-				try (PrintWriter debugWriter = new PrintWriter(new CommonsLogWriter(this.debugLogger))){
-					@SuppressWarnings("resource")
-					HessianDebugInputStream dis = new HessianDebugInputStream(inputStream, debugWriter);
-					@SuppressWarnings("resource")
-					HessianDebugOutputStream dos = new HessianDebugOutputStream(outputStream, debugWriter);
-					dis.startTop2();
-					dos.startTop2();
-					isToUse = dis;
-					osToUse = dos;
-				}
-			}
+    /**
+     * Perform an invocation on the exported object.
+     *
+     * @param inputStream  the request stream
+     * @param outputStream the response stream
+     * @throws Throwable if invocation failed
+     */
+    public void invoke(InputStream inputStream, OutputStream outputStream) throws Throwable {
+        Assert.notNull(this.skeleton, "Hessian exporter has not been initialized");
+        doInvoke(this.skeleton, inputStream, outputStream);
+    }
 
-			if (!isToUse.markSupported()) {
-				isToUse = new BufferedInputStream(isToUse);
-				isToUse.mark(1);
-			}
+    /**
+     * Actually invoke the skeleton with the given streams.
+     *
+     * @param skeleton     the skeleton to invoke
+     * @param inputStream  the request stream
+     * @param outputStream the response stream
+     * @throws Throwable if invocation failed
+     */
+    protected void doInvoke(HessianSkeleton skeleton, InputStream inputStream, OutputStream outputStream)
+            throws Throwable {
 
-			int code = isToUse.read();
-			int major;
-			int minor;
+        ClassLoader originalClassLoader = overrideThreadContextClassLoader();
+        try {
+            InputStream isToUse = inputStream;
+            OutputStream osToUse = outputStream;
 
-			AbstractHessianInput in;
-			AbstractHessianOutput out;
+            if (this.debugLogger != null && this.debugLogger.isDebugEnabled()) {
+                try (PrintWriter debugWriter = new PrintWriter(new CommonsLogWriter(this.debugLogger))) {
+                    @SuppressWarnings("resource")
+                    HessianDebugInputStream dis = new HessianDebugInputStream(inputStream, debugWriter);
+                    @SuppressWarnings("resource")
+                    HessianDebugOutputStream dos = new HessianDebugOutputStream(outputStream, debugWriter);
+                    dis.startTop2();
+                    dos.startTop2();
+                    isToUse = dis;
+                    osToUse = dos;
+                }
+            }
 
-			if (code == 'H') {
-				// Hessian 2.0 stream
-				major = isToUse.read();
-				minor = isToUse.read();
-				if (major != 0x02) {
-					throw new IOException("Version " + major + '.' + minor + " is not understood");
-				}
-				in = new Hessian2Input(isToUse);
-				out = new Hessian2Output(osToUse);
-				in.readCall();
-			}
-			else if (code == 'C') {
-				// Hessian 2.0 call... for some reason not handled in HessianServlet!
-				isToUse.reset();
-				in = new Hessian2Input(isToUse);
-				out = new Hessian2Output(osToUse);
-				in.readCall();
-			}
-			else if (code == 'c') {
-				// Hessian 1.0 call
-				major = isToUse.read();
-				minor = isToUse.read();
-				in = new HessianInput(isToUse);
-				if (major >= 2) {
-					out = new Hessian2Output(osToUse);
-				}
-				else {
-					out = new HessianOutput(osToUse);
-				}
-			}
-			else {
-				throw new IOException("Expected 'H'/'C' (Hessian 2.0) or 'c' (Hessian 1.0) in hessian input at " + code);
-			}
+            if (!isToUse.markSupported()) {
+                isToUse = new BufferedInputStream(isToUse);
+                isToUse.mark(1);
+            }
 
-			in.setSerializerFactory(this.serializerFactory);
-			out.setSerializerFactory(this.serializerFactory);
-			if (this.remoteResolver != null) {
-				in.setRemoteResolver(this.remoteResolver);
-			}
+            int code = isToUse.read();
+            int major;
+            int minor;
 
-			try {
-				skeleton.invoke(in, out);
-			}
-			finally {
-				try {
-					in.close();
-					isToUse.close();
-				}
-				catch (IOException ex) {
-					// ignore
-				}
-				try {
-					out.close();
-					osToUse.close();
-				}
-				catch (IOException ex) {
-					// ignore
-				}
-			}
-		}
-		finally {
-			resetThreadContextClassLoader(originalClassLoader);
-		}
-	}
+            AbstractHessianInput in;
+            AbstractHessianOutput out;
+
+            if (code == 'H') {
+                // Hessian 2.0 stream
+                major = isToUse.read();
+                minor = isToUse.read();
+                if (major != 0x02) {
+                    throw new IOException("Version " + major + '.' + minor + " is not understood");
+                }
+                in = new Hessian2Input(isToUse);
+                out = new Hessian2Output(osToUse);
+                in.readCall();
+            } else if (code == 'C') {
+                // Hessian 2.0 call... for some reason not handled in HessianServlet!
+                isToUse.reset();
+                in = new Hessian2Input(isToUse);
+                out = new Hessian2Output(osToUse);
+                in.readCall();
+            } else if (code == 'c') {
+                // Hessian 1.0 call
+                major = isToUse.read();
+                minor = isToUse.read();
+                in = new HessianInput(isToUse);
+                if (major >= 2) {
+                    out = new Hessian2Output(osToUse);
+                } else {
+                    out = new HessianOutput(osToUse);
+                }
+            } else {
+                throw new IOException("Expected 'H'/'C' (Hessian 2.0) or 'c' (Hessian 1.0) in hessian input at " + code);
+            }
+
+            in.setSerializerFactory(this.serializerFactory);
+            out.setSerializerFactory(this.serializerFactory);
+            if (this.remoteResolver != null) {
+                in.setRemoteResolver(this.remoteResolver);
+            }
+
+            try {
+                skeleton.invoke(in, out);
+            } finally {
+                try {
+                    in.close();
+                    isToUse.close();
+                } catch (IOException ex) {
+                    // ignore
+                }
+                try {
+                    out.close();
+                    osToUse.close();
+                } catch (IOException ex) {
+                    // ignore
+                }
+            }
+        } finally {
+            resetThreadContextClassLoader(originalClassLoader);
+        }
+    }
 
 }

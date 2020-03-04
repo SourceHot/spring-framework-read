@@ -12,13 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */package org.springframework.web.util;
+ */
+package org.springframework.web.util;
 
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockServletContext;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Marten Deinum
@@ -26,24 +26,23 @@ import static org.junit.Assert.*;
  */
 public class ServletContextPropertyUtilsTests {
 
-	@Test
-	public void resolveAsServletContextInitParameter() {
-		MockServletContext servletContext = new MockServletContext();
-		servletContext.setInitParameter("test.prop", "bar");
-		String resolved = ServletContextPropertyUtils.resolvePlaceholders("${test.prop:foo}", servletContext);
-		assertEquals("bar", resolved);
-	}
+    @Test
+    public void resolveAsServletContextInitParameter() {
+        MockServletContext servletContext = new MockServletContext();
+        servletContext.setInitParameter("test.prop", "bar");
+        String resolved = ServletContextPropertyUtils.resolvePlaceholders("${test.prop:foo}", servletContext);
+        assertEquals("bar", resolved);
+    }
 
-	@Test
-	public void fallbackToSystemProperties() {
-		MockServletContext servletContext = new MockServletContext();
-		System.setProperty("test.prop", "bar");
-		try {
-			String resolved = ServletContextPropertyUtils.resolvePlaceholders("${test.prop:foo}", servletContext);
-			assertEquals("bar", resolved);
-		}
-		finally {
-			System.clearProperty("test.prop");
-		}
-	}
+    @Test
+    public void fallbackToSystemProperties() {
+        MockServletContext servletContext = new MockServletContext();
+        System.setProperty("test.prop", "bar");
+        try {
+            String resolved = ServletContextPropertyUtils.resolvePlaceholders("${test.prop:foo}", servletContext);
+            assertEquals("bar", resolved);
+        } finally {
+            System.clearProperty("test.prop");
+        }
+    }
 }

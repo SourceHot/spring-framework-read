@@ -304,10 +304,10 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
         }
 
         // Start the shared Connection, if any.
-		if (sharedConnectionEnabled()) {
-			// 开启共享的jms-connection
-			startSharedConnection();
-		}
+        if (sharedConnectionEnabled()) {
+            // 开启共享的jms-connection
+            startSharedConnection();
+        }
     }
 
     /**
@@ -548,8 +548,8 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
     /**
      * Try to resume all paused tasks.
      * Tasks for which rescheduling failed simply remain in paused mode.
-	 *
-	 * 恢复暂停任务
+     * <p>
+     * 恢复暂停任务
      */
     protected void resumePausedTasks() {
         synchronized (this.lifecycleMonitor) {
@@ -557,7 +557,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
                 for (Iterator<?> it = this.pausedTasks.iterator(); it.hasNext(); ) {
                     Object task = it.next();
                     try {
-                    	// 回复暂停任务
+                        // 回复暂停任务
                         doRescheduleTask(task);
                         it.remove();
                         if (logger.isDebugEnabled()) {

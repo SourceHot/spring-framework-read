@@ -17,7 +17,6 @@
 package org.springframework.aop.support;
 
 import org.junit.Test;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.tests.sample.beans.ITestBean;
@@ -35,34 +34,34 @@ import static org.junit.Assert.assertTrue;
  */
 public class ClassFiltersTests {
 
-	private final ClassFilter exceptionFilter = new RootClassFilter(Exception.class);
+    private final ClassFilter exceptionFilter = new RootClassFilter(Exception.class);
 
-	private final ClassFilter interfaceFilter = new RootClassFilter(ITestBean.class);
+    private final ClassFilter interfaceFilter = new RootClassFilter(ITestBean.class);
 
-	private final ClassFilter hasRootCauseFilter = new RootClassFilter(NestedRuntimeException.class);
+    private final ClassFilter hasRootCauseFilter = new RootClassFilter(NestedRuntimeException.class);
 
 
-	@Test
-	public void union() {
-		assertTrue(exceptionFilter.matches(RuntimeException.class));
-		assertFalse(exceptionFilter.matches(TestBean.class));
-		assertFalse(interfaceFilter.matches(Exception.class));
-		assertTrue(interfaceFilter.matches(TestBean.class));
-		ClassFilter union = ClassFilters.union(exceptionFilter, interfaceFilter);
-		assertTrue(union.matches(RuntimeException.class));
-		assertTrue(union.matches(TestBean.class));
-		assertTrue(union.toString().matches("^.+UnionClassFilter: \\[.+RootClassFilter: .+Exception, .+RootClassFilter: .+TestBean\\]$"));
-	}
+    @Test
+    public void union() {
+        assertTrue(exceptionFilter.matches(RuntimeException.class));
+        assertFalse(exceptionFilter.matches(TestBean.class));
+        assertFalse(interfaceFilter.matches(Exception.class));
+        assertTrue(interfaceFilter.matches(TestBean.class));
+        ClassFilter union = ClassFilters.union(exceptionFilter, interfaceFilter);
+        assertTrue(union.matches(RuntimeException.class));
+        assertTrue(union.matches(TestBean.class));
+        assertTrue(union.toString().matches("^.+UnionClassFilter: \\[.+RootClassFilter: .+Exception, .+RootClassFilter: .+TestBean\\]$"));
+    }
 
-	@Test
-	public void intersection() {
-		assertTrue(exceptionFilter.matches(RuntimeException.class));
-		assertTrue(hasRootCauseFilter.matches(NestedRuntimeException.class));
-		ClassFilter intersection = ClassFilters.intersection(exceptionFilter, hasRootCauseFilter);
-		assertFalse(intersection.matches(RuntimeException.class));
-		assertFalse(intersection.matches(TestBean.class));
-		assertTrue(intersection.matches(NestedRuntimeException.class));
-		assertTrue(intersection.toString().matches("^.+IntersectionClassFilter: \\[.+RootClassFilter: .+Exception, .+RootClassFilter: .+NestedRuntimeException\\]$"));
-	}
+    @Test
+    public void intersection() {
+        assertTrue(exceptionFilter.matches(RuntimeException.class));
+        assertTrue(hasRootCauseFilter.matches(NestedRuntimeException.class));
+        ClassFilter intersection = ClassFilters.intersection(exceptionFilter, hasRootCauseFilter);
+        assertFalse(intersection.matches(RuntimeException.class));
+        assertFalse(intersection.matches(TestBean.class));
+        assertTrue(intersection.matches(NestedRuntimeException.class));
+        assertTrue(intersection.toString().matches("^.+IntersectionClassFilter: \\[.+RootClassFilter: .+Exception, .+RootClassFilter: .+NestedRuntimeException\\]$"));
+    }
 
 }

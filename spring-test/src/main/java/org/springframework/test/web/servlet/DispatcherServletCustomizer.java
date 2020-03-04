@@ -27,11 +27,12 @@ import org.springframework.web.servlet.DispatcherServlet;
  */
 public interface DispatcherServletCustomizer {
 
-	/**
-	 * Customize the supplied {@link DispatcherServlet} <em>before</em> it is
-	 * initialized.
-	 * @param dispatcherServlet the dispatcher servlet to customize
-	 */
-	void customize(DispatcherServlet dispatcherServlet);
+    /**
+     * Customize the supplied {@link DispatcherServlet} <em>before</em> it is
+     * initialized.
+     *
+     * @param dispatcherServlet the dispatcher servlet to customize
+     */
+    void customize(DispatcherServlet dispatcherServlet);
 
 }

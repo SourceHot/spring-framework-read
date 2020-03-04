@@ -26,21 +26,23 @@ package org.springframework.transaction;
 @SuppressWarnings("serial")
 public class TransactionSuspensionNotSupportedException extends CannotCreateTransactionException {
 
-	/**
-	 * Constructor for TransactionSuspensionNotSupportedException.
-	 * @param msg the detail message
-	 */
-	public TransactionSuspensionNotSupportedException(String msg) {
-		super(msg);
-	}
+    /**
+     * Constructor for TransactionSuspensionNotSupportedException.
+     *
+     * @param msg the detail message
+     */
+    public TransactionSuspensionNotSupportedException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Constructor for TransactionSuspensionNotSupportedException.
-	 * @param msg the detail message
-	 * @param cause the root cause from the transaction API in use
-	 */
-	public TransactionSuspensionNotSupportedException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    /**
+     * Constructor for TransactionSuspensionNotSupportedException.
+     *
+     * @param msg   the detail message
+     * @param cause the root cause from the transaction API in use
+     */
+    public TransactionSuspensionNotSupportedException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

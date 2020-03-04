@@ -16,12 +16,12 @@
 
 package org.springframework.web.accept;
 
-import java.util.Map;
-
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
+
+import java.util.Map;
 
 /**
  * Strategy that resolves the requested content type from a query parameter.
@@ -37,35 +37,33 @@ import org.springframework.web.context.request.NativeWebRequest;
  */
 public class ParameterContentNegotiationStrategy extends AbstractMappingContentNegotiationStrategy {
 
-	private String parameterName = "format";
+    private String parameterName = "format";
 
 
-	/**
-	 * Create an instance with the given map of file extensions and media types.
-	 */
-	public ParameterContentNegotiationStrategy(Map<String, MediaType> mediaTypes) {
-		super(mediaTypes);
-	}
+    /**
+     * Create an instance with the given map of file extensions and media types.
+     */
+    public ParameterContentNegotiationStrategy(Map<String, MediaType> mediaTypes) {
+        super(mediaTypes);
+    }
 
+    public String getParameterName() {
+        return this.parameterName;
+    }
 
-	/**
-	 * Set the name of the parameter to use to determine requested media types.
-	 * <p>By default this is set to {@code "format"}.
-	 */
-	public void setParameterName(String parameterName) {
-		Assert.notNull(parameterName, "'parameterName' is required");
-		this.parameterName = parameterName;
-	}
+    /**
+     * Set the name of the parameter to use to determine requested media types.
+     * <p>By default this is set to {@code "format"}.
+     */
+    public void setParameterName(String parameterName) {
+        Assert.notNull(parameterName, "'parameterName' is required");
+        this.parameterName = parameterName;
+    }
 
-	public String getParameterName() {
-		return this.parameterName;
-	}
-
-
-	@Override
-	@Nullable
-	protected String getMediaTypeKey(NativeWebRequest request) {
-		return request.getParameter(getParameterName());
-	}
+    @Override
+    @Nullable
+    protected String getMediaTypeKey(NativeWebRequest request) {
+        return request.getParameter(getParameterName());
+    }
 
 }
