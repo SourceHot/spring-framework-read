@@ -182,6 +182,11 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		this.autoStartup = autoStartup;
 	}
 
+	/**
+	 * 创建监听容器
+	 * @param endpoint the endpoint to configure
+	 * @return
+	 */
 	@Override
 	public C createListenerContainer(JmsListenerEndpoint endpoint) {
 		C instance = createContainerInstance();

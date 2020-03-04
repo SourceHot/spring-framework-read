@@ -139,6 +139,7 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 		Assert.state(this.endpointRegistry != null, "No JmsListenerEndpointRegistry set");
 		synchronized (this.mutex) {
 			for (JmsListenerEndpointDescriptor descriptor : this.endpointDescriptors) {
+				// 注册监听
 				this.endpointRegistry.registerListenerContainer(
 						descriptor.endpoint, resolveContainerFactory(descriptor));
 			}

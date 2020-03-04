@@ -175,11 +175,15 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 		if (this.beanFactory instanceof ListableBeanFactory) {
 			// Apply JmsListenerConfigurer beans from the BeanFactory, if any
+			// 根据类型获取bean
 			Map<String, JmsListenerConfigurer> beans =
 					((ListableBeanFactory) this.beanFactory).getBeansOfType(JmsListenerConfigurer.class);
+
 			List<JmsListenerConfigurer> configurers = new ArrayList<>(beans.values());
+			// 排序 Order
 			AnnotationAwareOrderComparator.sort(configurers);
 			for (JmsListenerConfigurer configurer : configurers) {
+				// 放入jms监听配置,开发者自定义
 				configurer.configureJmsListeners(this.registrar);
 			}
 		}
@@ -227,6 +231,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 			return bean;
 		}
 
+		// 获取 bean 的代理对象.class
 		Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
 		if (!this.nonAnnotatedClasses.contains(targetClass)) {
 			Map<Method, Set<JmsListener>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,

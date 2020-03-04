@@ -197,7 +197,8 @@ public abstract class JmsAccessor implements InitializingBean {
     /**
      * Create a JMS Connection via this template's ConnectionFactory.
      * <p>This implementation uses JMS 1.1 API.
-     *创建jms链接
+     * 创建jms链接
+     *
      * @return the new JMS Connection
      * @throws JMSException if thrown by JMS API methods
      * @see javax.jms.ConnectionFactory#createConnection()

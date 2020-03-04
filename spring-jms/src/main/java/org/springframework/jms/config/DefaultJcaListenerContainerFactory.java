@@ -120,6 +120,7 @@ public class DefaultJcaListenerContainerFactory extends JmsActivationSpecConfig
 
 	/**
 	 * Create an empty container instance.
+	 * 创建一个空的监听容器
 	 */
 	protected JmsMessageEndpointManager createContainerInstance() {
 		return new JmsMessageEndpointManager();
