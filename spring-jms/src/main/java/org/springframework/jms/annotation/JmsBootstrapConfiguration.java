@@ -43,12 +43,21 @@ import org.springframework.jms.config.JmsListenerEndpointRegistry;
 @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class JmsBootstrapConfiguration {
 
+	/**
+	 * jms 监听注解后处理, 将{@link JmsListener} 注册到{@link JmsListenerContainerFactory}
+	 * @return
+	 */
 	@Bean(name = JmsListenerConfigUtils.JMS_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public JmsListenerAnnotationBeanPostProcessor jmsListenerAnnotationProcessor() {
 		return new JmsListenerAnnotationBeanPostProcessor();
 	}
 
+
+	/**
+	 * JMS 监听注册
+	 * @return
+	 */
 	@Bean(name = JmsListenerConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME)
 	public JmsListenerEndpointRegistry defaultJmsListenerEndpointRegistry() {
 		return new JmsListenerEndpointRegistry();

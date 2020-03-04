@@ -1,6 +1,6 @@
 # Spring-MVC-ViewResolverRegistry
 - Author: [HuiFer](https://github.com/huifer)
-- 源码阅读仓库: [huifer-spring](https://github.com/huifer/spring-framework-read)
+- 源码阅读仓库: [SourceHot-spring](https://github.com/SourceHot/spring-framework-read)
 - 源码路径: `org.springframework.web.servlet.config.annotation.ViewResolverRegistry`
 - `ViewResolverRegistry`是`org.springframework.web.servlet.config.annotation.WebMvcConfigurer`的一个配置`org.springframework.web.servlet.config.annotation.WebMvcConfigurer.configureViewResolvers`
 ```java

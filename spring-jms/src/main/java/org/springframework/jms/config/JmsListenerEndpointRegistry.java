@@ -50,6 +50,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * listener containers for management purposes. If you need to access to a
  * specific message listener container, use {@link #getListenerContainer(String)}
  * with the id of the endpoint.
+ * <p>
+ * JMS 监听点注册类
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
@@ -125,10 +127,15 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
      * with regards to its configuration.
      * <p>The {@code startImmediately} flag determines if the container should be
      * started immediately.
+     * <p>
+     * 注册监听容器
      *
      * @param endpoint         the endpoint to add
+     *                         监听点
      * @param factory          the listener factory to use
+     *                         监听容器工厂
      * @param startImmediately start the container immediately if necessary
+     *                         是否立即启动容器
      * @see #getListenerContainers()
      * @see #getListenerContainer(String)
      */
@@ -147,10 +154,10 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
             // 创建消息监听容器
             MessageListenerContainer container = createListenerContainer(endpoint, factory);
             this.listenerContainers.put(id, container);
-			if (startImmediately) {
-				// 启动消息监听容器
-				startIfNecessary(container);
-			}
+            if (startImmediately) {
+                // 启动消息监听容器
+                startIfNecessary(container);
+            }
         }
     }
 
@@ -176,10 +183,12 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
     protected MessageListenerContainer createListenerContainer(JmsListenerEndpoint endpoint,
                                                                JmsListenerContainerFactory<?> factory) {
 
+        // 创建监听 容器
         MessageListenerContainer listenerContainer = factory.createListenerContainer(endpoint);
 
         if (listenerContainer instanceof InitializingBean) {
             try {
+                // 后置方法
                 ((InitializingBean) listenerContainer).afterPropertiesSet();
             } catch (Exception ex) {
                 throw new BeanInitializationException("Failed to initialize message listener container", ex);
