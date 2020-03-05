@@ -53,6 +53,14 @@ public class StringMessageConverter extends AbstractMessageConverter {
 		return (String.class == clazz);
 	}
 
+	/**
+	 * 从消息对象{@link	Message} 转换为JAVA对象
+	 * @param message        the input message
+	 * @param targetClass    the target class for the conversion
+	 * @param conversionHint an extra object passed to the {@link MessageConverter},
+	 *                       e.g. the associated {@code MethodParameter} (may be {@code null}}
+	 * @return
+	 */
 	@Override
 	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
 		Charset charset = getContentTypeCharset(getMimeType(message.getHeaders()));
@@ -60,13 +68,23 @@ public class StringMessageConverter extends AbstractMessageConverter {
 		return (payload instanceof String ? payload : new String((byte[]) payload, charset));
 	}
 
+	/**
+	 * 将JAVA 对象转换成 Byte[]
+	 * @param payload        the Object to convert
+	 * @param headers        optional headers for the message (may be {@code null})
+	 * @param conversionHint an extra object passed to the {@link MessageConverter},
+	 *                       e.g. the associated {@code MethodParameter} (may be {@code null}}
+	 * @return
+	 */
 	@Override
 	@Nullable
 	protected Object convertToInternal(
 			Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 
 		if (byte[].class == getSerializedPayloadClass()) {
+			// 获取编码
 			Charset charset = getContentTypeCharset(getMimeType(headers));
+			// 获取byte数组
 			payload = ((String) payload).getBytes(charset);
 		}
 		return payload;
