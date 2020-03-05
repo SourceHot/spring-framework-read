@@ -98,6 +98,8 @@ import java.util.Properties;
  * nested transactions! Hence, do not expect JPA access code to semantically
  * participate in a nested transaction.</i>
  *
+ *
+ * JPA 事务管理
  * @author Juergen Hoeller
  * @see #setEntityManagerFactory
  * @see #setDataSource

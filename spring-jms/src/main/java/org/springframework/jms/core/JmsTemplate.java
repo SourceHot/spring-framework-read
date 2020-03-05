@@ -628,12 +628,16 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
             throws JMSException {
 
         Assert.notNull(messageCreator, "MessageCreator must not be null");
+
+        // 创建消息生产者
         MessageProducer producer = createProducer(session, destination);
         try {
+            // 创建消息
             Message message = messageCreator.createMessage(session);
             if (logger.isDebugEnabled()) {
                 logger.debug("Sending created message: " + message);
             }
+            // 发送
             doSend(producer, message);
             // Check commit - avoid commit call within a JTA transaction.
             if (session.getTransacted() && isSessionLocallyTransacted(session)) {
@@ -641,6 +645,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
                 JmsUtils.commitIfNecessary(session);
             }
         } finally {
+            // 关闭消息生产者
             JmsUtils.closeMessageProducer(producer);
         }
     }
@@ -810,16 +815,22 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
         try {
             // Use transaction timeout (if available).
             long timeout = getReceiveTimeout();
+            // 链接工厂
             ConnectionFactory connectionFactory = getConnectionFactory();
+            // JMS 资源信息
             JmsResourceHolder resourceHolder = null;
             if (connectionFactory != null) {
+                // 从连接对象中获取JMS 资源信息
                 resourceHolder = (JmsResourceHolder) TransactionSynchronizationManager.getResource(connectionFactory);
             }
             if (resourceHolder != null && resourceHolder.hasTimeout()) {
+                // 超时时间
                 timeout = Math.min(timeout, resourceHolder.getTimeToLiveInMillis());
             }
+            // 具体的消息
             Message message = receiveFromConsumer(consumer, timeout);
             if (session.getTransacted()) {
+                // 事务性操作
                 // Commit necessary - but avoid commit call within a JTA transaction.
                 if (isSessionLocallyTransacted(session)) {
                     // Transacted session created by this template -> commit.
@@ -1141,6 +1152,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
      * @throws JMSException if thrown by JMS API methods
      */
     protected MessageProducer doCreateProducer(Session session, @Nullable Destination destination) throws JMSException {
+        // JMS 实现
         return session.createProducer(destination);
     }
 

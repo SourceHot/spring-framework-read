@@ -133,6 +133,7 @@ public abstract class JmsDestinationAccessor extends JmsAccessor {
     @Nullable
     protected Message receiveFromConsumer(MessageConsumer consumer, long timeout) throws JMSException {
         if (timeout > 0) {
+            // chu
             return consumer.receive(timeout);
         } else if (timeout < 0) {
             return consumer.receiveNoWait();

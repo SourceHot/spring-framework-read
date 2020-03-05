@@ -458,6 +458,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
         @Override
         public javax.jms.Message createMessage(Session session) throws JMSException {
             try {
+                // 消息转换
                 return this.messageConverter.toMessage(this.message, session);
             } catch (Exception ex) {
                 throw new MessageConversionException("Could not convert '" + this.message + "'", ex);
