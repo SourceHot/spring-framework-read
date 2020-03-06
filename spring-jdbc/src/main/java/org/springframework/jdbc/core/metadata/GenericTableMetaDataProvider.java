@@ -92,6 +92,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
     /**
      * Collection of TableParameterMetaData objects.
+     * 表的参数信息
      */
     private List<TableParameterMetaData> tableParameterMetaData = new ArrayList<>();
 
@@ -228,6 +229,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
                                                   @Nullable String schemaName, @Nullable String tableName) throws SQLException {
 
         this.tableColumnMetaDataUsed = true;
+        // 对表数据进行存储
         locateTableAndProcessMetaData(databaseMetaData, catalogName, schemaName, tableName);
     }
 
@@ -313,8 +315,10 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
         Map<String, TableMetaData> tableMeta = new HashMap<>();
         ResultSet tables = null;
         try {
+            // 获取表
             tables = databaseMetaData.getTables(
                     catalogNameToUse(catalogName), schemaNameToUse(schemaName), tableNameToUse(tableName), null);
+
             while (tables != null && tables.next()) {
                 TableMetaData tmd = new TableMetaData();
                 tmd.setCatalogName(tables.getString("TABLE_CAT"));
@@ -339,6 +343,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
                 logger.info("Unable to locate table meta-data for '" + tableName + "': column names must be provided");
             }
         } else {
+            // 处理表字段
             processTableColumns(databaseMetaData, findTableMetaData(schemaName, tableName, tableMeta));
         }
     }
@@ -381,18 +386,21 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
         ResultSet tableColumns = null;
         String metaDataCatalogName = metaDataCatalogNameToUse(tmd.getCatalogName());
         String metaDataSchemaName = metaDataSchemaNameToUse(tmd.getSchemaName());
+        // 表名
         String metaDataTableName = tableNameToUse(tmd.getTableName());
         if (logger.isDebugEnabled()) {
             logger.debug("Retrieving meta-data for " + metaDataCatalogName + '/' +
                     metaDataSchemaName + '/' + metaDataTableName);
         }
         try {
+            // 表的所有字段,列
             tableColumns = databaseMetaData.getColumns(
                     metaDataCatalogName, metaDataSchemaName, metaDataTableName, null);
             while (tableColumns.next()) {
                 String columnName = tableColumns.getString("COLUMN_NAME");
                 int dataType = tableColumns.getInt("DATA_TYPE");
                 if (dataType == Types.DECIMAL) {
+                    // 这列的类型
                     String typeName = tableColumns.getString("TYPE_NAME");
                     int decimalDigits = tableColumns.getInt("DECIMAL_DIGITS");
                     // Override a DECIMAL data type for no-decimal numerics
@@ -406,7 +414,9 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
                     }
                 }
                 boolean nullable = tableColumns.getBoolean("NULLABLE");
+                // 表的信息
                 TableParameterMetaData meta = new TableParameterMetaData(columnName, dataType, nullable);
+                // 添加表型信息
                 this.tableParameterMetaData.add(meta);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Retrieved meta-data: " + meta.getParameterName() + " " +

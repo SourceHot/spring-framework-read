@@ -114,6 +114,8 @@ public abstract class SqlParameterSourceUtils {
 
     /**
      * Create a Map of case insensitive parameter names together with the original name.
+     * <p>
+     * {@link   SqlParameterSource} 数据拆成map对象
      *
      * @param parameterSource the source of parameter names
      * @return the Map that can be used for case insensitive matching of parameter names

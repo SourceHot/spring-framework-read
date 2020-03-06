@@ -289,6 +289,7 @@ public abstract class JdbcUtils {
 
         Connection con = null;
         try {
+            // 创建数据库连接
             con = DataSourceUtils.getConnection(dataSource);
             DatabaseMetaData metaData = con.getMetaData();
             if (metaData == null) {

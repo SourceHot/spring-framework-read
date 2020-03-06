@@ -19,6 +19,7 @@ package org.springframework.jdbc.core.namedparam;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,8 +32,16 @@ import java.util.Map;
  */
 public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 
+    /**
+     * key: 参数名称
+     * value:{@link Types}
+     */
     private final Map<String, Integer> sqlTypes = new HashMap<>();
 
+    /**
+     * key: 参数名称
+     * value: 参数类型
+     */
     private final Map<String, String> typeNames = new HashMap<>();
 
 
@@ -44,6 +53,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
      */
     public void registerSqlType(String paramName, int sqlType) {
         Assert.notNull(paramName, "Parameter name must not be null");
+        // sql类型保存
         this.sqlTypes.put(paramName, sqlType);
     }
 

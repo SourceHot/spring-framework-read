@@ -47,7 +47,10 @@ public class TableMetaDataContext {
     // Logger available to subclasses
     protected final Log logger = LogFactory.getLog(getClass());
 
-    // Name of table for this context
+    /**
+     * Name of table for this context
+     * 表名
+     */
     @Nullable
     private String tableName;
 
@@ -60,6 +63,9 @@ public class TableMetaDataContext {
     private String schemaName;
 
     // List of columns objects to be used in this context
+    /**
+     * 表字段
+     */
     private List<String> tableColumns = new ArrayList<>();
 
     // Should we access insert parameter meta-data info or not
@@ -85,6 +91,7 @@ public class TableMetaDataContext {
 
     /**
      * Set the name of the table for this context.
+     * 设置表名
      */
     public void setTableName(@Nullable String tableName) {
         this.tableName = tableName;
@@ -203,6 +210,7 @@ public class TableMetaDataContext {
      * Match the provided column names and values with the list of columns used.
      *
      * @param parameterSource the parameter names and values
+     *                        sql参数列表,
      */
     public List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
         List<Object> values = new ArrayList<>();

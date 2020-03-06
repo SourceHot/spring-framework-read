@@ -34,6 +34,9 @@ import java.util.Map;
  * <p>The {@code addValue} methods on this class will make adding several values
  * easier. The methods return a reference to the {@link MapSqlParameterSource}
  * itself, so you can chain several method calls together within a single statement.
+ * <p>
+ * <p>
+ * Map结构的sql参数
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -45,6 +48,10 @@ import java.util.Map;
  */
 public class MapSqlParameterSource extends AbstractSqlParameterSource {
 
+    /**
+     * Map结构存储参数
+     * key: 参数名称,value: 数据值
+     */
     private final Map<String, Object> values = new LinkedHashMap<>();
 
 
@@ -81,16 +88,22 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 
     /**
      * Add a parameter to this parameter source.
+     * <p>
+     * 添加参数
      *
      * @param paramName the name of the parameter
+     *                  参数名称
      * @param value     the value of the parameter
+ *                      参数值
      * @return a reference to this parameter source,
      * so it's possible to chain several calls together
      */
     public MapSqlParameterSource addValue(String paramName, @Nullable Object value) {
         Assert.notNull(paramName, "Parameter name must not be null");
+        // map 结构存储
         this.values.put(paramName, value);
         if (value instanceof SqlParameterValue) {
+            // 注册sql类型
             registerSqlType(paramName, ((SqlParameterValue) value).getSqlType());
         }
         return this;

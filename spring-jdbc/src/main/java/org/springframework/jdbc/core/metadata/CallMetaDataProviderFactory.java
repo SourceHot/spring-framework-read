@@ -77,6 +77,7 @@ public final class CallMetaDataProviderFactory {
     public static CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {
         try {
             return (CallMetaDataProvider) JdbcUtils.extractDatabaseMetaData(dataSource, databaseMetaData -> {
+                // 具体数据库名称
                 String databaseProductName = JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
                 boolean accessProcedureColumnMetaData = context.isAccessCallParameterMetaData();
                 if (context.isFunction()) {

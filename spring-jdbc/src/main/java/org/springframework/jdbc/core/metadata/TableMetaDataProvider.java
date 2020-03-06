@@ -25,6 +25,9 @@ import java.util.List;
 /**
  * Interface specifying the API to be implemented by a class providing table meta-data.
  * This is intended for internal use by the Simple JDBC classes.
+ * <p>
+ * <p>
+ * 表的信息
  *
  * @author Thomas Risberg
  * @since 2.5
