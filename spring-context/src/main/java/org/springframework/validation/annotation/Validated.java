@@ -41,6 +41,8 @@ import java.lang.annotation.Target;
  * for a specific bean to begin with. Can also be used as a meta-annotation on a
  * custom stereotype annotation or a custom group-specific validated annotation.
  *
+ *
+ * Spring 的校验注解
  * @author Juergen Hoeller
  * @since 3.1
  * @see javax.validation.Validator#validate(Object, Class[])

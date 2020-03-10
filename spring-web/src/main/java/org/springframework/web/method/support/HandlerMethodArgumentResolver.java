@@ -26,6 +26,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * Strategy interface for resolving method parameters into argument values in
  * the context of a given request.
  *
+ * 处理web请求参数
  * @author Arjen Poutsma
  * @see HandlerMethodReturnValueHandler
  * @since 3.1
@@ -36,6 +37,7 @@ public interface HandlerMethodArgumentResolver {
      * Whether the given {@linkplain MethodParameter method parameter} is
      * supported by this resolver.
      *
+     * 是否支持参数解析
      * @param parameter the method parameter to check
      * @return {@code true} if this resolver supports the supplied parameter;
      * {@code false} otherwise
@@ -49,6 +51,7 @@ public interface HandlerMethodArgumentResolver {
      * a {@link WebDataBinder} instance when needed for data binding and
      * type conversion purposes.
      *
+     * 将转换成对象
      * @param parameter     the method parameter to resolve. This parameter must
      *                      have previously been passed to {@link #supportsParameter} which must
      *                      have returned {@code true}.

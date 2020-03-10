@@ -98,8 +98,10 @@ public class ModelResultMatchers {
      * Assert the given model attribute(s) have errors.
      */
     public ResultMatcher attributeErrorCount(final String name, final int expectedCount) {
+
         return result -> {
             ModelAndView mav = getModelAndView(result);
+            // 获取异常结果信息
             Errors errors = getBindingResult(mav, name);
             assertEquals("Binding/validation error count for attribute '" + name + "', ",
                     expectedCount, errors.getErrorCount());

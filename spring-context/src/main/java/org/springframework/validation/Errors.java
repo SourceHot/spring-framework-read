@@ -184,6 +184,7 @@ public interface Errors {
 
 	/**
 	 * Return if there were any errors.
+	 * 是否存在异常
 	 */
 	boolean hasErrors();
 

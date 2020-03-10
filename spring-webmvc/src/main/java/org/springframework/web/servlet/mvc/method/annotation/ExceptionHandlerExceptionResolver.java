@@ -303,6 +303,8 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
     /**
      * Return the list of argument resolvers to use including built-in resolvers
      * and custom resolvers provided via {@link #setCustomArgumentResolvers}.
+     *
+     * 默认的参数解析接口
      */
     protected List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
         List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();

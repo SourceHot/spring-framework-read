@@ -33,6 +33,8 @@ import org.springframework.lang.Nullable;
  * implementations can also be used directly, for example to invoke
  * a {@link Validator} on it (e.g. as part of a unit test).
  *
+ *
+ * 绑定异常结果
  * @author Juergen Hoeller
  * @since 2.0
  * @see DataBinder
