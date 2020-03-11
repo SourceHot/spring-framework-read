@@ -1209,10 +1209,14 @@ public abstract class ClassUtils {
      * unique candidate, i.e. a single public method with the specified name.
      * <p>Essentially translates {@code NoSuchMethodException} to {@code null}.
      *
+     * 根据传入的类，以及方法名称，参数类型，返回 对应的method
      * @param clazz      the clazz to analyze
+     *                      类
      * @param methodName the name of the method
+     *                   方法名
      * @param paramTypes the parameter types of the method
      *                   (may be {@code null} to indicate any signature)
+     *                   参数类型
      * @return the method, or {@code null} if not found
      * @see Class#getMethod
      */
@@ -1222,6 +1226,7 @@ public abstract class ClassUtils {
         Assert.notNull(methodName, "Method name must not be null");
         if (paramTypes != null) {
             try {
+                //  class操作
                 return clazz.getMethod(methodName, paramTypes);
             } catch (NoSuchMethodException ex) {
                 return null;

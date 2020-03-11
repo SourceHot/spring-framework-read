@@ -34,6 +34,8 @@ import org.springframework.lang.Nullable;
  * to catch it or subclasses if any error is to be considered fatal
  * (the usual case).
  *
+ *
+ * 数据库异常
  * @author Rod Johnson
  */
 @SuppressWarnings("serial")
