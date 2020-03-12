@@ -30,11 +30,14 @@ public interface MessageHandlingRunnable extends Runnable {
 
 	/**
 	 * Return the Message that will be handled.
+	 * 获取消息
 	 */
 	Message<?> getMessage();
 
 	/**
 	 * Return the MessageHandler that will be used to handle the message.
+	 *
+	 * 获取消息处理对象
 	 */
 	MessageHandler getMessageHandler();
 

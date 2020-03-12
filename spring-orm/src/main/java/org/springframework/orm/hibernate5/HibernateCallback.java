@@ -26,6 +26,7 @@ import org.springframework.lang.Nullable;
  * A typical implementation will call {@code Session.load/find/update} to perform
  * some operations on persistent objects.
  *
+ * 这是一个回调接口, 在{@link HibernateTemplate} 中作为参数进行传递
  * @param <T> the result type
  * @author Juergen Hoeller
  * @see HibernateTemplate

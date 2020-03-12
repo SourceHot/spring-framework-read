@@ -860,6 +860,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
         Assert.notNull(criteria, "DetachedCriteria must not be null");
         return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
+                // 查询条件表达式
             Criteria executableCriteria = criteria.getExecutableCriteria(session);
             prepareCriteria(executableCriteria);
             if (firstResult >= 0) {
