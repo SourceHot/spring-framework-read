@@ -64,6 +64,7 @@ public class DefaultDeserializer implements Deserializer<Object> {
      * Read from the supplied {@code InputStream} and deserialize the contents
      * into an object.
      *
+     * 反序列化
      * @see ObjectInputStream#readObject()
      */
     @Override

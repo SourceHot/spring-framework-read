@@ -319,6 +319,8 @@ public abstract class ObjectUtils {
      * both are {@code null} or {@code false} if only one is {@code null}.
      * <p>Compares arrays with {@code Arrays.equals}, performing an equality
      * check based on the array elements rather than the array reference.
+     * <p>
+     * 判空工具
      *
      * @param o1 first Object to compare
      * @param o2 second Object to compare
@@ -345,6 +347,8 @@ public abstract class ObjectUtils {
     /**
      * Compare the given arrays with {@code Arrays.equals}, performing an equality
      * check based on the array elements rather than the array reference.
+     *
+     * array判断是否相同
      *
      * @param o1 first array to compare
      * @param o2 second array to compare
@@ -740,7 +744,7 @@ public abstract class ObjectUtils {
             } else {
                 sb.append(ARRAY_ELEMENT_SEPARATOR);
             }
-            sb.append(String.valueOf(array[i]));
+            sb.append(array[i]);
         }
         sb.append(ARRAY_END);
         return sb.toString();

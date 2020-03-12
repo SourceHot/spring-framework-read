@@ -20,6 +20,7 @@ package org.springframework.expression;
  * Supported operations that an {@link OperatorOverloader} can implement for any pair of
  * operands.
  *
+ * 数学操作 加减乘除等
  * @author Andy Clement
  * @since 3.0
  */

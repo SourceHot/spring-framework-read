@@ -26,13 +26,20 @@ import java.lang.reflect.Method;
  * including {@link #toString()} representation and {@link Comparable}
  * support (as suggested for custom {@code HashMap} keys as of Java 8).
  *
+ * 方法信息
  * @author Juergen Hoeller
  * @since 4.3
  */
 public final class MethodClassKey implements Comparable<MethodClassKey> {
 
+    /**
+     * 方法
+     */
     private final Method method;
 
+    /**
+     * 类
+     */
     @Nullable
     private final Class<?> targetClass;
 

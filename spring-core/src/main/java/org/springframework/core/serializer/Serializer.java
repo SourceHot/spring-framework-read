@@ -36,6 +36,7 @@ public interface Serializer<T> {
      * (or any decorators of that OutputStream) but rather leave this up
      * to the caller.
      *
+     * 序列化
      * @param object       the object to serialize
      * @param outputStream the output stream
      * @throws IOException in case of errors writing to the stream

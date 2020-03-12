@@ -39,10 +39,19 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 
     /**
      * Map with String keys and Object values.
+     *
+     * 属性map key: 属性名,value:数据值
      */
     private final Map<String, Object> attributes = new LinkedHashMap<>();
 
 
+    /**
+     * 设置属性
+     * @param name  the unique attribute key
+     *              属性值名称
+     * @param value the attribute value to be attached
+     *              属性值
+     */
     @Override
     public void setAttribute(String name, @Nullable Object value) {
         Assert.notNull(name, "Name must not be null");

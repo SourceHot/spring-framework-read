@@ -36,6 +36,7 @@ public interface Deserializer<T> {
      * (or any decorators of that InputStream) but rather leave this up
      * to the caller.
      *
+     * 反序列化
      * @param inputStream the input stream
      * @return the deserialized object
      * @throws IOException in case of errors reading from the stream

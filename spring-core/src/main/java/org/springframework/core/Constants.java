@@ -48,11 +48,14 @@ public class Constants {
 
     /**
      * The name of the introspected class.
+     * 类名
      */
     private final String className;
 
     /**
      * Map from String field name to object value.
+     * key: 属性名称,字段名称
+     * value: 值
      */
     private final Map<String, Object> fieldCache = new HashMap<>();
 
@@ -61,6 +64,7 @@ public class Constants {
      * Create a new Constants converter class wrapping the given class.
      * <p>All <b>public</b> static final variables will be exposed, whatever their type.
      *
+     * 反射获取属性名称以及属性值
      * @param clazz the class to analyze
      * @throws IllegalArgumentException if the supplied {@code clazz} is {@code null}
      */

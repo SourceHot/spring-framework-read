@@ -270,9 +270,10 @@ public abstract class ReflectionUtils {
      * Invoke the specified {@link Method} against the supplied target object with no arguments.
      * The target object can be {@code null} when invoking a static {@link Method}.
      * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
-     *
-     *
+     * <p>
+     * <p>
      * 执行具体方法
+     *
      * @param method the method to invoke
      *               方法
      * @param target the target object to invoke the method on
@@ -818,6 +819,8 @@ public abstract class ReflectionUtils {
 
     /**
      * Determine whether the given field is a "public static final" constant.
+     * <p>
+     * 是否 {@code public} {@code static} {@code final} 同时满足 true
      *
      * @param field the field to check
      */
