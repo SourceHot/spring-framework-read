@@ -87,6 +87,9 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 	private Ehcache cache;
 
 
+	/**
+	 * 设置基本参数
+	 */
 	public EhCacheFactoryBean() {
 		setMaxEntriesLocalHeap(10000);
 		setMaxEntriesLocalDisk(10000000);
@@ -224,6 +227,7 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 		synchronized (this.cacheManager) {
 			// Fetch cache region: If none with the given name exists, create one on the fly.
 			Ehcache rawCache;
+			// 缓存是否存在
 			boolean cacheExists = this.cacheManager.cacheExists(cacheName);
 
 			if (cacheExists) {
@@ -265,6 +269,7 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 
 	/**
 	 * Create a raw Cache object based on the configuration of this FactoryBean.
+	 * 创建缓存
 	 */
 	protected Cache createCache() {
 		return new Cache(this);
@@ -272,11 +277,13 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 
 	/**
 	 * Decorate the given Cache, if necessary.
+	 * 对缓存进行包装
 	 * @param cache the raw Cache object, based on the configuration of this FactoryBean
 	 * @return the (potentially decorated) cache object to be registered with the CacheManager
 	 */
 	protected Ehcache decorateCache(Ehcache cache) {
 		if (this.cacheEntryFactory != null) {
+			// 根据不同类型做不同的包装
 			if (this.cacheEntryFactory instanceof UpdatingCacheEntryFactory) {
 				return new UpdatingSelfPopulatingCache(cache, (UpdatingCacheEntryFactory) this.cacheEntryFactory);
 			}

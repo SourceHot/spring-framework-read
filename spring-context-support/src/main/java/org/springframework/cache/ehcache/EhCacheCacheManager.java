@@ -81,6 +81,10 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 	}
 
 
+	/**
+	 * 加载缓存
+	 * @return
+	 */
 	@Override
 	protected Collection<Cache> loadCaches() {
 		net.sf.ehcache.CacheManager cacheManager = getCacheManager();
@@ -92,9 +96,11 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 					"An 'alive' EhCache CacheManager is required - current cache is " + status.toString());
 		}
 
+		// 获取所有缓存名称
 		String[] names = getCacheManager().getCacheNames();
 		Collection<Cache> caches = new LinkedHashSet<>(names.length);
 		for (String name : names) {
+			// 加入缓存数据
 			caches.add(new EhCacheCache(getCacheManager().getEhcache(name)));
 		}
 		return caches;
