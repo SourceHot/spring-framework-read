@@ -24,6 +24,7 @@ package org.springframework.mail;
  * <p>Allows for easy testing of clients, as it does not depend on JavaMail's
  * infrastructure classes: no mocking of JavaMail Session or Transport necessary.
  *
+ * 邮件发送接口
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @since 10.09.2003
@@ -33,6 +34,7 @@ public interface MailSender {
 
 	/**
 	 * Send the given simple mail message.
+	 * 发送单个简单消息
 	 * @param simpleMessage the message to send
 	 * @throws MailParseException in case of failure when parsing the message
 	 * @throws MailAuthenticationException in case of authentication failure
@@ -42,6 +44,7 @@ public interface MailSender {
 
 	/**
 	 * Send the given array of simple mail messages in batch.
+	 * 发送多个简单消息
 	 * @param simpleMessages the messages to send
 	 * @throws MailParseException in case of failure when parsing a message
 	 * @throws MailAuthenticationException in case of authentication failure

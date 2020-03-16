@@ -586,6 +586,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
         RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
         adapter.setContentNegotiationManager(mvcContentNegotiationManager());
         adapter.setMessageConverters(getMessageConverters());
+        // 设置数据绑定
         adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
         adapter.setCustomArgumentResolvers(getArgumentResolvers());
         adapter.setCustomReturnValueHandlers(getReturnValueHandlers());
@@ -676,7 +677,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
      * Delegates to {@link #getValidator()} first and if that returns {@code null}
      * checks the classpath for the presence of a JSR-303 implementations
      * before creating a {@code OptionalValidatorFactoryBean}.If a JSR-303
-     * implementation is not available, a no-op {@link Validator} is returned.
+     * implementation is not available, a no-op {@link Validator}
+     *
+     * 数据验证bean
      */
     @Bean
     public Validator mvcValidator() {

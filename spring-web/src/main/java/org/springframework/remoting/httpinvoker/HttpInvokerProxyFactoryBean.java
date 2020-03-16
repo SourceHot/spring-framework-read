@@ -56,6 +56,9 @@ import org.springframework.util.Assert;
  */
 public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor implements FactoryBean<Object> {
 
+    /**
+     * 服务的代理对象
+     */
     @Nullable
     private Object serviceProxy;
 
@@ -63,8 +66,10 @@ public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor im
     @Override
     public void afterPropertiesSet() {
         super.afterPropertiesSet();
+        // 服务接口设置
         Class<?> ifc = getServiceInterface();
         Assert.notNull(ifc, "Property 'serviceInterface' is required");
+        // 代理工厂创建对象
         this.serviceProxy = new ProxyFactory(ifc, this).getProxy(getBeanClassLoader());
     }
 
