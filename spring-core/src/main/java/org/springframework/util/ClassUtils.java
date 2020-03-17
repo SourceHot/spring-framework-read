@@ -246,6 +246,8 @@ public abstract class ClassUtils {
      * for primitives (e.g. "int") and array class names (e.g. "String[]").
      * Furthermore, it is also capable of resolving inner class names in Java source
      * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
+     * <p>
+     * 通过名字创建类的class对象
      *
      * @param name        the name of the Class
      * @param classLoader the class loader to use
@@ -1208,10 +1210,11 @@ public abstract class ClassUtils {
      * <p>In case of any signature specified, only returns the method if there is a
      * unique candidate, i.e. a single public method with the specified name.
      * <p>Essentially translates {@code NoSuchMethodException} to {@code null}.
-     *
+     * <p>
      * 根据传入的类，以及方法名称，参数类型，返回 对应的method
+     *
      * @param clazz      the clazz to analyze
-     *                      类
+     *                   类
      * @param methodName the name of the method
      *                   方法名
      * @param paramTypes the parameter types of the method

@@ -103,6 +103,8 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
      * {@link javax.annotation.Priority @Priority} on various kinds of
      * elements, in addition to the {@link org.springframework.core.Ordered}
      * check in the superclass.
+     *
+     * 找到{@link Order} 并将数字返回
      */
     @Override
     @Nullable

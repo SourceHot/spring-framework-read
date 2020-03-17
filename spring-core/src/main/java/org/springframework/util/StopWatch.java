@@ -49,7 +49,13 @@ public class StopWatch {
      * and need to distinguish between them in log or console output.
      */
     private final String id;
+    /**
+     * 任务信息列表
+     */
     private final List<TaskInfo> taskList = new LinkedList<>();
+    /**
+     * 是否保留任务信息列表
+     */
     private boolean keepTaskList = true;
     /**
      * Start time of the current task.
