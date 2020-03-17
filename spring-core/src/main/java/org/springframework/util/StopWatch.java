@@ -35,6 +35,7 @@ import java.util.List;
  * <p>This class is normally used to verify performance during proof-of-concepts
  * and in development, rather than as part of production applications.
  *
+ * 秒表
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -52,22 +53,31 @@ public class StopWatch {
     private boolean keepTaskList = true;
     /**
      * Start time of the current task.
+     * 任务开始的时间
      */
     private long startTimeMillis;
 
     /**
      * Name of the current task.
+     * 任务名称
      */
     @Nullable
     private String currentTaskName;
 
+    /**
+     * 任务信息
+     */
     @Nullable
     private TaskInfo lastTaskInfo;
 
+    /**
+     * 任务数量
+     */
     private int taskCount;
 
     /**
      * Total running time.
+     * 总共花费的时间,单位:毫秒(ms)
      */
     private long totalTimeMillis;
 
@@ -126,7 +136,7 @@ public class StopWatch {
     /**
      * Start a named task. The results are undefined if {@link #stop()}
      * or timing methods are called without invoking this method.
-     *
+     * 开始任务，记录开始时间，以及任务名称
      * @param taskName the name of the task to start
      * @see #stop()
      */
@@ -149,8 +159,10 @@ public class StopWatch {
         if (this.currentTaskName == null) {
             throw new IllegalStateException("Can't stop StopWatch: it's not running");
         }
+        // 消费的时间
         long lastTime = System.currentTimeMillis() - this.startTimeMillis;
         this.totalTimeMillis += lastTime;
+        // 任务信息初始化
         this.lastTaskInfo = new TaskInfo(this.currentTaskName, lastTime);
         if (this.keepTaskList) {
             this.taskList.add(this.lastTaskInfo);
@@ -303,8 +315,14 @@ public class StopWatch {
      */
     public static final class TaskInfo {
 
+        /**
+         * 任务名称
+         */
         private final String taskName;
 
+        /**
+         * 消费的时间
+         */
         private final long timeMillis;
 
         TaskInfo(String taskName, long timeMillis) {
