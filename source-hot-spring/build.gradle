@@ -18,6 +18,7 @@ dependencies {
     compile(project(":spring-beans"))
     compile(project(":spring-aop"))
     compile(project(":spring-context"))
+    compile(project(":spring-context-support"))
     compile(project(":spring-jdbc"))
     compile(project(":spring-web"))
     compile(project(":spring-webmvc"))
