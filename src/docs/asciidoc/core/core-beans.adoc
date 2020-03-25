@@ -74,7 +74,7 @@ In most application scenarios, explicit user code is not required to instantiate
 more instances of a Spring IoC container. For example, in a web application scenario, a
 simple eight (or so) lines of boilerplate web descriptor XML in the `web.xml` file
 of the application typically suffices (see <<context-create>>). If you use the
-https://spring.io/tools/sts[Spring Tool Suite] (an Eclipse-powered development
+https://spring.io/tools[Spring Tools for Eclipse] (an Eclipse-powered development
 environment), you can easily create this boilerplate configuration with a few mouse clicks or
 keystrokes.
 
@@ -1481,7 +1481,7 @@ XML configuration:
 
 The preceding XML is more succinct. However, typos are discovered at runtime rather than
 design time, unless you use an IDE (such as https://www.jetbrains.com/idea/[IntelliJ
-IDEA] or the https://spring.io/tools/sts[Spring Tool Suite])
+IDEA] or the https://spring.io/tools[Spring Tools for Eclipse])
 that supports automatic property completion when you create bean definitions. Such IDE
 assistance is highly recommended.
 
@@ -4649,7 +4649,7 @@ No matter the choice, Spring can accommodate both styles and even mix them toget
 It is worth pointing out that through its <<beans-java, JavaConfig>> option, Spring lets
 annotations be used in a non-invasive way, without touching the target components
 source code and that, in terms of tooling, all configuration styles are supported by the
-https://spring.io/tools/sts[Spring Tool Suite].
+https://spring.io/tools[Spring Tools for Eclipse].
 ****
 
 An alternative to XML setup is provided by annotation-based configuration, which relies on
@@ -5085,21 +5085,22 @@ without an `@Autowired` annotation.
 ====
 Only one constructor of any given bean class may declare `@Autowired` with the `required`
 attribute set to `true`, indicating _the_ constructor to autowire when used as a Spring
-bean. Furthermore, if the `required` attribute is set to `true`, only a single
-constructor may be annotated with `@Autowired`. If multiple _non-required_ constructors
-declare the annotation, they will be considered as candidates for autowiring. The
-constructor with the greatest number of dependencies that can be satisfied by matching
+bean. As a consequence, if the `required` attribute is left at its default value `true`,
+only a single constructor may be annotated with `@Autowired`. If multiple constructors
+declare the annotation, they will all have to declare `required=false` in order to be
+considered as candidates for autowiring (analogous to `autowire=constructor` in XML).
+The constructor with the greatest number of dependencies that can be satisfied by matching
 beans in the Spring container will be chosen. If none of the candidates can be satisfied,
 then a primary/default constructor (if present) will be used. If a class only declares a
-single constructor to begin with, it will always be used, even if not annotated. An
-annotated constructor does not have to be public.
+single constructor to begin with, it will always be used, even if not annotated. Note that
+an annotated constructor does not have to be public.
 
 The `required` attribute of `@Autowired` is recommended over the deprecated `@Required`
 annotation on setter methods. Setting the `required` attribute to `false` indicates that
 the property is not required for autowiring purposes, and the property is ignored if it
 cannot be autowired. `@Required`, on the other hand, is stronger in that it enforces the
-property to be set by any means supported by the container, and if no value is defined, a
-corresponding exception is raised.
+property to be set by any means supported by the container, and if no value is defined,
+a corresponding exception is raised.
 ====
 
 Alternatively, you can express the non-required nature of a particular dependency
@@ -8985,7 +8986,7 @@ modularity, but determining exactly where the autowired bean definitions are dec
 still somewhat ambiguous. For example, as a developer looking at `ServiceConfig`, how do
 you know exactly where the `@Autowired AccountRepository` bean is declared? It is not
 explicit in the code, and this may be just fine. Remember that the
-https://spring.io/tools/sts[Spring Tool Suite] provides tooling that
+https://spring.io/tools[Spring Tools for Eclipse] provides tooling that
 can render graphs showing how everything is wired, which may be all you need. Also,
 your Java IDE can easily find all declarations and uses of the `AccountRepository` type
 and quickly show you the location of `@Bean` methods that return that type.
