@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+    <context:property-placeholder location="classpath:mail/email.properties" ignore-unresolvable="true"/>
+
+    <bean id="javaMailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="protocol" value="${email.protocol}"/>
+        <property name="host" value="${email.host}"/>
+        <property name="port" value="${email.port}"/>
+        <property name="username" value="${email.username}"/>
+        <property name="password" value="${email.password}"/>
+        <property name="defaultEncoding" value="UTF-8"></property>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.auth">${email.auth}</prop>
+                <prop key="mail.smtp.timeout">${email.timout}</prop>
+            </props>
+        </property>
+
+    </bean>
+    <bean id="simpleMailMessage" class="org.springframework.mail.SimpleMailMessage">
+        <!-- 发件人email -->
+        <property name="from" value="${email.username}" />
+        <!--收件人email-->
+        <property name="to" value="${email.default.to}" />
+        <!--email主题(标题)-->
+        <property name="subject" value="${email.default.subject}" />
+        <!--email主题内容-->
+        <property name="text">
+            <value>${email.default.text}</value>
+        </property>
+    </bean>
+
+    <bean id="emailService"
+          class="org.sourcehot.spring.mail.EmailServiceImpl">
+        <property name="javaMailSender" ref="javaMailSender"/>
+        <property name="simpleMailMessage" ref="simpleMailMessage"/>
+    </bean>
+</beans>

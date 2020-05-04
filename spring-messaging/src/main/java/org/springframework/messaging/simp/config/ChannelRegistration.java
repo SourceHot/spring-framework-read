@@ -36,6 +36,9 @@ public class ChannelRegistration {
 	@Nullable
 	private TaskExecutorRegistration registration;
 
+	/**
+	 * {@link ChannelInterceptor} 集合
+	 */
 	private final List<ChannelInterceptor> interceptors = new ArrayList<>();
 
 
@@ -49,7 +52,9 @@ public class ChannelRegistration {
 	/**
 	 * Configure the thread pool backing this message channel using a custom
 	 * ThreadPoolTaskExecutor.
+	 *
 	 * @param taskExecutor the executor to use (or {@code null} for a default executor)
+	 * @return 任务执行注册器
 	 */
 	public TaskExecutorRegistration taskExecutor(@Nullable ThreadPoolTaskExecutor taskExecutor) {
 		if (this.registration == null) {

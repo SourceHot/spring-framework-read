@@ -644,6 +644,7 @@ public interface HibernateOperations {
      * @param criteria    the detached Hibernate criteria object.
      *                    <b>Note: Do not reuse criteria objects! They need to recreated per execution,
      *                    due to the suboptimal design of Hibernate's criteria facility.</b>
+     *                    查询条件
      * @param firstResult the index of the first result object to be retrieved
      *                    (numbered from 0)
      * @param maxResults  the maximum number of result objects to retrieve

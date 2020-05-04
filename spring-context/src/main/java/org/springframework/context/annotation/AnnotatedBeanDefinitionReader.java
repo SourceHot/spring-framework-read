@@ -39,6 +39,8 @@ import java.util.function.Supplier;
  * <p>This is an alternative to {@link ClassPathBeanDefinitionScanner}, applying
  * the same resolution of annotations but for explicitly registered classes only.
  *
+ *
+ * 注解形式的bean定义读取器
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Sam Brannen

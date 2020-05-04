@@ -125,8 +125,11 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
      */
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
+        // 注解判断是否存在
         if (parameter.hasParameterAnnotation(RequestParam.class)) {
+
             if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
+                // 获取注解
                 RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
                 return (requestParam != null && StringUtils.hasText(requestParam.name()));
             } else {
@@ -229,6 +232,13 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
         }
     }
 
+    /**
+     * 将URL中的参数转换成字符串
+     * @param cs
+     * @param sourceType
+     * @param value
+     * @return
+     */
     @Nullable
     protected String formatUriValue(
             @Nullable ConversionService cs, @Nullable TypeDescriptor sourceType, @Nullable Object value) {

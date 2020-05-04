@@ -69,6 +69,9 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
     @Nullable
     private final BeanExpressionContext expressionContext;
 
+    /**
+     * key: 方法的详细信息，value:数据值
+     */
     private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<>(256);
 
 

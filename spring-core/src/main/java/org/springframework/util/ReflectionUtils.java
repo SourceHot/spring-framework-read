@@ -270,9 +270,14 @@ public abstract class ReflectionUtils {
      * Invoke the specified {@link Method} against the supplied target object with no arguments.
      * The target object can be {@code null} when invoking a static {@link Method}.
      * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
+     * <p>
+     * <p>
+     * 执行具体方法
      *
      * @param method the method to invoke
+     *               方法
      * @param target the target object to invoke the method on
+     *               能够执行这个方法的对象
      * @return the invocation result, if any
      * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
      */
@@ -288,13 +293,17 @@ public abstract class ReflectionUtils {
      * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
      *
      * @param method the method to invoke
+     *               方法
      * @param target the target object to invoke the method on
+     *               能够执行方法的对象
      * @param args   the invocation arguments (may be {@code null})
+     *               参数列表
      * @return the invocation result, if any
      */
     @Nullable
     public static Object invokeMethod(Method method, @Nullable Object target, @Nullable Object... args) {
         try {
+            // jdk源码执行
             return method.invoke(target, args);
         } catch (Exception ex) {
             handleReflectionException(ex);
@@ -810,6 +819,8 @@ public abstract class ReflectionUtils {
 
     /**
      * Determine whether the given field is a "public static final" constant.
+     * <p>
+     * 是否 {@code public} {@code static} {@code final} 同时满足 true
      *
      * @param field the field to check
      */

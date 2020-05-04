@@ -103,6 +103,7 @@ public abstract class BeanUtils {
      * <p>Note that this method tries to set the constructor accessible
      * if given a non-accessible (that is, non-public) constructor.
      *
+     * 通过class 创建对象
      * @param clazz the class to instantiate
      * @return the new instance
      * @throws BeanInstantiationException if the bean cannot be instantiated.
@@ -157,7 +158,7 @@ public abstract class BeanUtils {
      * non-accessible (that is, non-public) constructor, and supports Kotlin classes
      * with optional parameters and default values.
      * <p>
-     * 反射创建实体
+     * 通过构造器和参数列表，反射创建实体
      *
      * @param ctor the constructor to instantiate
      * @param args the constructor arguments to apply (use {@code null} for an unspecified
@@ -189,6 +190,7 @@ public abstract class BeanUtils {
      * (as defined in the Kotlin specification). Otherwise, in particular for non-Kotlin
      * classes, this simply returns {@code null}.
      *
+     * 寻找构造器(构造函数)
      * @param clazz the class to check
      * @see <a href="https://kotlinlang.org/docs/reference/classes.html#constructors">Kotlin docs</a>
      * @since 5.0
@@ -393,11 +395,14 @@ public abstract class BeanUtils {
         } else if (startParen == -1) {
             return findMethodWithMinimalParameters(clazz, signature);
         } else {
+            // 函数名
             String methodName = signature.substring(0, startParen);
+            // 参数类型列表
             String[] parameterTypeNames =
                     StringUtils.commaDelimitedListToStringArray(signature.substring(startParen + 1, endParen));
             Class<?>[] parameterTypes = new Class<?>[parameterTypeNames.length];
             for (int i = 0; i < parameterTypeNames.length; i++) {
+                // 参数类型名获取
                 String parameterTypeName = parameterTypeNames[i].trim();
                 try {
                     parameterTypes[i] = ClassUtils.forName(parameterTypeName, clazz.getClassLoader());

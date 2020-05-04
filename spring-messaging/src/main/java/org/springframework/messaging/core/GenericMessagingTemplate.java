@@ -274,6 +274,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 	/**
 	 * A temporary channel for receiving a single reply message.
+	 * 接收单个回复消息的临时通道。
 	 */
 	private static final class TemporaryReplyChannel implements PollableChannel {
 

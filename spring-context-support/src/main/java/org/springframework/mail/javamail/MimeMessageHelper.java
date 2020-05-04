@@ -90,6 +90,8 @@ import org.springframework.util.Assert;
  * Consider choosing a specific multipart mode for your needs: The javadoc
  * on the MULTIPART_MODE constants contains more detailed information.
  *
+ *
+ * 各类邮件类型
  * @author Juergen Hoeller
  * @since 19.01.2004
  * @see #setText(String, boolean)
@@ -318,6 +320,8 @@ public class MimeMessageHelper {
 	 * The main multipart element will either be added as nested element of
 	 * type "related" (MULTIPART_MODE_MIXED_RELATED) or be identical to the root
 	 * element itself (MULTIPART_MODE_MIXED, MULTIPART_MODE_RELATED).
+	 *
+	 * 根据不同类型设置参数
 	 * @param mimeMessage the MimeMessage object to add the root MimeMultipart
 	 * object to
 	 * @param multipartMode the multipart mode, as passed into the constructor

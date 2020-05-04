@@ -46,6 +46,9 @@ import java.util.TreeSet;
  * Factory for collections that is aware of common Java and Spring collection types.
  *
  * <p>Mainly for internal use within the framework.
+ * <p>
+ * <p>
+ * 集合工厂
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
@@ -55,8 +58,14 @@ import java.util.TreeSet;
  */
 public final class CollectionFactory {
 
+    /**
+     * 集合接口 , 如 {@link List}
+     */
     private static final Set<Class<?>> approximableCollectionTypes = new HashSet<>();
 
+    /**
+     * 集合实现类 , 如 {@link ArrayList}
+     */
     private static final Set<Class<?>> approximableMapTypes = new HashSet<>();
 
 
@@ -165,6 +174,8 @@ public final class CollectionFactory {
      * supplied {@code elementType} is an enum type matching type {@code E}.
      * As an alternative, the caller may wish to treat the return value as a
      * raw collection or collection of {@link Object}.
+     * <p>
+     * 创建集合对象
      *
      * @param collectionType the desired type of the target collection (never {@code null})
      * @param elementType    the collection's element type, or {@code null} if unknown
@@ -185,10 +196,13 @@ public final class CollectionFactory {
         Assert.notNull(collectionType, "Collection type must not be null");
         if (collectionType.isInterface()) {
             if (Set.class == collectionType || Collection.class == collectionType) {
+                // SET 集合
                 return new LinkedHashSet<>(capacity);
             } else if (List.class == collectionType) {
+                // LIST 集合
                 return new ArrayList<>(capacity);
             } else if (SortedSet.class == collectionType || NavigableSet.class == collectionType) {
+                // SortedSet 集合
                 return new TreeSet<>();
             } else {
                 throw new IllegalArgumentException("Unsupported Collection interface: " + collectionType.getName());

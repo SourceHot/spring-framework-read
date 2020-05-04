@@ -34,8 +34,11 @@ public interface AttributeAccessor {
      * metadata attributes by using fully-qualified names, perhaps using
      * class or package names as prefix.
      *
+     * 设置属性
      * @param name  the unique attribute key
+     *                  属性名称
      * @param value the attribute value to be attached
+     *                  属性值
      */
     void setAttribute(String name, @Nullable Object value);
 
@@ -43,6 +46,7 @@ public interface AttributeAccessor {
      * Get the value of the attribute identified by {@code name}.
      * Return {@code null} if the attribute doesn't exist.
      *
+     * 获取一个属性的数据值
      * @param name the unique attribute key
      * @return the current value of the attribute, if any
      */
@@ -53,6 +57,7 @@ public interface AttributeAccessor {
      * Remove the attribute identified by {@code name} and return its value.
      * Return {@code null} if no attribute under {@code name} is found.
      *
+     * 删除一个属性
      * @param name the unique attribute key
      * @return the last value of the attribute, if any
      */
@@ -63,12 +68,14 @@ public interface AttributeAccessor {
      * Return {@code true} if the attribute identified by {@code name} exists.
      * Otherwise return {@code false}.
      *
+     * 判断是否存在熟悉
      * @param name the unique attribute key
      */
     boolean hasAttribute(String name);
 
     /**
      * Return the names of all attributes.
+     * 返回属性名称列表
      */
     String[] attributeNames();
 

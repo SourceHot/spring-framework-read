@@ -59,6 +59,7 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
         if (this.initializer != null) {
             this.initializer.initBinder(dataBinder, webRequest);
         }
+        // 初始化数据绑定
         initBinder(dataBinder, webRequest);
         return dataBinder;
     }

@@ -823,6 +823,7 @@ class ConfigurationClassParser {
 		/**
 		 * Return the imports defined by the group.
 		 *
+		 * 自动配置相关操作
 		 * @return each import with its associated configuration class
 		 */
 		public Iterable<Group.Entry> getImports() {

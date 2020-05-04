@@ -194,6 +194,10 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
         this.propertyEditorRegistrars = propertyEditorRegistrars;
     }
 
+    /**
+     * Êý¾Ý°ó¶¨
+     * @param binder the DataBinder to initialize
+     */
     @Override
     public void initBinder(WebDataBinder binder) {
         binder.setAutoGrowNestedPaths(this.autoGrowNestedPaths);

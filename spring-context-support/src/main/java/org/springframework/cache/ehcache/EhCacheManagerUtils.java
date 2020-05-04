@@ -37,6 +37,7 @@ import org.springframework.core.io.Resource;
  * customizing the configuration object, and then calling the
  * {@link CacheManager#CacheManager(Configuration)} constructor.
  *
+ * 缓存管理工具
  * @author Juergen Hoeller
  * @since 4.1
  */
@@ -104,7 +105,9 @@ public abstract class EhCacheManagerUtils {
 	public static Configuration parseConfiguration(Resource configLocation) throws CacheException {
 		InputStream is = null;
 		try {
+			// 获取输入流
 			is = configLocation.getInputStream();
+			// 解析配置文件信息, ehcache 提供的方法
 			return ConfigurationFactory.parseConfiguration(is);
 		}
 		catch (IOException ex) {

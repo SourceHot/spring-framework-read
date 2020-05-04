@@ -48,6 +48,9 @@ import java.util.stream.Collectors;
  * <p>As of 4.2, there is a {@link org.springframework.core.annotation.SynthesizingMethodParameter}
  * subclass available which synthesizes annotations with attribute aliases. That subclass is used
  * for web and message endpoint processing, in particular.
+ * <p>
+ * <p>
+ * 方法信息已经工具
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -499,6 +502,8 @@ public class MethodParameter {
 
     /**
      * Return the type of the method/constructor parameter.
+     * <p>
+     * 获取参数的实际类型
      *
      * @return the parameter type (never {@code null})
      */
@@ -556,6 +561,8 @@ public class MethodParameter {
 
     /**
      * Return the nested type of the method/constructor parameter.
+     * <p>
+     * 获取参数的类型
      *
      * @return the parameter type (never {@code null})
      * @see #getNestingLevel()
@@ -641,6 +648,8 @@ public class MethodParameter {
 
     /**
      * Return the annotations associated with the specific method/constructor parameter.
+     * <p>
+     * 返回参数上的注解列表
      */
     public Annotation[] getParameterAnnotations() {
         Annotation[] paramAnns = this.parameterAnnotations;
@@ -674,6 +683,8 @@ public class MethodParameter {
 
     /**
      * Return the parameter annotation of the given type, if available.
+     * <p>
+     * 获取这个注解的信息
      *
      * @param annotationType the annotation type to look for
      * @return the annotation object, or {@code null} if not found
@@ -693,6 +704,8 @@ public class MethodParameter {
 
     /**
      * Return whether the parameter is declared with the given annotation type.
+     * <p>
+     * 判断是否存在注解
      *
      * @param annotationType the annotation type to look for
      * @see #getParameterAnnotation(Class)

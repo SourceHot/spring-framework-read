@@ -79,6 +79,7 @@ public abstract class QuartzJobBean implements Job {
 	 * Execute the actual job. The job data map will already have been
 	 * applied as bean property values by execute. The contract is
 	 * exactly the same as for the standard Quartz execute method.
+	 * 子类实现, 做具体的任务操作
 	 * @see #execute
 	 */
 	protected abstract void executeInternal(JobExecutionContext context) throws JobExecutionException;

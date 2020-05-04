@@ -616,15 +616,22 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
     /**
      * Return the list of argument resolvers to use including built-in resolvers
      * and custom resolvers provided via {@link #setCustomArgumentResolvers}.
+     * <p>
+     * 默认的web参数解析器
      */
     private List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
         List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
         // Annotation-based argument resolution
+        // 处理注解@RequestParam 基础类型
         resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), false));
+        // 处理 @RequestParam Map类型
         resolvers.add(new RequestParamMapMethodArgumentResolver());
+        // 处理注解 @PathVariable
         resolvers.add(new PathVariableMethodArgumentResolver());
+        // 处理 PathVariable + Map类型
         resolvers.add(new PathVariableMapMethodArgumentResolver());
+        // 处理数组类型
         resolvers.add(new MatrixVariableMethodArgumentResolver());
         resolvers.add(new MatrixVariableMapMethodArgumentResolver());
         resolvers.add(new ServletModelAttributeMethodProcessor(false));

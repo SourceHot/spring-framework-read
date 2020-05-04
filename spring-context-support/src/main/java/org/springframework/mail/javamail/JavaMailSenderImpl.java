@@ -56,6 +56,7 @@ import org.springframework.util.Assert;
  * in the JavaMail {@code Session}. Note that if overriding all values locally,
  * there is no added value in setting a pre-configured {@code Session}.
  *
+ * 邮件发送实现类
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @since 10.09.2003

@@ -159,6 +159,7 @@ public abstract class SessionFactoryUtils {
      * Perform actual closing of the Hibernate Session,
      * catching and logging any cleanup exceptions thrown.
      *
+     * 关闭session
      * @param session the Hibernate Session to close (may be {@code null})
      * @see Session#close()
      */
@@ -175,18 +176,23 @@ public abstract class SessionFactoryUtils {
     /**
      * Determine the DataSource of the given SessionFactory.
      *
+     * 获取数据源 , 依赖于{@link SessionFactory}
      * @param sessionFactory the SessionFactory to check
      * @return the DataSource, or {@code null} if none found
      * @see ConnectionProvider
      */
     @Nullable
     public static DataSource getDataSource(SessionFactory sessionFactory) {
+        // 获取getProperties函数
         Method getProperties = ClassUtils.getMethodIfAvailable(sessionFactory.getClass(), "getProperties");
         if (getProperties != null) {
+            // 执行 具体方法
             Map<?, ?> props = (Map<?, ?>) ReflectionUtils.invokeMethod(getProperties, sessionFactory);
             if (props != null) {
+                // 从 对象中获取一个value
                 Object dataSourceValue = props.get(Environment.DATASOURCE);
                 if (dataSourceValue instanceof DataSource) {
+                    // 类型判断,做强制转换返回
                     return (DataSource) dataSourceValue;
                 }
             }
@@ -211,6 +217,8 @@ public abstract class SessionFactoryUtils {
      * Convert the given HibernateException to an appropriate exception
      * from the {@code org.springframework.dao} hierarchy.
      *
+     *
+     * hibernate 异常处理
      * @param ex the HibernateException that occurred
      * @return the corresponding DataAccessException instance
      * @see HibernateExceptionTranslator#convertHibernateAccessException

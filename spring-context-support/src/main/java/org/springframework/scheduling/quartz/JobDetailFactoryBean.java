@@ -56,6 +56,9 @@ public class JobDetailFactoryBean
 	@Nullable
 	private String group;
 
+	/**
+	 * นคื๗ภเ, ผฬณะ{@link Job}
+	 */
 	@Nullable
 	private Class<? extends Job> jobClass;
 

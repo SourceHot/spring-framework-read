@@ -383,6 +383,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
         Session session = null;
         boolean isNew = false;
         try {
+            // 打开
             session = obtainSessionFactory().getCurrentSession();
         } catch (HibernateException ex) {
             logger.debug("Could not retrieve pre-bound Hibernate session", ex);
@@ -397,6 +398,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
             enableFilters(session);
             Session sessionToExpose =
                     (enforceNativeSession || isExposeNativeSession() ? session : createSessionProxy(session));
+            // 执行
             return action.doInHibernate(sessionToExpose);
         } catch (HibernateException ex) {
             throw SessionFactoryUtils.convertHibernateAccessException(ex);
@@ -470,6 +472,15 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
         }
     }
 
+    /**
+     * 获取一个实体对象,根据id
+     *
+     * @param entityClass a persistent class
+     * @param id          the identifier of the persistent instance
+     * @param <T>
+     * @return
+     * @throws DataAccessException
+     */
     @Override
     @Nullable
     public <T> T get(Class<T> entityClass, Serializable id) throws DataAccessException {
@@ -483,6 +494,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
         return executeWithNativeSession(session -> {
             if (lockMode != null) {
+                // 通过id获取实例对象
                 return session.get(entityClass, id, new LockOptions(lockMode));
             } else {
                 return session.get(entityClass, id);
@@ -848,6 +860,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
         Assert.notNull(criteria, "DetachedCriteria must not be null");
         return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
+                // 查询条件表达式
             Criteria executableCriteria = criteria.getExecutableCriteria(session);
             prepareCriteria(executableCriteria);
             if (firstResult >= 0) {
@@ -875,6 +888,13 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
     // Convenience finder methods for HQL strings
     //-------------------------------------------------------------------------
 
+    /**
+     * 根据一个exampleEntity进行查询
+     *
+     * @param <T>
+     * @return
+     * @throws DataAccessException
+     */
     @Override
     public <T> List<T> findByExample(T exampleEntity, int firstResult, int maxResults) throws DataAccessException {
         return findByExample(null, exampleEntity, firstResult, maxResults);

@@ -16,17 +16,18 @@
 
 package org.springframework.web.socket.config.annotation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link WebSocketMessageBrokerConfigurationSupport} extension that detects
@@ -35,6 +36,12 @@ import org.springframework.util.CollectionUtils;
  * in {@link WebSocketMessageBrokerConfigurationSupport}.
  *
  * <p>This class is typically imported via {@link EnableWebSocketMessageBroker}.
+ * <p>
+ * <p>
+ * {@link org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration} 中有初始化bean行为
+ * 1. {@link AbstractMessageBrokerConfiguration#clientInboundChannel() } 用于传递从WebSocket客户端接收到的消息。
+ * 2. {@link AbstractMessageBrokerConfiguration#clientOutboundChannel()} 用于向WebSocket客户端发送服务器消息。
+ * 3. {@link AbstractMessageBrokerConfiguration#brokerChannel()} 用于从服务器端的应用程序代码中向message broker或 stomp broker relay发送消息.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -42,75 +49,80 @@ import org.springframework.util.CollectionUtils;
 @Configuration
 public class DelegatingWebSocketMessageBrokerConfiguration extends WebSocketMessageBrokerConfigurationSupport {
 
-	private final List<WebSocketMessageBrokerConfigurer> configurers = new ArrayList<>();
+    private final List<WebSocketMessageBrokerConfigurer> configurers = new ArrayList<>();
 
 
-	@Autowired(required = false)
-	public void setConfigurers(List<WebSocketMessageBrokerConfigurer> configurers) {
-		if (!CollectionUtils.isEmpty(configurers)) {
-			this.configurers.addAll(configurers);
-		}
-	}
+    /**
+     * 加载配置
+     *
+     * @param configurers
+     */
+    @Autowired(required = false)
+    public void setConfigurers(List<WebSocketMessageBrokerConfigurer> configurers) {
+        if (!CollectionUtils.isEmpty(configurers)) {
+            this.configurers.addAll(configurers);
+        }
+    }
 
 
-	@Override
-	protected void registerStompEndpoints(StompEndpointRegistry registry) {
-		for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
-			configurer.registerStompEndpoints(registry);
-		}
-	}
+    @Override
+    protected void registerStompEndpoints(StompEndpointRegistry registry) {
+        for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
+            configurer.registerStompEndpoints(registry);
+        }
+    }
 
-	@Override
-	protected void configureWebSocketTransport(WebSocketTransportRegistration registration) {
-		for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
-			configurer.configureWebSocketTransport(registration);
-		}
-	}
+    @Override
+    protected void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+        for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
+            configurer.configureWebSocketTransport(registration);
+        }
+    }
 
-	@Override
-	protected void configureClientInboundChannel(ChannelRegistration registration) {
-		for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
-			configurer.configureClientInboundChannel(registration);
-		}
-	}
+    @Override
+    protected void configureClientInboundChannel(ChannelRegistration registration) {
+        for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
+            configurer.configureClientInboundChannel(registration);
+        }
+    }
 
-	@Override
-	protected void configureClientOutboundChannel(ChannelRegistration registration) {
-		for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
-			configurer.configureClientOutboundChannel(registration);
-		}
-	}
+    @Override
+    protected void configureClientOutboundChannel(ChannelRegistration registration) {
+        for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
+            configurer.configureClientOutboundChannel(registration);
+        }
+    }
 
-	@Override
-	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-		for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
-			configurer.addArgumentResolvers(argumentResolvers);
-		}
-	}
+    @Override
+    protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+        for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
+            configurer.addArgumentResolvers(argumentResolvers);
+        }
+    }
 
-	@Override
-	protected void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-		for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
-			configurer.addReturnValueHandlers(returnValueHandlers);
-		}
-	}
+    @Override
+    protected void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+        for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
+            configurer.addReturnValueHandlers(returnValueHandlers);
+        }
+    }
 
-	@Override
-	protected boolean configureMessageConverters(List<MessageConverter> messageConverters) {
-		boolean registerDefaults = true;
-		for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
-			if (!configurer.configureMessageConverters(messageConverters)) {
-				registerDefaults = false;
-			}
-		}
-		return registerDefaults;
-	}
+    @Override
+    protected boolean configureMessageConverters(List<MessageConverter> messageConverters) {
+        boolean registerDefaults = true;
+        for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
+            if (!configurer.configureMessageConverters(messageConverters)) {
+                registerDefaults = false;
+            }
+        }
+        return registerDefaults;
+    }
 
-	@Override
-	protected void configureMessageBroker(MessageBrokerRegistry registry) {
-		for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
-			configurer.configureMessageBroker(registry);
-		}
-	}
+    @Override
+    protected void configureMessageBroker(MessageBrokerRegistry registry) {
+        for (WebSocketMessageBrokerConfigurer configurer : this.configurers) {
+            configurer.configureMessageBroker(registry);
+        }
+    }
 
 }

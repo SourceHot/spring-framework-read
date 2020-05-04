@@ -46,6 +46,7 @@ public class EhCacheCache implements Cache {
 	 */
 	public EhCacheCache(Ehcache ehcache) {
 		Assert.notNull(ehcache, "Ehcache must not be null");
+		// 缓存状态
 		Status status = ehcache.getStatus();
 		if (!Status.STATUS_ALIVE.equals(status)) {
 			throw new IllegalArgumentException(
@@ -146,11 +147,21 @@ public class EhCacheCache implements Cache {
 	}
 
 
+	/***
+	 * 获取key 对应值
+	 * @param key
+	 * @return
+	 */
 	@Nullable
 	private Element lookup(Object key) {
 		return this.cache.get(key);
 	}
 
+	/**
+	 * 包装值
+	 * @param element
+	 * @return
+	 */
 	@Nullable
 	private ValueWrapper toValueWrapper(@Nullable Element element) {
 		return (element != null ? new SimpleValueWrapper(element.getObjectValue()) : null);

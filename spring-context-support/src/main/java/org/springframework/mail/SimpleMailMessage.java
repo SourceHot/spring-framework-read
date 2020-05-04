@@ -32,6 +32,8 @@ import org.springframework.util.StringUtils;
  * more sophisticated messages, for example messages with attachments, special
  * character encodings, or personal names that accompany mail addresses.
  *
+ *
+ * 消息实体
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @since 10.09.2003
@@ -44,9 +46,15 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class SimpleMailMessage implements MailMessage, Serializable {
 
+	/**
+	 * 发送方
+	 */
 	@Nullable
 	private String from;
 
+	/**
+	 * 接收方
+	 */
 	@Nullable
 	private String replyTo;
 
@@ -59,12 +67,21 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	@Nullable
 	private String[] bcc;
 
+	/**
+	 * 发送时间
+	 */
 	@Nullable
 	private Date sentDate;
 
+	/**
+	 * 主题
+	 */
 	@Nullable
 	private String subject;
 
+	/**
+	 * 正文
+	 */
 	@Nullable
 	private String text;
 
