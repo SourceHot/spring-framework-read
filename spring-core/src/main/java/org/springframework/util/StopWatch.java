@@ -39,6 +39,8 @@ import org.springframework.lang.Nullable;
  * <p>As of Spring Framework 5.2, running time is tracked and reported in
  * nanoseconds.
  *
+ * 秒表
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
