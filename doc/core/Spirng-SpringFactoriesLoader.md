@@ -1,4 +1,7 @@
 # SpringFactoriesLoader
+- Author: [HuiFer](https://github.com/huifer)
+- 源码阅读仓库: [SourceHot-spring-boot](https://github.com/SourceHot/spring-boot-read)
+
 
 - 全路径 : `org.springframework.core.io.support.SpringFactoriesLoader`
 - 测试类 : `org.springframework.core.io.support.SpringFactoriesLoaderTests`
