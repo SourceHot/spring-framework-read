@@ -50,6 +50,7 @@ import org.springframework.util.StringUtils;
  * element of the XML document: this class will parse all bean definition elements
  * in the XML file, regardless of the actual root element.
  *
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -186,6 +187,11 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 	}
 
+	/**
+	 * 解析 element 元素
+	 * @param ele
+	 * @param delegate
+	 */
 	private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
 		if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {
 			importBeanDefinitionResource(ele);

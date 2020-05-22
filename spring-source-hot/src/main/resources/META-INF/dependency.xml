@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns="http://www.springframework.org/schema/beans"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-	<bean id="userEntity" class="org.source.hot.spring.overview.ioc.domain.UserEntity"/>
+	<bean scope="prototype" id="userEntity" class="org.source.hot.spring.overview.ioc.domain.UserEntity" >
+		<!--		set 方法注入-->
+				<property name="name" value="李四"/>
+				<property name="age" value="18"/>
+		<!--		构造器注入-->
+<!--		<constructor-arg index="0" type="java.lang.String" value="李四"/>-->
+<!--		<constructor-arg index="1" type="java.lang.Integer" value="18"/>-->
+
+	</bean>
 </beans>
