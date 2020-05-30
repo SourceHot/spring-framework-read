@@ -87,6 +87,7 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 			throws BeansException {
 
 		List<PropertyAccessException> propertyAccessExceptions = null;
+		// 获取属性值列表
 		List<PropertyValue> propertyValues = (pvs instanceof MutablePropertyValues ?
 				((MutablePropertyValues) pvs).getPropertyValueList() : Arrays.asList(pvs.getPropertyValues()));
 		for (PropertyValue pv : propertyValues) {
@@ -94,6 +95,7 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 				// This method may throw any BeansException, which won't be caught
 				// here, if there is a critical failure such as no matching field.
 				// We can attempt to deal only with less serious exceptions.
+				// 设置属性
 				setPropertyValue(pv);
 			}
 			catch (NotWritablePropertyException ex) {

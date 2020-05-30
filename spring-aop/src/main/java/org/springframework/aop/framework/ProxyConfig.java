@@ -33,7 +33,9 @@ public class ProxyConfig implements Serializable {
 	/** use serialVersionUID from Spring 1.2 for interoperability. */
 	private static final long serialVersionUID = -8409359707199703185L;
 
-
+	/**
+	 * {@code <aop:aspectj-autoproxy proxy-target-class="true"/>} 中的属性
+	 */
 	private boolean proxyTargetClass = false;
 
 	private boolean optimize = false;

@@ -53,6 +53,7 @@ public abstract class AopConfigUtils {
 
 	/**
 	 * Stores the auto proxy creator classes in escalation order.
+	 * 按照代理加载
 	 */
 	private static final List<Class<?>> APC_PRIORITY_LIST = new ArrayList<>(3);
 
@@ -96,7 +97,7 @@ public abstract class AopConfigUtils {
 	@Nullable
 	public static BeanDefinition registerAspectJAnnotationAutoProxyCreatorIfNecessary(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
-
+		// 注册或者升级 AspectJ
 		return registerOrEscalateApcAsRequired(AnnotationAwareAspectJAutoProxyCreator.class, registry, source);
 	}
 
@@ -114,14 +115,25 @@ public abstract class AopConfigUtils {
 		}
 	}
 
+	/**
+	 * 注册或者升级 bean
+	 *
+	 * @param cls      类
+	 * @param registry 注册器
+	 * @param source   源类
+	 * @return
+	 */
 	@Nullable
 	private static BeanDefinition registerOrEscalateApcAsRequired(
 			Class<?> cls, BeanDefinitionRegistry registry, @Nullable Object source) {
 
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 
+		// 判断注册器是否包含org.springframework.aop.config.internalAutoProxyCreator
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
+			// 获取注册器
 			BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
+			// 创建新的bean对象
 			if (!cls.getName().equals(apcDefinition.getBeanClassName())) {
 				int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
 				int requiredPriority = findPriorityForClass(cls);
@@ -129,13 +141,16 @@ public abstract class AopConfigUtils {
 					apcDefinition.setBeanClassName(cls.getName());
 				}
 			}
+			// 即将创建的Bean对象和当前的注册器相同返回null
 			return null;
 		}
 
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
 		beanDefinition.setSource(source);
+		// 设置加载顺序
 		beanDefinition.getPropertyValues().add("order", Ordered.HIGHEST_PRECEDENCE);
 		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		// 注册bean定义
 		registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, beanDefinition);
 		return beanDefinition;
 	}

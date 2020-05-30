@@ -58,7 +58,9 @@ import org.springframework.lang.Nullable;
 public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFactory {
 
 	private static final String AJC_MAGIC = "ajc$";
-
+	/**
+	 * AOP相关注解
+	 */
 	private static final Class<?>[] ASPECTJ_ANNOTATION_CLASSES = new Class<?>[] {
 			Pointcut.class, Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class};
 
@@ -79,7 +81,12 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	public boolean isAspect(Class<?> clazz) {
 		return (hasAspectAnnotation(clazz) && !compiledByAjc(clazz));
 	}
-
+	/**
+	 * 判断是否存在{@link Aspect} 注解
+	 *
+	 * @param clazz
+	 * @return
+	 */
 	private boolean hasAspectAnnotation(Class<?> clazz) {
 		return (AnnotationUtils.findAnnotation(clazz, Aspect.class) != null);
 	}
@@ -130,6 +137,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	@SuppressWarnings("unchecked")
 	@Nullable
 	protected static AspectJAnnotation<?> findAspectJAnnotationOnMethod(Method method) {
+		// 循环判断当前方法是否存在AOP相关注解
 		for (Class<?> clazz : ASPECTJ_ANNOTATION_CLASSES) {
 			AspectJAnnotation<?> foundAnnotation = findAnnotation(method, (Class<Annotation>) clazz);
 			if (foundAnnotation != null) {

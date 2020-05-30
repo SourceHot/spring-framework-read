@@ -9,7 +9,7 @@
 
 ## loadFactories
 
-- **加载并实例化工厂 **
+- **加载并实例化工厂**
 
 ```java
 public static <T> List<T> loadFactories(Class<T> factoryType, @Nullable ClassLoader classLoader) {

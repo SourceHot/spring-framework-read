@@ -18,6 +18,7 @@ package org.springframework.core.io.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.UrlResource;
 import org.springframework.lang.Nullable;
@@ -71,7 +72,7 @@ public final class SpringFactoriesLoader {
 	private static final Log logger = LogFactory.getLog(SpringFactoriesLoader.class);
 
 	/**
-	 * 缓存
+	 * 缓存.
 	 */
 	private static final Map<ClassLoader, MultiValueMap<String, String>> cache = new ConcurrentReferenceHashMap<>();
 
@@ -139,7 +140,7 @@ public final class SpringFactoriesLoader {
 	}
 
 	/**
-	 * 加载 spring 工厂
+	 * 加载 spring 工厂.
 	 *
 	 * @param classLoader 类加载器
 	 *
@@ -184,12 +185,9 @@ public final class SpringFactoriesLoader {
 	}
 
 	/**
-	 * 实例化工厂
-	 * @param factoryImplementationName
-	 * @param factoryType
-	 * @param classLoader
-	 * @param <T>
-	 * @return
+	 * 实例化工厂.
+	 *
+	 *
 	 */
 	@SuppressWarnings("unchecked")
 	private static <T> T instantiateFactory(String factoryImplementationName, Class<T> factoryType, ClassLoader classLoader) {
