@@ -62,6 +62,7 @@ public abstract class LogFactory {
 	/**
 	 * Convenience method to return a named logger.
 	 * @param name logical name of the <code>Log</code> instance to be returned
+	 *             名称,可是类名,可以是任何的字符串
 	 */
 	public static Log getLog(String name) {
 		return LogAdapter.createLog(name);
