@@ -38,6 +38,9 @@ import org.springframework.util.Assert;
  * Use the alternative {@link SimpleTransactionStatus} class or a mock for the plain
  * {@link org.springframework.transaction.TransactionStatus} interface instead.
  *
+ *
+ *
+ * 事务状态
  * @author Juergen Hoeller
  * @since 19.01.2004
  * @see AbstractPlatformTransactionManager

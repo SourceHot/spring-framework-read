@@ -17,9 +17,8 @@
 package org.springframework.transaction;
 
 /**
- * Common representation of the current state of a transaction.
- * Serves as base interface for {@link TransactionStatus} as well as
- * {@link ReactiveTransaction}.
+ * Common representation of the current state of a transaction. Serves as base interface for {@link
+ * TransactionStatus} as well as {@link ReactiveTransaction}.
  *
  * @author Juergen Hoeller
  * @since 5.2
@@ -27,28 +26,35 @@ package org.springframework.transaction;
 public interface TransactionExecution {
 
 	/**
-	 * Return whether the present transaction is new; otherwise participating
-	 * in an existing transaction, or potentially not running in an actual
-	 * transaction in the first place.
+	 * Return whether the present transaction is new; otherwise participating in an existing
+	 * transaction, or potentially not running in an actual transaction in the first place.
+	 * <p>
+	 * 是否是一个新的事务
 	 */
 	boolean isNewTransaction();
 
 	/**
-	 * Set the transaction rollback-only. This instructs the transaction manager
-	 * that the only possible outcome of the transaction may be a rollback, as
-	 * alternative to throwing an exception which would in turn trigger a rollback.
+	 * Set the transaction rollback-only. This instructs the transaction manager that the only
+	 * possible outcome of the transaction may be a rollback, as alternative to throwing an
+	 * exception which would in turn trigger a rollback.
+	 * <p>
+	 * 仅回滚设置
 	 */
 	void setRollbackOnly();
 
 	/**
-	 * Return whether the transaction has been marked as rollback-only
-	 * (either by the application or by the transaction infrastructure).
+	 * Return whether the transaction has been marked as rollback-only (either by the application or
+	 * by the transaction infrastructure).
+	 * <p>
+	 * 是否仅回滚
 	 */
 	boolean isRollbackOnly();
 
 	/**
-	 * Return whether this transaction is completed, that is,
-	 * whether it has already been committed or rolled back.
+	 * Return whether this transaction is completed, that is, whether it has already been committed
+	 * or rolled back.
+	 * <p>
+	 * 是否已经完成
 	 */
 	boolean isCompleted();
 

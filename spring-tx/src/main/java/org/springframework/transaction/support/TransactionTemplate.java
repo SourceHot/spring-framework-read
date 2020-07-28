@@ -17,10 +17,8 @@
 package org.springframework.transaction.support;
 
 import java.lang.reflect.UndeclaredThrowableException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -31,41 +29,41 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.util.Assert;
 
 /**
- * Template class that simplifies programmatic transaction demarcation and
- * transaction exception handling.
+ * Template class that simplifies programmatic transaction demarcation and transaction exception
+ * handling.
  *
  * <p>The central method is {@link #execute}, supporting transactional code that
- * implements the {@link TransactionCallback} interface. This template handles
- * the transaction lifecycle and possible exceptions such that neither the
- * TransactionCallback implementation nor the calling code needs to explicitly
- * handle transactions.
+ * implements the {@link TransactionCallback} interface. This template handles the transaction
+ * lifecycle and possible exceptions such that neither the TransactionCallback implementation nor
+ * the calling code needs to explicitly handle transactions.
  *
  * <p>Typical usage: Allows for writing low-level data access objects that use
- * resources such as JDBC DataSources but are not transaction-aware themselves.
- * Instead, they can implicitly participate in transactions handled by higher-level
- * application services utilizing this class, making calls to the low-level
- * services via an inner-class callback object.
+ * resources such as JDBC DataSources but are not transaction-aware themselves. Instead, they can
+ * implicitly participate in transactions handled by higher-level application services utilizing
+ * this class, making calls to the low-level services via an inner-class callback object.
  *
  * <p>Can be used within a service implementation via direct instantiation with
- * a transaction manager reference, or get prepared in an application context
- * and passed to services as bean reference. Note: The transaction manager should
- * always be configured as bean in the application context: in the first case given
- * to the service directly, in the second case given to the prepared template.
+ * a transaction manager reference, or get prepared in an application context and passed to services
+ * as bean reference. Note: The transaction manager should always be configured as bean in the
+ * application context: in the first case given to the service directly, in the second case given to
+ * the prepared template.
  *
  * <p>Supports setting the propagation behavior and the isolation level by name,
  * for convenient configuration in context definitions.
  *
  * @author Juergen Hoeller
- * @since 17.03.2003
  * @see #execute
  * @see #setTransactionManager
  * @see org.springframework.transaction.PlatformTransactionManager
+ * @since 17.03.2003
  */
 @SuppressWarnings("serial")
 public class TransactionTemplate extends DefaultTransactionDefinition
 		implements TransactionOperations, InitializingBean {
 
-	/** Logger available to subclasses. */
+	/**
+	 * Logger available to subclasses.
+	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	@Nullable
@@ -76,6 +74,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	 * Construct a new TransactionTemplate for bean usage.
 	 * <p>Note: The PlatformTransactionManager needs to be set before
 	 * any {@code execute} calls.
+	 *
 	 * @see #setTransactionManager
 	 */
 	public TransactionTemplate() {
@@ -83,6 +82,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 
 	/**
 	 * Construct a new TransactionTemplate using the given transaction manager.
+	 *
 	 * @param transactionManager the transaction management strategy to be used
 	 */
 	public TransactionTemplate(PlatformTransactionManager transactionManager) {
@@ -90,22 +90,16 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	}
 
 	/**
-	 * Construct a new TransactionTemplate using the given transaction manager,
-	 * taking its default settings from the given transaction definition.
-	 * @param transactionManager the transaction management strategy to be used
-	 * @param transactionDefinition the transaction definition to copy the
-	 * default settings from. Local properties can still be set to change values.
+	 * Construct a new TransactionTemplate using the given transaction manager, taking its default
+	 * settings from the given transaction definition.
+	 *
+	 * @param transactionManager    the transaction management strategy to be used
+	 * @param transactionDefinition the transaction definition to copy the default settings from.
+	 *                              Local properties can still be set to change values.
 	 */
-	public TransactionTemplate(PlatformTransactionManager transactionManager, TransactionDefinition transactionDefinition) {
+	public TransactionTemplate(PlatformTransactionManager transactionManager,
+			TransactionDefinition transactionDefinition) {
 		super(transactionDefinition);
-		this.transactionManager = transactionManager;
-	}
-
-
-	/**
-	 * Set the transaction management strategy to be used.
-	 */
-	public void setTransactionManager(@Nullable PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
 
@@ -117,6 +111,13 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 		return this.transactionManager;
 	}
 
+	/**
+	 * Set the transaction management strategy to be used.
+	 */
+	public void setTransactionManager(@Nullable PlatformTransactionManager transactionManager) {
+		this.transactionManager = transactionManager;
+	}
+
 	@Override
 	public void afterPropertiesSet() {
 		if (this.transactionManager == null) {
@@ -125,30 +126,45 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	}
 
 
+	/**
+	 * 执行,做一个事务
+	 *
+	 * @param action the callback object that specifies the transactional action
+	 * @param <T>
+	 * @return
+	 * @throws TransactionException
+	 */
 	@Override
 	@Nullable
 	public <T> T execute(TransactionCallback<T> action) throws TransactionException {
 		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 
+		// 事务管理是否是 xxx接口
 		if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager) {
-			return ((CallbackPreferringPlatformTransactionManager) this.transactionManager).execute(this, action);
-		}
-		else {
+//			强转执行
+			return ((CallbackPreferringPlatformTransactionManager) this.transactionManager)
+					.execute(this, action);
+		} else {
+			// 获取事务状态
 			TransactionStatus status = this.transactionManager.getTransaction(this);
+			// 返回结果
 			T result;
 			try {
+				// 事务回调执行
 				result = action.doInTransaction(status);
-			}
-			catch (RuntimeException | Error ex) {
+			} catch (RuntimeException | Error ex) {
 				// Transactional code threw application exception -> rollback
+				// 回滚异常
 				rollbackOnException(status, ex);
 				throw ex;
-			}
-			catch (Throwable ex) {
+			} catch (Throwable ex) {
 				// Transactional code threw unexpected exception -> rollback
+				// 回滚异常
 				rollbackOnException(status, ex);
-				throw new UndeclaredThrowableException(ex, "TransactionCallback threw undeclared checked exception");
+				throw new UndeclaredThrowableException(ex,
+						"TransactionCallback threw undeclared checked exception");
 			}
+			// 提交
 			this.transactionManager.commit(status);
 			return result;
 		}
@@ -156,23 +172,23 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 
 	/**
 	 * Perform a rollback, handling rollback exceptions properly.
+	 *
 	 * @param status object representing the transaction
-	 * @param ex the thrown application exception or error
+	 * @param ex     the thrown application exception or error
 	 * @throws TransactionException in case of a rollback error
 	 */
-	private void rollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {
+	private void rollbackOnException(TransactionStatus status, Throwable ex)
+			throws TransactionException {
 		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 
 		logger.debug("Initiating transaction rollback on application exception", ex);
 		try {
 			this.transactionManager.rollback(status);
-		}
-		catch (TransactionSystemException ex2) {
+		} catch (TransactionSystemException ex2) {
 			logger.error("Application exception overridden by rollback exception", ex);
 			ex2.initApplicationException(ex);
 			throw ex2;
-		}
-		catch (RuntimeException | Error ex2) {
+		} catch (RuntimeException | Error ex2) {
 			logger.error("Application exception overridden by rollback exception", ex);
 			throw ex2;
 		}

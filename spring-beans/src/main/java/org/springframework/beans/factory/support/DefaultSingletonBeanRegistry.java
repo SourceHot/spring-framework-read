@@ -61,6 +61,7 @@ import org.springframework.util.StringUtils;
  * (which inherit from it). Can alternatively also be used as a nested
  * helper to delegate to.
  *
+ * 默认的单例bean注册
  * @author Juergen Hoeller
  * @since 2.0
  * @see #registerSingleton

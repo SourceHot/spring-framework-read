@@ -33,6 +33,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * in combination with the {@code <tx:annotation-driven>} element.
  * Both approached are detailed to great extent in the Spring reference manual.
  *
+ * spring 的xml解析(事务解析)
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
@@ -50,11 +51,18 @@ public class TxNamespaceHandler extends NamespaceHandlerSupport {
 	}
 
 
+	/**
+	 * 初始化
+	 */
 	@Override
 	public void init() {
+		// 切面解析
 		registerBeanDefinitionParser("advice", new TxAdviceBeanDefinitionParser());
-		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
-		registerBeanDefinitionParser("jta-transaction-manager", new JtaTransactionManagerBeanDefinitionParser());
+		// 注解驱动
+		registerBeanDefinitionParser("annotation-driven",
+				new AnnotationDrivenBeanDefinitionParser());
+		registerBeanDefinitionParser("jta-transaction-manager",
+				new JtaTransactionManagerBeanDefinitionParser());
 	}
 
 }

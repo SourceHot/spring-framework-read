@@ -20,6 +20,7 @@ package org.springframework.transaction;
  * Marker interface for Spring transaction manager implementations,
  * either traditional or reactive.
  *
+ * 事务管理
  * @author Juergen Hoeller
  * @since 5.2
  * @see PlatformTransactionManager

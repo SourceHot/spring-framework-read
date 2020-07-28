@@ -110,6 +110,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	// Handling of current savepoint state
 	//---------------------------------------------------------------------
 
+
 	@Override
 	public boolean hasSavepoint() {
 		return (this.savepoint != null);

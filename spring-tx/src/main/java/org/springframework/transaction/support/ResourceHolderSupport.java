@@ -56,6 +56,7 @@ public abstract class ResourceHolderSupport implements ResourceHolder {
 
 	/**
 	 * Return whether the resource is synchronized with a transaction.
+	 * 是否为同步事务
 	 */
 	public boolean isSynchronizedWithTransaction() {
 		return this.synchronizedWithTransaction;
@@ -167,6 +168,7 @@ public abstract class ResourceHolderSupport implements ResourceHolder {
 	/**
 	 * Decrease the reference count by one because the holder has been released
 	 * (i.e. someone released the resource held by it).
+	 * 计数器减一
 	 */
 	public void released() {
 		this.referenceCount--;

@@ -29,6 +29,8 @@ import org.springframework.transaction.ReactiveTransaction;
  * alternative, consider the use of declarative transaction demarcation (e.g. through
  * Spring's {@link org.springframework.transaction.annotation.Transactional} annotation).
  *
+ * 响应式事务回调
+ *
  * @author Mark Paluch
  * @author Juergen Hoeller
  * @since 5.2

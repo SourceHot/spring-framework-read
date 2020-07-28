@@ -12,6 +12,11 @@ repositories {
 dependencies {
 	compile(project(":spring-context"))
 	compile(project(":spring-core"))
-	compile(project(":spring-web"))
+    compile(project(":spring-web"))
+    compile(project(":spring-jdbc"))
+    compile(project(":spring-tx"))
+    compile group: 'com.alibaba', name: 'druid', version: '1.1.23'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.48'
+
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

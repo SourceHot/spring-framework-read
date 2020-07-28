@@ -24,6 +24,7 @@ import org.springframework.transaction.TransactionStatus;
  * Allows for implementing a doInTransaction version without result,
  * i.e. without the need for a return statement.
  *
+ * 带有返回结果的事务回调
  * @author Juergen Hoeller
  * @since 28.03.2003
  * @see TransactionTemplate

@@ -17,7 +17,6 @@
 package org.springframework.transaction.support;
 
 import java.util.function.Consumer;
-
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
@@ -28,6 +27,8 @@ import org.springframework.transaction.TransactionStatus;
  * but a useful option to enhance testability, as it can easily be
  * mocked or stubbed.
  *
+ *
+ * 事务操作接口
  * @author Juergen Hoeller
  * @since 2.0.4
  */

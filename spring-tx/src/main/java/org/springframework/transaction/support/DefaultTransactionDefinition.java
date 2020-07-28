@@ -30,6 +30,7 @@ import org.springframework.transaction.TransactionDefinition;
  * <p>Base class for both {@link TransactionTemplate} and
  * {@link org.springframework.transaction.interceptor.DefaultTransactionAttribute}.
  *
+ * 默认的事务定义
  * @author Juergen Hoeller
  * @since 08.05.2003
  */
@@ -56,8 +57,14 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 	private int isolationLevel = ISOLATION_DEFAULT;
 
+	/**
+	 * 超时时间
+	 */
 	private int timeout = TIMEOUT_DEFAULT;
 
+	/**
+	 * 是否只读
+	 */
 	private boolean readOnly = false;
 
 	@Nullable

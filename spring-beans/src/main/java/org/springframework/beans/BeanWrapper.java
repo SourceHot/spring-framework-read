@@ -36,6 +36,8 @@ import java.beans.PropertyDescriptor;
  * is "false", to avoid side effects caused by getter method invocations.
  * Turn this to "true" to expose present property values to custom editors.
  *
+ * bean 的包装接口
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13 April 2001

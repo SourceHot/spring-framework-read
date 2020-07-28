@@ -34,6 +34,8 @@ import org.springframework.util.Assert;
  *
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *
+ *
+ * 数据库链接对象. 从
  * @author Juergen Hoeller
  * @since 06.05.2003
  * @see DataSourceTransactionManager
