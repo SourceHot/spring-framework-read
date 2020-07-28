@@ -471,11 +471,178 @@ public final void commit(TransactionStatus status) throws TransactionException {
 
 
 
+
+
+```java
+private void processCommit(DefaultTransactionStatus status) throws TransactionException {
+   try {
+      boolean beforeCompletionInvoked = false;
+
+      try {
+         boolean unexpectedRollback = false;
+         //
+         prepareForCommit(status);
+         triggerBeforeCommit(status);
+         triggerBeforeCompletion(status);
+         // 前置任务是否已经执行
+         beforeCompletionInvoked = true;
+
+         // 嵌套事务. 是否有保存点
+         if (status.hasSavepoint()) {
+            if (status.isDebug()) {
+               logger.debug("Releasing transaction savepoint");
+            }
+            unexpectedRollback = status.isGlobalRollbackOnly();
+            status.releaseHeldSavepoint();
+         } else if (status.isNewTransaction()) {
+            if (status.isDebug()) {
+               logger.debug("Initiating transaction commit");
+            }
+            unexpectedRollback = status.isGlobalRollbackOnly();
+            doCommit(status);
+         } else if (isFailEarlyOnGlobalRollbackOnly()) {
+            unexpectedRollback = status.isGlobalRollbackOnly();
+         }
+
+         // Throw UnexpectedRollbackException if we have a global rollback-only
+         // marker but still didn't get a corresponding exception from commit.
+         if (unexpectedRollback) {
+            throw new UnexpectedRollbackException(
+                  "Transaction silently rolled back because it has been marked as rollback-only");
+         }
+      } catch (UnexpectedRollbackException ex) {
+         // can only be caused by doCommit
+         // 事务的同步状态: 回滚
+         triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK);
+         throw ex;
+      } catch (TransactionException ex) {
+         // can only be caused by doCommit
+         // 提交失败 做回滚
+         if (isRollbackOnCommitFailure()) {
+            doRollbackOnCommitException(status, ex);
+         } else {
+            // 事务的同步状态: 未知
+            triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
+         }
+         throw ex;
+      } catch (RuntimeException | Error ex) {
+         if (!beforeCompletionInvoked) {
+            triggerBeforeCompletion(status);
+         }
+         doRollbackOnCommitException(status, ex);
+         throw ex;
+      }
+
+      // Trigger afterCommit callbacks, with an exception thrown there
+      // propagated to callers but the transaction still considered as committed.
+      try {
+         triggerAfterCommit(status);
+      } finally {
+         triggerAfterCompletion(status, TransactionSynchronization.STATUS_COMMITTED);
+      }
+
+   } finally {
+      // 完成后清理
+      cleanupAfterCompletion(status);
+   }
+}
+```
+
+
+
 ### rollback 方法
 
 
 
+```java
+@Override
+public final void rollback(TransactionStatus status) throws TransactionException {
+   // 是否已完成
+   if (status.isCompleted()) {
+      throw new IllegalTransactionStateException(
+            "Transaction is already completed - do not call commit or rollback more than once per transaction");
+   }
 
+   DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
+   // 执行回滚
+   processRollback(defStatus, false);
+}
+```
+
+
+
+```java
+private void processRollback(DefaultTransactionStatus status, boolean unexpected) {
+   try {
+      boolean unexpectedRollback = unexpected;
+
+      try {
+         triggerBeforeCompletion(status);
+
+         // 嵌套事务
+         if (status.hasSavepoint()) {
+            if (status.isDebug()) {
+               logger.debug("Rolling back transaction to savepoint");
+            }
+            // 回滚保存点
+            status.rollbackToHeldSavepoint();
+         }
+         // 独立事务
+         else if (status.isNewTransaction()) {
+            if (status.isDebug()) {
+               logger.debug("Initiating transaction rollback");
+            }
+            // 执行回滚
+            doRollback(status);
+         } else {
+            // Participating in larger transaction
+            if (status.hasTransaction()) {
+               if (status.isLocalRollbackOnly()
+                     || isGlobalRollbackOnParticipationFailure()) {
+                  if (status.isDebug()) {
+                     logger.debug(
+                           "Participating transaction failed - marking existing transaction as rollback-only");
+                  }
+                  // 设置回滚
+                  doSetRollbackOnly(status);
+               } else {
+                  if (status.isDebug()) {
+                     logger.debug(
+                           "Participating transaction failed - letting transaction originator decide on rollback");
+                  }
+               }
+            } else {
+               logger.debug(
+                     "Should roll back transaction but cannot - no transaction available");
+            }
+            // Unexpected rollback only matters here if we're asked to fail early
+            if (!isFailEarlyOnGlobalRollbackOnly()) {
+               unexpectedRollback = false;
+            }
+         }
+      } catch (RuntimeException | Error ex) {
+         triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
+         throw ex;
+      }
+
+      triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK);
+
+      // Raise UnexpectedRollbackException if we had a global rollback-only marker
+      if (unexpectedRollback) {
+         throw new UnexpectedRollbackException(
+               "Transaction rolled back because it has been marked as rollback-only");
+      }
+   } finally {
+      cleanupAfterCompletion(status);
+   }
+}
+```
+
+
+
+
+
+## TransactionSynchronizationManager
 
 
 
@@ -526,5 +693,43 @@ public final void commit(TransactionStatus status) throws TransactionException {
 
 
 
+### execute
 
+```java
+   @Override
+   @Nullable
+   public <T> T execute(TransactionCallback<T> action) throws TransactionException {
+      Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
+
+      // 事务管理是否是 xxx接口
+      if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager) {
+//       强转执行
+         return ((CallbackPreferringPlatformTransactionManager) this.transactionManager)
+               .execute(this, action);
+      } else {
+         // 获取事务状态
+         TransactionStatus status = this.transactionManager.getTransaction(this);
+         // 返回结果
+         T result;
+         try {
+            // 事务回调执行
+            result = action.doInTransaction(status);
+         } catch (RuntimeException | Error ex) {
+            // Transactional code threw application exception -> rollback
+            // 回滚异常
+            rollbackOnException(status, ex);
+            throw ex;
+         } catch (Throwable ex) {
+            // Transactional code threw unexpected exception -> rollback
+            // 回滚异常
+            rollbackOnException(status, ex);
+            throw new UndeclaredThrowableException(ex,
+                  "TransactionCallback threw undeclared checked exception");
+         }
+         // 提交
+         this.transactionManager.commit(status);
+         return result;
+      }
+   }
+```
 
