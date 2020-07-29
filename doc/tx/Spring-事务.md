@@ -10,7 +10,13 @@ org.springframework.transaction.support.DefaultTransactionDefinition 默认事�
 
 
 
-## DefaultTransactionDefinition
+## 编程式事务
+
+
+
+
+
+### DefaultTransactionDefinition
 
 - 默认的事务定义
   - 常见属性
@@ -22,7 +28,7 @@ org.springframework.transaction.support.DefaultTransactionDefinition 默认事�
 
 
 
-## PlatformTransactionManager
+### PlatformTransactionManager
 
 
 
@@ -72,7 +78,7 @@ doCleanupAfterCompletion
 
 
 
-## DataSourceTransactionManager
+### DataSourceTransactionManager
 
 - xml配置如下
 
@@ -400,7 +406,7 @@ doCleanupAfterCompletion
 	}
 ```
 
-### 内部类 DataSourceTransactionObject
+#### 内部类 DataSourceTransactionObject
 
 ```java
 	private static class DataSourceTransactionObject extends JdbcTransactionObjectSupport {
@@ -421,7 +427,7 @@ doCleanupAfterCompletion
 
 
 
-## AbstractPlatformTransactionManager
+### AbstractPlatformTransactionManager
 
 - abstract 修饰具体定义的方法不具体展开。主要关注实现`org.springframework.transaction.PlatformTransactionManager`的几个方法
 
@@ -431,7 +437,7 @@ doCleanupAfterCompletion
 
 
 
-### commit 方法
+#### commit 方法
 
 ```java
 @Override
@@ -550,7 +556,7 @@ private void processCommit(DefaultTransactionStatus status) throws TransactionEx
 
 
 
-### rollback 方法
+#### rollback 方法
 
 
 
@@ -642,16 +648,303 @@ private void processRollback(DefaultTransactionStatus status, boolean unexpected
 
 
 
-## TransactionSynchronizationManager
+### TransactionSynchronizationManager
+
+- 事务同步管理器
+
+- 一些基本属性
+
+```java
+	/**
+	 * 资源
+	 */
+	private static final ThreadLocal<Map<Object, Object>> resources =
+			new NamedThreadLocal<>("Transactional resources");
+	/**
+	 * 同步器
+	 */
+	private static final ThreadLocal<Set<TransactionSynchronization>> synchronizations =
+			new NamedThreadLocal<>("Transaction synchronizations");
+
+	/**
+	 * 事务名称
+	 */
+	private static final ThreadLocal<String> currentTransactionName =
+			new NamedThreadLocal<>("Current transaction name");
+
+	/**
+	 * 是否只读
+	 */
+	private static final ThreadLocal<Boolean> currentTransactionReadOnly =
+			new NamedThreadLocal<>("Current transaction read-only status");
+
+	/**
+	 * 事务隔离级别
+	 */
+	private static final ThreadLocal<Integer> currentTransactionIsolationLevel =
+			new NamedThreadLocal<>("Current transaction isolation level");
+
+	/**
+	 * 事务激活状态
+	 */
+	private static final ThreadLocal<Boolean> actualTransactionActive =
+			new NamedThreadLocal<>("Actual transaction active");
+```
+
+
+
+#### 资源方法
+
+##### 获取资源
+
+```java
+public static Map<Object, Object> getResourceMap() {
+   // 线程变量中获取
+   Map<Object, Object> map = resources.get();
+   // 判空 如果为空给个空map如果有就返回
+   return (map != null ? Collections.unmodifiableMap(map) : Collections.emptyMap());
+}
+```
+
+##### 判断是否存在资源
+
+```java
+public static boolean hasResource(Object key) {
+   // 资源key获取
+   // 通过 unwrapResourceIfNecessary 会走一次资源对象转换.
+   // 1. InfrastructureProxy
+   // 2. ScopedObject
+   Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
+   Object value = doGetResource(actualKey);
+   return (value != null);
+}
+```
+
+- `unwrapResourceIfNecessary`方法会将资源具体化到接口，从接口中调用方法获取具体的资源
+
+  ```java
+  static Object unwrapResourceIfNecessary(Object resource) {
+     Assert.notNull(resource, "Resource must not be null");
+     Object resourceRef = resource;
+     // unwrap infrastructure proxy
+     if (resourceRef instanceof InfrastructureProxy) {
+        resourceRef = ((InfrastructureProxy) resourceRef).getWrappedObject();
+     }
+     if (aopAvailable) {
+        // now unwrap scoped proxy
+        resourceRef = ScopedProxyUnwrapper.unwrapIfNecessary(resourceRef);
+     }
+     return resourceRef;
+  }
+  
+  	private static class ScopedProxyUnwrapper {
+  
+  		public static Object unwrapIfNecessary(Object resource) {
+  			if (resource instanceof ScopedObject) {
+  				return ((ScopedObject) resource).getTargetObject();
+  			} else {
+  				return resource;
+  			}
+  		}
+  	}
+  
+  ```
+
+- `doGetResource` 方法去获取资源
+
+  ```java
+  @Nullable
+  private static Object doGetResource(Object actualKey) {
+     Map<Object, Object> map = resources.get();
+     if (map == null) {
+        return null;
+     }
+     Object value = map.get(actualKey);
+     // Transparently remove ResourceHolder that was marked as void...
+     // 如果资源是下面两种的其中一个就删除这个资源
+     if (value instanceof ResourceHolder && ((ResourceHolder) value).isVoid()) {
+        map.remove(actualKey);
+        // Remove entire ThreadLocal if empty...
+        if (map.isEmpty()) {
+           resources.remove();
+        }
+        value = null;
+     }
+     return value;
+  }
+  ```
 
 
 
 
+
+
+
+
+
+
+
+##### 资源绑定
+
+```java
+public static void bindResource(Object key, Object value) throws IllegalStateException {
+   // 将资源转换为正真的key
+   Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
+   Assert.notNull(value, "Value must not be null");
+   Map<Object, Object> map = resources.get();
+   // set ThreadLocal Map if none found
+   // 资源对象为空初始化
+   if (map == null) {
+      map = new HashMap<>();
+      resources.set(map);
+   }
+   // 原来的值
+   Object oldValue = map.put(actualKey, value);
+   // Transparently suppress a ResourceHolder that was marked as void...
+   // 如果原来的值是下面的两种 抛出异常
+   if (oldValue instanceof ResourceHolder && ((ResourceHolder) oldValue).isVoid()) {
+      oldValue = null;
+   }
+   if (oldValue != null) {
+      throw new IllegalStateException("Already value [" + oldValue + "] for key [" +
+            actualKey + "] bound to thread [" + Thread.currentThread().getName() + "]");
+   }
+   if (logger.isTraceEnabled()) {
+      logger.trace("Bound value [" + value + "] for key [" + actualKey + "] to thread [" +
+            Thread.currentThread().getName() + "]");
+   }
+}
+```
+
+
+
+- debug 使用的是druid的数据源
+
+![image-20200729090322058](images/image-20200729090322058.png)
+
+- `unwrapResourceIfNecessary` 方法
+
+```java
+static Object unwrapResourceIfNecessary(Object resource) {
+   Assert.notNull(resource, "Resource must not be null");
+   Object resourceRef = resource;
+   // unwrap infrastructure proxy
+   if (resourceRef instanceof InfrastructureProxy) {
+      resourceRef = ((InfrastructureProxy) resourceRef).getWrappedObject();
+   }
+   if (aopAvailable) {
+      // now unwrap scoped proxy
+      resourceRef = ScopedProxyUnwrapper.unwrapIfNecessary(resourceRef);
+   }
+   return resourceRef;
+}
+```
+
+显然`com.alibaba.druid.pool.DruidDataSource`不是`InfrastructureProxy`
+
+- `aopAvailable`
+
+  ```java
+  private static final boolean aopAvailable = ClassUtils.isPresent(
+        "org.springframework.aop.scope.ScopedObject",
+        TransactionSynchronizationUtils.class.getClassLoader());
+  ```
+
+  ```java
+  public static boolean isPresent(String className, @Nullable ClassLoader classLoader) {
+     try {
+        forName(className, classLoader);
+        return true;
+     }
+     catch (IllegalAccessError err) {
+        throw new IllegalStateException("Readability mismatch in inheritance hierarchy of class [" +
+              className + "]: " + err.getMessage(), err);
+     }
+     catch (Throwable ex) {
+        // Typically ClassNotFoundException or NoClassDefFoundError...
+        return false;
+     }
+  }
+  ```
+
+  看是否可以解析如果解析成功返回`true` 解析失败返回`false`
+
+- `ScopedProxyUnwrapper.unwrapIfNecessary`
+
+  ```JAVA
+  private static class ScopedProxyUnwrapper {
+  
+     public static Object unwrapIfNecessary(Object resource) {
+        if (resource instanceof ScopedObject) {
+           return ((ScopedObject) resource).getTargetObject();
+        } else {
+           return resource;
+        }
+     }
+  }
+  ```
+
+  - `com.alibaba.druid.pool.DruidDataSource`不是`ScopedObject` 直接返回
+
+
+
+后续就是一个`map`的`put`方法不具体展开
+
+
+
+##### 解除资源绑定
+
+```java
+public static Object unbindResource(Object key) throws IllegalStateException {
+   // 获取真正的资源对象
+   Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
+   // map 移除key
+   Object value = doUnbindResource(actualKey);
+   if (value == null) {
+      throw new IllegalStateException(
+            "No value for key [" + actualKey + "] bound to thread [" + Thread
+                  .currentThread().getName() + "]");
+   }
+   return value;
+}
+
+
+	@Nullable
+	private static Object doUnbindResource(Object actualKey) {
+		Map<Object, Object> map = resources.get();
+		if (map == null) {
+			return null;
+		}
+		Object value = map.remove(actualKey);
+		// Remove entire ThreadLocal if empty...
+		if (map.isEmpty()) {
+			resources.remove();
+		}
+		// Transparently suppress a ResourceHolder that was marked as void...
+		if (value instanceof ResourceHolder && ((ResourceHolder) value).isVoid()) {
+			value = null;
+		}
+		if (value != null && logger.isTraceEnabled()) {
+			logger.trace("Removed value [" + value + "] for key [" + actualKey + "] from thread [" +
+					Thread.currentThread().getName() + "]");
+		}
+		return value;
+	}
+
+```
+
+map 对象的remove操作
+
+
+
+#### 其他
+
+- 其他几个都是使用`ThreadLocal`进行数据设置操作即可.
 
 
 
 ---
-## TransactionTemplate 
+### TransactionTemplate 
 
 - 属性
 
@@ -693,7 +986,7 @@ private void processRollback(DefaultTransactionStatus status, boolean unexpected
 
 
 
-### execute
+#### execute
 
 ```java
    @Override

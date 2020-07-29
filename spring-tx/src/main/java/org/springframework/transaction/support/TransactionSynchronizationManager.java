@@ -75,6 +75,9 @@ public abstract class TransactionSynchronizationManager {
 
 	private static final Log logger = LogFactory.getLog(TransactionSynchronizationManager.class);
 
+	/**
+	 * 资源
+	 */
 	private static final ThreadLocal<Map<Object, Object>> resources =
 			new NamedThreadLocal<>("Transactional resources");
 
@@ -116,24 +119,32 @@ public abstract class TransactionSynchronizationManager {
 	 * Return all resources that are bound to the current thread.
 	 * <p>Mainly for debugging purposes. Resource managers should always invoke
 	 * {@code hasResource} for a specific resource key that they are interested in.
+	 * <p>
+	 * 获取资源map
 	 *
 	 * @return a Map with resource keys (usually the resource factory) and resource values (usually
 	 * the active resource object), or an empty Map if there are currently no resources bound
 	 * @see #hasResource
 	 */
 	public static Map<Object, Object> getResourceMap() {
+		// 线程变量中获取
 		Map<Object, Object> map = resources.get();
+		// 判空 如果为空给个空map如果有就返回
 		return (map != null ? Collections.unmodifiableMap(map) : Collections.emptyMap());
 	}
 
 	/**
 	 * Check if there is a resource for the given key bound to the current thread.
-	 *
+	 *判断是否存在资源
 	 * @param key the key to check (usually the resource factory)
 	 * @return if there is a value bound to the current thread
 	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	public static boolean hasResource(Object key) {
+		// 资源key获取
+		// 通过 unwrapResourceIfNecessary 会走一次资源对象转换.
+		// 1. InfrastructureProxy
+		// 2. ScopedObject
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Object value = doGetResource(actualKey);
 		return (value != null);
@@ -141,8 +152,9 @@ public abstract class TransactionSynchronizationManager {
 
 	/**
 	 * Retrieve a resource for the given key that is bound to the current thread.
-	 *
+	 * <p>
 	 * 获取资源
+	 *
 	 * @param key the key to check (usually the resource factory)
 	 * @return a value bound to the current thread (usually the active resource object), or {@code
 	 * null} if none
@@ -172,6 +184,7 @@ public abstract class TransactionSynchronizationManager {
 		}
 		Object value = map.get(actualKey);
 		// Transparently remove ResourceHolder that was marked as void...
+		// 如果资源是下面两种的其中一个就删除这个资源
 		if (value instanceof ResourceHolder && ((ResourceHolder) value).isVoid()) {
 			map.remove(actualKey);
 			// Remove entire ThreadLocal if empty...
@@ -184,7 +197,9 @@ public abstract class TransactionSynchronizationManager {
 	}
 
 	/**
-	 * Bind the given resource for the given key to the current thread. 资源绑定
+	 * Bind the given resource for the given key to the current thread.
+	 * <p>
+	 * 资源绑定
 	 *
 	 * @param key   the key to bind the value to (usually the resource factory)
 	 * @param value the value to bind (usually the active resource object)
@@ -192,16 +207,20 @@ public abstract class TransactionSynchronizationManager {
 	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	public static void bindResource(Object key, Object value) throws IllegalStateException {
+		// 将资源转换为正真的key
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Assert.notNull(value, "Value must not be null");
 		Map<Object, Object> map = resources.get();
 		// set ThreadLocal Map if none found
+		// 资源对象为空初始化
 		if (map == null) {
 			map = new HashMap<>();
 			resources.set(map);
 		}
+		// 原来的值
 		Object oldValue = map.put(actualKey, value);
 		// Transparently suppress a ResourceHolder that was marked as void...
+		// 如果原来的值是下面的两种 抛出异常
 		if (oldValue instanceof ResourceHolder && ((ResourceHolder) oldValue).isVoid()) {
 			oldValue = null;
 		}
@@ -226,6 +245,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	public static Object unbindResource(Object key) throws IllegalStateException {
+		// 获取真正的资源对象
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		// map 移除key
 		Object value = doUnbindResource(actualKey);
@@ -240,6 +260,8 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Unbind a resource for the given key from the current thread.
 	 *
+	 *
+	 * 资源解绑
 	 * @param key the key to unbind (usually the resource factory)
 	 * @return the previously bound value, or {@code null} if none bound
 	 */

@@ -38,6 +38,9 @@ public abstract class TransactionSynchronizationUtils {
 
 	private static final Log logger = LogFactory.getLog(TransactionSynchronizationUtils.class);
 
+	/**
+	 * aop 是否可用
+	 */
 	private static final boolean aopAvailable = ClassUtils.isPresent(
 			"org.springframework.aop.scope.ScopedObject",
 			TransactionSynchronizationUtils.class.getClassLoader());
@@ -59,6 +62,7 @@ public abstract class TransactionSynchronizationUtils {
 	/**
 	 * Unwrap the given resource handle if necessary; otherwise return the given handle as-is.
 	 *
+	 * 资源对象转换获取具体的资源对象
 	 * @see org.springframework.core.InfrastructureProxy#getWrappedObject()
 	 */
 	static Object unwrapResourceIfNecessary(Object resource) {
@@ -68,6 +72,7 @@ public abstract class TransactionSynchronizationUtils {
 		if (resourceRef instanceof InfrastructureProxy) {
 			resourceRef = ((InfrastructureProxy) resourceRef).getWrappedObject();
 		}
+		// aop 是否可用
 		if (aopAvailable) {
 			// now unwrap scoped proxy
 			resourceRef = ScopedProxyUnwrapper.unwrapIfNecessary(resourceRef);
@@ -199,6 +204,11 @@ public abstract class TransactionSynchronizationUtils {
 	 */
 	private static class ScopedProxyUnwrapper {
 
+		/**
+		 * 是否是 ScopedObject 的实现, 如果不是直接将资源返回
+		 * @param resource
+		 * @return
+		 */
 		public static Object unwrapIfNecessary(Object resource) {
 			if (resource instanceof ScopedObject) {
 				return ((ScopedObject) resource).getTargetObject();

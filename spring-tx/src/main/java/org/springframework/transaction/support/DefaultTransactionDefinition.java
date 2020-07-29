@@ -17,40 +17,50 @@
 package org.springframework.transaction.support;
 
 import java.io.Serializable;
-
 import org.springframework.core.Constants;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
- * Default implementation of the {@link TransactionDefinition} interface,
- * offering bean-style configuration and sensible default values
- * (PROPAGATION_REQUIRED, ISOLATION_DEFAULT, TIMEOUT_DEFAULT, readOnly=false).
+ * Default implementation of the {@link TransactionDefinition} interface, offering bean-style
+ * configuration and sensible default values (PROPAGATION_REQUIRED, ISOLATION_DEFAULT,
+ * TIMEOUT_DEFAULT, readOnly=false).
  *
  * <p>Base class for both {@link TransactionTemplate} and
  * {@link org.springframework.transaction.interceptor.DefaultTransactionAttribute}.
- *
+ * <p>
  * 默认的事务定义
+ *
  * @author Juergen Hoeller
  * @since 08.05.2003
  */
 @SuppressWarnings("serial")
 public class DefaultTransactionDefinition implements TransactionDefinition, Serializable {
 
-	/** Prefix for the propagation constants defined in TransactionDefinition. */
+	/**
+	 * Prefix for the propagation constants defined in TransactionDefinition.
+	 */
 	public static final String PREFIX_PROPAGATION = "PROPAGATION_";
 
-	/** Prefix for the isolation constants defined in TransactionDefinition. */
+	/**
+	 * Prefix for the isolation constants defined in TransactionDefinition.
+	 */
 	public static final String PREFIX_ISOLATION = "ISOLATION_";
 
-	/** Prefix for transaction timeout values in description strings. */
+	/**
+	 * Prefix for transaction timeout values in description strings.
+	 */
 	public static final String PREFIX_TIMEOUT = "timeout_";
 
-	/** Marker for read-only transactions in description strings. */
+	/**
+	 * Marker for read-only transactions in description strings.
+	 */
 	public static final String READ_ONLY_MARKER = "readOnly";
 
 
-	/** Constants instance for TransactionDefinition. */
+	/**
+	 * Constants instance for TransactionDefinition.
+	 */
 	static final Constants constants = new Constants(TransactionDefinition.class);
 
 	private int propagationBehavior = PROPAGATION_REQUIRED;
@@ -72,8 +82,9 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 
 	/**
-	 * Create a new DefaultTransactionDefinition, with default settings.
-	 * Can be modified through bean property setters.
+	 * Create a new DefaultTransactionDefinition, with default settings. Can be modified through
+	 * bean property setters.
+	 *
 	 * @see #setPropagationBehavior
 	 * @see #setIsolationLevel
 	 * @see #setTimeout
@@ -85,6 +96,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 	/**
 	 * Copy constructor. Definition can be modified through bean property setters.
+	 *
 	 * @see #setPropagationBehavior
 	 * @see #setIsolationLevel
 	 * @see #setTimeout
@@ -100,10 +112,11 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	/**
-	 * Create a new DefaultTransactionDefinition with the given
-	 * propagation behavior. Can be modified through bean property setters.
-	 * @param propagationBehavior one of the propagation constants in the
-	 * TransactionDefinition interface
+	 * Create a new DefaultTransactionDefinition with the given propagation behavior. Can be
+	 * modified through bean property setters.
+	 *
+	 * @param propagationBehavior one of the propagation constants in the TransactionDefinition
+	 *                            interface
 	 * @see #setIsolationLevel
 	 * @see #setTimeout
 	 * @see #setReadOnly
@@ -116,32 +129,41 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	/**
 	 * Set the propagation behavior by the name of the corresponding constant in
 	 * TransactionDefinition, e.g. "PROPAGATION_REQUIRED".
+	 *
 	 * @param constantName name of the constant
-	 * @throws IllegalArgumentException if the supplied value is not resolvable
-	 * to one of the {@code PROPAGATION_} constants or is {@code null}
+	 * @throws IllegalArgumentException if the supplied value is not resolvable to one of the {@code
+	 *                                  PROPAGATION_} constants or is {@code null}
 	 * @see #setPropagationBehavior
 	 * @see #PROPAGATION_REQUIRED
 	 */
-	public final void setPropagationBehaviorName(String constantName) throws IllegalArgumentException {
+	public final void setPropagationBehaviorName(String constantName)
+			throws IllegalArgumentException {
 		if (!constantName.startsWith(PREFIX_PROPAGATION)) {
 			throw new IllegalArgumentException("Only propagation constants allowed");
 		}
 		setPropagationBehavior(constants.asNumber(constantName).intValue());
 	}
 
+	@Override
+	public final int getPropagationBehavior() {
+		return this.propagationBehavior;
+	}
+
 	/**
-	 * Set the propagation behavior. Must be one of the propagation constants
-	 * in the TransactionDefinition interface. Default is PROPAGATION_REQUIRED.
+	 * Set the propagation behavior. Must be one of the propagation constants in the
+	 * TransactionDefinition interface. Default is PROPAGATION_REQUIRED.
 	 * <p>Exclusively designed for use with {@link #PROPAGATION_REQUIRED} or
-	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started
-	 * transactions. Consider switching the "validateExistingTransactions" flag to
-	 * "true" on your transaction manager if you'd like isolation level declarations
-	 * to get rejected when participating in an existing transaction with a different
-	 * isolation level.
+	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started transactions.
+	 * Consider switching the "validateExistingTransactions" flag to "true" on your transaction
+	 * manager if you'd like isolation level declarations to get rejected when participating in an
+	 * existing transaction with a different isolation level.
 	 * <p>Note that a transaction manager that does not support custom isolation levels
 	 * will throw an exception when given any other level than {@link #ISOLATION_DEFAULT}.
-	 * @throws IllegalArgumentException if the supplied value is not one of the
-	 * {@code PROPAGATION_} constants
+	 * <p>
+	 * 设置事务的传播性
+	 *
+	 * @throws IllegalArgumentException if the supplied value is not one of the {@code PROPAGATION_}
+	 *                                  constants
 	 * @see #PROPAGATION_REQUIRED
 	 */
 	public final void setPropagationBehavior(int propagationBehavior) {
@@ -151,17 +173,14 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 		this.propagationBehavior = propagationBehavior;
 	}
 
-	@Override
-	public final int getPropagationBehavior() {
-		return this.propagationBehavior;
-	}
-
 	/**
-	 * Set the isolation level by the name of the corresponding constant in
-	 * TransactionDefinition, e.g. "ISOLATION_DEFAULT".
+	 * Set the isolation level by the name of the corresponding constant in TransactionDefinition,
+	 * e.g. "ISOLATION_DEFAULT".
+	 *
+	 * 设置事务的隔离级别
 	 * @param constantName name of the constant
-	 * @throws IllegalArgumentException if the supplied value is not resolvable
-	 * to one of the {@code ISOLATION_} constants or is {@code null}
+	 * @throws IllegalArgumentException if the supplied value is not resolvable to one of the {@code
+	 *                                  ISOLATION_} constants or is {@code null}
 	 * @see #setIsolationLevel
 	 * @see #ISOLATION_DEFAULT
 	 */
@@ -172,19 +191,24 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 		setIsolationLevel(constants.asNumber(constantName).intValue());
 	}
 
+	@Override
+	public final int getIsolationLevel() {
+		return this.isolationLevel;
+	}
+
 	/**
-	 * Set the isolation level. Must be one of the isolation constants
-	 * in the TransactionDefinition interface. Default is ISOLATION_DEFAULT.
+	 * Set the isolation level. Must be one of the isolation constants in the TransactionDefinition
+	 * interface. Default is ISOLATION_DEFAULT.
 	 * <p>Exclusively designed for use with {@link #PROPAGATION_REQUIRED} or
-	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started
-	 * transactions. Consider switching the "validateExistingTransactions" flag to
-	 * "true" on your transaction manager if you'd like isolation level declarations
-	 * to get rejected when participating in an existing transaction with a different
-	 * isolation level.
+	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started transactions.
+	 * Consider switching the "validateExistingTransactions" flag to "true" on your transaction
+	 * manager if you'd like isolation level declarations to get rejected when participating in an
+	 * existing transaction with a different isolation level.
 	 * <p>Note that a transaction manager that does not support custom isolation levels
 	 * will throw an exception when given any other level than {@link #ISOLATION_DEFAULT}.
-	 * @throws IllegalArgumentException if the supplied value is not one of the
-	 * {@code ISOLATION_} constants
+	 *
+	 * @throws IllegalArgumentException if the supplied value is not one of the {@code ISOLATION_}
+	 *                                  constants
 	 * @see #ISOLATION_DEFAULT
 	 */
 	public final void setIsolationLevel(int isolationLevel) {
@@ -195,44 +219,42 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	@Override
-	public final int getIsolationLevel() {
-		return this.isolationLevel;
-	}
-
-	/**
-	 * Set the timeout to apply, as number of seconds.
-	 * Default is TIMEOUT_DEFAULT (-1).
-	 * <p>Exclusively designed for use with {@link #PROPAGATION_REQUIRED} or
-	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started
-	 * transactions.
-	 * <p>Note that a transaction manager that does not support timeouts will throw
-	 * an exception when given any other timeout than {@link #TIMEOUT_DEFAULT}.
-	 * @see #TIMEOUT_DEFAULT
-	 */
-	public final void setTimeout(int timeout) {
-		if (timeout < TIMEOUT_DEFAULT) {
-			throw new IllegalArgumentException("Timeout must be a positive integer or TIMEOUT_DEFAULT");
-		}
-		this.timeout = timeout;
-	}
-
-	@Override
 	public final int getTimeout() {
 		return this.timeout;
 	}
 
 	/**
-	 * Set whether to optimize as read-only transaction.
-	 * Default is "false".
+	 * Set the timeout to apply, as number of seconds. Default is TIMEOUT_DEFAULT (-1).
+	 * <p>Exclusively designed for use with {@link #PROPAGATION_REQUIRED} or
+	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started transactions.
+	 * <p>Note that a transaction manager that does not support timeouts will throw
+	 * an exception when given any other timeout than {@link #TIMEOUT_DEFAULT}.
+	 *
+	 * @see #TIMEOUT_DEFAULT
+	 */
+	public final void setTimeout(int timeout) {
+		if (timeout < TIMEOUT_DEFAULT) {
+			throw new IllegalArgumentException(
+					"Timeout must be a positive integer or TIMEOUT_DEFAULT");
+		}
+		this.timeout = timeout;
+	}
+
+	@Override
+	public final boolean isReadOnly() {
+		return this.readOnly;
+	}
+
+	/**
+	 * Set whether to optimize as read-only transaction. Default is "false".
 	 * <p>The read-only flag applies to any transaction context, whether backed
-	 * by an actual resource transaction ({@link #PROPAGATION_REQUIRED}/
-	 * {@link #PROPAGATION_REQUIRES_NEW}) or operating non-transactionally at
-	 * the resource level ({@link #PROPAGATION_SUPPORTS}). In the latter case,
-	 * the flag will only apply to managed resources within the application,
-	 * such as a Hibernate {@code Session}.
+	 * by an actual resource transaction ({@link #PROPAGATION_REQUIRED}/ {@link
+	 * #PROPAGATION_REQUIRES_NEW}) or operating non-transactionally at the resource level ({@link
+	 * #PROPAGATION_SUPPORTS}). In the latter case, the flag will only apply to managed resources
+	 * within the application, such as a Hibernate {@code Session}.
 	 * <p>This just serves as a hint for the actual transaction subsystem;
-	 * it will <i>not necessarily</i> cause failure of write access attempts.
-	 * A transaction manager which cannot interpret the read-only hint will
+	 * it will <i>not necessarily</i> cause failure of write access attempts. A transaction manager
+	 * which cannot interpret the read-only hint will
 	 * <i>not</i> throw an exception when asked for a read-only transaction.
 	 */
 	public final void setReadOnly(boolean readOnly) {
@@ -240,8 +262,9 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	@Override
-	public final boolean isReadOnly() {
-		return this.readOnly;
+	@Nullable
+	public final String getName() {
+		return this.name;
 	}
 
 	/**
@@ -253,24 +276,20 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 		this.name = name;
 	}
 
-	@Override
-	@Nullable
-	public final String getName() {
-		return this.name;
-	}
-
-
 	/**
 	 * This implementation compares the {@code toString()} results.
+	 *
 	 * @see #toString()
 	 */
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof TransactionDefinition && toString().equals(other.toString())));
+		return (this == other || (other instanceof TransactionDefinition && toString()
+				.equals(other.toString())));
 	}
 
 	/**
 	 * This implementation returns {@code toString()}'s hash code.
+	 *
 	 * @see #toString()
 	 */
 	@Override
@@ -281,12 +300,13 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	/**
 	 * Return an identifying description for this transaction definition.
 	 * <p>The format matches the one used by
-	 * {@link org.springframework.transaction.interceptor.TransactionAttributeEditor},
-	 * to be able to feed {@code toString} results into bean properties of type
-	 * {@link org.springframework.transaction.interceptor.TransactionAttribute}.
+	 * {@link org.springframework.transaction.interceptor.TransactionAttributeEditor}, to be able to
+	 * feed {@code toString} results into bean properties of type {@link
+	 * org.springframework.transaction.interceptor.TransactionAttribute}.
 	 * <p>Has to be overridden in subclasses for correct {@code equals}
-	 * and {@code hashCode} behavior. Alternatively, {@link #equals}
-	 * and {@link #hashCode} can be overridden themselves.
+	 * and {@code hashCode} behavior. Alternatively, {@link #equals} and {@link #hashCode} can be
+	 * overridden themselves.
+	 *
 	 * @see #getDefinitionDescription()
 	 * @see org.springframework.transaction.interceptor.TransactionAttributeEditor
 	 */
