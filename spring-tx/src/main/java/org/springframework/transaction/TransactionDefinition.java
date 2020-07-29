@@ -146,6 +146,7 @@ public interface TransactionDefinition {
 	 * transaction before any changes in that row have been committed (a "dirty read"). If any of
 	 * the changes are rolled back, the second transaction will have retrieved an invalid row.
 	 *
+	 * 读未提交
 	 * @see java.sql.Connection#TRANSACTION_READ_UNCOMMITTED
 	 */
 	int ISOLATION_READ_UNCOMMITTED = 1;  // same as java.sql.Connection.TRANSACTION_READ_UNCOMMITTED;
@@ -155,6 +156,7 @@ public interface TransactionDefinition {
 	 * <p>This level only prohibits a transaction from reading a row
 	 * with uncommitted changes in it.
 	 *
+	 * 读已提交
 	 * @see java.sql.Connection#TRANSACTION_READ_COMMITTED
 	 */
 	int ISOLATION_READ_COMMITTED = 2;  // same as java.sql.Connection.TRANSACTION_READ_COMMITTED;
@@ -165,7 +167,7 @@ public interface TransactionDefinition {
 	 * in it, and it also prohibits the situation where one transaction reads a row, a second
 	 * transaction alters the row, and the first transaction re-reads the row, getting different
 	 * values the second time (a "non-repeatable read").
-	 *
+	 *可重复读
 	 * @see java.sql.Connection#TRANSACTION_REPEATABLE_READ
 	 */
 	int ISOLATION_REPEATABLE_READ = 4;  // same as java.sql.Connection.TRANSACTION_REPEATABLE_READ;
@@ -177,7 +179,7 @@ public interface TransactionDefinition {
 	 * {@code WHERE} condition, a second transaction inserts a row that satisfies that {@code WHERE}
 	 * condition, and the first transaction re-reads for the same condition, retrieving the
 	 * additional "phantom" row in the second read.
-	 *
+	 *可串行化
 	 * @see java.sql.Connection#TRANSACTION_SERIALIZABLE
 	 */
 	int ISOLATION_SERIALIZABLE = 8;  // same as java.sql.Connection.TRANSACTION_SERIALIZABLE;

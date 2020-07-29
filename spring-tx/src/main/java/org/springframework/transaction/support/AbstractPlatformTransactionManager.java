@@ -337,6 +337,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * This implementation handles propagation behavior. Delegates to {@code doGetTransaction},
 	 * {@code isExistingTransaction} and {@code doBegin}.
+	 * <p>
+	 * 获取事务
 	 *
 	 * @see #doGetTransaction
 	 * @see #isExistingTransaction
@@ -347,29 +349,36 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			throws TransactionException {
 
 		// Use defaults if no transaction definition given.
+		// 获取事务的定义
 		TransactionDefinition def = (definition != null ? definition
 				: TransactionDefinition.withDefaults());
 
+		// 获取事务
 		Object transaction = doGetTransaction();
 		boolean debugEnabled = logger.isDebugEnabled();
 
+		// 是否存在事务
 		if (isExistingTransaction(transaction)) {
 			// Existing transaction found -> check propagation behavior to find out how to behave.
+			// 存在事务后处理什么操作,处理事务嵌套
 			return handleExistingTransaction(def, transaction, debugEnabled);
 		}
 
 		// Check definition settings for new transaction.
+		// 超时的校验. 小于默认值抛出异常
 		if (def.getTimeout() < TransactionDefinition.TIMEOUT_DEFAULT) {
 			throw new InvalidTimeoutException("Invalid transaction timeout", def.getTimeout());
 		}
 
 		// No existing transaction found -> check propagation behavior to find out how to proceed.
+		// 没有事务抛出异常
 		if (def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) {
 			throw new IllegalTransactionStateException(
 					"No existing transaction found for transaction marked with propagation 'mandatory'");
 		} else if (def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
 				def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
 				def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
+			// 创建事务
 			SuspendedResourcesHolder suspendedResources = suspend(null);
 			if (debugEnabled) {
 				logger.debug("Creating new transaction with name [" + def.getName() + "]: " + def);
@@ -377,6 +386,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			try {
 				boolean newSynchronization = (getTransactionSynchronization()
 						!= SYNCHRONIZATION_NEVER);
+				// 创建默认的事务
 				DefaultTransactionStatus status = newTransactionStatus(
 						def, transaction, true, newSynchronization, debugEnabled,
 						suspendedResources);
@@ -404,6 +414,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	/**
 	 * Create a TransactionStatus for an existing transaction.
+	 * 处理事务嵌套
 	 */
 	private TransactionStatus handleExistingTransaction(
 			TransactionDefinition definition, Object transaction, boolean debugEnabled)
@@ -604,13 +615,20 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				if (transaction != null) {
 					suspendedResources = doSuspend(transaction);
 				}
+				// 线程名称
 				String name = TransactionSynchronizationManager.getCurrentTransactionName();
+				// 同步方法中设置
 				TransactionSynchronizationManager.setCurrentTransactionName(null);
+				// 只读设置
 				boolean readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
+				// 同步方法中设置
 				TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+				// 隔离级别
 				Integer isolationLevel = TransactionSynchronizationManager
 						.getCurrentTransactionIsolationLevel();
+				// 同步方法中设置
 				TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(null);
+				// 是否活跃
 				boolean wasActive = TransactionSynchronizationManager.isActualTransactionActive();
 				TransactionSynchronizationManager.setActualTransactionActive(false);
 				return new SuspendedResourcesHolder(
