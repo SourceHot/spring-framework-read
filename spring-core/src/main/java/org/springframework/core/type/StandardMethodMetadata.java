@@ -140,6 +140,9 @@ public class StandardMethodMetadata implements MethodMetadata {
 				annotationName, classValuesAsString, false);
 	}
 
+    /**
+     * 获取所有注解的信息
+     */
 	@Override
 	@Nullable
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {

@@ -41,14 +41,16 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 @FunctionalInterface
 public interface Condition {
 
-	/**
-	 * Determine if the condition matches.
-	 * @param context the condition context
-	 * @param metadata metadata of the {@link org.springframework.core.type.AnnotationMetadata class}
-	 * or {@link org.springframework.core.type.MethodMetadata method} being checked
-	 * @return {@code true} if the condition matches and the component can be registered,
-	 * or {@code false} to veto the annotated component's registration
-	 */
-	boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata);
+    /**
+     * Determine if the condition matches.
+     * @param context the condition context
+     * @param metadata metadata of the {@link org.springframework.core.type.AnnotationMetadata class}
+     * or {@link org.springframework.core.type.MethodMetadata method} being checked
+     * @return {@code true} if the condition matches and the component can be registered,
+     * or {@code false} to veto the annotated component's registration
+     *
+     * 匹配,如果匹配返回true进行初始化,返回false跳过初始化
+     */
+    boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata);
 
 }

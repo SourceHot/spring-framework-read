@@ -31,44 +31,51 @@ package org.springframework.core.type;
  */
 public interface MethodMetadata extends AnnotatedTypeMetadata {
 
-	/**
-	 * Return the name of the method.
-	 */
-	String getMethodName();
+    /**
+     * Return the name of the method.
+     * 方法名称
+     */
+    String getMethodName();
 
-	/**
-	 * Return the fully-qualified name of the class that declares this method.
-	 */
-	String getDeclaringClassName();
+    /**
+     * Return the fully-qualified name of the class that declares this method.
+     * 方法全路径
+     */
+    String getDeclaringClassName();
 
-	/**
-	 * Return the fully-qualified name of this method's declared return type.
-	 * @since 4.2
-	 */
-	String getReturnTypeName();
+    /**
+     * Return the fully-qualified name of this method's declared return type.
+     * 返回值类型
+     * @since 4.2
+     */
+    String getReturnTypeName();
 
-	/**
-	 * Return whether the underlying method is effectively abstract:
-	 * i.e. marked as abstract on a class or declared as a regular,
-	 * non-default method in an interface.
-	 * @since 4.2
-	 */
-	boolean isAbstract();
+    /**
+     * Return whether the underlying method is effectively abstract:
+     * i.e. marked as abstract on a class or declared as a regular,
+     * non-default method in an interface.
+     * 是不是abstrac修饰
+     * @since 4.2
+     */
+    boolean isAbstract();
 
-	/**
-	 * Return whether the underlying method is declared as 'static'.
-	 */
-	boolean isStatic();
+    /**
+     * Return whether the underlying method is declared as 'static'.
+     * 是否 static 修饰
+     */
+    boolean isStatic();
 
-	/**
-	 * Return whether the underlying method is marked as 'final'.
-	 */
-	boolean isFinal();
+    /**
+     * Return whether the underlying method is marked as 'final'.
+     * 是否 final 修饰
+     */
+    boolean isFinal();
 
-	/**
-	 * Return whether the underlying method is overridable,
-	 * i.e. not marked as static, final or private.
-	 */
-	boolean isOverridable();
+    /**
+     * Return whether the underlying method is overridable,
+     * i.e. not marked as static, final or private.
+     * 是否重载
+     */
+    boolean isOverridable();
 
 }

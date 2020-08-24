@@ -167,7 +167,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 	public <A extends Annotation> MergedAnnotation<A> get(String annotationType,
 			@Nullable Predicate<? super MergedAnnotation<A>> predicate,
 			@Nullable MergedAnnotationSelector<A> selector) {
-
+        // 匹配校验
 		if (this.annotationFilter.matches(annotationType)) {
 			return MergedAnnotation.missing();
 		}
@@ -247,7 +247,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
-
+        // 判断是否为空
 		if (AnnotationsScanner.isKnownEmpty(element, searchStrategy)) {
 			return NONE;
 		}

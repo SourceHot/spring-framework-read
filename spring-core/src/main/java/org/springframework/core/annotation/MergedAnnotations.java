@@ -135,6 +135,8 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * <p>Equivalent to calling {@code get(annotationType).isPresent()}.
 	 * @param annotationType the annotation type to check
 	 * @return {@code true} if the annotation is present
+     *
+     * 确定注解是否存在
 	 */
 	<A extends Annotation> boolean isPresent(Class<A> annotationType);
 
@@ -153,6 +155,8 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * <p>Equivalent to calling {@code get(annotationType).isDirectlyPresent()}.
 	 * @param annotationType the annotation type to check
 	 * @return {@code true} if the annotation is directly present
+     *
+     * 注解是否直接存在
 	 */
 	<A extends Annotation> boolean isDirectlyPresent(Class<A> annotationType);
 
@@ -171,6 +175,8 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * {@link MergedAnnotation#missing()} if none is present.
 	 * @param annotationType the annotation type to get
 	 * @return a {@link MergedAnnotation} instance
+     *
+     * 获取匹配的注解
 	 */
 	<A extends Annotation> MergedAnnotation<A> get(Class<A> annotationType);
 
@@ -435,6 +441,8 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		 * Find only directly declared annotations, without considering
 		 * {@link Inherited @Inherited} annotations and without searching
 		 * superclasses or implemented interfaces.
+         *
+         * 直接查找
 		 */
 		DIRECT,
 
@@ -445,6 +453,8 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		 * {@link Inherited @Inherited} annotation is ignored for all other
 		 * {@linkplain AnnotatedElement annotated elements}. This strategy does
 		 * not search implemented interfaces.
+         *
+         * 继承查找
 		 */
 		INHERITED_ANNOTATIONS,
 
@@ -453,6 +463,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		 * is similar to {@link #INHERITED_ANNOTATIONS} except the annotations
 		 * do not need to be meta-annotated with {@link Inherited @Inherited}.
 		 * This strategy does not search implemented interfaces.
+         * 查找当前类和父类的注解
 		 */
 		SUPERCLASS,
 

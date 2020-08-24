@@ -56,15 +56,17 @@ import java.lang.annotation.Target;
  * @since 4.0
  * @see Condition
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Conditional {
 
-	/**
-	 * All {@link Condition Conditions} that must {@linkplain Condition#matches match}
-	 * in order for the component to be registered.
-	 */
-	Class<? extends Condition>[] value();
+    /**
+     * All {@link Condition Conditions} that must {@linkplain Condition#matches match}
+     * in order for the component to be registered.
+     *
+     * 多个匹配器接口
+     */
+    Class<? extends Condition>[] value();
 
 }

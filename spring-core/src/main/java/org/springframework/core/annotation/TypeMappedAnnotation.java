@@ -280,7 +280,8 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	@Override
 	public <T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations) {
 		T map = factory.apply(this);
-		Assert.state(map != null, "Factory used to create MergedAnnotation Map must not return null");
+        Assert.state(map != null, "Factory used to create MergedAnnotation Map must not return null");
+        // 属性列表
 		AttributeMethods attributes = this.mapping.getAttributes();
 		for (int i = 0; i < attributes.size(); i++) {
 			Method attribute = attributes.get(i);

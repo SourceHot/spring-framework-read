@@ -25,6 +25,7 @@ import org.springframework.lang.Nullable;
 /**
  * Context information for use by {@link Condition Conditions}.
  *
+ * 上下文
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @since 4.0
@@ -36,6 +37,8 @@ public interface ConditionContext {
 	 * should the condition match.
 	 * @throws IllegalStateException if no registry is available (which is unusual:
 	 * only the case with a plain {@link ClassPathScanningCandidateComponentProvider})
+     *
+     * bean的定义
 	 */
 	BeanDefinitionRegistry getRegistry();
 
@@ -43,17 +46,23 @@ public interface ConditionContext {
 	 * Return the {@link ConfigurableListableBeanFactory} that will hold the bean
 	 * definition should the condition match, or {@code null} if the bean factory is
 	 * not available (or not downcastable to {@code ConfigurableListableBeanFactory}).
+     *
+     * bean 工厂
 	 */
 	@Nullable
 	ConfigurableListableBeanFactory getBeanFactory();
 
 	/**
 	 * Return the {@link Environment} for which the current application is running.
+     *
+     * 环境
 	 */
 	Environment getEnvironment();
 
 	/**
 	 * Return the {@link ResourceLoader} currently being used.
+     *
+     * 资源加载器
 	 */
 	ResourceLoader getResourceLoader();
 
@@ -61,6 +70,8 @@ public interface ConditionContext {
 	 * Return the {@link ClassLoader} that should be used to load additional classes
 	 * (only {@code null} if even the system ClassLoader isn't accessible).
 	 * @see org.springframework.util.ClassUtils#forName(String, ClassLoader)
+     *
+     * 类加载器
 	 */
 	@Nullable
 	ClassLoader getClassLoader();
