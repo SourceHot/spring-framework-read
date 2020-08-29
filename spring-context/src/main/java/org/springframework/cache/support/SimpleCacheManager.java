@@ -30,6 +30,9 @@ import org.springframework.cache.Cache;
  */
 public class SimpleCacheManager extends AbstractCacheManager {
 
+    /**
+     * 缓存集合
+     */
 	private Collection<? extends Cache> caches = Collections.emptySet();
 
 

@@ -133,6 +133,8 @@ public @interface CacheEvict {
 	 * <p>By default, only the value under the associated key is removed.
 	 * <p>Note that setting this parameter to {@code true} and specifying a
 	 * {@link #key} is not allowed.
+     *
+     * 删除所有数据
 	 */
 	boolean allEntries() default false;
 
@@ -144,6 +146,8 @@ public @interface CacheEvict {
 	 * <p>Defaults to {@code false}, meaning that the cache eviction operation
 	 * will occur <em>after</em> the advised method is invoked successfully (i.e.
 	 * only if the invocation did not throw an exception).
+     *
+     * 调用之前还是调用之后删除
 	 */
 	boolean beforeInvocation() default false;
 

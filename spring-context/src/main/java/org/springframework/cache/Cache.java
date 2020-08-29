@@ -36,11 +36,13 @@ public interface Cache {
 
 	/**
 	 * Return the cache name.
+     * 获取缓存名称
 	 */
 	String getName();
 
 	/**
 	 * Return the underlying native cache provider.
+     * 获取缓存
 	 */
 	Object getNativeCache();
 
@@ -56,6 +58,8 @@ public interface Cache {
 	 * returned means that the cache contains no mapping for this key.
 	 * @see #get(Object, Class)
 	 * @see #get(Object, Callable)
+     *
+     * 获取值的包装
 	 */
 	@Nullable
 	ValueWrapper get(Object key);
@@ -77,6 +81,7 @@ public interface Cache {
 	 * but failed to match the specified type
 	 * @since 4.0
 	 * @see #get(Object)
+     * 获取值
 	 */
 	@Nullable
 	<T> T get(Object key, @Nullable Class<T> type);
@@ -111,6 +116,8 @@ public interface Cache {
 	 * @param key the key with which the specified value is to be associated
 	 * @param value the value to be associated with the specified key
 	 * @see #putIfAbsent(Object, Object)
+     *
+     * 设置值
 	 */
 	void put(Object key, @Nullable Object value);
 
@@ -158,6 +165,7 @@ public interface Cache {
 	 * Use {@link #evictIfPresent} for guaranteed immediate removal.
 	 * @param key the key whose mapping is to be removed from the cache
 	 * @see #evictIfPresent(Object)
+     * 删除一个缓存
 	 */
 	void evict(Object key);
 
@@ -209,6 +217,8 @@ public interface Cache {
 
 	/**
 	 * A (wrapper) object representing a cache value.
+     *
+     * 对象包装
 	 */
 	@FunctionalInterface
 	interface ValueWrapper {
@@ -225,6 +235,7 @@ public interface Cache {
 	 * Wrapper exception to be thrown from {@link #get(Object, Callable)}
 	 * in case of the value loader callback failing with an exception.
 	 * @since 4.3
+     * 值检索异常
 	 */
 	@SuppressWarnings("serial")
 	class ValueRetrievalException extends RuntimeException {
