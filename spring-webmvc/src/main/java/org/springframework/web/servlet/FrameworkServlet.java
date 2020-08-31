@@ -621,10 +621,12 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	@Nullable
 	protected WebApplicationContext findWebApplicationContext() {
+		// 获取属性名称
 		String attrName = getContextAttribute();
 		if (attrName == null) {
 			return null;
 		}
+		// servletContext 中寻找 attrName 的 webApplicationContext
 		WebApplicationContext wac =
 				WebApplicationContextUtils.getWebApplicationContext(getServletContext(), attrName);
 		if (wac == null) {

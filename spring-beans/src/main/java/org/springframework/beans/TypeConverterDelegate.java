@@ -48,9 +48,9 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Dave Syer
- * @since 2.0
  * @see BeanWrapperImpl
  * @see SimpleTypeConverter
+ * @since 2.0
  */
 class TypeConverterDelegate {
 
@@ -64,6 +64,7 @@ class TypeConverterDelegate {
 
 	/**
 	 * Create a new TypeConverterDelegate for the given editor registry.
+	 *
 	 * @param propertyEditorRegistry the editor registry to use
 	 */
 	public TypeConverterDelegate(PropertyEditorRegistrySupport propertyEditorRegistry) {
@@ -72,8 +73,10 @@ class TypeConverterDelegate {
 
 	/**
 	 * Create a new TypeConverterDelegate for the given editor registry and bean instance.
+	 *
 	 * @param propertyEditorRegistry the editor registry to use
-	 * @param targetObject the target object to work on (as context that can be passed to editors)
+	 * @param targetObject           the target object to work on (as context that can be passed to
+	 *                               editors)
 	 */
 	public TypeConverterDelegate(PropertyEditorRegistrySupport propertyEditorRegistry, @Nullable Object targetObject) {
 		this.propertyEditorRegistry = propertyEditorRegistry;
@@ -83,37 +86,43 @@ class TypeConverterDelegate {
 
 	/**
 	 * Convert the value to the required type for the specified property.
+	 *
 	 * @param propertyName name of the property
-	 * @param oldValue the previous value, if available (may be {@code null})
-	 * @param newValue the proposed new value
-	 * @param requiredType the type we must convert to
-	 * (or {@code null} if not known, for example in case of a collection element)
+	 * @param oldValue     the previous value, if available (may be {@code null})
+	 * @param newValue     the proposed new value
+	 * @param requiredType the type we must convert to (or {@code null} if not known, for example in
+	 *                     case of a collection element)
+	 *
 	 * @return the new value, possibly the result of type conversion
+	 *
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
 	@Nullable
 	public <T> T convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue,
-			Object newValue, @Nullable Class<T> requiredType) throws IllegalArgumentException {
+									Object newValue, @Nullable Class<T> requiredType) throws IllegalArgumentException {
 
 		return convertIfNecessary(propertyName, oldValue, newValue, requiredType, TypeDescriptor.valueOf(requiredType));
 	}
 
 	/**
-	 * Convert the value to the required type (if necessary from a String),
-	 * for the specified property.
-	 * @param propertyName name of the property
-	 * @param oldValue the previous value, if available (may be {@code null})
-	 * @param newValue the proposed new value
-	 * @param requiredType the type we must convert to
-	 * (or {@code null} if not known, for example in case of a collection element)
+	 * Convert the value to the required type (if necessary from a String), for the specified
+	 * property.
+	 *
+	 * @param propertyName   name of the property
+	 * @param oldValue       the previous value, if available (may be {@code null})
+	 * @param newValue       the proposed new value
+	 * @param requiredType   the type we must convert to (or {@code null} if not known, for example
+	 *                       in case of a collection element)
 	 * @param typeDescriptor the descriptor for the target property or field
+	 *
 	 * @return the new value, possibly the result of type conversion
+	 *
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
 	public <T> T convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue, @Nullable Object newValue,
-			@Nullable Class<T> requiredType, @Nullable TypeDescriptor typeDescriptor) throws IllegalArgumentException {
+									@Nullable Class<T> requiredType, @Nullable TypeDescriptor typeDescriptor) throws IllegalArgumentException {
 
 		// Custom editor for this type?
 		PropertyEditor editor = this.propertyEditorRegistry.findCustomEditor(requiredType, propertyName);
@@ -152,6 +161,7 @@ class TypeConverterDelegate {
 			if (editor == null) {
 				editor = findDefaultEditor(requiredType);
 			}
+			// 执行转换方法
 			convertedValue = doConvertValue(oldValue, convertedValue, requiredType, editor);
 		}
 
@@ -269,7 +279,7 @@ class TypeConverterDelegate {
 				throw conversionAttemptEx;
 			}
 			logger.debug("Original ConversionService attempt failed - ignored since " +
-					"PropertyEditor based conversion eventually succeeded", conversionAttemptEx);
+								 "PropertyEditor based conversion eventually succeeded", conversionAttemptEx);
 		}
 
 		return (T) convertedValue;
@@ -281,7 +291,7 @@ class TypeConverterDelegate {
 		if (Enum.class == requiredType && this.targetObject != null) {
 			// target type is declared as raw enum, treat the trimmed value as <enum.fqn>.FIELD_NAME
 			int index = trimmedValue.lastIndexOf('.');
-			if (index > - 1) {
+			if (index > -1) {
 				String enumType = trimmedValue.substring(0, index);
 				String fieldName = trimmedValue.substring(index + 1);
 				ClassLoader cl = this.targetObject.getClass().getClassLoader();
@@ -321,9 +331,12 @@ class TypeConverterDelegate {
 
 		return convertedValue;
 	}
+
 	/**
 	 * Find a default editor for the given type.
+	 *
 	 * @param requiredType the type to find an editor for
+	 *
 	 * @return the corresponding editor, or {@code null} if none
 	 */
 	@Nullable
@@ -341,19 +354,22 @@ class TypeConverterDelegate {
 	}
 
 	/**
-	 * Convert the value to the required type (if necessary from a String),
-	 * using the given property editor.
-	 * @param oldValue the previous value, if available (may be {@code null})
-	 * @param newValue the proposed new value
-	 * @param requiredType the type we must convert to
-	 * (or {@code null} if not known, for example in case of a collection element)
-	 * @param editor the PropertyEditor to use
+	 * Convert the value to the required type (if necessary from a String), using the given property
+	 * editor.
+	 *
+	 * @param oldValue     the previous value, if available (may be {@code null})
+	 * @param newValue     the proposed new value
+	 * @param requiredType the type we must convert to (or {@code null} if not known, for example in
+	 *                     case of a collection element)
+	 * @param editor       the PropertyEditor to use
+	 *
 	 * @return the new value, possibly the result of type conversion
+	 *
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
 	@Nullable
 	private Object doConvertValue(@Nullable Object oldValue, @Nullable Object newValue,
-			@Nullable Class<?> requiredType, @Nullable PropertyEditor editor) {
+								  @Nullable Class<?> requiredType, @Nullable PropertyEditor editor) {
 
 		Object convertedValue = newValue;
 
@@ -411,9 +427,11 @@ class TypeConverterDelegate {
 
 	/**
 	 * Convert the given text value using the given property editor.
-	 * @param oldValue the previous value, if available (may be {@code null})
+	 *
+	 * @param oldValue     the previous value, if available (may be {@code null})
 	 * @param newTextValue the proposed text value
-	 * @param editor the PropertyEditor to use
+	 * @param editor       the PropertyEditor to use
+	 *
 	 * @return the converted value
 	 */
 	private Object doConvertTextValue(@Nullable Object oldValue, String newTextValue, PropertyEditor editor) {
@@ -426,6 +444,7 @@ class TypeConverterDelegate {
 			}
 			// Swallow and proceed.
 		}
+//		调用子类实现方法
 		editor.setAsText(newTextValue);
 		return editor.getValue();
 	}
@@ -470,7 +489,7 @@ class TypeConverterDelegate {
 
 	@SuppressWarnings("unchecked")
 	private Collection<?> convertToTypedCollection(Collection<?> original, @Nullable String propertyName,
-			Class<?> requiredType, @Nullable TypeDescriptor typeDescriptor) {
+												   Class<?> requiredType, @Nullable TypeDescriptor typeDescriptor) {
 
 		if (!Collection.class.isAssignableFrom(requiredType)) {
 			return original;
@@ -480,7 +499,7 @@ class TypeConverterDelegate {
 		if (!approximable && !canCreateCopy(requiredType)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Custom Collection type [" + original.getClass().getName() +
-						"] does not allow for creating a copy - injecting original Collection as-is");
+									 "] does not allow for creating a copy - injecting original Collection as-is");
 			}
 			return original;
 		}
@@ -499,7 +518,7 @@ class TypeConverterDelegate {
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cannot access Collection of type [" + original.getClass().getName() +
-						"] - injecting original Collection as-is: " + ex);
+									 "] - injecting original Collection as-is: " + ex);
 			}
 			return original;
 		}
@@ -517,7 +536,7 @@ class TypeConverterDelegate {
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cannot create copy of Collection type [" + original.getClass().getName() +
-						"] - injecting original Collection as-is: " + ex);
+									 "] - injecting original Collection as-is: " + ex);
 			}
 			return original;
 		}
@@ -526,14 +545,15 @@ class TypeConverterDelegate {
 			Object element = it.next();
 			String indexedPropertyName = buildIndexedPropertyName(propertyName, i);
 			Object convertedElement = convertIfNecessary(indexedPropertyName, null, element,
-					(elementType != null ? elementType.getType() : null) , elementType);
+														 (elementType != null ? elementType.getType() : null), elementType
+			);
 			try {
 				convertedCopy.add(convertedElement);
 			}
 			catch (Throwable ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Collection type [" + original.getClass().getName() +
-							"] seems to be read-only - injecting original Collection as-is: " + ex);
+										 "] seems to be read-only - injecting original Collection as-is: " + ex);
 				}
 				return original;
 			}
@@ -544,7 +564,7 @@ class TypeConverterDelegate {
 
 	@SuppressWarnings("unchecked")
 	private Map<?, ?> convertToTypedMap(Map<?, ?> original, @Nullable String propertyName,
-			Class<?> requiredType, @Nullable TypeDescriptor typeDescriptor) {
+										Class<?> requiredType, @Nullable TypeDescriptor typeDescriptor) {
 
 		if (!Map.class.isAssignableFrom(requiredType)) {
 			return original;
@@ -554,7 +574,7 @@ class TypeConverterDelegate {
 		if (!approximable && !canCreateCopy(requiredType)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Custom Map type [" + original.getClass().getName() +
-						"] does not allow for creating a copy - injecting original Map as-is");
+									 "] does not allow for creating a copy - injecting original Map as-is");
 			}
 			return original;
 		}
@@ -574,7 +594,7 @@ class TypeConverterDelegate {
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cannot access Map of type [" + original.getClass().getName() +
-						"] - injecting original Map as-is: " + ex);
+									 "] - injecting original Map as-is: " + ex);
 			}
 			return original;
 		}
@@ -592,7 +612,7 @@ class TypeConverterDelegate {
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cannot create copy of Map type [" + original.getClass().getName() +
-						"] - injecting original Map as-is: " + ex);
+									 "] - injecting original Map as-is: " + ex);
 			}
 			return original;
 		}
@@ -603,16 +623,18 @@ class TypeConverterDelegate {
 			Object value = entry.getValue();
 			String keyedPropertyName = buildKeyedPropertyName(propertyName, key);
 			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key,
-					(keyType != null ? keyType.getType() : null), keyType);
+													 (keyType != null ? keyType.getType() : null), keyType
+			);
 			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value,
-					(valueType!= null ? valueType.getType() : null), valueType);
+													   (valueType != null ? valueType.getType() : null), valueType
+			);
 			try {
 				convertedCopy.put(convertedKey, convertedValue);
 			}
 			catch (Throwable ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Map type [" + original.getClass().getName() +
-							"] seems to be read-only - injecting original Map as-is: " + ex);
+										 "] seems to be read-only - injecting original Map as-is: " + ex);
 				}
 				return original;
 			}

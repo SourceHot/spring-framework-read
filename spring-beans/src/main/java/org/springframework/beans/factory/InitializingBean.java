@@ -17,13 +17,13 @@
 package org.springframework.beans.factory;
 
 /**
- * Interface to be implemented by beans that need to react once all their properties
- * have been set by a {@link BeanFactory}: e.g. to perform custom initialization,
- * or merely to check that all mandatory properties have been set.
+ * Interface to be implemented by beans that need to react once all their properties have been set
+ * by a {@link BeanFactory}: e.g. to perform custom initialization, or merely to check that all
+ * mandatory properties have been set.
  *
  * <p>An alternative to implementing {@code InitializingBean} is specifying a custom
- * init method, for example in an XML bean definition. For a list of all bean
- * lifecycle methods, see the {@link BeanFactory BeanFactory javadocs}.
+ * init method, for example in an XML bean definition. For a list of all bean lifecycle methods, see
+ * the {@link BeanFactory BeanFactory javadocs}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -34,12 +34,14 @@ package org.springframework.beans.factory;
 public interface InitializingBean {
 
 	/**
-	 * Invoked by the containing {@code BeanFactory} after it has set all bean properties
-	 * and satisfied {@link BeanFactoryAware}, {@code ApplicationContextAware} etc.
+	 * Invoked by the containing {@code BeanFactory} after it has set all bean properties and
+	 * satisfied {@link BeanFactoryAware}, {@code ApplicationContextAware} etc.
 	 * <p>This method allows the bean instance to perform validation of its overall
 	 * configuration and final initialization when all bean properties have been set.
-	 * @throws Exception in the event of misconfiguration (such as failure to set an
-	 * essential property) or if initialization fails for any other reason
+	 *
+	 * 设置属性
+	 * @throws Exception in the event of misconfiguration (such as failure to set an essential
+	 *                   property) or if initialization fails for any other reason
 	 */
 	void afterPropertiesSet() throws Exception;
 

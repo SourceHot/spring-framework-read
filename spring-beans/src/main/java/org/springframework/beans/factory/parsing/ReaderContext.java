@@ -20,8 +20,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 
 /**
- * Context that gets passed along a bean definition reading process,
- * encapsulating all relevant configuration as well as state.
+ * Context that gets passed along a bean definition reading process, encapsulating all relevant
+ * configuration as well as state.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -40,13 +40,14 @@ public class ReaderContext {
 
 	/**
 	 * Construct a new {@code ReaderContext}.
-	 * @param resource the XML bean definition resource
+	 *
+	 * @param resource        the XML bean definition resource
 	 * @param problemReporter the problem reporter in use
-	 * @param eventListener the event listener in use
+	 * @param eventListener   the event listener in use
 	 * @param sourceExtractor the source extractor in use
 	 */
 	public ReaderContext(Resource resource, ProblemReporter problemReporter,
-			ReaderEventListener eventListener, SourceExtractor sourceExtractor) {
+						 ReaderEventListener eventListener, SourceExtractor sourceExtractor) {
 
 		this.resource = resource;
 		this.problemReporter = problemReporter;
@@ -173,9 +174,12 @@ public class ReaderContext {
 	}
 
 	/**
-	 * Fire an import-processed event.
+	 * Fire an import-processed event. 触发import 事件
 	 */
 	public void fireImportProcessed(String importedResource, @Nullable Object source) {
+		/**
+		 * 事件监听器importProcessed通知处理结果
+		 */
 		this.eventListener.importProcessed(new ImportDefinition(importedResource, source));
 	}
 
@@ -198,8 +202,11 @@ public class ReaderContext {
 
 	/**
 	 * Call the source extractor for the given source object.
+	 *
 	 * @param sourceCandidate the original source object
+	 *
 	 * @return the source object to store, or {@code null} for none.
+	 *
 	 * @see #getSourceExtractor()
 	 * @see SourceExtractor#extractSource
 	 */

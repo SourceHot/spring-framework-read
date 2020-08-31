@@ -41,7 +41,8 @@ import java.lang.annotation.Target;
  * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor BeanFactoryPostProcessor}
  * types. Please consult the javadoc for the {@link AutowiredAnnotationBeanPostProcessor}
  * class (which, by default, checks for the presence of this annotation).
- *
+ * 属性值注解
+
  * @author Juergen Hoeller
  * @since 3.0
  * @see AutowiredAnnotationBeanPostProcessor
