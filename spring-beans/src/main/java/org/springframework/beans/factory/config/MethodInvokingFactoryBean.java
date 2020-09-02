@@ -91,15 +91,6 @@ public class MethodInvokingFactoryBean extends MethodInvokingBean implements Fac
 	@Nullable
 	private Object singletonObject;
 
-
-	/**
-	 * Set if a singleton should be created, or a new object on each
-	 * {@link #getObject()} request otherwise. Default is "true".
-	 */
-	public void setSingleton(boolean singleton) {
-		this.singleton = singleton;
-	}
-
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		prepare();
@@ -108,7 +99,6 @@ public class MethodInvokingFactoryBean extends MethodInvokingBean implements Fac
 			this.singletonObject = invokeWithTargetException();
 		}
 	}
-
 
 	/**
 	 * Returns the same value each time if the singleton property is set
@@ -147,6 +137,14 @@ public class MethodInvokingFactoryBean extends MethodInvokingBean implements Fac
 	@Override
 	public boolean isSingleton() {
 		return this.singleton;
+	}
+
+	/**
+	 * Set if a singleton should be created, or a new object on each
+	 * {@link #getObject()} request otherwise. Default is "true".
+	 */
+	public void setSingleton(boolean singleton) {
+		this.singleton = singleton;
 	}
 
 }

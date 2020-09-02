@@ -44,10 +44,10 @@ public final class ParserContext {
 
 	private final BeanDefinitionParserDelegate delegate;
 
+	private final Deque<CompositeComponentDefinition> containingComponents = new ArrayDeque<>();
+
 	@Nullable
 	private BeanDefinition containingBeanDefinition;
-
-	private final Deque<CompositeComponentDefinition> containingComponents = new ArrayDeque<>();
 
 
 	public ParserContext(XmlReaderContext readerContext, BeanDefinitionParserDelegate delegate) {

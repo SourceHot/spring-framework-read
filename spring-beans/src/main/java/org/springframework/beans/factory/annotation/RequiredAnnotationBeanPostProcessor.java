@@ -86,6 +86,10 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	public static final String SKIP_REQUIRED_CHECK_ATTRIBUTE =
 			Conventions.getQualifiedAttributeName(RequiredAnnotationBeanPostProcessor.class, "skipRequiredCheck");
 
+	/**
+	 * Cache for validated bean names, skipping re-validation for the same bean.
+	 */
+	private final Set<String> validatedBeanNames = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
 	private Class<? extends Annotation> requiredAnnotationType = Required.class;
 
@@ -95,10 +99,11 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	private ConfigurableListableBeanFactory beanFactory;
 
 	/**
-	 * Cache for validated bean names, skipping re-validation for the same bean.
+	 * Return the 'required' annotation type.
 	 */
-	private final Set<String> validatedBeanNames = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
-
+	protected Class<? extends Annotation> getRequiredAnnotationType() {
+		return this.requiredAnnotationType;
+	}
 
 	/**
 	 * Set the 'required' annotation type, to be used on bean property
@@ -114,13 +119,6 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 		this.requiredAnnotationType = requiredAnnotationType;
 	}
 
-	/**
-	 * Return the 'required' annotation type.
-	 */
-	protected Class<? extends Annotation> getRequiredAnnotationType() {
-		return this.requiredAnnotationType;
-	}
-
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableListableBeanFactory) {
@@ -128,15 +126,14 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 		}
 	}
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
 	@Override
 	public int getOrder() {
 		return this.order;
 	}
 
+	public void setOrder(int order) {
+		this.order = order;
+	}
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {

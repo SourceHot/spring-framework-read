@@ -54,6 +54,10 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
+	@Override
+	public int getOrder() {
+		return this.order;
+	}
 
 	/**
 	 * Set the order value of this object for sorting purposes.
@@ -62,12 +66,6 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 	public void setOrder(int order) {
 		this.order = order;
 	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
-
 
 	/**
 	 * {@linkplain #mergeProperties Merge}, {@linkplain #convertProperties convert} and

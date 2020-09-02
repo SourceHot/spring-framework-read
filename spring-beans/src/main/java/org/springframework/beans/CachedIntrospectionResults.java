@@ -92,16 +92,6 @@ public final class CachedIntrospectionResults {
 	 */
 	public static final String IGNORE_BEANINFO_PROPERTY_NAME = "spring.beaninfo.ignore";
 
-
-	private static final boolean shouldIntrospectorIgnoreBeaninfoClasses =
-			SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
-
-	/** Stores the BeanInfoFactory instances. */
-	private static List<BeanInfoFactory> beanInfoFactories = SpringFactoriesLoader.loadFactories(
-			BeanInfoFactory.class, CachedIntrospectionResults.class.getClassLoader());
-
-	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
-
 	/**
 	 * Set of ClassLoaders that this CachedIntrospectionResults class will always
 	 * accept classes from, even if the classes do not qualify as cache-safe.
@@ -123,6 +113,73 @@ public final class CachedIntrospectionResults {
 	static final ConcurrentMap<Class<?>, CachedIntrospectionResults> softClassCache =
 			new ConcurrentReferenceHashMap<>(64);
 
+	private static final boolean shouldIntrospectorIgnoreBeaninfoClasses =
+			SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
+
+	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
+
+	/** Stores the BeanInfoFactory instances. */
+	private static final List<BeanInfoFactory> beanInfoFactories = SpringFactoriesLoader.loadFactories(
+			BeanInfoFactory.class, CachedIntrospectionResults.class.getClassLoader());
+
+	/** The BeanInfo object for the introspected bean class. */
+	private final BeanInfo beanInfo;
+
+	/** PropertyDescriptor objects keyed by property name String. */
+	private final Map<String, PropertyDescriptor> propertyDescriptorCache;
+
+	/** TypeDescriptor objects keyed by PropertyDescriptor. */
+	private final ConcurrentMap<PropertyDescriptor, TypeDescriptor> typeDescriptorCache;
+
+	/**
+	 * Create a new CachedIntrospectionResults instance for the given class.
+	 * @param beanClass the bean class to analyze
+	 * @throws BeansException in case of introspection failure
+	 */
+	private CachedIntrospectionResults(Class<?> beanClass) throws BeansException {
+		try {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
+			}
+			this.beanInfo = getBeanInfo(beanClass);
+
+			if (logger.isTraceEnabled()) {
+				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
+			}
+			this.propertyDescriptorCache = new LinkedHashMap<>();
+
+			// This call is slow so we do it once.
+			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
+			for (PropertyDescriptor pd : pds) {
+				if (Class.class == beanClass &&
+						("classLoader".equals(pd.getName()) || "protectionDomain".equals(pd.getName()))) {
+					// Ignore Class.getClassLoader() and getProtectionDomain() methods - nobody needs to bind to those
+					continue;
+				}
+				if (logger.isTraceEnabled()) {
+					logger.trace("Found bean property '" + pd.getName() + "'" +
+							(pd.getPropertyType() != null ? " of type [" + pd.getPropertyType().getName() + "]" : "") +
+							(pd.getPropertyEditorClass() != null ?
+									"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
+				}
+				pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
+				this.propertyDescriptorCache.put(pd.getName(), pd);
+			}
+
+			// Explicitly check implemented interfaces for setter/getter methods as well,
+			// in particular for Java 8 default methods...
+			Class<?> currClass = beanClass;
+			while (currClass != null && currClass != Object.class) {
+				introspectInterfaces(beanClass, currClass);
+				currClass = currClass.getSuperclass();
+			}
+
+			this.typeDescriptorCache = new ConcurrentReferenceHashMap<>();
+		}
+		catch (IntrospectionException ex) {
+			throw new FatalBeanException("Failed to obtain BeanInfo for class [" + beanClass.getName() + "]", ex);
+		}
+	}
 
 	/**
 	 * Accept the given ClassLoader as cache-safe, even if its classes would
@@ -246,67 +303,6 @@ public final class CachedIntrospectionResults {
 		return (shouldIntrospectorIgnoreBeaninfoClasses ?
 				Introspector.getBeanInfo(beanClass, Introspector.IGNORE_ALL_BEANINFO) :
 				Introspector.getBeanInfo(beanClass));
-	}
-
-
-	/** The BeanInfo object for the introspected bean class. */
-	private final BeanInfo beanInfo;
-
-	/** PropertyDescriptor objects keyed by property name String. */
-	private final Map<String, PropertyDescriptor> propertyDescriptorCache;
-
-	/** TypeDescriptor objects keyed by PropertyDescriptor. */
-	private final ConcurrentMap<PropertyDescriptor, TypeDescriptor> typeDescriptorCache;
-
-
-	/**
-	 * Create a new CachedIntrospectionResults instance for the given class.
-	 * @param beanClass the bean class to analyze
-	 * @throws BeansException in case of introspection failure
-	 */
-	private CachedIntrospectionResults(Class<?> beanClass) throws BeansException {
-		try {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
-			}
-			this.beanInfo = getBeanInfo(beanClass);
-
-			if (logger.isTraceEnabled()) {
-				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
-			}
-			this.propertyDescriptorCache = new LinkedHashMap<>();
-
-			// This call is slow so we do it once.
-			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
-			for (PropertyDescriptor pd : pds) {
-				if (Class.class == beanClass &&
-						("classLoader".equals(pd.getName()) ||  "protectionDomain".equals(pd.getName()))) {
-					// Ignore Class.getClassLoader() and getProtectionDomain() methods - nobody needs to bind to those
-					continue;
-				}
-				if (logger.isTraceEnabled()) {
-					logger.trace("Found bean property '" + pd.getName() + "'" +
-							(pd.getPropertyType() != null ? " of type [" + pd.getPropertyType().getName() + "]" : "") +
-							(pd.getPropertyEditorClass() != null ?
-									"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
-				}
-				pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
-				this.propertyDescriptorCache.put(pd.getName(), pd);
-			}
-
-			// Explicitly check implemented interfaces for setter/getter methods as well,
-			// in particular for Java 8 default methods...
-			Class<?> currClass = beanClass;
-			while (currClass != null && currClass != Object.class) {
-				introspectInterfaces(beanClass, currClass);
-				currClass = currClass.getSuperclass();
-			}
-
-			this.typeDescriptorCache = new ConcurrentReferenceHashMap<>();
-		}
-		catch (IntrospectionException ex) {
-			throw new FatalBeanException("Failed to obtain BeanInfo for class [" + beanClass.getName() + "]", ex);
-		}
 	}
 
 	private void introspectInterfaces(Class<?> beanClass, Class<?> currClass) throws IntrospectionException {

@@ -129,16 +129,15 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 		super(original);
 	}
 
-
-	@Override
-	public void setParentName(@Nullable String parentName) {
-		this.parentName = parentName;
-	}
-
 	@Override
 	@Nullable
 	public String getParentName() {
 		return this.parentName;
+	}
+
+	@Override
+	public void setParentName(@Nullable String parentName) {
+		this.parentName = parentName;
 	}
 
 	@Override

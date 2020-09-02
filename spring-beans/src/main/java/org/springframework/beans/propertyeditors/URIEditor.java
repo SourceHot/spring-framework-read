@@ -56,7 +56,6 @@ public class URIEditor extends PropertyEditorSupport {
 	private final boolean encode;
 
 
-
 	/**
 	 * Create a new, encoding URIEditor, converting "classpath:" locations into
 	 * standard URIs (not trying to resolve them into physical resources).
@@ -99,6 +98,33 @@ public class URIEditor extends PropertyEditorSupport {
 		this.encode = encode;
 	}
 
+	/**
+	 * Create a URI instance for the given user-specified String value.
+	 * <p>The default implementation encodes the value into a RFC-2396 compliant URI.
+	 * @param value the value to convert into a URI instance
+	 * @return the URI instance
+	 * @throws java.net.URISyntaxException if URI conversion failed
+	 */
+	protected URI createURI(String value) throws URISyntaxException {
+		int colonIndex = value.indexOf(':');
+		if (this.encode && colonIndex != -1) {
+			int fragmentIndex = value.indexOf('#', colonIndex + 1);
+			String scheme = value.substring(0, colonIndex);
+			String ssp = value.substring(colonIndex + 1, (fragmentIndex > 0 ? fragmentIndex : value.length()));
+			String fragment = (fragmentIndex > 0 ? value.substring(fragmentIndex + 1) : null);
+			return new URI(scheme, ssp, fragment);
+		}
+		else {
+			// not encoding or the value contains no scheme - fallback to default
+			return new URI(value);
+		}
+	}
+
+	@Override
+	public String getAsText() {
+		URI value = (URI) getValue();
+		return (value != null ? value.toString() : "");
+	}
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
@@ -126,35 +152,6 @@ public class URIEditor extends PropertyEditorSupport {
 		else {
 			setValue(null);
 		}
-	}
-
-	/**
-	 * Create a URI instance for the given user-specified String value.
-	 * <p>The default implementation encodes the value into a RFC-2396 compliant URI.
-	 * @param value the value to convert into a URI instance
-	 * @return the URI instance
-	 * @throws java.net.URISyntaxException if URI conversion failed
-	 */
-	protected URI createURI(String value) throws URISyntaxException {
-		int colonIndex = value.indexOf(':');
-		if (this.encode && colonIndex != -1) {
-			int fragmentIndex = value.indexOf('#', colonIndex + 1);
-			String scheme = value.substring(0, colonIndex);
-			String ssp = value.substring(colonIndex + 1, (fragmentIndex > 0 ? fragmentIndex : value.length()));
-			String fragment = (fragmentIndex > 0 ? value.substring(fragmentIndex + 1) : null);
-			return new URI(scheme, ssp, fragment);
-		}
-		else {
-			// not encoding or the value contains no scheme - fallback to default
-			return new URI(value);
-		}
-	}
-
-
-	@Override
-	public String getAsText() {
-		URI value = (URI) getValue();
-		return (value != null ? value.toString() : "");
 	}
 
 }

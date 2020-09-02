@@ -178,14 +178,6 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	}
 
 	/**
-	 * Set the security context used during the invocation of the wrapped instance methods.
-	 * Can be null.
-	 */
-	public void setSecurityContext(@Nullable AccessControlContext acc) {
-		this.acc = acc;
-	}
-
-	/**
 	 * Return the security context used during the invocation of the wrapped instance methods.
 	 * Can be null.
 	 */
@@ -194,6 +186,13 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 		return this.acc;
 	}
 
+	/**
+	 * Set the security context used during the invocation of the wrapped instance methods.
+	 * Can be null.
+	 */
+	public void setSecurityContext(@Nullable AccessControlContext acc) {
+		this.acc = acc;
+	}
 
 	/**
 	 * Convert the given value for the specified property to the latter's type.

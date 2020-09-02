@@ -41,16 +41,6 @@ public class BeanDefinitionDefaults {
 	@Nullable
 	private String destroyMethodName;
 
-
-	/**
-	 * Set whether beans should be lazily initialized by default.
-	 * <p>If {@code false}, the bean will get instantiated on startup by bean
-	 * factories that perform eager initialization of singletons.
-	 */
-	public void setLazyInit(boolean lazyInit) {
-		this.lazyInit = lazyInit;
-	}
-
 	/**
 	 * Return whether beans should be lazily initialized by default, i.e. not
 	 * eagerly instantiated on startup. Only applicable to singleton beans.
@@ -72,6 +62,22 @@ public class BeanDefinitionDefaults {
 	}
 
 	/**
+	 * Set whether beans should be lazily initialized by default.
+	 * <p>If {@code false}, the bean will get instantiated on startup by bean
+	 * factories that perform eager initialization of singletons.
+	 */
+	public void setLazyInit(boolean lazyInit) {
+		this.lazyInit = lazyInit;
+	}
+
+	/**
+	 * Return the default autowire mode.
+	 */
+	public int getAutowireMode() {
+		return this.autowireMode;
+	}
+
+	/**
 	 * Set the autowire mode. This determines whether any automagical detection
 	 * and setting of bean references will happen. Default is AUTOWIRE_NO
 	 * which means there won't be convention-based autowiring by name or type
@@ -84,10 +90,10 @@ public class BeanDefinitionDefaults {
 	}
 
 	/**
-	 * Return the default autowire mode.
+	 * Return the default dependency check code.
 	 */
-	public int getAutowireMode() {
-		return this.autowireMode;
+	public int getDependencyCheck() {
+		return this.dependencyCheck;
 	}
 
 	/**
@@ -100,10 +106,11 @@ public class BeanDefinitionDefaults {
 	}
 
 	/**
-	 * Return the default dependency check code.
+	 * Return the name of the default initializer method.
 	 */
-	public int getDependencyCheck() {
-		return this.dependencyCheck;
+	@Nullable
+	public String getInitMethodName() {
+		return this.initMethodName;
 	}
 
 	/**
@@ -114,11 +121,11 @@ public class BeanDefinitionDefaults {
 	}
 
 	/**
-	 * Return the name of the default initializer method.
+	 * Return the name of the default destroy method.
 	 */
 	@Nullable
-	public String getInitMethodName() {
-		return this.initMethodName;
+	public String getDestroyMethodName() {
+		return this.destroyMethodName;
 	}
 
 	/**
@@ -126,14 +133,6 @@ public class BeanDefinitionDefaults {
 	 */
 	public void setDestroyMethodName(@Nullable String destroyMethodName) {
 		this.destroyMethodName = (StringUtils.hasText(destroyMethodName) ? destroyMethodName : null);
-	}
-
-	/**
-	 * Return the name of the default destroy method.
-	 */
-	@Nullable
-	public String getDestroyMethodName() {
-		return this.destroyMethodName;
 	}
 
 }

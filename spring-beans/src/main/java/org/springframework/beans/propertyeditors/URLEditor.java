@@ -65,6 +65,11 @@ public class URLEditor extends PropertyEditorSupport {
 		this.resourceEditor = resourceEditor;
 	}
 
+	@Override
+	public String getAsText() {
+		URL value = (URL) getValue();
+		return (value != null ? value.toExternalForm() : "");
+	}
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
@@ -76,12 +81,6 @@ public class URLEditor extends PropertyEditorSupport {
 		catch (IOException ex) {
 			throw new IllegalArgumentException("Could not retrieve URL for " + resource + ": " + ex.getMessage());
 		}
-	}
-
-	@Override
-	public String getAsText() {
-		URL value = (URL) getValue();
-		return (value != null ? value.toExternalForm() : "");
 	}
 
 }

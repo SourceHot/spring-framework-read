@@ -126,8 +126,6 @@ public class BeanDefinitionParserDelegate {
 
 	public static final String SCOPE_ATTRIBUTE = "scope";
 
-	private static final String SINGLETON_ATTRIBUTE = "singleton";
-
 	public static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
 
 	public static final String AUTOWIRE_ATTRIBUTE = "autowire";
@@ -224,6 +222,7 @@ public class BeanDefinitionParserDelegate {
 
 	public static final String DEFAULT_DESTROY_METHOD_ATTRIBUTE = "default-destroy-method";
 
+	private static final String SINGLETON_ATTRIBUTE = "singleton";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -1250,7 +1249,7 @@ public class BeanDefinitionParserDelegate {
 						"'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
 			}
 			if ((hasValueTypeAttribute && hasValueRefAttribute) ||
-				(hasValueTypeAttribute && !hasValueAttribute) ||
+					(hasValueTypeAttribute && !hasValueAttribute) ||
 					(hasValueTypeAttribute && valueEle != null)) {
 				error("<entry> element is only allowed to contain a 'value-type' " +
 						"attribute when it has a 'value' attribute", entryEle);

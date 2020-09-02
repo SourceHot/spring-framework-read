@@ -43,12 +43,19 @@ import org.springframework.util.CollectionUtils;
 class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 
 	private static final String PARENT = "parent";
+
 	private static final String AUTOWIRE = "autowire";
+
 	private static final String CONSTRUCTOR_ARGS = "constructorArgs";
+
 	private static final String FACTORY_BEAN = "factoryBean";
+
 	private static final String FACTORY_METHOD = "factoryMethod";
+
 	private static final String INIT_METHOD = "initMethod";
+
 	private static final String DESTROY_METHOD = "destroyMethod";
+
 	private static final String SINGLETON = "singleton";
 
 	private static final List<String> dynamicProperties = new ArrayList<>(8);
@@ -98,15 +105,15 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		return this.beanName;
 	}
 
-	public void setBeanDefinition(AbstractBeanDefinition definition) {
-		this.definition = definition;
-	}
-
 	public AbstractBeanDefinition getBeanDefinition() {
 		if (this.definition == null) {
 			this.definition = createBeanDefinition();
 		}
 		return this.definition;
+	}
+
+	public void setBeanDefinition(AbstractBeanDefinition definition) {
+		this.definition = definition;
 	}
 
 	protected AbstractBeanDefinition createBeanDefinition() {
@@ -126,13 +133,13 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		return bd;
 	}
 
+	public BeanDefinitionHolder getBeanDefinitionHolder() {
+		return new BeanDefinitionHolder(getBeanDefinition(), getBeanName());
+	}
+
 	public void setBeanDefinitionHolder(BeanDefinitionHolder holder) {
 		this.definition = (AbstractBeanDefinition) holder.getBeanDefinition();
 		this.beanName = holder.getBeanName();
-	}
-
-	public BeanDefinitionHolder getBeanDefinitionHolder() {
-		return new BeanDefinitionHolder(getBeanDefinition(), getBeanName());
 	}
 
 	public void setParent(Object obj) {

@@ -132,7 +132,7 @@ abstract class AutowireUtils {
 			ObjectFactory<?> factory = (ObjectFactory<?>) autowiringValue;
 			if (autowiringValue instanceof Serializable && requiredType.isInterface()) {
 				autowiringValue = Proxy.newProxyInstance(requiredType.getClassLoader(),
-						new Class<?>[] {requiredType}, new ObjectFactoryDelegatingInvocationHandler(factory));
+						new Class<?>[] { requiredType }, new ObjectFactoryDelegatingInvocationHandler(factory));
 			}
 			else {
 				return factory.getObject();

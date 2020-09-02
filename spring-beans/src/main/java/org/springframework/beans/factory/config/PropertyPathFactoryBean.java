@@ -180,7 +180,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 			if (dotIndex == -1) {
 				throw new IllegalArgumentException(
 						"Neither 'targetObject' nor 'targetBeanName' specified, and PropertyPathFactoryBean " +
-						"bean name '" + this.beanName + "' does not follow 'beanName.property' syntax");
+								"bean name '" + this.beanName + "' does not follow 'beanName.property' syntax");
 			}
 			this.targetBeanName = this.beanName.substring(0, dotIndex);
 			this.propertyPath = this.beanName.substring(dotIndex + 1);

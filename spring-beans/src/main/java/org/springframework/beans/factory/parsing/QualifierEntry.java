@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
  */
 public class QualifierEntry implements ParseState.Entry {
 
-	private String typeName;
+	private final String typeName;
 
 
 	public QualifierEntry(String typeName) {

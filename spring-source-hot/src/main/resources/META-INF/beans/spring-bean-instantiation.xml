@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean class="org.source.hot.spring.overview.ioc.bean.init.UserBean"/>
+
+	<!--  静态方法-->
+	<bean id="static-method-user"
+		  class="org.source.hot.spring.overview.ioc.bean.init.UserBean"
+		  factory-method="createInstance"/>
+
+	<!--  工厂方法创建-->
+	<bean id="factory-use" class="org.source.hot.spring.overview.ioc.bean.init.UserBean"
+		  factory-bean="userFactory" factory-method="factory"></bean>
+	<!--user 工厂bean-->
+	<bean id="userFactory"
+		  class="org.source.hot.spring.overview.ioc.bean.init.UserBeanFactoryImpl"/>
+	<!--factory bean-->
+	<bean id="factory-bean-user"
+		  class="org.source.hot.spring.overview.ioc.bean.init.UserFactoryBean"/>
+
+	<alias name="factory-bean-user" alias="userFactoryBean"/>
+</beans>

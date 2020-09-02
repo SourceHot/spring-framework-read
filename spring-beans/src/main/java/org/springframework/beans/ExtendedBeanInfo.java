@@ -127,6 +127,13 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 	}
 
+	public static boolean isCandidateWriteMethod(Method method) {
+		String methodName = method.getName();
+		int nParams = method.getParameterCount();
+		return (methodName.length() > 3 && methodName.startsWith("set") && Modifier.isPublic(method.getModifiers()) &&
+				(!void.class.isAssignableFrom(method.getReturnType()) || Modifier.isStatic(method.getModifiers())) &&
+				(nParams == 1 || (nParams == 2 && int.class == method.getParameterTypes()[0])));
+	}
 
 	private List<Method> findCandidateWriteMethods(MethodDescriptor[] methodDescriptors) {
 		List<Method> matches = new ArrayList<>();
@@ -141,14 +148,6 @@ class ExtendedBeanInfo implements BeanInfo {
 		// under JDK 7. See https://bugs.java.com/view_bug.do?bug_id=7023180
 		matches.sort((m1, m2) -> m2.toString().compareTo(m1.toString()));
 		return matches;
-	}
-
-	public static boolean isCandidateWriteMethod(Method method) {
-		String methodName = method.getName();
-		int nParams = method.getParameterCount();
-		return (methodName.length() > 3 && methodName.startsWith("set") && Modifier.isPublic(method.getModifiers()) &&
-				(!void.class.isAssignableFrom(method.getReturnType()) || Modifier.isStatic(method.getModifiers())) &&
-				(nParams == 1 || (nParams == 2 && int.class == method.getParameterTypes()[0])));
 	}
 
 	private void handleCandidateWriteMethod(Method method) throws IntrospectionException {

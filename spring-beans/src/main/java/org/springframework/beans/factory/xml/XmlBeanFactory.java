@@ -51,7 +51,7 @@ import org.springframework.core.io.Resource;
  * {@link XmlBeanDefinitionReader}
  */
 @Deprecated
-@SuppressWarnings({"serial", "all"})
+@SuppressWarnings({ "serial", "all" })
 public class XmlBeanFactory extends DefaultListableBeanFactory {
 
 	private final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this);

@@ -48,6 +48,18 @@ public abstract class PropertyMatches {
 
 	// Static factory methods
 
+	private final String propertyName;
+
+	private final String[] possibleMatches;
+
+	/**
+	 * Create a new PropertyMatches instance for the given property and possible matches.
+	 */
+	private PropertyMatches(String propertyName, String[] possibleMatches) {
+		this.propertyName = propertyName;
+		this.possibleMatches = possibleMatches;
+	}
+
 	/**
 	 * Create PropertyMatches for the given bean property.
 	 * @param propertyName the name of the property to find possible matches for
@@ -56,6 +68,9 @@ public abstract class PropertyMatches {
 	public static PropertyMatches forProperty(String propertyName, Class<?> beanClass) {
 		return forProperty(propertyName, beanClass, DEFAULT_MAX_DISTANCE);
 	}
+
+
+	// Instance state
 
 	/**
 	 * Create PropertyMatches for the given bean property.
@@ -84,61 +99,6 @@ public abstract class PropertyMatches {
 	 */
 	public static PropertyMatches forField(String propertyName, Class<?> beanClass, int maxDistance) {
 		return new FieldPropertyMatches(propertyName, beanClass, maxDistance);
-	}
-
-
-	// Instance state
-
-	private final String propertyName;
-
-	private final String[] possibleMatches;
-
-
-	/**
-	 * Create a new PropertyMatches instance for the given property and possible matches.
-	 */
-	private PropertyMatches(String propertyName, String[] possibleMatches) {
-		this.propertyName = propertyName;
-		this.possibleMatches = possibleMatches;
-	}
-
-
-	/**
-	 * Return the name of the requested property.
-	 */
-	public String getPropertyName() {
-		return this.propertyName;
-	}
-
-	/**
-	 * Return the calculated possible matches.
-	 */
-	public String[] getPossibleMatches() {
-		return this.possibleMatches;
-	}
-
-	/**
-	 * Build an error message for the given invalid property name,
-	 * indicating the possible property matches.
-	 */
-	public abstract String buildErrorMessage();
-
-
-	// Implementation support for subclasses
-
-	protected void appendHintMessage(StringBuilder msg) {
-		msg.append("Did you mean ");
-		for (int i = 0; i < this.possibleMatches.length; i++) {
-			msg.append('\'');
-			msg.append(this.possibleMatches[i]);
-			if (i < this.possibleMatches.length - 2) {
-				msg.append("', ");
-			}
-			else if (i == this.possibleMatches.length - 2) {
-				msg.append("', or ");
-			}
-		}
-		msg.append("'?");
 	}
 
 	/**
@@ -180,6 +140,44 @@ public abstract class PropertyMatches {
 		}
 
 		return d[s1.length()][s2.length()];
+	}
+
+	/**
+	 * Return the name of the requested property.
+	 */
+	public String getPropertyName() {
+		return this.propertyName;
+	}
+
+	/**
+	 * Return the calculated possible matches.
+	 */
+	public String[] getPossibleMatches() {
+		return this.possibleMatches;
+	}
+
+
+	// Implementation support for subclasses
+
+	/**
+	 * Build an error message for the given invalid property name,
+	 * indicating the possible property matches.
+	 */
+	public abstract String buildErrorMessage();
+
+	protected void appendHintMessage(StringBuilder msg) {
+		msg.append("Did you mean ");
+		for (int i = 0; i < this.possibleMatches.length; i++) {
+			msg.append('\'');
+			msg.append(this.possibleMatches[i]);
+			if (i < this.possibleMatches.length - 2) {
+				msg.append("', ");
+			}
+			else if (i == this.possibleMatches.length - 2) {
+				msg.append("', or ");
+			}
+		}
+		msg.append("'?");
 	}
 
 

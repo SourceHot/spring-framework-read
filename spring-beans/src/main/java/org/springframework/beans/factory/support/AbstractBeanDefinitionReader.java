@@ -112,6 +112,12 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 		return this.registry;
 	}
 
+	@Override
+	@Nullable
+	public ResourceLoader getResourceLoader() {
+		return this.resourceLoader;
+	}
+
 	/**
 	 * Set the ResourceLoader to use for resource locations.
 	 * If specifying a ResourcePatternResolver, the bean definition reader
@@ -129,8 +135,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	@Override
 	@Nullable
-	public ResourceLoader getResourceLoader() {
-		return this.resourceLoader;
+	public ClassLoader getBeanClassLoader() {
+		return this.beanClassLoader;
 	}
 
 	/**
@@ -145,9 +151,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	}
 
 	@Override
-	@Nullable
-	public ClassLoader getBeanClassLoader() {
-		return this.beanClassLoader;
+	public Environment getEnvironment() {
+		return this.environment;
 	}
 
 	/**
@@ -161,8 +166,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	}
 
 	@Override
-	public Environment getEnvironment() {
-		return this.environment;
+	public BeanNameGenerator getBeanNameGenerator() {
+		return this.beanNameGenerator;
 	}
 
 	/**
@@ -173,12 +178,6 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
 		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : DefaultBeanNameGenerator.INSTANCE);
 	}
-
-	@Override
-	public BeanNameGenerator getBeanNameGenerator() {
-		return this.beanNameGenerator;
-	}
-
 
 	@Override
 	public int loadBeanDefinitions(Resource... resources) throws BeanDefinitionStoreException {

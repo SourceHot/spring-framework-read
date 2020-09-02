@@ -60,6 +60,18 @@ public class ClassArrayEditor extends PropertyEditorSupport {
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
 
+	@Override
+	public String getAsText() {
+		Class<?>[] classes = (Class[]) getValue();
+		if (ObjectUtils.isEmpty(classes)) {
+			return "";
+		}
+		StringJoiner sj = new StringJoiner(",");
+		for (Class<?> klass : classes) {
+			sj.add(ClassUtils.getQualifiedName(klass));
+		}
+		return sj.toString();
+	}
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
@@ -75,19 +87,6 @@ public class ClassArrayEditor extends PropertyEditorSupport {
 		else {
 			setValue(null);
 		}
-	}
-
-	@Override
-	public String getAsText() {
-		Class<?>[] classes = (Class[]) getValue();
-		if (ObjectUtils.isEmpty(classes)) {
-			return "";
-		}
-		StringJoiner sj = new StringJoiner(",");
-		for (Class<?> klass : classes) {
-			sj.add(ClassUtils.getQualifiedName(klass));
-		}
-		return sj.toString();
 	}
 
 }

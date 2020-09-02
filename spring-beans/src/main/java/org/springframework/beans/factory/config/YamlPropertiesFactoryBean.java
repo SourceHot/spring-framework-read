@@ -88,6 +88,10 @@ public class YamlPropertiesFactoryBean extends YamlProcessor implements FactoryB
 	@Nullable
 	private Properties properties;
 
+	@Override
+	public boolean isSingleton() {
+		return this.singleton;
+	}
 
 	/**
 	 * Set if a singleton should be created, or a new object on each request
@@ -95,11 +99,6 @@ public class YamlPropertiesFactoryBean extends YamlProcessor implements FactoryB
 	 */
 	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;
-	}
-
-	@Override
-	public boolean isSingleton() {
-		return this.singleton;
 	}
 
 	@Override

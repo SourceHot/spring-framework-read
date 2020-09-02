@@ -32,6 +32,12 @@ import org.springframework.util.StringUtils;
 public class UUIDEditor extends PropertyEditorSupport {
 
 	@Override
+	public String getAsText() {
+		UUID value = (UUID) getValue();
+		return (value != null ? value.toString() : "");
+	}
+
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (StringUtils.hasText(text)) {
 			setValue(UUID.fromString(text.trim()));
@@ -39,12 +45,6 @@ public class UUIDEditor extends PropertyEditorSupport {
 		else {
 			setValue(null);
 		}
-	}
-
-	@Override
-	public String getAsText() {
-		UUID value = (UUID) getValue();
-		return (value != null ? value.toString() : "");
 	}
 
 }

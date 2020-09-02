@@ -51,6 +51,10 @@ public class PropertiesFactoryBean extends PropertiesLoaderSupport
 	@Nullable
 	private Properties singletonInstance;
 
+	@Override
+	public final boolean isSingleton() {
+		return this.singleton;
+	}
 
 	/**
 	 * Set whether a shared 'singleton' Properties instance should be
@@ -60,12 +64,6 @@ public class PropertiesFactoryBean extends PropertiesLoaderSupport
 	public final void setSingleton(boolean singleton) {
 		this.singleton = singleton;
 	}
-
-	@Override
-	public final boolean isSingleton() {
-		return this.singleton;
-	}
-
 
 	@Override
 	public final void afterPropertiesSet() throws IOException {

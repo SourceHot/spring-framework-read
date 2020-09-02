@@ -115,6 +115,12 @@ public class RuntimeBeanReference implements BeanReference {
 		return this.toParent;
 	}
 
+	@Override
+	@Nullable
+	public Object getSource() {
+		return this.source;
+	}
+
 	/**
 	 * Set the configuration source {@code Object} for this metadata element.
 	 * <p>The exact type of the object will depend on the configuration mechanism used.
@@ -122,13 +128,6 @@ public class RuntimeBeanReference implements BeanReference {
 	public void setSource(@Nullable Object source) {
 		this.source = source;
 	}
-
-	@Override
-	@Nullable
-	public Object getSource() {
-		return this.source;
-	}
-
 
 	@Override
 	public boolean equals(@Nullable Object other) {

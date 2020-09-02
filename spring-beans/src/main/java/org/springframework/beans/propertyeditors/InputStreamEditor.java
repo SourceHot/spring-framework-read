@@ -63,6 +63,15 @@ public class InputStreamEditor extends PropertyEditorSupport {
 		this.resourceEditor = resourceEditor;
 	}
 
+	/**
+	 * This implementation returns {@code null} to indicate that
+	 * there is no appropriate text representation.
+	 */
+	@Override
+	@Nullable
+	public String getAsText() {
+		return null;
+	}
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
@@ -74,16 +83,6 @@ public class InputStreamEditor extends PropertyEditorSupport {
 		catch (IOException ex) {
 			throw new IllegalArgumentException("Failed to retrieve InputStream for " + resource, ex);
 		}
-	}
-
-	/**
-	 * This implementation returns {@code null} to indicate that
-	 * there is no appropriate text representation.
-	 */
-	@Override
-	@Nullable
-	public String getAsText() {
-		return null;
 	}
 
 }

@@ -204,6 +204,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 					throw new NoSuchBeanDefinitionException(requiredType);
 				}
 			}
+
 			@Override
 			public T getObject(Object... args) throws BeansException {
 				String[] beanNames = getBeanNamesForType(requiredType);
@@ -217,6 +218,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 					throw new NoSuchBeanDefinitionException(requiredType);
 				}
 			}
+
 			@Override
 			@Nullable
 			public T getIfAvailable() throws BeansException {
@@ -231,6 +233,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 					return null;
 				}
 			}
+
 			@Override
 			@Nullable
 			public T getIfUnique() throws BeansException {
@@ -242,10 +245,12 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 					return null;
 				}
 			}
+
 			@Override
 			public Stream<T> stream() {
 				return Arrays.stream(getBeanNamesForType(requiredType)).map(name -> (T) getBean(name));
 			}
+
 			@Override
 			public Stream<T> orderedStream() {
 				return stream().sorted(OrderComparator.INSTANCE);

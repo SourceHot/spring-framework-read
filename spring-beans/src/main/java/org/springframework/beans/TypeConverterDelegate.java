@@ -99,7 +99,7 @@ class TypeConverterDelegate {
 	 */
 	@Nullable
 	public <T> T convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue,
-									Object newValue, @Nullable Class<T> requiredType) throws IllegalArgumentException {
+			Object newValue, @Nullable Class<T> requiredType) throws IllegalArgumentException {
 
 		return convertIfNecessary(propertyName, oldValue, newValue, requiredType, TypeDescriptor.valueOf(requiredType));
 	}
@@ -122,7 +122,7 @@ class TypeConverterDelegate {
 	@SuppressWarnings("unchecked")
 	@Nullable
 	public <T> T convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue, @Nullable Object newValue,
-									@Nullable Class<T> requiredType, @Nullable TypeDescriptor typeDescriptor) throws IllegalArgumentException {
+			@Nullable Class<T> requiredType, @Nullable TypeDescriptor typeDescriptor) throws IllegalArgumentException {
 
 		// Custom editor for this type?
 		PropertyEditor editor = this.propertyEditorRegistry.findCustomEditor(requiredType, propertyName);
@@ -279,7 +279,7 @@ class TypeConverterDelegate {
 				throw conversionAttemptEx;
 			}
 			logger.debug("Original ConversionService attempt failed - ignored since " +
-								 "PropertyEditor based conversion eventually succeeded", conversionAttemptEx);
+					"PropertyEditor based conversion eventually succeeded", conversionAttemptEx);
 		}
 
 		return (T) convertedValue;
@@ -369,7 +369,7 @@ class TypeConverterDelegate {
 	 */
 	@Nullable
 	private Object doConvertValue(@Nullable Object oldValue, @Nullable Object newValue,
-								  @Nullable Class<?> requiredType, @Nullable PropertyEditor editor) {
+			@Nullable Class<?> requiredType, @Nullable PropertyEditor editor) {
 
 		Object convertedValue = newValue;
 
@@ -489,7 +489,7 @@ class TypeConverterDelegate {
 
 	@SuppressWarnings("unchecked")
 	private Collection<?> convertToTypedCollection(Collection<?> original, @Nullable String propertyName,
-												   Class<?> requiredType, @Nullable TypeDescriptor typeDescriptor) {
+			Class<?> requiredType, @Nullable TypeDescriptor typeDescriptor) {
 
 		if (!Collection.class.isAssignableFrom(requiredType)) {
 			return original;
@@ -499,7 +499,7 @@ class TypeConverterDelegate {
 		if (!approximable && !canCreateCopy(requiredType)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Custom Collection type [" + original.getClass().getName() +
-									 "] does not allow for creating a copy - injecting original Collection as-is");
+						"] does not allow for creating a copy - injecting original Collection as-is");
 			}
 			return original;
 		}
@@ -518,7 +518,7 @@ class TypeConverterDelegate {
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cannot access Collection of type [" + original.getClass().getName() +
-									 "] - injecting original Collection as-is: " + ex);
+						"] - injecting original Collection as-is: " + ex);
 			}
 			return original;
 		}
@@ -536,7 +536,7 @@ class TypeConverterDelegate {
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cannot create copy of Collection type [" + original.getClass().getName() +
-									 "] - injecting original Collection as-is: " + ex);
+						"] - injecting original Collection as-is: " + ex);
 			}
 			return original;
 		}
@@ -545,7 +545,7 @@ class TypeConverterDelegate {
 			Object element = it.next();
 			String indexedPropertyName = buildIndexedPropertyName(propertyName, i);
 			Object convertedElement = convertIfNecessary(indexedPropertyName, null, element,
-														 (elementType != null ? elementType.getType() : null), elementType
+					(elementType != null ? elementType.getType() : null), elementType
 			);
 			try {
 				convertedCopy.add(convertedElement);
@@ -553,7 +553,7 @@ class TypeConverterDelegate {
 			catch (Throwable ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Collection type [" + original.getClass().getName() +
-										 "] seems to be read-only - injecting original Collection as-is: " + ex);
+							"] seems to be read-only - injecting original Collection as-is: " + ex);
 				}
 				return original;
 			}
@@ -564,7 +564,7 @@ class TypeConverterDelegate {
 
 	@SuppressWarnings("unchecked")
 	private Map<?, ?> convertToTypedMap(Map<?, ?> original, @Nullable String propertyName,
-										Class<?> requiredType, @Nullable TypeDescriptor typeDescriptor) {
+			Class<?> requiredType, @Nullable TypeDescriptor typeDescriptor) {
 
 		if (!Map.class.isAssignableFrom(requiredType)) {
 			return original;
@@ -574,7 +574,7 @@ class TypeConverterDelegate {
 		if (!approximable && !canCreateCopy(requiredType)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Custom Map type [" + original.getClass().getName() +
-									 "] does not allow for creating a copy - injecting original Map as-is");
+						"] does not allow for creating a copy - injecting original Map as-is");
 			}
 			return original;
 		}
@@ -594,7 +594,7 @@ class TypeConverterDelegate {
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cannot access Map of type [" + original.getClass().getName() +
-									 "] - injecting original Map as-is: " + ex);
+						"] - injecting original Map as-is: " + ex);
 			}
 			return original;
 		}
@@ -612,7 +612,7 @@ class TypeConverterDelegate {
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cannot create copy of Map type [" + original.getClass().getName() +
-									 "] - injecting original Map as-is: " + ex);
+						"] - injecting original Map as-is: " + ex);
 			}
 			return original;
 		}
@@ -623,10 +623,10 @@ class TypeConverterDelegate {
 			Object value = entry.getValue();
 			String keyedPropertyName = buildKeyedPropertyName(propertyName, key);
 			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key,
-													 (keyType != null ? keyType.getType() : null), keyType
+					(keyType != null ? keyType.getType() : null), keyType
 			);
 			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value,
-													   (valueType != null ? valueType.getType() : null), valueType
+					(valueType != null ? valueType.getType() : null), valueType
 			);
 			try {
 				convertedCopy.put(convertedKey, convertedValue);
@@ -634,7 +634,7 @@ class TypeConverterDelegate {
 			catch (Throwable ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Map type [" + original.getClass().getName() +
-										 "] seems to be read-only - injecting original Map as-is: " + ex);
+							"] seems to be read-only - injecting original Map as-is: " + ex);
 				}
 				return original;
 			}

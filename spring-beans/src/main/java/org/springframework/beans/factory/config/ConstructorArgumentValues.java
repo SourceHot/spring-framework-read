@@ -73,7 +73,7 @@ public class ConstructorArgumentValues {
 	public void addArgumentValues(@Nullable ConstructorArgumentValues other) {
 		if (other != null) {
 			other.indexedArgumentValues.forEach(
-				(index, argValue) -> addOrMergeIndexedArgumentValue(index, argValue.copy())
+					(index, argValue) -> addOrMergeIndexedArgumentValue(index, argValue.copy())
 			);
 			other.genericArgumentValues.stream()
 					.filter(valueHolder -> !this.genericArgumentValues.contains(valueHolder))
@@ -227,7 +227,7 @@ public class ConstructorArgumentValues {
 	 */
 	private void addOrMergeGenericArgumentValue(ValueHolder newValue) {
 		if (newValue.getName() != null) {
-			for (Iterator<ValueHolder> it = this.genericArgumentValues.iterator(); it.hasNext();) {
+			for (Iterator<ValueHolder> it = this.genericArgumentValues.iterator(); it.hasNext(); ) {
 				ValueHolder currentValue = it.next();
 				if (newValue.getName().equals(currentValue.getName())) {
 					if (newValue.getValue() instanceof Mergeable) {
@@ -483,13 +483,6 @@ public class ConstructorArgumentValues {
 		}
 
 		/**
-		 * Set the value for the constructor argument.
-		 */
-		public void setValue(@Nullable Object value) {
-			this.value = value;
-		}
-
-		/**
 		 * Return the value for the constructor argument.
 		 */
 		@Nullable
@@ -498,10 +491,10 @@ public class ConstructorArgumentValues {
 		}
 
 		/**
-		 * Set the type of the constructor argument.
+		 * Set the value for the constructor argument.
 		 */
-		public void setType(@Nullable String type) {
-			this.type = type;
+		public void setValue(@Nullable Object value) {
+			this.value = value;
 		}
 
 		/**
@@ -513,10 +506,10 @@ public class ConstructorArgumentValues {
 		}
 
 		/**
-		 * Set the name of the constructor argument.
+		 * Set the type of the constructor argument.
 		 */
-		public void setName(@Nullable String name) {
-			this.name = name;
+		public void setType(@Nullable String type) {
+			this.type = type;
 		}
 
 		/**
@@ -528,17 +521,24 @@ public class ConstructorArgumentValues {
 		}
 
 		/**
-		 * Set the configuration source {@code Object} for this metadata element.
-		 * <p>The exact type of the object will depend on the configuration mechanism used.
+		 * Set the name of the constructor argument.
 		 */
-		public void setSource(@Nullable Object source) {
-			this.source = source;
+		public void setName(@Nullable String name) {
+			this.name = name;
 		}
 
 		@Override
 		@Nullable
 		public Object getSource() {
 			return this.source;
+		}
+
+		/**
+		 * Set the configuration source {@code Object} for this metadata element.
+		 * <p>The exact type of the object will depend on the configuration mechanism used.
+		 */
+		public void setSource(@Nullable Object source) {
+			this.source = source;
 		}
 
 		/**
@@ -550,21 +550,21 @@ public class ConstructorArgumentValues {
 		}
 
 		/**
-		 * Set the converted value of the constructor argument,
-		 * after processed type conversion.
-		 */
-		public synchronized void setConvertedValue(@Nullable Object value) {
-			this.converted = (value != null);
-			this.convertedValue = value;
-		}
-
-		/**
 		 * Return the converted value of the constructor argument,
 		 * after processed type conversion.
 		 */
 		@Nullable
 		public synchronized Object getConvertedValue() {
 			return this.convertedValue;
+		}
+
+		/**
+		 * Set the converted value of the constructor argument,
+		 * after processed type conversion.
+		 */
+		public synchronized void setConvertedValue(@Nullable Object value) {
+			this.converted = (value != null);
+			this.convertedValue = value;
 		}
 
 		/**

@@ -34,16 +34,22 @@ import org.springframework.lang.Nullable;
 public interface ConfigurablePropertyAccessor extends PropertyAccessor, PropertyEditorRegistry, TypeConverter {
 
 	/**
+	 * Return the associated ConversionService, if any.
+	 */
+	@Nullable
+	ConversionService getConversionService();
+
+	/**
 	 * Specify a Spring 3.0 ConversionService to use for converting
 	 * property values, as an alternative to JavaBeans PropertyEditors.
 	 */
 	void setConversionService(@Nullable ConversionService conversionService);
 
 	/**
-	 * Return the associated ConversionService, if any.
+	 * Return whether to extract the old property value when applying a
+	 * property editor to a new value for a property.
 	 */
-	@Nullable
-	ConversionService getConversionService();
+	boolean isExtractOldValueForEditor();
 
 	/**
 	 * Set whether to extract the old property value when applying a
@@ -52,10 +58,9 @@ public interface ConfigurablePropertyAccessor extends PropertyAccessor, Property
 	void setExtractOldValueForEditor(boolean extractOldValueForEditor);
 
 	/**
-	 * Return whether to extract the old property value when applying a
-	 * property editor to a new value for a property.
+	 * Return whether "auto-growing" of nested paths has been activated.
 	 */
-	boolean isExtractOldValueForEditor();
+	boolean isAutoGrowNestedPaths();
 
 	/**
 	 * Set whether this instance should attempt to "auto-grow" a
@@ -66,10 +71,5 @@ public interface ConfigurablePropertyAccessor extends PropertyAccessor, Property
 	 * <p>Default is {@code false} on a plain PropertyAccessor instance.
 	 */
 	void setAutoGrowNestedPaths(boolean autoGrowNestedPaths);
-
-	/**
-	 * Return whether "auto-growing" of nested paths has been activated.
-	 */
-	boolean isAutoGrowNestedPaths();
 
 }

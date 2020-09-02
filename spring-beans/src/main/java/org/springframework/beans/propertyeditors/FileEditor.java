@@ -74,6 +74,11 @@ public class FileEditor extends PropertyEditorSupport {
 		this.resourceEditor = resourceEditor;
 	}
 
+	@Override
+	public String getAsText() {
+		File value = (File) getValue();
+		return (value != null ? value.getPath() : "");
+	}
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
@@ -111,12 +116,6 @@ public class FileEditor extends PropertyEditorSupport {
 			// Set a relative File reference and hope for the best.
 			setValue(file);
 		}
-	}
-
-	@Override
-	public String getAsText() {
-		File value = (File) getValue();
-		return (value != null ? value.getPath() : "");
 	}
 
 }

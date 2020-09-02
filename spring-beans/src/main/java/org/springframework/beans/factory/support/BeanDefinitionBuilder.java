@@ -38,6 +38,23 @@ import org.springframework.util.ObjectUtils;
 public final class BeanDefinitionBuilder {
 
 	/**
+	 * The {@code BeanDefinition} instance we are creating.
+	 */
+	private final AbstractBeanDefinition beanDefinition;
+
+	/**
+	 * Our current position with respect to constructor args.
+	 */
+	private int constructorArgIndex;
+
+	/**
+	 * Enforce the use of factory methods.
+	 */
+	private BeanDefinitionBuilder(AbstractBeanDefinition beanDefinition) {
+		this.beanDefinition = beanDefinition;
+	}
+
+	/**
 	 * Create a new {@code BeanDefinitionBuilder} used to construct a {@link GenericBeanDefinition}.
 	 */
 	public static BeanDefinitionBuilder genericBeanDefinition() {
@@ -123,25 +140,6 @@ public final class BeanDefinitionBuilder {
 	 */
 	public static BeanDefinitionBuilder childBeanDefinition(String parentName) {
 		return new BeanDefinitionBuilder(new ChildBeanDefinition(parentName));
-	}
-
-
-	/**
-	 * The {@code BeanDefinition} instance we are creating.
-	 */
-	private final AbstractBeanDefinition beanDefinition;
-
-	/**
-	 * Our current position with respect to constructor args.
-	 */
-	private int constructorArgIndex;
-
-
-	/**
-	 * Enforce the use of factory methods.
-	 */
-	private BeanDefinitionBuilder(AbstractBeanDefinition beanDefinition) {
-		this.beanDefinition = beanDefinition;
 	}
 
 	/**

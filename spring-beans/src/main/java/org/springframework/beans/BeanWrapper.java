@@ -51,17 +51,17 @@ import java.beans.PropertyDescriptor;
 public interface BeanWrapper extends ConfigurablePropertyAccessor {
 
 	/**
+	 * Return the limit for array and collection auto-growing.
+	 * @since 4.1
+	 */
+	int getAutoGrowCollectionLimit();
+
+	/**
 	 * Specify a limit for array and collection auto-growing.
 	 * <p>Default is unlimited on a plain BeanWrapper.
 	 * @since 4.1
 	 */
 	void setAutoGrowCollectionLimit(int autoGrowCollectionLimit);
-
-	/**
-	 * Return the limit for array and collection auto-growing.
-	 * @since 4.1
-	 */
-	int getAutoGrowCollectionLimit();
 
 	/**
 	 * Return the bean instance wrapped by this object.

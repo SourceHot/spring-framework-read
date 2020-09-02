@@ -92,7 +92,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	private static class CglibSubclassCreator {
 
 		private static final Class<?>[] CALLBACK_TYPES = new Class<?>[]
-				{NoOp.class, LookupOverrideMethodInterceptor.class, ReplaceOverrideMethodInterceptor.class};
+				{ NoOp.class, LookupOverrideMethodInterceptor.class, ReplaceOverrideMethodInterceptor.class };
 
 		private final RootBeanDefinition beanDefinition;
 
@@ -131,9 +131,9 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			// SPR-10785: set callbacks directly on the instance instead of in the
 			// enhanced class (via the Enhancer) in order to avoid memory leaks.
 			Factory factory = (Factory) instance;
-			factory.setCallbacks(new Callback[] {NoOp.INSTANCE,
+			factory.setCallbacks(new Callback[] { NoOp.INSTANCE,
 					new LookupOverrideMethodInterceptor(this.beanDefinition, this.owner),
-					new ReplaceOverrideMethodInterceptor(this.beanDefinition, this.owner)});
+					new ReplaceOverrideMethodInterceptor(this.beanDefinition, this.owner) });
 			return instance;
 		}
 

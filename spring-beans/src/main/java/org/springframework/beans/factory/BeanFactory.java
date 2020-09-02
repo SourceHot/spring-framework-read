@@ -224,7 +224,7 @@ public interface BeanFactory {
 	/**
 	 * Return a provider for the specified bean, allowing for lazy on-demand retrieval of instances,
 	 * including availability and uniqueness options.
-	 *
+	 * 延迟加载 bean
 	 * @param requiredType type the bean must match; can be an interface or superclass
 	 *
 	 * @return a corresponding provider handle

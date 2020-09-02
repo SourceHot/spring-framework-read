@@ -63,6 +63,11 @@ public class InputSourceEditor extends PropertyEditorSupport {
 		this.resourceEditor = resourceEditor;
 	}
 
+	@Override
+	public String getAsText() {
+		InputSource value = (InputSource) getValue();
+		return (value != null ? value.getSystemId() : "");
+	}
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
@@ -75,12 +80,6 @@ public class InputSourceEditor extends PropertyEditorSupport {
 			throw new IllegalArgumentException(
 					"Could not retrieve URL for " + resource + ": " + ex.getMessage());
 		}
-	}
-
-	@Override
-	public String getAsText() {
-		InputSource value = (InputSource) getValue();
-		return (value != null ? value.getSystemId() : "");
 	}
 
 }

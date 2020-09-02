@@ -40,6 +40,10 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 
 	private boolean autoGrowNestedPaths = false;
 
+	@Override
+	public boolean isExtractOldValueForEditor() {
+		return this.extractOldValueForEditor;
+	}
 
 	@Override
 	public void setExtractOldValueForEditor(boolean extractOldValueForEditor) {
@@ -47,20 +51,14 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 	}
 
 	@Override
-	public boolean isExtractOldValueForEditor() {
-		return this.extractOldValueForEditor;
+	public boolean isAutoGrowNestedPaths() {
+		return this.autoGrowNestedPaths;
 	}
 
 	@Override
 	public void setAutoGrowNestedPaths(boolean autoGrowNestedPaths) {
 		this.autoGrowNestedPaths = autoGrowNestedPaths;
 	}
-
-	@Override
-	public boolean isAutoGrowNestedPaths() {
-		return this.autoGrowNestedPaths;
-	}
-
 
 	@Override
 	public void setPropertyValue(PropertyValue pv) throws BeansException {

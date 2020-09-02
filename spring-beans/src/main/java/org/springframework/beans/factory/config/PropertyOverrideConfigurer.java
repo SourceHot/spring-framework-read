@@ -69,16 +69,14 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	 */
 	public static final String DEFAULT_BEAN_NAME_SEPARATOR = ".";
 
-
-	private String beanNameSeparator = DEFAULT_BEAN_NAME_SEPARATOR;
-
-	private boolean ignoreInvalidKeys = false;
-
 	/**
 	 * Contains names of beans that have overrides.
 	 */
 	private final Set<String> beanNames = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
+	private String beanNameSeparator = DEFAULT_BEAN_NAME_SEPARATOR;
+
+	private boolean ignoreInvalidKeys = false;
 
 	/**
 	 * Set the separator to expect between bean name and property path.
@@ -103,7 +101,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props)
 			throws BeansException {
 
-		for (Enumeration<?> names = props.propertyNames(); names.hasMoreElements();) {
+		for (Enumeration<?> names = props.propertyNames(); names.hasMoreElements(); ) {
 			String key = (String) names.nextElement();
 			try {
 				processKey(beanFactory, key, props.getProperty(key));

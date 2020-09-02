@@ -71,6 +71,11 @@ public class PathEditor extends PropertyEditorSupport {
 		this.resourceEditor = resourceEditor;
 	}
 
+	@Override
+	public String getAsText() {
+		Path value = (Path) getValue();
+		return (value != null ? value.toString() : "");
+	}
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
@@ -108,12 +113,6 @@ public class PathEditor extends PropertyEditorSupport {
 				throw new IllegalArgumentException("Failed to retrieve file for " + resource, ex);
 			}
 		}
-	}
-
-	@Override
-	public String getAsText() {
-		Path value = (Path) getValue();
-		return (value != null ? value.toString() : "");
 	}
 
 }

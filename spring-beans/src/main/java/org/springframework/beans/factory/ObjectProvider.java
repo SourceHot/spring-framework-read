@@ -32,6 +32,7 @@ import org.springframework.lang.Nullable;
  * support. It can be therefore be used in {@code for} loops, provides {@link #forEach}
  * iteration and allows for collection-style {@link #stream} access.
  *
+ * 延迟加载
  * @author Juergen Hoeller
  * @since 4.3
  * @param <T> the object type
@@ -45,6 +46,8 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * managed by this factory.
 	 * <p>Allows for specifying explicit construction arguments, along the
 	 * lines of {@link BeanFactory#getBean(String, Object...)}.
+	 *
+	 * 返回指定类型的bean实例
 	 * @param args arguments to use when creating a corresponding instance
 	 * @return an instance of the bean
 	 * @throws BeansException in case of creation errors
@@ -55,6 +58,8 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	/**
 	 * Return an instance (possibly shared or independent) of the object
 	 * managed by this factory.
+	 *
+	 * 获取实例对象, 没有返回null
 	 * @return an instance of the bean, or {@code null} if not available
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()

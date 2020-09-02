@@ -50,14 +50,6 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 	@Nullable
 	private Object source;
 
-
-	/**
-	 * Set the default lazy-init flag for the document that's currently parsed.
-	 */
-	public void setLazyInit(@Nullable String lazyInit) {
-		this.lazyInit = lazyInit;
-	}
-
 	/**
 	 * Return the default lazy-init flag for the document that's currently parsed.
 	 */
@@ -67,10 +59,10 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 	}
 
 	/**
-	 * Set the default merge setting for the document that's currently parsed.
+	 * Set the default lazy-init flag for the document that's currently parsed.
 	 */
-	public void setMerge(@Nullable String merge) {
-		this.merge = merge;
+	public void setLazyInit(@Nullable String lazyInit) {
+		this.lazyInit = lazyInit;
 	}
 
 	/**
@@ -82,10 +74,10 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 	}
 
 	/**
-	 * Set the default autowire setting for the document that's currently parsed.
+	 * Set the default merge setting for the document that's currently parsed.
 	 */
-	public void setAutowire(@Nullable String autowire) {
-		this.autowire = autowire;
+	public void setMerge(@Nullable String merge) {
+		this.merge = merge;
 	}
 
 	/**
@@ -97,11 +89,10 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 	}
 
 	/**
-	 * Set the default autowire-candidate pattern for the document that's currently parsed.
-	 * Also accepts a comma-separated list of patterns.
+	 * Set the default autowire setting for the document that's currently parsed.
 	 */
-	public void setAutowireCandidates(@Nullable String autowireCandidates) {
-		this.autowireCandidates = autowireCandidates;
+	public void setAutowire(@Nullable String autowire) {
+		this.autowire = autowire;
 	}
 
 	/**
@@ -114,10 +105,11 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 	}
 
 	/**
-	 * Set the default init-method setting for the document that's currently parsed.
+	 * Set the default autowire-candidate pattern for the document that's currently parsed.
+	 * Also accepts a comma-separated list of patterns.
 	 */
-	public void setInitMethod(@Nullable String initMethod) {
-		this.initMethod = initMethod;
+	public void setAutowireCandidates(@Nullable String autowireCandidates) {
+		this.autowireCandidates = autowireCandidates;
 	}
 
 	/**
@@ -129,10 +121,10 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 	}
 
 	/**
-	 * Set the default destroy-method setting for the document that's currently parsed.
+	 * Set the default init-method setting for the document that's currently parsed.
 	 */
-	public void setDestroyMethod(@Nullable String destroyMethod) {
-		this.destroyMethod = destroyMethod;
+	public void setInitMethod(@Nullable String initMethod) {
+		this.initMethod = initMethod;
 	}
 
 	/**
@@ -144,17 +136,24 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 	}
 
 	/**
-	 * Set the configuration source {@code Object} for this metadata element.
-	 * <p>The exact type of the object will depend on the configuration mechanism used.
+	 * Set the default destroy-method setting for the document that's currently parsed.
 	 */
-	public void setSource(@Nullable Object source) {
-		this.source = source;
+	public void setDestroyMethod(@Nullable String destroyMethod) {
+		this.destroyMethod = destroyMethod;
 	}
 
 	@Override
 	@Nullable
 	public Object getSource() {
 		return this.source;
+	}
+
+	/**
+	 * Set the configuration source {@code Object} for this metadata element.
+	 * <p>The exact type of the object will depend on the configuration mechanism used.
+	 */
+	public void setSource(@Nullable Object source) {
+		this.source = source;
 	}
 
 }

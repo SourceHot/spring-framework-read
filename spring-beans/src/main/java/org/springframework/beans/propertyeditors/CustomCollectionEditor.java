@@ -96,15 +96,6 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 		this.nullAsEmptyCollection = nullAsEmptyCollection;
 	}
 
-
-	/**
-	 * Convert the given text value to a Collection with a single element.
-	 */
-	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
-		setValue(text);
-	}
-
 	/**
 	 * Convert the given value to a Collection of the target type.
 	 */
@@ -150,7 +141,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	 * @param initialCapacity the initial capacity
 	 * @return the new Collection instance
 	 */
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected Collection<Object> createCollection(Class<? extends Collection> collectionType, int initialCapacity) {
 		if (!collectionType.isInterface()) {
 			try {
@@ -201,7 +192,6 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 		return element;
 	}
 
-
 	/**
 	 * This implementation returns {@code null} to indicate that
 	 * there is no appropriate text representation.
@@ -210,6 +200,14 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	@Nullable
 	public String getAsText() {
 		return null;
+	}
+
+	/**
+	 * Convert the given text value to a Collection with a single element.
+	 */
+	@Override
+	public void setAsText(String text) throws IllegalArgumentException {
+		setValue(text);
 	}
 
 }

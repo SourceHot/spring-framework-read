@@ -90,6 +90,14 @@ public class CustomDateEditor extends PropertyEditorSupport {
 		this.exactDateLength = exactDateLength;
 	}
 
+	/**
+	 * Format the Date as String, using the specified DateFormat.
+	 */
+	@Override
+	public String getAsText() {
+		Date value = (Date) getValue();
+		return (value != null ? this.dateFormat.format(value) : "");
+	}
 
 	/**
 	 * Parse the Date from the given text, using the specified DateFormat.
@@ -112,15 +120,6 @@ public class CustomDateEditor extends PropertyEditorSupport {
 				throw new IllegalArgumentException("Could not parse date: " + ex.getMessage(), ex);
 			}
 		}
-	}
-
-	/**
-	 * Format the Date as String, using the specified DateFormat.
-	 */
-	@Override
-	public String getAsText() {
-		Date value = (Date) getValue();
-		return (value != null ? this.dateFormat.format(value) : "");
 	}
 
 }

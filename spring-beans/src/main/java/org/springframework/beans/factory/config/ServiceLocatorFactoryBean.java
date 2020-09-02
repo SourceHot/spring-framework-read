@@ -266,7 +266,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 		// Create service locator proxy.
 		this.proxy = Proxy.newProxyInstance(
 				this.serviceLocatorInterface.getClassLoader(),
-				new Class<?>[] {this.serviceLocatorInterface},
+				new Class<?>[] { this.serviceLocatorInterface },
 				new ServiceLocatorInvocationHandler());
 	}
 
@@ -297,7 +297,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 				catch (NoSuchMethodException ex3) {
 					throw new IllegalArgumentException(
 							"Service locator exception [" + exceptionClass.getName() +
-							"] neither has a (String, Throwable) constructor nor a (String) constructor");
+									"] neither has a (String, Throwable) constructor nor a (String) constructor");
 				}
 			}
 		}
@@ -418,7 +418,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 			if (paramTypes.length > 1 || void.class == serviceLocatorReturnType) {
 				throw new UnsupportedOperationException(
 						"May only call methods with signature '<type> xxx()' or '<type> xxx(<idtype> id)' " +
-						"on factory interface, but tried to call: " + interfaceMethod);
+								"on factory interface, but tried to call: " + interfaceMethod);
 			}
 			return serviceLocatorReturnType;
 		}

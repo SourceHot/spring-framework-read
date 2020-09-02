@@ -86,15 +86,6 @@ public class CustomMapEditor extends PropertyEditorSupport {
 		this.nullAsEmptyMap = nullAsEmptyMap;
 	}
 
-
-	/**
-	 * Convert the given text value to a Map with a single element.
-	 */
-	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
-		setValue(text);
-	}
-
 	/**
 	 * Convert the given value to a Map of the target type.
 	 */
@@ -126,7 +117,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 * @param initialCapacity the initial capacity
 	 * @return the new Map instance
 	 */
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected Map<Object, Object> createMap(Class<? extends Map> mapType, int initialCapacity) {
 		if (!mapType.isInterface()) {
 			try {
@@ -191,7 +182,6 @@ public class CustomMapEditor extends PropertyEditorSupport {
 		return value;
 	}
 
-
 	/**
 	 * This implementation returns {@code null} to indicate that
 	 * there is no appropriate text representation.
@@ -200,6 +190,14 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	@Nullable
 	public String getAsText() {
 		return null;
+	}
+
+	/**
+	 * Convert the given text value to a Map with a single element.
+	 */
+	@Override
+	public void setAsText(String text) throws IllegalArgumentException {
+		setValue(text);
 	}
 
 }

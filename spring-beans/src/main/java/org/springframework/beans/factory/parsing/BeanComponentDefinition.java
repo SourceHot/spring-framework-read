@@ -36,9 +36,9 @@ import org.springframework.lang.Nullable;
  */
 public class BeanComponentDefinition extends BeanDefinitionHolder implements ComponentDefinition {
 
-	private BeanDefinition[] innerBeanDefinitions;
+	private final BeanDefinition[] innerBeanDefinitions;
 
-	private BeanReference[] beanReferences;
+	private final BeanReference[] beanReferences;
 
 
 	/**
@@ -100,7 +100,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 
 	@Override
 	public BeanDefinition[] getBeanDefinitions() {
-		return new BeanDefinition[] {getBeanDefinition()};
+		return new BeanDefinition[] { getBeanDefinition() };
 	}
 
 	@Override

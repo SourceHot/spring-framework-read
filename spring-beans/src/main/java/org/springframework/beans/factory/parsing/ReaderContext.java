@@ -47,7 +47,7 @@ public class ReaderContext {
 	 * @param sourceExtractor the source extractor in use
 	 */
 	public ReaderContext(Resource resource, ProblemReporter problemReporter,
-						 ReaderEventListener eventListener, SourceExtractor sourceExtractor) {
+			ReaderEventListener eventListener, SourceExtractor sourceExtractor) {
 
 		this.resource = resource;
 		this.problemReporter = problemReporter;

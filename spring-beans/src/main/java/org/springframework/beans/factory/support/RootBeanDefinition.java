@@ -54,11 +54,11 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
-	@Nullable
-	private BeanDefinitionHolder decoratedDefinition;
+	/** Common lock for the four constructor fields below. */
+	final Object constructorArgumentLock = new Object();
 
-	@Nullable
-	private AnnotatedElement qualifiedElement;
+	/** Common lock for the two post-processing fields below. */
+	final Object postProcessingLock = new Object();
 
 	/** Determines if the definition needs to be re-merged. */
 	volatile boolean stale;
@@ -86,9 +86,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	@Nullable
 	volatile Method factoryMethodToIntrospect;
 
-	/** Common lock for the four constructor fields below. */
-	final Object constructorArgumentLock = new Object();
-
 	/** Package-visible field for caching the resolved constructor or factory method. */
 	@Nullable
 	Executable resolvedConstructorOrFactoryMethod;
@@ -104,15 +101,18 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	@Nullable
 	Object[] preparedConstructorArguments;
 
-	/** Common lock for the two post-processing fields below. */
-	final Object postProcessingLock = new Object();
-
 	/** Package-visible field that indicates MergedBeanDefinitionPostProcessor having been applied. */
 	boolean postProcessed = false;
 
 	/** Package-visible field that indicates a before-instantiation post-processor having kicked in. */
 	@Nullable
 	volatile Boolean beforeInstantiationResolved;
+
+	@Nullable
+	private BeanDefinitionHolder decoratedDefinition;
+
+	@Nullable
+	private AnnotatedElement qualifiedElement;
 
 	@Nullable
 	private Set<Member> externallyManagedConfigMembers;
@@ -270,6 +270,14 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * Return the target definition that is being decorated by this bean definition, if any.
+	 */
+	@Nullable
+	public BeanDefinitionHolder getDecoratedDefinition() {
+		return this.decoratedDefinition;
+	}
+
+	/**
 	 * Register a target definition that is being decorated by this bean definition.
 	 */
 	public void setDecoratedDefinition(@Nullable BeanDefinitionHolder decoratedDefinition) {
@@ -277,11 +285,13 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Return the target definition that is being decorated by this bean definition, if any.
+	 * Return the {@link AnnotatedElement} defining qualifiers, if any.
+	 * Otherwise, the factory method and target class will be checked.
+	 * @since 4.3.3
 	 */
 	@Nullable
-	public BeanDefinitionHolder getDecoratedDefinition() {
-		return this.decoratedDefinition;
+	public AnnotatedElement getQualifiedElement() {
+		return this.qualifiedElement;
 	}
 
 	/**
@@ -296,13 +306,17 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Return the {@link AnnotatedElement} defining qualifiers, if any.
-	 * Otherwise, the factory method and target class will be checked.
-	 * @since 4.3.3
+	 * Return the target type of this bean definition, if known
+	 * (either specified in advance or resolved on first instantiation).
+	 * @since 3.2.2
 	 */
 	@Nullable
-	public AnnotatedElement getQualifiedElement() {
-		return this.qualifiedElement;
+	public Class<?> getTargetType() {
+		if (this.resolvedTargetType != null) {
+			return this.resolvedTargetType;
+		}
+		ResolvableType targetType = this.targetType;
+		return (targetType != null ? targetType.resolve() : null);
 	}
 
 	/**
@@ -319,20 +333,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public void setTargetType(@Nullable Class<?> targetType) {
 		this.targetType = (targetType != null ? ResolvableType.forClass(targetType) : null);
-	}
-
-	/**
-	 * Return the target type of this bean definition, if known
-	 * (either specified in advance or resolved on first instantiation).
-	 * @since 3.2.2
-	 */
-	@Nullable
-	public Class<?> getTargetType() {
-		if (this.resolvedTargetType != null) {
-			return this.resolvedTargetType;
-		}
-		ResolvableType targetType = this.targetType;
-		return (targetType != null ? targetType.resolve() : null);
 	}
 
 	/**
@@ -401,21 +401,21 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Set a resolved Java Method for the factory method on this bean definition.
-	 * @param method the resolved factory method, or {@code null} to reset it
-	 * @since 5.2
-	 */
-	public void setResolvedFactoryMethod(@Nullable Method method) {
-		this.factoryMethodToIntrospect = method;
-	}
-
-	/**
 	 * Return the resolved factory method as a Java Method object, if available.
 	 * @return the factory method, or {@code null} if not found or not resolved yet
 	 */
 	@Nullable
 	public Method getResolvedFactoryMethod() {
 		return this.factoryMethodToIntrospect;
+	}
+
+	/**
+	 * Set a resolved Java Method for the factory method on this bean definition.
+	 * @param method the resolved factory method, or {@code null} to reset it
+	 * @since 5.2
+	 */
+	public void setResolvedFactoryMethod(@Nullable Method method) {
+		this.factoryMethodToIntrospect = method;
 	}
 
 	public void registerExternallyManagedConfigMember(Member configMember) {

@@ -66,12 +66,39 @@ public class PropertyComparator<T> implements Comparator<T> {
 	}
 
 	/**
+	 * Sort the given List according to the given sort definition.
+	 * <p>Note: Contained objects have to provide the given property
+	 * in the form of a bean property, i.e. a getXXX method.
+	 * @param source the input List
+	 * @param sortDefinition the parameters to sort by
+	 * @throws java.lang.IllegalArgumentException in case of a missing propertyName
+	 */
+	public static void sort(List<?> source, SortDefinition sortDefinition) throws BeansException {
+		if (StringUtils.hasText(sortDefinition.getProperty())) {
+			source.sort(new PropertyComparator<>(sortDefinition));
+		}
+	}
+
+	/**
+	 * Sort the given source according to the given sort definition.
+	 * <p>Note: Contained objects have to provide the given property
+	 * in the form of a bean property, i.e. a getXXX method.
+	 * @param source input source
+	 * @param sortDefinition the parameters to sort by
+	 * @throws java.lang.IllegalArgumentException in case of a missing propertyName
+	 */
+	public static void sort(Object[] source, SortDefinition sortDefinition) throws BeansException {
+		if (StringUtils.hasText(sortDefinition.getProperty())) {
+			Arrays.sort(source, new PropertyComparator<>(sortDefinition));
+		}
+	}
+
+	/**
 	 * Return the SortDefinition that this comparator uses.
 	 */
 	public final SortDefinition getSortDefinition() {
 		return this.sortDefinition;
 	}
-
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -121,35 +148,6 @@ public class PropertyComparator<T> implements Comparator<T> {
 		catch (BeansException ex) {
 			logger.debug("PropertyComparator could not access property - treating as null for sorting", ex);
 			return null;
-		}
-	}
-
-
-	/**
-	 * Sort the given List according to the given sort definition.
-	 * <p>Note: Contained objects have to provide the given property
-	 * in the form of a bean property, i.e. a getXXX method.
-	 * @param source the input List
-	 * @param sortDefinition the parameters to sort by
-	 * @throws java.lang.IllegalArgumentException in case of a missing propertyName
-	 */
-	public static void sort(List<?> source, SortDefinition sortDefinition) throws BeansException {
-		if (StringUtils.hasText(sortDefinition.getProperty())) {
-			source.sort(new PropertyComparator<>(sortDefinition));
-		}
-	}
-
-	/**
-	 * Sort the given source according to the given sort definition.
-	 * <p>Note: Contained objects have to provide the given property
-	 * in the form of a bean property, i.e. a getXXX method.
-	 * @param source input source
-	 * @param sortDefinition the parameters to sort by
-	 * @throws java.lang.IllegalArgumentException in case of a missing propertyName
-	 */
-	public static void sort(Object[] source, SortDefinition sortDefinition) throws BeansException {
-		if (StringUtils.hasText(sortDefinition.getProperty())) {
-			Arrays.sort(source, new PropertyComparator<>(sortDefinition));
 		}
 	}
 

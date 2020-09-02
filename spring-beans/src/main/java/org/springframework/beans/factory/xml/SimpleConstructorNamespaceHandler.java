@@ -120,8 +120,8 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 
 					if (cvs.hasIndexedArgumentValue(index)) {
 						parserContext.getReaderContext().error(
-								"Constructor argument '" + argName + "' with index "+ index+" already defined using <constructor-arg>." +
-								" Only one approach may be used per argument.", attr);
+								"Constructor argument '" + argName + "' with index " + index + " already defined using <constructor-arg>." +
+										" Only one approach may be used per argument.", attr);
 					}
 
 					cvs.addIndexedArgumentValue(index, valueHolder);
@@ -133,7 +133,7 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 				if (containsArgWithName(name, cvs)) {
 					parserContext.getReaderContext().error(
 							"Constructor argument '" + argName + "' already defined using <constructor-arg>." +
-							" Only one approach may be used per argument.", attr);
+									" Only one approach may be used per argument.", attr);
 				}
 				valueHolder.setName(Conventions.attributeNameToPropertyName(argName));
 				cvs.addGenericArgumentValue(valueHolder);

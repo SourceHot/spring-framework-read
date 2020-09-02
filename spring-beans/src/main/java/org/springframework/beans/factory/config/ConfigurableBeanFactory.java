@@ -189,7 +189,6 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * use {@link #addPropertyEditorRegistrar} instead of this method, to avoid for the need for
 	 * synchronization on custom editors.
 	 * 注册{@link PropertyEditor}
-
 	 * @param requiredType        type of the property
 	 * @param propertyEditorClass the {@link PropertyEditor} class to register
 	 */

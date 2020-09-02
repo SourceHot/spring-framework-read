@@ -157,6 +157,13 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		super(registry);
 	}
 
+	/**
+	 * Return the default parent bean for this bean factory.
+	 */
+	@Nullable
+	public String getDefaultParentBean() {
+		return this.defaultParentBean;
+	}
 
 	/**
 	 * Set the default parent bean for this bean factory.
@@ -175,11 +182,10 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	}
 
 	/**
-	 * Return the default parent bean for this bean factory.
+	 * Return the PropertiesPersister to use for parsing properties files.
 	 */
-	@Nullable
-	public String getDefaultParentBean() {
-		return this.defaultParentBean;
+	public PropertiesPersister getPropertiesPersister() {
+		return this.propertiesPersister;
 	}
 
 	/**
@@ -191,14 +197,6 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		this.propertiesPersister =
 				(propertiesPersister != null ? propertiesPersister : new DefaultPropertiesPersister());
 	}
-
-	/**
-	 * Return the PropertiesPersister to use for parsing properties files.
-	 */
-	public PropertiesPersister getPropertiesPersister() {
-		return this.propertiesPersister;
-	}
-
 
 	/**
 	 * Load bean definitions from the specified properties file,

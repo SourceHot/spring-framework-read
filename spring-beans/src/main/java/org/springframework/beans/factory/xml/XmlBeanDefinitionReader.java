@@ -102,6 +102,11 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/** Constants instance for this class. */
 	private static final Constants constants = new Constants(XmlBeanDefinitionReader.class);
 
+	private final XmlValidationModeDetector validationModeDetector = new XmlValidationModeDetector();
+
+	private final ThreadLocal<Set<EncodedResource>> resourcesCurrentlyBeingLoaded =
+			new NamedThreadLocal<>("XML bean definition resources currently being loaded");
+
 	private int validationMode = VALIDATION_AUTO;
 
 	private boolean namespaceAware = false;
@@ -124,11 +129,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	private EntityResolver entityResolver;
 
 	private ErrorHandler errorHandler = new SimpleSaxErrorHandler(logger);
-
-	private final XmlValidationModeDetector validationModeDetector = new XmlValidationModeDetector();
-
-	private final ThreadLocal<Set<EncodedResource>> resourcesCurrentlyBeingLoaded =
-			new NamedThreadLocal<>("XML bean definition resources currently being loaded");
 
 
 	/**
@@ -162,6 +162,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
+	 * Return the validation mode to use.
+	 */
+	public int getValidationMode() {
+		return this.validationMode;
+	}
+
+	/**
 	 * Set the validation mode to use. Defaults to {@link #VALIDATION_AUTO}.
 	 * <p>Note that this only activates or deactivates validation itself.
 	 * If you are switching validation off for schema files, you might need to
@@ -172,10 +179,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Return the validation mode to use.
+	 * Return whether or not the XML parser should be XML namespace aware.
 	 */
-	public int getValidationMode() {
-		return this.validationMode;
+	public boolean isNamespaceAware() {
+		return this.namespaceAware;
 	}
 
 	/**
@@ -187,13 +194,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public void setNamespaceAware(boolean namespaceAware) {
 		this.namespaceAware = namespaceAware;
-	}
-
-	/**
-	 * Return whether or not the XML parser should be XML namespace aware.
-	 */
-	public boolean isNamespaceAware() {
-		return this.namespaceAware;
 	}
 
 	/**
@@ -227,30 +227,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Specify the {@link NamespaceHandlerResolver} to use.
-	 * <p>If none is specified, a default instance will be created through
-	 * {@link #createDefaultNamespaceHandlerResolver()}.
-	 */
-	public void setNamespaceHandlerResolver(@Nullable NamespaceHandlerResolver namespaceHandlerResolver) {
-		this.namespaceHandlerResolver = namespaceHandlerResolver;
-	}
-
-	/**
 	 * Specify the {@link DocumentLoader} to use.
 	 * <p>The default implementation is {@link DefaultDocumentLoader}
 	 * which loads {@link Document} instances using JAXP.
 	 */
 	public void setDocumentLoader(@Nullable DocumentLoader documentLoader) {
 		this.documentLoader = (documentLoader != null ? documentLoader : new DefaultDocumentLoader());
-	}
-
-	/**
-	 * Set a SAX entity resolver to be used for parsing.
-	 * <p>By default, {@link ResourceEntityResolver} will be used. Can be overridden
-	 * for custom entity resolution, for example relative to some specific base path.
-	 */
-	public void setEntityResolver(@Nullable EntityResolver entityResolver) {
-		this.entityResolver = entityResolver;
 	}
 
 	/**
@@ -269,6 +251,15 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			}
 		}
 		return this.entityResolver;
+	}
+
+	/**
+	 * Set a SAX entity resolver to be used for parsing.
+	 * <p>By default, {@link ResourceEntityResolver} will be used. Can be overridden
+	 * for custom entity resolution, for example relative to some specific base path.
+	 */
+	public void setEntityResolver(@Nullable EntityResolver entityResolver) {
+		this.entityResolver = entityResolver;
 	}
 
 	/**
@@ -292,7 +283,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	public void setDocumentReaderClass(Class<? extends BeanDefinitionDocumentReader> documentReaderClass) {
 		this.documentReaderClass = documentReaderClass;
 	}
-
 
 	/**
 	 * Load bean definitions from the specified XML file.
@@ -375,7 +365,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 		return doLoadBeanDefinitions(inputSource, new DescriptiveResource(resourceDescription));
 	}
-
 
 	/**
 	 * Actually load bean definitions from the specified XML file.
@@ -470,9 +459,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		if (resource.isOpen()) {
 			throw new BeanDefinitionStoreException(
 					"Passed-in Resource [" + resource + "] contains an open stream: " +
-					"cannot determine validation mode automatically. Either pass in a Resource " +
-					"that is able to create fresh streams, or explicitly specify the validationMode " +
-					"on your XmlBeanDefinitionReader instance.");
+							"cannot determine validation mode automatically. Either pass in a Resource " +
+							"that is able to create fresh streams, or explicitly specify the validationMode " +
+							"on your XmlBeanDefinitionReader instance.");
 		}
 
 		InputStream inputStream;
@@ -482,8 +471,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException(
 					"Unable to determine validation mode for [" + resource + "]: cannot open InputStream. " +
-					"Did you attempt to load directly from a SAX InputSource without specifying the " +
-					"validationMode on your XmlBeanDefinitionReader instance?", ex);
+							"Did you attempt to load directly from a SAX InputSource without specifying the " +
+							"validationMode on your XmlBeanDefinitionReader instance?", ex);
 		}
 
 		try {
@@ -542,6 +531,15 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			this.namespaceHandlerResolver = createDefaultNamespaceHandlerResolver();
 		}
 		return this.namespaceHandlerResolver;
+	}
+
+	/**
+	 * Specify the {@link NamespaceHandlerResolver} to use.
+	 * <p>If none is specified, a default instance will be created through
+	 * {@link #createDefaultNamespaceHandlerResolver()}.
+	 */
+	public void setNamespaceHandlerResolver(@Nullable NamespaceHandlerResolver namespaceHandlerResolver) {
+		this.namespaceHandlerResolver = namespaceHandlerResolver;
 	}
 
 	/**

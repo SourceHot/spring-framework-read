@@ -181,15 +181,21 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		this.groovyDslXmlBeanDefinitionReader = xmlBeanDefinitionReader;
 	}
 
+	@Override
+	public MetaClass getMetaClass() {
+		return this.metaClass;
+	}
 
 	@Override
 	public void setMetaClass(MetaClass metaClass) {
 		this.metaClass = metaClass;
 	}
 
-	@Override
-	public MetaClass getMetaClass() {
-		return this.metaClass;
+	/**
+	 * Return a specified binding for Groovy variables, if any.
+	 */
+	public Binding getBinding() {
+		return this.binding;
 	}
 
 	/**
@@ -198,13 +204,6 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 */
 	public void setBinding(Binding binding) {
 		this.binding = binding;
-	}
-
-	/**
-	 * Return a specified binding for Groovy variables, if any.
-	 */
-	public Binding getBinding() {
-		return this.binding;
 	}
 
 
@@ -310,7 +309,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 * @param args the constructors arguments and closure configurer
 	 * @return the bean definition
 	 */
-	public AbstractBeanDefinition bean(Class<?> type, Object...args) {
+	public AbstractBeanDefinition bean(Class<?> type, Object... args) {
 		GroovyBeanDefinitionWrapper current = this.currentBeanDefinition;
 		try {
 			Closure<?> callable = null;
@@ -341,7 +340,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 */
 	public void xmlns(Map<String, String> definition) {
 		if (!definition.isEmpty()) {
-			for (Map.Entry<String,String> entry : definition.entrySet()) {
+			for (Map.Entry<String, String> entry : definition.entrySet()) {
 				String namespace = entry.getKey();
 				String uri = entry.getValue();
 				if (uri == null) {
@@ -376,7 +375,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 */
 	@Override
 	public Object invokeMethod(String name, Object arg) {
-		Object[] args = (Object[])arg;
+		Object[] args = (Object[]) arg;
 		if ("beans".equals(name) && args.length == 1 && args[0] instanceof Closure) {
 			return beans((Closure<?>) args[0]);
 		}
@@ -409,11 +408,11 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				(args[0] instanceof Class || args[0] instanceof RuntimeBeanReference || args[0] instanceof Map)) {
 			return invokeBeanDefiningMethod(name, args);
 		}
-		else if (args.length > 1 && args[args.length -1] instanceof Closure) {
+		else if (args.length > 1 && args[args.length - 1] instanceof Closure) {
 			return invokeBeanDefiningMethod(name, args);
 		}
 		MetaClass mc = DefaultGroovyMethods.getMetaClass(getRegistry());
-		if (!mc.respondsTo(getRegistry(), name, args).isEmpty()){
+		if (!mc.respondsTo(getRegistry(), name, args).isEmpty()) {
 			return mc.invokeMethod(getRegistry(), name, args);
 		}
 		return this;
@@ -473,7 +472,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, beanClass);
 				}
 			}
-			else  {
+			else {
 				this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(
 						beanName, beanClass, resolveConstructorArguments(args, 1, args.length));
 			}
@@ -503,7 +502,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				// In between are the constructor args
 				int constructorArgsTest = (hasClosureArgument ? 2 : 1);
 				// If we have more than this number of args, we have constructor args
-				if (args.length > constructorArgsTest){
+				if (args.length > constructorArgsTest) {
 					// factory-method requires args
 					int endOfConstructArgs = (hasClosureArgument ? args.length - 1 : args.length);
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, null,
@@ -550,7 +549,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			else if (constructorArgs[i] instanceof List) {
 				constructorArgs[i] = manageListIfNecessary((List<?>) constructorArgs[i]);
 			}
-			else if (constructorArgs[i] instanceof Map){
+			else if (constructorArgs[i] instanceof Map) {
 				constructorArgs[i] = manageMapIfNecessary((Map<?, ?>) constructorArgs[i]);
 			}
 		}
@@ -761,6 +760,11 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		}
 
 		@Override
+		public void setMetaClass(MetaClass metaClass) {
+			this.metaClass = metaClass;
+		}
+
+		@Override
 		public Object getProperty(String property) {
 			if (property.equals("beanName")) {
 				return getBeanName();
@@ -780,11 +784,6 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		@Override
 		public Object invokeMethod(String name, Object args) {
 			return this.metaClass.invokeMethod(this, name, args);
-		}
-
-		@Override
-		public void setMetaClass(MetaClass metaClass) {
-			this.metaClass = metaClass;
 		}
 
 		@Override

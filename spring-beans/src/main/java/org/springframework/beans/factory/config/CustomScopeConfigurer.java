@@ -78,14 +78,13 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 		this.scopes.put(scopeName, scope);
 	}
 
-
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
 	@Override
 	public int getOrder() {
 		return this.order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 
 	@Override

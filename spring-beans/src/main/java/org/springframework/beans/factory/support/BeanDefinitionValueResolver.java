@@ -386,8 +386,8 @@ class BeanDefinitionValueResolver {
 			throw new BeanCreationException(
 					this.beanDefinition.getResourceDescription(), this.beanName,
 					"Cannot create inner bean '" + innerBeanName + "' " +
-					(mbd != null && mbd.getBeanClassName() != null ? "of type [" + mbd.getBeanClassName() + "] " : "") +
-					"while setting " + argName, ex);
+							(mbd != null && mbd.getBeanClassName() != null ? "of type [" + mbd.getBeanClassName() + "] " : "") +
+							"while setting " + argName, ex);
 		}
 	}
 

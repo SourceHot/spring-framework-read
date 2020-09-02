@@ -56,9 +56,11 @@ public class InjectionMetadata {
 		@Override
 		public void checkConfigMembers(RootBeanDefinition beanDefinition) {
 		}
+
 		@Override
 		public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) {
 		}
+
 		@Override
 		public void clear(@Nullable PropertyValues pvs) {
 		}
@@ -88,6 +90,27 @@ public class InjectionMetadata {
 		this.injectedElements = elements;
 	}
 
+	/**
+	 * Return an {@code InjectionMetadata} instance, possibly for empty elements.
+	 * @param elements the elements to inject (possibly empty)
+	 * @param clazz the target class
+	 * @return a new {@code InjectionMetadata} instance,
+	 * or {@link #EMPTY} in case of no elements
+	 * @since 5.2
+	 */
+	public static InjectionMetadata forElements(Collection<InjectedElement> elements, Class<?> clazz) {
+		return (elements.isEmpty() ? InjectionMetadata.EMPTY : new InjectionMetadata(clazz, elements));
+	}
+
+	/**
+	 * Check whether the given injection metadata needs to be refreshed.
+	 * @param metadata the existing metadata instance
+	 * @param clazz the current target class
+	 * @return {@code true} indicating a refresh, {@code false} otherwise
+	 */
+	public static boolean needsRefresh(@Nullable InjectionMetadata metadata, Class<?> clazz) {
+		return (metadata == null || metadata.targetClass != clazz);
+	}
 
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
 		Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size());
@@ -132,30 +155,6 @@ public class InjectionMetadata {
 			}
 		}
 	}
-
-
-	/**
-	 * Return an {@code InjectionMetadata} instance, possibly for empty elements.
-	 * @param elements the elements to inject (possibly empty)
-	 * @param clazz the target class
-	 * @return a new {@code InjectionMetadata} instance,
-	 * or {@link #EMPTY} in case of no elements
-	 * @since 5.2
-	 */
-	public static InjectionMetadata forElements(Collection<InjectedElement> elements, Class<?> clazz) {
-		return (elements.isEmpty() ? InjectionMetadata.EMPTY : new InjectionMetadata(clazz, elements));
-	}
-
-	/**
-	 * Check whether the given injection metadata needs to be refreshed.
-	 * @param metadata the existing metadata instance
-	 * @param clazz the current target class
-	 * @return {@code true} indicating a refresh, {@code false} otherwise
-	 */
-	public static boolean needsRefresh(@Nullable InjectionMetadata metadata, Class<?> clazz) {
-		return (metadata == null || metadata.targetClass != clazz);
-	}
-
 
 	/**
 	 * A single injected element.

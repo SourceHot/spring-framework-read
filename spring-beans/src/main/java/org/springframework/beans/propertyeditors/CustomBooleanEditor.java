@@ -126,6 +126,18 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 		this.allowEmpty = allowEmpty;
 	}
 
+	@Override
+	public String getAsText() {
+		if (Boolean.TRUE.equals(getValue())) {
+			return (this.trueString != null ? this.trueString : VALUE_TRUE);
+		}
+		else if (Boolean.FALSE.equals(getValue())) {
+			return (this.falseString != null ? this.falseString : VALUE_FALSE);
+		}
+		else {
+			return "";
+		}
+	}
 
 	@Override
 	public void setAsText(@Nullable String text) throws IllegalArgumentException {
@@ -152,19 +164,6 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 		}
 		else {
 			throw new IllegalArgumentException("Invalid boolean value [" + text + "]");
-		}
-	}
-
-	@Override
-	public String getAsText() {
-		if (Boolean.TRUE.equals(getValue())) {
-			return (this.trueString != null ? this.trueString : VALUE_TRUE);
-		}
-		else if (Boolean.FALSE.equals(getValue())) {
-			return (this.falseString != null ? this.falseString : VALUE_FALSE);
-		}
-		else {
-			return "";
 		}
 	}
 

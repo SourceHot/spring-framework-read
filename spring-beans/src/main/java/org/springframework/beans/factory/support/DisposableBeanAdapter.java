@@ -87,7 +87,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	private transient Method destroyMethod;
 
 	@Nullable
-	private List<DestructionAwareBeanPostProcessor> beanPostProcessors;
+	private final List<DestructionAwareBeanPostProcessor> beanPostProcessors;
 
 
 	/**
@@ -168,6 +168,41 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		this.beanPostProcessors = postProcessors;
 	}
 
+	/**
+	 * Check whether the given bean has any kind of destroy method to call.
+	 * @param bean the bean instance
+	 * @param beanDefinition the corresponding bean definition
+	 */
+	public static boolean hasDestroyMethod(Object bean, RootBeanDefinition beanDefinition) {
+		if (bean instanceof DisposableBean || bean instanceof AutoCloseable) {
+			return true;
+		}
+		String destroyMethodName = beanDefinition.getDestroyMethodName();
+		if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName)) {
+			return (ClassUtils.hasMethod(bean.getClass(), CLOSE_METHOD_NAME) ||
+					ClassUtils.hasMethod(bean.getClass(), SHUTDOWN_METHOD_NAME));
+		}
+		return StringUtils.hasLength(destroyMethodName);
+	}
+
+	/**
+	 * Check whether the given bean has destruction-aware post-processors applying to it.
+	 * @param bean the bean instance
+	 * @param postProcessors the post-processor candidates
+	 */
+	public static boolean hasApplicableProcessors(Object bean, List<BeanPostProcessor> postProcessors) {
+		if (!CollectionUtils.isEmpty(postProcessors)) {
+			for (BeanPostProcessor processor : postProcessors) {
+				if (processor instanceof DestructionAwareBeanPostProcessor) {
+					DestructionAwareBeanPostProcessor dabpp = (DestructionAwareBeanPostProcessor) processor;
+					if (dabpp.requiresDestruction(bean)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * If the current value of the given beanDefinition's "destroyMethodName" property is
@@ -229,7 +264,6 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		return filteredPostProcessors;
 	}
 
-
 	@Override
 	public void run() {
 		destroy();
@@ -280,7 +314,6 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		}
 	}
 
-
 	@Nullable
 	private Method determineDestroyMethod(String name) {
 		try {
@@ -328,7 +361,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				});
 				try {
 					AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
-						destroyMethod.invoke(this.bean, args), this.acc);
+							destroyMethod.invoke(this.bean, args), this.acc);
 				}
 				catch (PrivilegedActionException pax) {
 					throw (InvocationTargetException) pax.getException();
@@ -355,7 +388,6 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		}
 	}
 
-
 	/**
 	 * Serializes a copy of the state of this class,
 	 * filtering out non-serializable BeanPostProcessors.
@@ -372,43 +404,6 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		}
 		return new DisposableBeanAdapter(this.bean, this.beanName, this.invokeDisposableBean,
 				this.nonPublicAccessAllowed, this.destroyMethodName, serializablePostProcessors);
-	}
-
-
-	/**
-	 * Check whether the given bean has any kind of destroy method to call.
-	 * @param bean the bean instance
-	 * @param beanDefinition the corresponding bean definition
-	 */
-	public static boolean hasDestroyMethod(Object bean, RootBeanDefinition beanDefinition) {
-		if (bean instanceof DisposableBean || bean instanceof AutoCloseable) {
-			return true;
-		}
-		String destroyMethodName = beanDefinition.getDestroyMethodName();
-		if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName)) {
-			return (ClassUtils.hasMethod(bean.getClass(), CLOSE_METHOD_NAME) ||
-					ClassUtils.hasMethod(bean.getClass(), SHUTDOWN_METHOD_NAME));
-		}
-		return StringUtils.hasLength(destroyMethodName);
-	}
-
-	/**
-	 * Check whether the given bean has destruction-aware post-processors applying to it.
-	 * @param bean the bean instance
-	 * @param postProcessors the post-processor candidates
-	 */
-	public static boolean hasApplicableProcessors(Object bean, List<BeanPostProcessor> postProcessors) {
-		if (!CollectionUtils.isEmpty(postProcessors)) {
-			for (BeanPostProcessor processor : postProcessors) {
-				if (processor instanceof DestructionAwareBeanPostProcessor) {
-					DestructionAwareBeanPostProcessor dabpp = (DestructionAwareBeanPostProcessor) processor;
-					if (dabpp.requiresDestruction(bean)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	}
 
 }

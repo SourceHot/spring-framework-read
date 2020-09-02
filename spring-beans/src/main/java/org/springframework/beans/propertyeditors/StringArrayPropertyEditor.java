@@ -126,6 +126,11 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 	}
 
 	@Override
+	public String getAsText() {
+		return StringUtils.arrayToDelimitedString(ObjectUtils.toObjectArray(getValue()), this.separator);
+	}
+
+	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		String[] array = StringUtils.delimitedListToStringArray(text, this.separator, this.charsToDelete);
 		if (this.emptyArrayAsNull && array.length == 0) {
@@ -137,11 +142,6 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 			}
 			setValue(array);
 		}
-	}
-
-	@Override
-	public String getAsText() {
-		return StringUtils.arrayToDelimitedString(ObjectUtils.toObjectArray(getValue()), this.separator);
 	}
 
 }

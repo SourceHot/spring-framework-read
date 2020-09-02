@@ -41,7 +41,7 @@ public class NotWritablePropertyException extends InvalidPropertyException {
 	public NotWritablePropertyException(Class<?> beanClass, String propertyName) {
 		super(beanClass, propertyName,
 				"Bean property '" + propertyName + "' is not writable or has an invalid setter method: " +
-				"Does the return type of the getter match the parameter type of the setter?");
+						"Does the return type of the getter match the parameter type of the setter?");
 		this.possibleMatches = null;
 	}
 

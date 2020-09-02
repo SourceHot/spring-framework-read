@@ -309,36 +309,6 @@ public abstract class YamlProcessor {
 
 
 	/**
-	 * Callback interface used to process the YAML parsing results.
-	 */
-	public interface MatchCallback {
-
-		/**
-		 * Process the given representation of the parsing results.
-		 * @param properties the properties to process (as a flattened
-		 * representation with indexed keys in case of a collection or map)
-		 * @param map the result map (preserving the original value structure
-		 * in the YAML document)
-		 */
-		void process(Properties properties, Map<String, Object> map);
-	}
-
-
-	/**
-	 * Strategy interface used to test if properties match.
-	 */
-	public interface DocumentMatcher {
-
-		/**
-		 * Test if the given properties match.
-		 * @param properties the properties to test
-		 * @return the status of the match
-		 */
-		MatchStatus matches(Properties properties);
-	}
-
-
-	/**
 	 * Status returned from {@link DocumentMatcher#matches(java.util.Properties)}.
 	 */
 	public enum MatchStatus {
@@ -386,6 +356,36 @@ public abstract class YamlProcessor {
 		 * Take the first resource in the list that exists and use just that.
 		 */
 		FIRST_FOUND
+	}
+
+
+	/**
+	 * Callback interface used to process the YAML parsing results.
+	 */
+	public interface MatchCallback {
+
+		/**
+		 * Process the given representation of the parsing results.
+		 * @param properties the properties to process (as a flattened
+		 * representation with indexed keys in case of a collection or map)
+		 * @param map the result map (preserving the original value structure
+		 * in the YAML document)
+		 */
+		void process(Properties properties, Map<String, Object> map);
+	}
+
+
+	/**
+	 * Strategy interface used to test if properties match.
+	 */
+	public interface DocumentMatcher {
+
+		/**
+		 * Test if the given properties match.
+		 * @param properties the properties to test
+		 * @return the status of the match
+		 */
+		MatchStatus matches(Properties properties);
 	}
 
 }

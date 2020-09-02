@@ -127,42 +127,51 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * example, String. Default is none.
 	 */
 	private final Set<Class<?>> ignoredDependencyTypes = new HashSet<>();
+
 	/**
 	 * Dependency interfaces to ignore on dependency check and autowire, as Set of Class objects. By
 	 * default, only the BeanFactory interface is ignored.
 	 */
 	private final Set<Class<?>> ignoredDependencyInterfaces = new HashSet<>();
+
 	/**
 	 * The name of the currently created bean, for implicit dependency registration on getBean etc
 	 * invocations triggered from a user-specified Supplier callback.
 	 */
 	private final NamedThreadLocal<String> currentlyCreatedBean = new NamedThreadLocal<>("Currently created bean");
+
 	/**
 	 * Cache of unfinished FactoryBean instances: FactoryBean name to BeanWrapper.
 	 */
 	private final ConcurrentMap<String, BeanWrapper> factoryBeanInstanceCache = new ConcurrentHashMap<>();
+
 	/**
 	 * Cache of candidate factory methods per factory class.
 	 */
 	private final ConcurrentMap<Class<?>, Method[]> factoryMethodCandidateCache = new ConcurrentHashMap<>();
+
 	/**
 	 * Cache of filtered PropertyDescriptors: bean Class to PropertyDescriptor array.
 	 */
 	private final ConcurrentMap<Class<?>, PropertyDescriptor[]> filteredPropertyDescriptorsCache =
 			new ConcurrentHashMap<>();
+
 	/**
 	 * Strategy for creating bean instances.
 	 */
 	private InstantiationStrategy instantiationStrategy = new CglibSubclassingInstantiationStrategy();
+
 	/**
 	 * Resolver strategy for method parameter names.
 	 */
 	@Nullable
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+
 	/**
 	 * Whether to automatically try to resolve circular references between beans.
 	 */
 	private boolean allowCircularReferences = true;
+
 	/**
 	 * Whether to resort to injecting a raw bean instance in case of circular reference, even if the
 	 * injected bean eventually got wrapped.
@@ -504,7 +513,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		catch (BeanDefinitionValidationException ex) {
 			throw new BeanDefinitionStoreException(mbdToUse.getResourceDescription(),
-												   beanName, "Validation of method overrides failed", ex
+					beanName, "Validation of method overrides failed", ex
 			);
 		}
 
@@ -518,7 +527,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(mbdToUse.getResourceDescription(), beanName,
-											"BeanPostProcessor before instantiation of bean failed", ex
+					"BeanPostProcessor before instantiation of bean failed", ex
 			);
 		}
 
@@ -584,7 +593,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 				catch (Throwable ex) {
 					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-													"Post-processing of merged bean definition failed", ex
+							"Post-processing of merged bean definition failed", ex
 					);
 				}
 				mbd.postProcessed = true;
@@ -598,7 +607,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (earlySingletonExposure) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Eagerly caching bean '" + beanName +
-									 "' to allow for resolving potential circular references");
+						"' to allow for resolving potential circular references");
 			}
 			addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
 		}
@@ -742,7 +751,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (factoryBeanName != null) {
 				if (factoryBeanName.equals(beanName)) {
 					throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
-														   "factory-bean reference points back to the same bean definition"
+							"factory-bean reference points back to the same bean definition"
 					);
 				}
 				// Check declared factory method return type on factory class.
@@ -1195,7 +1204,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Create a new instance for the specified bean, using an appropriate instantiation strategy:
 	 * factory method, constructor autowiring, or simple instantiation.
 	 * bean 初始化
-
 	 * @param beanName the name of the bean
 	 * @param mbd      the bean definition for the bean
 	 * @param args     explicit arguments to use for constructor or factory method invocation
@@ -1214,7 +1222,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		if (beanClass != null && !Modifier.isPublic(beanClass.getModifiers()) && !mbd.isNonPublicAccessAllowed()) {
 			throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-											"Bean class isn't public, and non-public access not allowed: " + beanClass.getName()
+					"Bean class isn't public, and non-public access not allowed: " + beanClass.getName()
 			);
 		}
 
@@ -1537,13 +1545,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				registerDependentBean(propertyName, beanName);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Added autowiring by name from bean name '" + beanName +
-										 "' via property '" + propertyName + "' to bean named '" + propertyName + "'");
+							"' via property '" + propertyName + "' to bean named '" + propertyName + "'");
 				}
 			}
 			else {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Not autowiring property '" + propertyName + "' of bean '" + beanName +
-										 "' by name: no matching bean found");
+							"' by name: no matching bean found");
 				}
 			}
 		}
@@ -1589,7 +1597,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						registerDependentBean(autowiredBeanName, beanName);
 						if (logger.isTraceEnabled()) {
 							logger.trace("Autowiring by type from bean name '" + beanName + "' via property '" +
-												 propertyName + "' to bean named '" + autowiredBeanName + "'");
+									propertyName + "' to bean named '" + autowiredBeanName + "'");
 						}
 					}
 					autowiredBeanNames.clear();
@@ -1713,7 +1721,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						(!isSimple && dependencyCheck == AbstractBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
 				if (unsatisfied) {
 					throw new UnsatisfiedDependencyException(mbd.getResourceDescription(), beanName, pd.getName(),
-															 "Set this property value or disable dependency checking for this bean."
+							"Set this property value or disable dependency checking for this bean."
 					);
 				}
 			}
@@ -1995,12 +2003,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (initMethod == null) {
 			if (mbd.isEnforceInitMethod()) {
 				throw new BeanDefinitionValidationException("Could not find an init method named '" +
-																	initMethodName + "' on bean with name '" + beanName + "'");
+						initMethodName + "' on bean with name '" + beanName + "'");
 			}
 			else {
 				if (logger.isTraceEnabled()) {
 					logger.trace("No default init method named '" + initMethodName +
-										 "' found on bean with name '" + beanName + "'");
+							"' found on bean with name '" + beanName + "'");
 				}
 				// Ignore non-existent default lifecycle methods.
 				return;
@@ -2042,7 +2050,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Applies the {@code postProcessAfterInitialization} callback of all registered
 	 * BeanPostProcessors, giving them a chance to post-process the object obtained from
 	 * FactoryBeans (for example, to auto-proxy them).
-	 *
+	 *从 FactoryBean 接口创建的 后置处理
 	 * @see #applyBeanPostProcessorsAfterInitialization
 	 */
 	@Override

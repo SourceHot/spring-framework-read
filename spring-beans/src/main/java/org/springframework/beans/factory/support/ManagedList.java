@@ -52,15 +52,6 @@ public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetad
 		super(initialCapacity);
 	}
 
-
-	/**
-	 * Set the configuration source {@code Object} for this metadata element.
-	 * <p>The exact type of the object will depend on the configuration mechanism used.
-	 */
-	public void setSource(@Nullable Object source) {
-		this.source = source;
-	}
-
 	@Override
 	@Nullable
 	public Object getSource() {
@@ -68,10 +59,11 @@ public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetad
 	}
 
 	/**
-	 * Set the default element type name (class name) to be used for this list.
+	 * Set the configuration source {@code Object} for this metadata element.
+	 * <p>The exact type of the object will depend on the configuration mechanism used.
 	 */
-	public void setElementTypeName(String elementTypeName) {
-		this.elementTypeName = elementTypeName;
+	public void setSource(@Nullable Object source) {
+		this.source = source;
 	}
 
 	/**
@@ -83,16 +75,23 @@ public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetad
 	}
 
 	/**
-	 * Set whether merging should be enabled for this collection,
-	 * in case of a 'parent' collection value being present.
+	 * Set the default element type name (class name) to be used for this list.
 	 */
-	public void setMergeEnabled(boolean mergeEnabled) {
-		this.mergeEnabled = mergeEnabled;
+	public void setElementTypeName(String elementTypeName) {
+		this.elementTypeName = elementTypeName;
 	}
 
 	@Override
 	public boolean isMergeEnabled() {
 		return this.mergeEnabled;
+	}
+
+	/**
+	 * Set whether merging should be enabled for this collection,
+	 * in case of a 'parent' collection value being present.
+	 */
+	public void setMergeEnabled(boolean mergeEnabled) {
+		this.mergeEnabled = mergeEnabled;
 	}
 
 	@Override

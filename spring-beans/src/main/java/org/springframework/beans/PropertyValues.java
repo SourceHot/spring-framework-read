@@ -30,7 +30,6 @@ import org.springframework.lang.Nullable;
  * typically comprising one update for a specific target bean.
  *
  * 属性值接口
-
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13 May 2001

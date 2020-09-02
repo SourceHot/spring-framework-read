@@ -105,14 +105,13 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered
 	@Nullable
 	private Map<Class<?>, Class<? extends PropertyEditor>> customEditors;
 
-
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
 	@Override
 	public int getOrder() {
 		return this.order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 
 	/**

@@ -82,6 +82,10 @@ public abstract class AbstractFactoryBean<T>
 	@Nullable
 	private T earlySingletonInstance;
 
+	@Override
+	public boolean isSingleton() {
+		return this.singleton;
+	}
 
 	/**
 	 * Set if a singleton should be created, or a new object on each request
@@ -92,18 +96,8 @@ public abstract class AbstractFactoryBean<T>
 	}
 
 	@Override
-	public boolean isSingleton() {
-		return this.singleton;
-	}
-
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
-	}
-
-	@Override
-	public void setBeanFactory(@Nullable BeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
 	}
 
 	/**
@@ -112,6 +106,11 @@ public abstract class AbstractFactoryBean<T>
 	@Nullable
 	protected BeanFactory getBeanFactory() {
 		return this.beanFactory;
+	}
+
+	@Override
+	public void setBeanFactory(@Nullable BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
 	}
 
 	/**
@@ -236,7 +235,7 @@ public abstract class AbstractFactoryBean<T>
 	@Nullable
 	protected Class<?>[] getEarlySingletonInterfaces() {
 		Class<?> type = getObjectType();
-		return (type != null && type.isInterface() ? new Class<?>[] {type} : null);
+		return (type != null && type.isInterface() ? new Class<?>[] { type } : null);
 	}
 
 	/**

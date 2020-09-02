@@ -39,7 +39,7 @@ public class ReplaceOverride extends MethodOverride {
 
 	private final String methodReplacerBeanName;
 
-	private List<String> typeIdentifiers = new LinkedList<>();
+	private final List<String> typeIdentifiers = new LinkedList<>();
 
 
 	/**

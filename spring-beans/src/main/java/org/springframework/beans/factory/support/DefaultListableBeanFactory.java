@@ -123,6 +123,10 @@ import org.springframework.util.StringUtils;
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
 		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
 
+	/** Map from serialized id to factory instance. */
+	private static final Map<String, Reference<DefaultListableBeanFactory>> serializableFactories =
+			new ConcurrentHashMap<>(8);
+
 	@Nullable
 	private static Class<?> javaxInjectProviderClass;
 
@@ -137,10 +141,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
+	/** Map from dependency type to corresponding autowired value. */
+	private final Map<Class<?>, Object> resolvableDependencies = new ConcurrentHashMap<>(16);
 
-	/** Map from serialized id to factory instance. */
-	private static final Map<String, Reference<DefaultListableBeanFactory>> serializableFactories =
-			new ConcurrentHashMap<>(8);
+	/** Map of bean definition objects, keyed by bean name. */
+	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
+
+	/** Map of singleton and non-singleton bean names, keyed by dependency type. */
+	private final Map<Class<?>, String[]> allBeanNamesByType = new ConcurrentHashMap<>(64);
+
+	/** Map of singleton-only bean names, keyed by dependency type. */
+	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<>(64);
 
 	/** Optional id for this factory, for serialization purposes. */
 	@Nullable
@@ -158,18 +169,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/** Resolver to use for checking if a bean definition is an autowire candidate. */
 	private AutowireCandidateResolver autowireCandidateResolver = new SimpleAutowireCandidateResolver();
-
-	/** Map from dependency type to corresponding autowired value. */
-	private final Map<Class<?>, Object> resolvableDependencies = new ConcurrentHashMap<>(16);
-
-	/** Map of bean definition objects, keyed by bean name. */
-	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
-
-	/** Map of singleton and non-singleton bean names, keyed by dependency type. */
-	private final Map<Class<?>, String[]> allBeanNamesByType = new ConcurrentHashMap<>(64);
-
-	/** Map of singleton-only bean names, keyed by dependency type. */
-	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<>(64);
 
 	/** List of bean definition names, in registration order. */
 	private volatile List<String> beanDefinitionNames = new ArrayList<>(256);
@@ -200,6 +199,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		super(parentBeanFactory);
 	}
 
+	/**
+	 * Return an id for serialization purposes, if specified, allowing this BeanFactory
+	 * to be deserialized from this id back into the BeanFactory object, if needed.
+	 * @since 4.1.2
+	 */
+	@Nullable
+	public String getSerializationId() {
+		return this.serializationId;
+	}
 
 	/**
 	 * Specify an id for serialization purposes, allowing this BeanFactory to be
@@ -216,13 +224,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Return an id for serialization purposes, if specified, allowing this BeanFactory
-	 * to be deserialized from this id back into the BeanFactory object, if needed.
+	 * Return whether it should be allowed to override bean definitions by registering
+	 * a different definition with the same name, automatically replacing the former.
 	 * @since 4.1.2
 	 */
-	@Nullable
-	public String getSerializationId() {
-		return this.serializationId;
+	public boolean isAllowBeanDefinitionOverriding() {
+		return this.allowBeanDefinitionOverriding;
 	}
 
 	/**
@@ -237,12 +244,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Return whether it should be allowed to override bean definitions by registering
-	 * a different definition with the same name, automatically replacing the former.
+	 * Return whether the factory is allowed to eagerly load bean classes
+	 * even for bean definitions that are marked as "lazy-init".
 	 * @since 4.1.2
 	 */
-	public boolean isAllowBeanDefinitionOverriding() {
-		return this.allowBeanDefinitionOverriding;
+	public boolean isAllowEagerClassLoading() {
+		return this.allowEagerClassLoading;
 	}
 
 	/**
@@ -260,12 +267,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Return whether the factory is allowed to eagerly load bean classes
-	 * even for bean definitions that are marked as "lazy-init".
-	 * @since 4.1.2
+	 * Return the dependency comparator for this BeanFactory (may be {@code null}.
+	 * @since 4.0
 	 */
-	public boolean isAllowEagerClassLoading() {
-		return this.allowEagerClassLoading;
+	@Nullable
+	public Comparator<Object> getDependencyComparator() {
+		return this.dependencyComparator;
 	}
 
 	/**
@@ -279,12 +286,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Return the dependency comparator for this BeanFactory (may be {@code null}.
-	 * @since 4.0
+	 * Return the autowire candidate resolver for this BeanFactory (never {@code null}).
 	 */
-	@Nullable
-	public Comparator<Object> getDependencyComparator() {
-		return this.dependencyComparator;
+	public AutowireCandidateResolver getAutowireCandidateResolver() {
+		return this.autowireCandidateResolver;
 	}
 
 	/**
@@ -307,14 +312,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		this.autowireCandidateResolver = autowireCandidateResolver;
 	}
-
-	/**
-	 * Return the autowire candidate resolver for this BeanFactory (never {@code null}).
-	 */
-	public AutowireCandidateResolver getAutowireCandidateResolver() {
-		return this.autowireCandidateResolver;
-	}
-
 
 	@Override
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
@@ -371,6 +368,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 				return resolved;
 			}
+
 			@Override
 			public T getObject(Object... args) throws BeansException {
 				T resolved = resolveBean(requiredType, args, false);
@@ -379,22 +377,26 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 				return resolved;
 			}
+
 			@Override
 			@Nullable
 			public T getIfAvailable() throws BeansException {
 				return resolveBean(requiredType, null, false);
 			}
+
 			@Override
 			@Nullable
 			public T getIfUnique() throws BeansException {
 				return resolveBean(requiredType, null, true);
 			}
+
 			@Override
 			public Stream<T> stream() {
 				return Arrays.stream(getBeanNamesForTypedStream(requiredType))
 						.map(name -> (T) getBean(name))
 						.filter(bean -> !(bean instanceof NullBean));
 			}
+
 			@Override
 			public Stream<T> orderedStream() {
 				String[] beanNames = getBeanNamesForTypedStream(requiredType);
@@ -527,7 +529,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 								matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit);
 							}
 						}
-						else  {
+						else {
 							if (includeNonSingletons || isNonLazyDecorated ||
 									(allowFactoryBeanInit && isSingleton(beanName, mbd, dbd))) {
 								matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit);
@@ -1607,7 +1609,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						if (candidatePriority.equals(highestPriority)) {
 							throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
 									"Multiple beans found with the same priority ('" + highestPriority +
-									"') among candidates: " + candidates.keySet());
+											"') among candidates: " + candidates.keySet());
 						}
 						else if (candidatePriority < highestPriority) {
 							highestPriorityBeanName = candidateBeanName;
@@ -1693,7 +1695,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		throw new NoSuchBeanDefinitionException(resolvableType,
 				"expected at least 1 bean which qualifies as autowire candidate. " +
-				"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
+						"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
 	}
 
 	/**
@@ -1733,6 +1735,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			public boolean isRequired() {
 				return false;
 			}
+
 			@Override
 			public Object resolveCandidate(String beanName, Class<?> requiredType, BeanFactory beanFactory) {
 				return (!ObjectUtils.isEmpty(args) ? beanFactory.getBean(beanName, args) :
@@ -1780,6 +1783,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 
+	private interface BeanObjectProvider<T> extends ObjectProvider<T>, Serializable {
+	}
+
 	/**
 	 * Minimal id reference to the factory.
 	 * Resolved to the actual factory instance on deserialization.
@@ -1807,7 +1813,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
-
 	/**
 	 * A dependency descriptor marker for nested elements.
 	 */
@@ -1819,7 +1824,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
-
 	/**
 	 * A dependency descriptor for a multi-element declaration with nested elements.
 	 */
@@ -1829,7 +1833,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			super(original);
 		}
 	}
-
 
 	/**
 	 * A dependency descriptor marker for stream access to multiple elements.
@@ -1847,11 +1850,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return this.ordered;
 		}
 	}
-
-
-	private interface BeanObjectProvider<T> extends ObjectProvider<T>, Serializable {
-	}
-
 
 	/**
 	 * Serializable ObjectFactory/ObjectProvider for lazy resolution of a dependency.
@@ -1930,6 +1928,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				public boolean isRequired() {
 					return false;
 				}
+
 				@Override
 				@Nullable
 				public Object resolveNotUnique(ResolvableType type, Map<String, Object> matchingBeans) {

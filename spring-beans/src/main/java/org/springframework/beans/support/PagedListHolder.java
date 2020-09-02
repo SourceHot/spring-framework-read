@@ -113,6 +113,12 @@ public class PagedListHolder<E> implements Serializable {
 		setSort(sort);
 	}
 
+	/**
+	 * Return the source list for this holder.
+	 */
+	public List<E> getSource() {
+		return this.source;
+	}
 
 	/**
 	 * Set the source list for this holder.
@@ -125,18 +131,19 @@ public class PagedListHolder<E> implements Serializable {
 	}
 
 	/**
-	 * Return the source list for this holder.
-	 */
-	public List<E> getSource() {
-		return this.source;
-	}
-
-	/**
 	 * Return the last time the list has been fetched from the source provider.
 	 */
 	@Nullable
 	public Date getRefreshDate() {
 		return this.refreshDate;
+	}
+
+	/**
+	 * Return the sort definition for this holder.
+	 */
+	@Nullable
+	public SortDefinition getSort() {
+		return this.sort;
 	}
 
 	/**
@@ -149,11 +156,10 @@ public class PagedListHolder<E> implements Serializable {
 	}
 
 	/**
-	 * Return the sort definition for this holder.
+	 * Return the current page size.
 	 */
-	@Nullable
-	public SortDefinition getSort() {
-		return this.sort;
+	public int getPageSize() {
+		return this.pageSize;
 	}
 
 	/**
@@ -171,22 +177,6 @@ public class PagedListHolder<E> implements Serializable {
 	}
 
 	/**
-	 * Return the current page size.
-	 */
-	public int getPageSize() {
-		return this.pageSize;
-	}
-
-	/**
-	 * Set the current page number.
-	 * Page numbering starts with 0.
-	 */
-	public void setPage(int page) {
-		this.page = page;
-		this.newPageSet = true;
-	}
-
-	/**
 	 * Return the current page number.
 	 * Page numbering starts with 0.
 	 */
@@ -199,10 +189,12 @@ public class PagedListHolder<E> implements Serializable {
 	}
 
 	/**
-	 * Set the maximum number of page links to a few pages around the current one.
+	 * Set the current page number.
+	 * Page numbering starts with 0.
 	 */
-	public void setMaxLinkedPages(int maxLinkedPages) {
-		this.maxLinkedPages = maxLinkedPages;
+	public void setPage(int page) {
+		this.page = page;
+		this.newPageSet = true;
 	}
 
 	/**
@@ -212,6 +204,12 @@ public class PagedListHolder<E> implements Serializable {
 		return this.maxLinkedPages;
 	}
 
+	/**
+	 * Set the maximum number of page links to a few pages around the current one.
+	 */
+	public void setMaxLinkedPages(int maxLinkedPages) {
+		this.maxLinkedPages = maxLinkedPages;
+	}
 
 	/**
 	 * Return the number of pages for the current source list.
@@ -232,7 +230,7 @@ public class PagedListHolder<E> implements Serializable {
 	 * Return if the current page is the last one.
 	 */
 	public boolean isLastPage() {
-		return getPage() == getPageCount() -1;
+		return getPage() == getPageCount() - 1;
 	}
 
 	/**

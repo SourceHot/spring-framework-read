@@ -85,18 +85,23 @@ public class InitDestroyAnnotationBeanPostProcessor
 				@Override
 				public void checkConfigMembers(RootBeanDefinition beanDefinition) {
 				}
+
 				@Override
 				public void invokeInitMethods(Object target, String beanName) {
 				}
+
 				@Override
 				public void invokeDestroyMethods(Object target, String beanName) {
 				}
+
 				@Override
 				public boolean hasDestroyMethods() {
 					return false;
 				}
 			};
 
+	@Nullable
+	private final transient Map<Class<?>, LifecycleMetadata> lifecycleMetadataCache = new ConcurrentHashMap<>(256);
 
 	protected transient Log logger = LogFactory.getLog(getClass());
 
@@ -107,10 +112,6 @@ public class InitDestroyAnnotationBeanPostProcessor
 	private Class<? extends Annotation> destroyAnnotationType;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
-
-	@Nullable
-	private final transient Map<Class<?>, LifecycleMetadata> lifecycleMetadataCache = new ConcurrentHashMap<>(256);
-
 
 	/**
 	 * Specify the init annotation to check for, indicating initialization
@@ -134,15 +135,14 @@ public class InitDestroyAnnotationBeanPostProcessor
 		this.destroyAnnotationType = destroyAnnotationType;
 	}
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
 	@Override
 	public int getOrder() {
 		return this.order;
 	}
 
+	public void setOrder(int order) {
+		this.order = order;
+	}
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
@@ -268,6 +268,54 @@ public class InitDestroyAnnotationBeanPostProcessor
 		this.logger = LogFactory.getLog(getClass());
 	}
 
+	/**
+	 * Class representing injection information about an annotated method.
+	 */
+	private static class LifecycleElement {
+
+		private final Method method;
+
+		private final String identifier;
+
+		public LifecycleElement(Method method) {
+			if (method.getParameterCount() != 0) {
+				throw new IllegalStateException("Lifecycle method annotation requires a no-arg method: " + method);
+			}
+			this.method = method;
+			this.identifier = (Modifier.isPrivate(method.getModifiers()) ?
+					ClassUtils.getQualifiedMethodName(method) : method.getName());
+		}
+
+		public Method getMethod() {
+			return this.method;
+		}
+
+		public String getIdentifier() {
+			return this.identifier;
+		}
+
+		public void invoke(Object target) throws Throwable {
+			ReflectionUtils.makeAccessible(this.method);
+			this.method.invoke(target, (Object[]) null);
+		}
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof LifecycleElement)) {
+				return false;
+			}
+			LifecycleElement otherElement = (LifecycleElement) other;
+			return (this.identifier.equals(otherElement.identifier));
+		}
+
+		@Override
+		public int hashCode() {
+			return this.identifier.hashCode();
+		}
+	}
 
 	/**
 	 * Class representing information about annotated init and destroy methods.
@@ -354,56 +402,6 @@ public class InitDestroyAnnotationBeanPostProcessor
 			Collection<LifecycleElement> destroyMethodsToUse =
 					(checkedDestroyMethods != null ? checkedDestroyMethods : this.destroyMethods);
 			return !destroyMethodsToUse.isEmpty();
-		}
-	}
-
-
-	/**
-	 * Class representing injection information about an annotated method.
-	 */
-	private static class LifecycleElement {
-
-		private final Method method;
-
-		private final String identifier;
-
-		public LifecycleElement(Method method) {
-			if (method.getParameterCount() != 0) {
-				throw new IllegalStateException("Lifecycle method annotation requires a no-arg method: " + method);
-			}
-			this.method = method;
-			this.identifier = (Modifier.isPrivate(method.getModifiers()) ?
-					ClassUtils.getQualifiedMethodName(method) : method.getName());
-		}
-
-		public Method getMethod() {
-			return this.method;
-		}
-
-		public String getIdentifier() {
-			return this.identifier;
-		}
-
-		public void invoke(Object target) throws Throwable {
-			ReflectionUtils.makeAccessible(this.method);
-			this.method.invoke(target, (Object[]) null);
-		}
-
-		@Override
-		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof LifecycleElement)) {
-				return false;
-			}
-			LifecycleElement otherElement = (LifecycleElement) other;
-			return (this.identifier.equals(otherElement.identifier));
-		}
-
-		@Override
-		public int hashCode() {
-			return this.identifier.hashCode();
 		}
 	}
 

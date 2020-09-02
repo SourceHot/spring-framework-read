@@ -68,6 +68,11 @@ public class CharacterEditor extends PropertyEditorSupport {
 		this.allowEmpty = allowEmpty;
 	}
 
+	@Override
+	public String getAsText() {
+		Object value = getValue();
+		return (value != null ? value.toString() : "");
+	}
 
 	@Override
 	public void setAsText(@Nullable String text) throws IllegalArgumentException {
@@ -89,13 +94,6 @@ public class CharacterEditor extends PropertyEditorSupport {
 					text.length() + " cannot be converted to char type: neither Unicode nor single character");
 		}
 	}
-
-	@Override
-	public String getAsText() {
-		Object value = getValue();
-		return (value != null ? value.toString() : "");
-	}
-
 
 	private boolean isUnicodeCharacterSequence(String sequence) {
 		return (sequence.startsWith(UNICODE_PREFIX) && sequence.length() == UNICODE_LENGTH);

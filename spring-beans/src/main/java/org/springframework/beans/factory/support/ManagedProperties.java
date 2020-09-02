@@ -38,6 +38,11 @@ public class ManagedProperties extends Properties implements Mergeable, BeanMeta
 
 	private boolean mergeEnabled;
 
+	@Override
+	@Nullable
+	public Object getSource() {
+		return this.source;
+	}
 
 	/**
 	 * Set the configuration source {@code Object} for this metadata element.
@@ -48,9 +53,8 @@ public class ManagedProperties extends Properties implements Mergeable, BeanMeta
 	}
 
 	@Override
-	@Nullable
-	public Object getSource() {
-		return this.source;
+	public boolean isMergeEnabled() {
+		return this.mergeEnabled;
 	}
 
 	/**
@@ -60,12 +64,6 @@ public class ManagedProperties extends Properties implements Mergeable, BeanMeta
 	public void setMergeEnabled(boolean mergeEnabled) {
 		this.mergeEnabled = mergeEnabled;
 	}
-
-	@Override
-	public boolean isMergeEnabled() {
-		return this.mergeEnabled;
-	}
-
 
 	@Override
 	public Object merge(@Nullable Object parent) {

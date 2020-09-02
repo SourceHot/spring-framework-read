@@ -30,6 +30,7 @@ import org.springframework.lang.Nullable;
  * and returns "null" from {@code #toString()}, which is how they can be tested
  * externally (since this class itself is not public).
  *
+ * spring 的 nullBean 在bean生成的时候使用
  * @author Juergen Hoeller
  * @since 5.0
  */

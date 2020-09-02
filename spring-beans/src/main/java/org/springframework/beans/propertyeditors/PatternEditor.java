@@ -56,16 +56,15 @@ public class PatternEditor extends PropertyEditorSupport {
 		this.flags = flags;
 	}
 
-
-	@Override
-	public void setAsText(@Nullable String text) {
-		setValue(text != null ? Pattern.compile(text, this.flags) : null);
-	}
-
 	@Override
 	public String getAsText() {
 		Pattern value = (Pattern) getValue();
 		return (value != null ? value.pattern() : "");
+	}
+
+	@Override
+	public void setAsText(@Nullable String text) {
+		setValue(text != null ? Pattern.compile(text, this.flags) : null);
 	}
 
 }

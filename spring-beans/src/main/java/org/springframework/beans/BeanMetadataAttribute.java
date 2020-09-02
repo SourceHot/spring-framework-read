@@ -33,6 +33,7 @@ public class BeanMetadataAttribute implements BeanMetadataElement {
 	 * 属性值名称
 	 */
 	private final String name;
+
 	/**
 	 * 属性值
 	 */
@@ -70,6 +71,12 @@ public class BeanMetadataAttribute implements BeanMetadataElement {
 		return this.value;
 	}
 
+	@Override
+	@Nullable
+	public Object getSource() {
+		return this.source;
+	}
+
 	/**
 	 * Set the configuration source {@code Object} for this metadata element.
 	 * <p>The exact type of the object will depend on the configuration mechanism used.
@@ -77,13 +84,6 @@ public class BeanMetadataAttribute implements BeanMetadataElement {
 	public void setSource(@Nullable Object source) {
 		this.source = source;
 	}
-
-	@Override
-	@Nullable
-	public Object getSource() {
-		return this.source;
-	}
-
 
 	@Override
 	public boolean equals(@Nullable Object other) {

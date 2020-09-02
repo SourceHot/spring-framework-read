@@ -38,7 +38,6 @@ import org.springframework.util.ClassUtils;
  * {@link BeanWiringInfoResolver} interface. The default implementation looks for
  * a bean with the same name as the fully-qualified class name. (This is the default
  * name of the bean in a Spring XML file if the '{@code id}' attribute is not used.)
-
  * @author Rob Harrop
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -78,7 +77,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
 			throw new IllegalArgumentException(
-				"Bean configurer aspect needs to run in a ConfigurableListableBeanFactory: " + beanFactory);
+					"Bean configurer aspect needs to run in a ConfigurableListableBeanFactory: " + beanFactory);
 		}
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 		if (this.beanWiringInfoResolver == null) {

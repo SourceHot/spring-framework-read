@@ -51,6 +51,8 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	@Nullable
 	private final Method writeMethod;
 
+	private final Class<?> propertyEditorClass;
+
 	@Nullable
 	private volatile Set<Method> ambiguousWriteMethods;
 
@@ -59,8 +61,6 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	@Nullable
 	private Class<?> propertyType;
-
-	private final Class<?> propertyEditorClass;
 
 
 	public GenericTypeAwarePropertyDescriptor(Class<?> beanClass, String propertyName,

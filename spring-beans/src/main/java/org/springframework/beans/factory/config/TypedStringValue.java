@@ -82,6 +82,13 @@ public class TypedStringValue implements BeanMetadataElement {
 		setTargetTypeName(targetTypeName);
 	}
 
+	/**
+	 * Return the String value.
+	 */
+	@Nullable
+	public String getValue() {
+		return this.value;
+	}
 
 	/**
 	 * Set the String value.
@@ -93,11 +100,14 @@ public class TypedStringValue implements BeanMetadataElement {
 	}
 
 	/**
-	 * Return the String value.
+	 * Return the type to convert to.
 	 */
-	@Nullable
-	public String getValue() {
-		return this.value;
+	public Class<?> getTargetType() {
+		Object targetTypeValue = this.targetType;
+		if (!(targetTypeValue instanceof Class)) {
+			throw new IllegalStateException("Typed String value does not carry a resolved target type");
+		}
+		return (Class<?>) targetTypeValue;
 	}
 
 	/**
@@ -113,24 +123,6 @@ public class TypedStringValue implements BeanMetadataElement {
 	/**
 	 * Return the type to convert to.
 	 */
-	public Class<?> getTargetType() {
-		Object targetTypeValue = this.targetType;
-		if (!(targetTypeValue instanceof Class)) {
-			throw new IllegalStateException("Typed String value does not carry a resolved target type");
-		}
-		return (Class<?>) targetTypeValue;
-	}
-
-	/**
-	 * Specify the type to convert to.
-	 */
-	public void setTargetTypeName(@Nullable String targetTypeName) {
-		this.targetType = targetTypeName;
-	}
-
-	/**
-	 * Return the type to convert to.
-	 */
 	@Nullable
 	public String getTargetTypeName() {
 		Object targetTypeValue = this.targetType;
@@ -140,6 +132,13 @@ public class TypedStringValue implements BeanMetadataElement {
 		else {
 			return (String) targetTypeValue;
 		}
+	}
+
+	/**
+	 * Specify the type to convert to.
+	 */
+	public void setTargetTypeName(@Nullable String targetTypeName) {
+		this.targetType = targetTypeName;
 	}
 
 	/**
@@ -168,6 +167,11 @@ public class TypedStringValue implements BeanMetadataElement {
 		return resolvedClass;
 	}
 
+	@Override
+	@Nullable
+	public Object getSource() {
+		return this.source;
+	}
 
 	/**
 	 * Set the configuration source {@code Object} for this metadata element.
@@ -177,10 +181,12 @@ public class TypedStringValue implements BeanMetadataElement {
 		this.source = source;
 	}
 
-	@Override
+	/**
+	 * Return the type name as actually specified for this particular value, if any.
+	 */
 	@Nullable
-	public Object getSource() {
-		return this.source;
+	public String getSpecifiedTypeName() {
+		return this.specifiedTypeName;
 	}
 
 	/**
@@ -188,14 +194,6 @@ public class TypedStringValue implements BeanMetadataElement {
 	 */
 	public void setSpecifiedTypeName(@Nullable String specifiedTypeName) {
 		this.specifiedTypeName = specifiedTypeName;
-	}
-
-	/**
-	 * Return the type name as actually specified for this particular value, if any.
-	 */
-	@Nullable
-	public String getSpecifiedTypeName() {
-		return this.specifiedTypeName;
 	}
 
 	/**

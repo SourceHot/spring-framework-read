@@ -46,20 +46,6 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 
 	private boolean useDefaultConverter = true;
 
-
-	/**
-	 * Set a TypeConverter to use for argument type conversion.
-	 * <p>Default is a {@link org.springframework.beans.SimpleTypeConverter}.
-	 * Can be overridden with any TypeConverter implementation, typically
-	 * a pre-configured SimpleTypeConverter or a BeanWrapperImpl instance.
-	 * @see org.springframework.beans.SimpleTypeConverter
-	 * @see org.springframework.beans.BeanWrapperImpl
-	 */
-	public void setTypeConverter(@Nullable TypeConverter typeConverter) {
-		this.typeConverter = typeConverter;
-		this.useDefaultConverter = (typeConverter == null);
-	}
-
 	/**
 	 * Return the TypeConverter used for argument type conversion.
 	 * <p>Can be cast to {@link org.springframework.beans.PropertyEditorRegistry}
@@ -73,6 +59,19 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 			this.typeConverter = getDefaultTypeConverter();
 		}
 		return this.typeConverter;
+	}
+
+	/**
+	 * Set a TypeConverter to use for argument type conversion.
+	 * <p>Default is a {@link org.springframework.beans.SimpleTypeConverter}.
+	 * Can be overridden with any TypeConverter implementation, typically
+	 * a pre-configured SimpleTypeConverter or a BeanWrapperImpl instance.
+	 * @see org.springframework.beans.SimpleTypeConverter
+	 * @see org.springframework.beans.BeanWrapperImpl
+	 */
+	public void setTypeConverter(@Nullable TypeConverter typeConverter) {
+		this.typeConverter = typeConverter;
+		this.useDefaultConverter = (typeConverter == null);
 	}
 
 	/**
@@ -120,7 +119,7 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 		}
 		if (matchingMethod == null) {
 			// Interpret argument array as single method argument of array type.
-			matchingMethod = doFindMatchingMethod(new Object[] {getArguments()});
+			matchingMethod = doFindMatchingMethod(new Object[] { getArguments() });
 		}
 		return matchingMethod;
 	}

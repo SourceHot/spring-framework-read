@@ -77,6 +77,10 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 	@Nullable
 	private Map<String, Object> map;
 
+	@Override
+	public boolean isSingleton() {
+		return this.singleton;
+	}
 
 	/**
 	 * Set if a singleton should be created, or a new object on each request
@@ -84,11 +88,6 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 	 */
 	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;
-	}
-
-	@Override
-	public boolean isSingleton() {
-		return this.singleton;
 	}
 
 	@Override
@@ -125,7 +124,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 		return result;
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void merge(Map<String, Object> output, Map<String, Object> map) {
 		map.forEach((key, value) -> {
 			Object existing = output.get(key);

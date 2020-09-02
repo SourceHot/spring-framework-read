@@ -76,15 +76,15 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 */
 	private static final Log logger = LogFactory.getLog(AbstractNestablePropertyAccessor.class);
 
-	private int autoGrowCollectionLimit = Integer.MAX_VALUE;
-
 	@Nullable
 	Object wrappedObject;
 
-	private String nestedPath = "";
-
 	@Nullable
 	Object rootObject;
+
+	private int autoGrowCollectionLimit = Integer.MAX_VALUE;
+
+	private String nestedPath = "";
 
 	/** Map with cached nested Accessors: nested path -> Accessor instance. */
 	@Nullable
@@ -158,15 +158,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		setConversionService(parent.getConversionService());
 	}
 
-
-	/**
-	 * Specify a limit for array and collection auto-growing.
-	 * <p>Default is unlimited on a plain accessor.
-	 */
-	public void setAutoGrowCollectionLimit(int autoGrowCollectionLimit) {
-		this.autoGrowCollectionLimit = autoGrowCollectionLimit;
-	}
-
 	/**
 	 * Return the limit for array and collection auto-growing.
 	 */
@@ -175,12 +166,11 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 	/**
-	 * Switch the target object, replacing the cached introspection results only
-	 * if the class of the new object is different to that of the replaced object.
-	 * @param object the new target object
+	 * Specify a limit for array and collection auto-growing.
+	 * <p>Default is unlimited on a plain accessor.
 	 */
-	public void setWrappedInstance(Object object) {
-		setWrappedInstance(object, "", null);
+	public void setAutoGrowCollectionLimit(int autoGrowCollectionLimit) {
+		this.autoGrowCollectionLimit = autoGrowCollectionLimit;
 	}
 
 	/**
@@ -202,6 +192,15 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	public final Object getWrappedInstance() {
 		Assert.state(this.wrappedObject != null, "No wrapped object");
 		return this.wrappedObject;
+	}
+
+	/**
+	 * Switch the target object, replacing the cached introspection results only
+	 * if the class of the new object is different to that of the replaced object.
+	 * @param object the new target object
+	 */
+	public void setWrappedInstance(Object object) {
+		setWrappedInstance(object, "", null);
 	}
 
 	public final Class<?> getWrappedClass() {
@@ -335,8 +334,8 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 					catch (NullPointerException ex) {
 						throw new InvalidPropertyException(getRootClass(), this.nestedPath + tokens.canonicalName,
 								"Cannot set element with index " + index + " in List of size " +
-								size + ", accessed using property path '" + tokens.canonicalName +
-								"': List does not support filling up gaps with null elements");
+										size + ", accessed using property path '" + tokens.canonicalName +
+										"': List does not support filling up gaps with null elements");
 					}
 				}
 				list.add(convertedValue);
@@ -374,7 +373,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		else {
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + tokens.canonicalName,
 					"Property referenced in indexed property path '" + tokens.canonicalName +
-					"' is neither an array nor a List nor a Map; returned value was [" + propValue + "]");
+							"' is neither an array nor a List nor a Map; returned value was [" + propValue + "]");
 		}
 	}
 
@@ -393,7 +392,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		catch (NotReadablePropertyException ex) {
 			throw new NotWritablePropertyException(getRootClass(), this.nestedPath + tokens.canonicalName,
 					"Cannot access indexed value in property referenced " +
-					"in indexed property path '" + tokens.canonicalName + "'", ex);
+							"in indexed property path '" + tokens.canonicalName + "'", ex);
 		}
 
 		if (propValue == null) {
@@ -406,7 +405,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			else {
 				throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + tokens.canonicalName,
 						"Cannot access indexed value in property referenced " +
-						"in indexed property path '" + tokens.canonicalName + "': returned null");
+								"in indexed property path '" + tokens.canonicalName + "': returned null");
 			}
 		}
 		return propValue;
@@ -1058,17 +1057,17 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 */
 	protected static class PropertyTokenHolder {
 
-		public PropertyTokenHolder(String name) {
-			this.actualName = name;
-			this.canonicalName = name;
-		}
-
 		public String actualName;
 
 		public String canonicalName;
 
 		@Nullable
 		public String[] keys;
+
+		public PropertyTokenHolder(String name) {
+			this.actualName = name;
+			this.canonicalName = name;
+		}
 	}
 
 }

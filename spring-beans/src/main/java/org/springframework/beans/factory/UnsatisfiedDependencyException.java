@@ -48,7 +48,7 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 
 		super(resourceDescription, beanName,
 				"Unsatisfied dependency expressed through bean property '" + propertyName + "'" +
-				(StringUtils.hasLength(msg) ? ": " + msg : ""));
+						(StringUtils.hasLength(msg) ? ": " + msg : ""));
 		this.injectionPoint = null;
 	}
 
@@ -79,7 +79,7 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 
 		super(resourceDescription, beanName,
 				"Unsatisfied dependency expressed through " + injectionPoint +
-				(StringUtils.hasLength(msg) ? ": " + msg : ""));
+						(StringUtils.hasLength(msg) ? ": " + msg : ""));
 		this.injectionPoint = injectionPoint;
 	}
 

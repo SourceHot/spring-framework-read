@@ -41,10 +41,10 @@ public class TypeMismatchException extends PropertyAccessException {
 	private String propertyName;
 
 	@Nullable
-	private transient Object value;
+	private final transient Object value;
 
 	@Nullable
-	private Class<?> requiredType;
+	private final Class<?> requiredType;
 
 
 	/**
@@ -67,11 +67,11 @@ public class TypeMismatchException extends PropertyAccessException {
 
 		super(propertyChangeEvent,
 				"Failed to convert property value of type '" +
-				ClassUtils.getDescriptiveType(propertyChangeEvent.getNewValue()) + "'" +
-				(requiredType != null ?
-				" to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : "") +
-				(propertyChangeEvent.getPropertyName() != null ?
-				" for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
+						ClassUtils.getDescriptiveType(propertyChangeEvent.getNewValue()) + "'" +
+						(requiredType != null ?
+								" to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : "") +
+						(propertyChangeEvent.getPropertyName() != null ?
+								" for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
 				cause);
 		this.propertyName = propertyChangeEvent.getPropertyName();
 		this.value = propertyChangeEvent.getNewValue();
@@ -97,7 +97,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	 */
 	public TypeMismatchException(@Nullable Object value, @Nullable Class<?> requiredType, @Nullable Throwable cause) {
 		super("Failed to convert value of type '" + ClassUtils.getDescriptiveType(value) + "'" +
-				(requiredType != null ? " to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : ""),
+						(requiredType != null ? " to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : ""),
 				cause);
 		this.value = value;
 		this.requiredType = requiredType;

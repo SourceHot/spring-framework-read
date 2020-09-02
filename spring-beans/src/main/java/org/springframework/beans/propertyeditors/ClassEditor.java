@@ -58,17 +58,6 @@ public class ClassEditor extends PropertyEditorSupport {
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
 
-
-	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
-		if (StringUtils.hasText(text)) {
-			setValue(ClassUtils.resolveClassName(text.trim(), this.classLoader));
-		}
-		else {
-			setValue(null);
-		}
-	}
-
 	@Override
 	public String getAsText() {
 		Class<?> clazz = (Class<?>) getValue();
@@ -77,6 +66,16 @@ public class ClassEditor extends PropertyEditorSupport {
 		}
 		else {
 			return "";
+		}
+	}
+
+	@Override
+	public void setAsText(String text) throws IllegalArgumentException {
+		if (StringUtils.hasText(text)) {
+			setValue(ClassUtils.resolveClassName(text.trim(), this.classLoader));
+		}
+		else {
+			setValue(null);
 		}
 	}
 

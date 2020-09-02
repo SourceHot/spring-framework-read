@@ -61,6 +61,11 @@ public class StringTrimmerEditor extends PropertyEditorSupport {
 		this.emptyAsNull = emptyAsNull;
 	}
 
+	@Override
+	public String getAsText() {
+		Object value = getValue();
+		return (value != null ? value.toString() : "");
+	}
 
 	@Override
 	public void setAsText(@Nullable String text) {
@@ -79,12 +84,6 @@ public class StringTrimmerEditor extends PropertyEditorSupport {
 				setValue(value);
 			}
 		}
-	}
-
-	@Override
-	public String getAsText() {
-		Object value = getValue();
-		return (value != null ? value.toString() : "");
 	}
 
 }

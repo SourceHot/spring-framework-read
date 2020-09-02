@@ -86,7 +86,6 @@ public abstract class BeanUtils {
 		DEFAULT_TYPE_VALUES = Collections.unmodifiableMap(values);
 	}
 
-
 	/**
 	 * Convenience method to instantiate a class using its no-arg constructor. 反射创建实体.
 	 *
@@ -239,7 +238,6 @@ public abstract class BeanUtils {
 	 * null}.
 	 *
 	 * 寻找构造器(构造函数)
-
 	 * @param clazz the class to check
 	 *
 	 * @see <a href="https://kotlinlang.org/docs/reference/classes.html#constructors">Kotlin
@@ -264,9 +262,7 @@ public abstract class BeanUtils {
 	 * <p>Checks {@code Class.getMethod} first, falling back to
 	 * {@code findDeclaredMethod}. This allows to find public methods without issues even in
 	 * environments with restricted Java security settings.
-
 	 * 寻找函数{@link Method}
-
 	 * @param clazz      the class to check
 	 * @param methodName the name of the method to find
 	 * @param paramTypes the parameter types of the method to find
@@ -293,7 +289,6 @@ public abstract class BeanUtils {
 	 * <p>Checks {@code Class.getDeclaredMethod}, cascading upwards to all superclasses.
 	 *
 	 * 寻找函数{@link Method}
-
 	 * @param clazz      the class to check
 	 * @param methodName the name of the method to find
 	 * @param paramTypes the parameter types of the method to find
@@ -323,7 +318,6 @@ public abstract class BeanUtils {
 	 * {@code findDeclaredMethodWithMinimalParameters}. This allows for finding public methods
 	 * without issues even in environments with restricted Java security settings.
 	 *
-
 	 * 找出参数最少的函数
 	 * @param clazz      the class to check
 	 * @param methodName the name of the method to find
@@ -414,9 +408,9 @@ public abstract class BeanUtils {
 		}
 		if (numMethodsFoundWithCurrentMinimumArgs > 1) {
 			throw new IllegalArgumentException("Cannot resolve method '" + methodName +
-													   "' to a unique method. Attempted to resolve to overloaded method with " +
-													   "the least number of parameters but there were " +
-													   numMethodsFoundWithCurrentMinimumArgs + " candidates.");
+					"' to a unique method. Attempted to resolve to overloaded method with " +
+					"the least number of parameters but there were " +
+					numMethodsFoundWithCurrentMinimumArgs + " candidates.");
 		}
 		return targetMethod;
 	}
@@ -451,11 +445,11 @@ public abstract class BeanUtils {
 		int endParen = signature.indexOf(')');
 		if (startParen > -1 && endParen == -1) {
 			throw new IllegalArgumentException("Invalid method signature '" + signature +
-													   "': expected closing ')' for args list");
+					"': expected closing ')' for args list");
 		}
 		else if (startParen == -1 && endParen > -1) {
 			throw new IllegalArgumentException("Invalid method signature '" + signature +
-													   "': expected opening '(' for args list");
+					"': expected opening '(' for args list");
 		}
 		else if (startParen == -1) {
 			return findMethodWithMinimalParameters(clazz, signature);
@@ -475,7 +469,7 @@ public abstract class BeanUtils {
 				}
 				catch (Throwable ex) {
 					throw new IllegalArgumentException("Invalid method signature: unable to resolve type [" +
-															   parameterTypeName + "] for argument " + i + ". Root cause: " + ex);
+							parameterTypeName + "] for argument " + i + ". Root cause: " + ex);
 				}
 			}
 			return findMethod(clazz, methodName, parameterTypes);
@@ -594,7 +588,7 @@ public abstract class BeanUtils {
 			if (!PropertyEditor.class.isAssignableFrom(editorClass)) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Editor class [" + editorName +
-										"] does not implement [java.beans.PropertyEditor] interface");
+							"] does not implement [java.beans.PropertyEditor] interface");
 				}
 				unknownEditorTypes.add(targetType);
 				return null;
@@ -604,7 +598,7 @@ public abstract class BeanUtils {
 		catch (ClassNotFoundException ex) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("No property editor [" + editorName + "] found for type " +
-									 targetTypeName + " according to 'Editor' suffix convention");
+						targetTypeName + " according to 'Editor' suffix convention");
 			}
 			unknownEditorTypes.add(targetType);
 			return null;
@@ -770,7 +764,7 @@ public abstract class BeanUtils {
 	 * @see BeanWrapper
 	 */
 	private static void copyProperties(Object source, Object target, @Nullable Class<?> editable,
-									   @Nullable String... ignoreProperties) throws BeansException {
+			@Nullable String... ignoreProperties) throws BeansException {
 
 		Assert.notNull(source, "Source must not be null");
 		Assert.notNull(target, "Target must not be null");
@@ -779,7 +773,7 @@ public abstract class BeanUtils {
 		if (editable != null) {
 			if (!editable.isInstance(target)) {
 				throw new IllegalArgumentException("Target class [" + target.getClass().getName() +
-														   "] not assignable to Editable class [" + editable.getName() + "]");
+						"] not assignable to Editable class [" + editable.getName() + "]");
 			}
 			actualEditable = editable;
 		}

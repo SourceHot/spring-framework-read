@@ -96,26 +96,6 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 		this.allowEmpty = allowEmpty;
 	}
 
-
-	/**
-	 * Parse the Number from the given text, using the specified NumberFormat.
-	 */
-	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
-		if (this.allowEmpty && !StringUtils.hasText(text)) {
-			// Treat empty String as null value.
-			setValue(null);
-		}
-		else if (this.numberFormat != null) {
-			// Use given NumberFormat for parsing text.
-			setValue(NumberUtils.parseNumber(text, this.numberClass, this.numberFormat));
-		}
-		else {
-			// Use default valueOf methods for parsing text.
-			setValue(NumberUtils.parseNumber(text, this.numberClass));
-		}
-	}
-
 	/**
 	 * Coerce a Number value into the required target class, if necessary.
 	 */
@@ -145,6 +125,25 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 		else {
 			// Use toString method for rendering value.
 			return value.toString();
+		}
+	}
+
+	/**
+	 * Parse the Number from the given text, using the specified NumberFormat.
+	 */
+	@Override
+	public void setAsText(String text) throws IllegalArgumentException {
+		if (this.allowEmpty && !StringUtils.hasText(text)) {
+			// Treat empty String as null value.
+			setValue(null);
+		}
+		else if (this.numberFormat != null) {
+			// Use given NumberFormat for parsing text.
+			setValue(NumberUtils.parseNumber(text, this.numberClass, this.numberFormat));
+		}
+		else {
+			// Use default valueOf methods for parsing text.
+			setValue(NumberUtils.parseNumber(text, this.numberClass));
 		}
 	}
 

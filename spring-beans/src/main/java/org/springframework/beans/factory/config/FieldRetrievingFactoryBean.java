@@ -80,6 +80,13 @@ public class FieldRetrievingFactoryBean
 	@Nullable
 	private Field fieldObject;
 
+	/**
+	 * Return the target class on which the field is defined.
+	 */
+	@Nullable
+	public Class<?> getTargetClass() {
+		return this.targetClass;
+	}
 
 	/**
 	 * Set the target class on which the field is defined.
@@ -93,11 +100,11 @@ public class FieldRetrievingFactoryBean
 	}
 
 	/**
-	 * Return the target class on which the field is defined.
+	 * Return the target object on which the field is defined.
 	 */
 	@Nullable
-	public Class<?> getTargetClass() {
-		return this.targetClass;
+	public Object getTargetObject() {
+		return this.targetObject;
 	}
 
 	/**
@@ -112,11 +119,11 @@ public class FieldRetrievingFactoryBean
 	}
 
 	/**
-	 * Return the target object on which the field is defined.
+	 * Return the name of the field to be retrieved.
 	 */
 	@Nullable
-	public Object getTargetObject() {
-		return this.targetObject;
+	public String getTargetField() {
+		return this.targetField;
 	}
 
 	/**
@@ -128,14 +135,6 @@ public class FieldRetrievingFactoryBean
 	 */
 	public void setTargetField(@Nullable String targetField) {
 		this.targetField = (targetField != null ? StringUtils.trimAllWhitespace(targetField) : null);
-	}
-
-	/**
-	 * Return the name of the field to be retrieved.
-	 */
-	@Nullable
-	public String getTargetField() {
-		return this.targetField;
 	}
 
 	/**
@@ -189,7 +188,7 @@ public class FieldRetrievingFactoryBean
 			if (lastDotIndex == -1 || lastDotIndex == this.staticField.length()) {
 				throw new IllegalArgumentException(
 						"staticField must be a fully qualified class plus static field name: " +
-						"e.g. 'example.MyExampleClass.MY_EXAMPLE_FIELD'");
+								"e.g. 'example.MyExampleClass.MY_EXAMPLE_FIELD'");
 			}
 			String className = this.staticField.substring(0, lastDotIndex);
 			String fieldName = this.staticField.substring(lastDotIndex + 1);

@@ -63,6 +63,14 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	}
 
 	/**
+	 * Return whether the overridden method is <em>overloaded</em> (i.e., whether argument
+	 * type matching needs to occur to disambiguate methods of the same name).
+	 */
+	protected boolean isOverloaded() {
+		return this.overloaded;
+	}
+
+	/**
 	 * Set whether the overridden method is <em>overloaded</em> (i.e., whether argument
 	 * type matching needs to occur to disambiguate methods of the same name).
 	 * <p>Default is {@code true}; can be switched to {@code false} to optimize
@@ -72,12 +80,10 @@ public abstract class MethodOverride implements BeanMetadataElement {
 		this.overloaded = overloaded;
 	}
 
-	/**
-	 * Return whether the overridden method is <em>overloaded</em> (i.e., whether argument
-	 * type matching needs to occur to disambiguate methods of the same name).
-	 */
-	protected boolean isOverloaded() {
-		return this.overloaded;
+	@Override
+	@Nullable
+	public Object getSource() {
+		return this.source;
 	}
 
 	/**
@@ -86,12 +92,6 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	 */
 	public void setSource(@Nullable Object source) {
 		this.source = source;
-	}
-
-	@Override
-	@Nullable
-	public Object getSource() {
-		return this.source;
 	}
 
 	/**

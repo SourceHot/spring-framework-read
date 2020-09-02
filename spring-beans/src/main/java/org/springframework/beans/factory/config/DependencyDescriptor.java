@@ -54,6 +54,10 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	private final Class<?> declaringClass;
 
+	private final boolean required;
+
+	private final boolean eager;
+
 	@Nullable
 	private String methodName;
 
@@ -64,10 +68,6 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	@Nullable
 	private String fieldName;
-
-	private final boolean required;
-
-	private final boolean eager;
 
 	private int nestingLevel = 1;
 

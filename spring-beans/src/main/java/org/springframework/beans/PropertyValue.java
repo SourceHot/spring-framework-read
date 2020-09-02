@@ -47,18 +47,12 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	 * 参数名称
 	 */
 	private final String name;
+
 	/**
 	 * 具体数据值
 	 */
 	@Nullable
 	private final Object value;
-
-	private boolean optional = false;
-
-	private boolean converted = false;
-
-	@Nullable
-	private Object convertedValue;
 
 	/** Package-visible field that indicates whether conversion is necessary. */
 	@Nullable
@@ -67,6 +61,13 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	/** Package-visible field for caching the resolved property path tokens. */
 	@Nullable
 	transient volatile Object resolvedTokens;
+
+	private boolean optional = false;
+
+	private boolean converted = false;
+
+	@Nullable
+	private Object convertedValue;
 
 
 	/**
@@ -149,21 +150,21 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	}
 
 	/**
-	 * Set whether this is an optional value, that is, to be ignored
-	 * when no corresponding property exists on the target class.
-	 * @since 3.0
-	 */
-	public void setOptional(boolean optional) {
-		this.optional = optional;
-	}
-
-	/**
 	 * Return whether this is an optional value, that is, to be ignored
 	 * when no corresponding property exists on the target class.
 	 * @since 3.0
 	 */
 	public boolean isOptional() {
 		return this.optional;
+	}
+
+	/**
+	 * Set whether this is an optional value, that is, to be ignored
+	 * when no corresponding property exists on the target class.
+	 * @since 3.0
+	 */
+	public void setOptional(boolean optional) {
+		this.optional = optional;
 	}
 
 	/**
@@ -175,15 +176,6 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	}
 
 	/**
-	 * Set the converted value of this property value,
-	 * after processed type conversion.
-	 */
-	public synchronized void setConvertedValue(@Nullable Object value) {
-		this.converted = true;
-		this.convertedValue = value;
-	}
-
-	/**
 	 * Return the converted value of this property value,
 	 * after processed type conversion.
 	 */
@@ -192,6 +184,14 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		return this.convertedValue;
 	}
 
+	/**
+	 * Set the converted value of this property value,
+	 * after processed type conversion.
+	 */
+	public synchronized void setConvertedValue(@Nullable Object value) {
+		this.converted = true;
+		this.convertedValue = value;
+	}
 
 	@Override
 	public boolean equals(@Nullable Object other) {

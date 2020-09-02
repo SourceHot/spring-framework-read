@@ -33,6 +33,11 @@ public class BeanMetadataAttributeAccessor extends AttributeAccessorSupport impl
 	@Nullable
 	private Object source;
 
+	@Override
+	@Nullable
+	public Object getSource() {
+		return this.source;
+	}
 
 	/**
 	 * Set the configuration source {@code Object} for this metadata element.
@@ -41,13 +46,6 @@ public class BeanMetadataAttributeAccessor extends AttributeAccessorSupport impl
 	public void setSource(@Nullable Object source) {
 		this.source = source;
 	}
-
-	@Override
-	@Nullable
-	public Object getSource() {
-		return this.source;
-	}
-
 
 	/**
 	 * Add the given BeanMetadataAttribute to this accessor's set of attributes.
