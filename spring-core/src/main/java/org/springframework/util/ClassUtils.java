@@ -59,6 +59,12 @@ public abstract class ClassUtils {
 	/** Suffix for array class names: {@code "[]"}. */
 	public static final String ARRAY_SUFFIX = "[]";
 
+	/** The CGLIB class separator: {@code "$$"}. */
+	public static final String CGLIB_CLASS_SEPARATOR = "$$";
+
+	/** The ".class" file suffix. */
+	public static final String CLASS_FILE_SUFFIX = ".class";
+
 	/** Prefix for internal array class names: {@code "["}. */
 	private static final String INTERNAL_ARRAY_PREFIX = "[";
 
@@ -73,13 +79,6 @@ public abstract class ClassUtils {
 
 	/** The inner class separator character: {@code '$'}. */
 	private static final char INNER_CLASS_SEPARATOR = '$';
-
-	/** The CGLIB class separator: {@code "$$"}. */
-	public static final String CGLIB_CLASS_SEPARATOR = "$$";
-
-	/** The ".class" file suffix. */
-	public static final String CLASS_FILE_SUFFIX = ".class";
-
 
 	/**
 	 * Map with primitive wrapper type as key and corresponding primitive
@@ -116,7 +115,6 @@ public abstract class ClassUtils {
 	 */
 	private static final Map<Method, Method> interfaceMethodCache = new ConcurrentReferenceHashMap<>(256);
 
-
 	static {
 		primitiveWrapperTypeMap.put(Boolean.class, boolean.class);
 		primitiveWrapperTypeMap.put(Byte.class, byte.class);
@@ -152,12 +150,11 @@ public abstract class ClassUtils {
 		registerCommonClasses(Enum.class, Iterable.class, Iterator.class, Enumeration.class,
 				Collection.class, List.class, Set.class, Map.class, Map.Entry.class, Optional.class);
 
-		Class<?>[] javaLanguageInterfaceArray = {Serializable.class, Externalizable.class,
-				Closeable.class, AutoCloseable.class, Cloneable.class, Comparable.class};
+		Class<?>[] javaLanguageInterfaceArray = { Serializable.class, Externalizable.class,
+				Closeable.class, AutoCloseable.class, Cloneable.class, Comparable.class };
 		registerCommonClasses(javaLanguageInterfaceArray);
 		javaLanguageInterfaces = new HashSet<>(Arrays.asList(javaLanguageInterfaceArray));
 	}
-
 
 	/**
 	 * Register the given common classes with the ClassUtils cache.
@@ -543,17 +540,12 @@ public abstract class ClassUtils {
 		}
 		if (lhsType.isPrimitive()) {
 			Class<?> resolvedPrimitive = primitiveWrapperTypeMap.get(rhsType);
-			if (lhsType == resolvedPrimitive) {
-				return true;
-			}
+			return lhsType == resolvedPrimitive;
 		}
 		else {
 			Class<?> resolvedWrapper = primitiveTypeToWrapperMap.get(rhsType);
-			if (resolvedWrapper != null && lhsType.isAssignableFrom(resolvedWrapper)) {
-				return true;
-			}
+			return resolvedWrapper != null && lhsType.isAssignableFrom(resolvedWrapper);
 		}
-		return false;
 	}
 
 	/**
@@ -1190,7 +1182,15 @@ public abstract class ClassUtils {
 	/**
 	 * Return the number of methods with a given name (with any argument types),
 	 * for the given class and/or its superclasses. Includes non-public methods.
-	 * @param clazz	the clazz to check
+	 *
+	 * 获取重写方法的数量
+	 * - 重写方法的数量方法
+	 *   - 获取class中的方法列表.判断名字是否相同
+	 *   - 获取接口列表(递归)
+	 *     - 获取class中的方法列表.判断名字是否相同
+	 *   - 获取父类列表(递归)
+	 *     - 获取class中的方法列表.判断名字是否相同
+	 * @param clazz    the clazz to check
 	 * @param methodName the name of the method
 	 * @return the number of methods with the given name
 	 */
@@ -1204,11 +1204,15 @@ public abstract class ClassUtils {
 				count++;
 			}
 		}
+		// 获取实现的接口
 		Class<?>[] ifcs = clazz.getInterfaces();
 		for (Class<?> ifc : ifcs) {
+			// 递归获取数量
 			count += getMethodCountForName(ifc, methodName);
 		}
+		// 获取父类
 		if (clazz.getSuperclass() != null) {
+			// 递归获取数量
 			count += getMethodCountForName(clazz.getSuperclass(), methodName);
 		}
 		return count;
@@ -1218,7 +1222,7 @@ public abstract class ClassUtils {
 	 * Does the given class or one of its superclasses at least have one or more
 	 * methods with the supplied name (with any argument types)?
 	 * Includes non-public methods.
-	 * @param clazz	the clazz to check
+	 * @param clazz    the clazz to check
 	 * @param methodName the name of the method
 	 * @return whether there is at least one method with the given name
 	 */
@@ -1295,15 +1299,20 @@ public abstract class ClassUtils {
 	 * @see #getMostSpecificMethod
 	 */
 	public static Method getInterfaceMethodIfPossible(Method method) {
+		// 是不是 public
+		// 是不是 接口
 		if (!Modifier.isPublic(method.getModifiers()) || method.getDeclaringClass().isInterface()) {
 			return method;
 		}
+		// 放入init-method 缓存
 		return interfaceMethodCache.computeIfAbsent(method, key -> {
 			Class<?> current = key.getDeclaringClass();
 			while (current != null && current != Object.class) {
+				// 当前类的 接口列表
 				Class<?>[] ifcs = current.getInterfaces();
 				for (Class<?> ifc : ifcs) {
 					try {
+						// 从接口中获取方法
 						return ifc.getMethod(key.getName(), key.getParameterTypes());
 					}
 					catch (NoSuchMethodException ex) {

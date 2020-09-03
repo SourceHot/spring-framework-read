@@ -852,6 +852,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	@Override
 	@Nullable
 	public ConversionService getConversionService() {
+		// 转换服务
 		return this.conversionService;
 	}
 
@@ -1253,7 +1254,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param bw the BeanWrapper to initialize
 	 */
 	protected void initBeanWrapper(BeanWrapper bw) {
+		// 设置转换服务
 		bw.setConversionService(getConversionService());
+		// 注册自定义属性编辑器
 		registerCustomEditors(bw);
 	}
 
@@ -1274,6 +1277,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (!this.propertyEditorRegistrars.isEmpty()) {
 			for (PropertyEditorRegistrar registrar : this.propertyEditorRegistrars) {
 				try {
+					// 属性编辑器,注册自定义属性编辑器
 					registrar.registerCustomEditors(registry);
 				}
 				catch (BeanCreationException ex) {

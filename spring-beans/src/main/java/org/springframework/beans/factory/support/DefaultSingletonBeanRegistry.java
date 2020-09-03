@@ -88,7 +88,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/** Cache of early singleton objects: bean name to bean instance. */
 	private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
-	/** Set of registered singletons, containing the bean names in registration order. */
+	/**
+	 *
+	 * Set of registered singletons, containing the bean names in registration order.
+	 *
+	 * 注册过的单例单例对象的beanName
+	 *  */
 	private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
 
 	/**
@@ -166,6 +171,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * if necessary.
 	 * <p>To be called for eager registration of singletons, e.g. to be able to
 	 * resolve circular references.
+	 * 添加单例工厂
 	 * @param beanName the name of the bean
 	 * @param singletonFactory the factory for the singleton object
 	 */
@@ -173,8 +179,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		Assert.notNull(singletonFactory, "Singleton factory must not be null");
 		synchronized (this.singletonObjects) {
 			if (!this.singletonObjects.containsKey(beanName)) {
+				// 添加单例对象工厂
 				this.singletonFactories.put(beanName, singletonFactory);
+				// 删除单例BeanName
 				this.earlySingletonObjects.remove(beanName);
+				// 注册单例beanName
 				this.registeredSingletons.add(beanName);
 			}
 		}

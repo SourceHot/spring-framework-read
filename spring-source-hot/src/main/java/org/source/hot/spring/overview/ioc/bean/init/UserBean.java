@@ -2,30 +2,36 @@ package org.source.hot.spring.overview.ioc.bean.init;
 
 public class UserBean {
 
-  private String name;
-  private Integer age;
+	private String name;
 
-  public static UserBean createInstance() {
-    UserBean userBean = new UserBean();
-    userBean.setAge(18);
-    userBean.setName("zhangsan");
+	private Integer age;
 
-    return userBean;
-  }
+	public static UserBean createInstance() {
+		UserBean userBean = new UserBean();
+		userBean.setAge(18);
+		userBean.setName("zhangsan");
 
-  public String getName() {
-    return name;
-  }
+		return userBean;
+	}
 
-  public void setName(String name) {
-    this.name = name;
-  }
+	public String getName() {
+		return name;
+	}
 
-  public Integer getAge() {
-    return age;
-  }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-  public void setAge(Integer age) {
-    this.age = age;
-  }
+	public Integer getAge() {
+		return age;
+	}
+
+	public void setAge(Integer age) {
+		this.age = age;
+	}
+
+	public void initMethod() {
+		this.name = "abc";
+		this.age = 10;
+	}
 }

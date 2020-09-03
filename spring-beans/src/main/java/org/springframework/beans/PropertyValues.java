@@ -30,6 +30,9 @@ import org.springframework.lang.Nullable;
  * typically comprising one update for a specific target bean.
  *
  * 属性值接口
+ *
+ * 用于读取 xml 中
+ * {@code <property name="age" value="30"/>} 属性
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 13 May 2001

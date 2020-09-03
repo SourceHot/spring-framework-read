@@ -183,6 +183,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Nullable
 	private MutablePropertyValues propertyValues;
 
+	/**
+	 * 重写方法列表
+	 */
 	private MethodOverrides methodOverrides = new MethodOverrides();
 
 	@Nullable
@@ -381,6 +384,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Return the current bean class name of this bean definition.
+	 *
+	 * 返回当前的beanClassName
 	 */
 	@Override
 	@Nullable
@@ -450,12 +455,15 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	@Nullable
 	public Class<?> resolveBeanClass(@Nullable ClassLoader classLoader) throws ClassNotFoundException {
+		// 获取beanClassName
 		String className = getBeanClassName();
 		if (className == null) {
 			return null;
 		}
+		// 加载类
 		Class<?> resolvedClass = ClassUtils.forName(className, classLoader);
 		this.beanClass = resolvedClass;
+		// 返回
 		return resolvedClass;
 	}
 
@@ -1108,11 +1116,15 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Validate and prepare the method overrides defined for this bean.
 	 * Checks for existence of a method with the specified name.
+	 *
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	public void prepareMethodOverrides() throws BeanDefinitionValidationException {
 		// Check that lookup methods exist and determine their overloaded status.
+
+		// 是否需要重写
 		if (hasMethodOverrides()) {
+			// 重写
 			getMethodOverrides().getOverrides().forEach(this::prepareMethodOverride);
 		}
 	}
@@ -1125,12 +1137,15 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	protected void prepareMethodOverride(MethodOverride mo) throws BeanDefinitionValidationException {
+		// 返回需要重写方法的数量
 		int count = ClassUtils.getMethodCountForName(getBeanClass(), mo.getMethodName());
+		// 重写方法数量 = 0 异常
 		if (count == 0) {
 			throw new BeanDefinitionValidationException(
 					"Invalid method override: no method with name '" + mo.getMethodName() +
 							"' on class [" + getBeanClassName() + "]");
 		}
+		// 重写方法数量等于1 设置重写值=false
 		else if (count == 1) {
 			// Mark override as not overloaded, to avoid the overhead of arg type checking.
 			mo.setOverloaded(false);
