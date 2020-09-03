@@ -60,7 +60,9 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
     @Override
     public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
         // Don't override the class with CGLIB if no overrides.
+        // 不是 cglib
         if (!bd.hasMethodOverrides()) {
+            // 构造方法
             Constructor<?> constructorToUse;
             synchronized (bd.constructorArgumentLock) {
                 constructorToUse = (Constructor<?>) bd.resolvedConstructorOrFactoryMethod;
@@ -70,6 +72,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
                         throw new BeanInstantiationException(clazz, "Specified class is an interface");
                     }
                     try {
+                        // 获取构造方法
                         if (System.getSecurityManager() != null) {
                             constructorToUse = AccessController.doPrivileged(
                                     (PrivilegedExceptionAction<Constructor<?>>) clazz::getDeclaredConstructor);
@@ -84,10 +87,12 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
                     }
                 }
             }
+            // 调用构造方法进行构造
             return BeanUtils.instantiateClass(constructorToUse);
         }
         else {
             // Must generate CGLIB subclass.
+            // cglib 构造
             return instantiateWithMethodInjection(bd, beanName, owner);
         }
     }

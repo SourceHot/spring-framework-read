@@ -403,24 +403,33 @@ class ConstructorResolver {
 	public BeanWrapper instantiateUsingFactoryMethod(
 			String beanName, RootBeanDefinition mbd, @Nullable Object[] explicitArgs) {
 
+		// beanWrapper 对象创建
 		BeanWrapperImpl bw = new BeanWrapperImpl();
+		// initBeanWrapper 方法调用
 		this.beanFactory.initBeanWrapper(bw);
 
+		// 创建 bean 的类
 		Object factoryBean;
+		// factoryBean 的 class
 		Class<?> factoryClass;
+		// 是否静态
 		boolean isStatic;
 
+		// 获取 factory bean
 		String factoryBeanName = mbd.getFactoryBeanName();
 		if (factoryBeanName != null) {
 			if (factoryBeanName.equals(beanName)) {
 				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
 						"factory-bean reference points back to the same bean definition");
 			}
+			// 从容器中获取bean
 			factoryBean = this.beanFactory.getBean(factoryBeanName);
 			if (mbd.isSingleton() && this.beanFactory.containsSingleton(beanName)) {
 				throw new ImplicitlyAppearedSingletonException();
 			}
+			// 获取class
 			factoryClass = factoryBean.getClass();
+			// 是否静态
 			isStatic = false;
 		}
 		else {
@@ -434,8 +443,11 @@ class ConstructorResolver {
 			isStatic = true;
 		}
 
+		// 工厂方法
 		Method factoryMethodToUse = null;
+		// 参数列表
 		ArgumentsHolder argsHolderToUse = null;
+		// 参数列表
 		Object[] argsToUse = null;
 
 		if (explicitArgs != null) {
@@ -463,19 +475,23 @@ class ConstructorResolver {
 			// Try all methods with this name to see if they match the given arguments.
 			factoryClass = ClassUtils.getUserClass(factoryClass);
 
+			// 需要执行的工厂方法
 			List<Method> candidates = null;
 			if (mbd.isFactoryMethodUnique) {
 				if (factoryMethodToUse == null) {
 					factoryMethodToUse = mbd.getResolvedFactoryMethod();
 				}
 				if (factoryMethodToUse != null) {
+					// 转换 list
 					candidates = Collections.singletonList(factoryMethodToUse);
 				}
 			}
 			if (candidates == null) {
 				candidates = new ArrayList<>();
+				// 获取所有方法
 				Method[] rawCandidates = getCandidateMethods(factoryClass, mbd);
 				for (Method candidate : rawCandidates) {
+					// 名字是否和定义的相同
 					if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
 						candidates.add(candidate);
 					}
@@ -483,7 +499,9 @@ class ConstructorResolver {
 			}
 
 			if (candidates.size() == 1 && explicitArgs == null && !mbd.hasConstructorArgumentValues()) {
+				// 取出第一个方法执行
 				Method uniqueCandidate = candidates.get(0);
+				// 参数是否没有
 				if (uniqueCandidate.getParameterCount() == 0) {
 					mbd.factoryMethodToIntrospect = uniqueCandidate;
 					synchronized (mbd.constructorArgumentLock) {
@@ -491,11 +509,13 @@ class ConstructorResolver {
 						mbd.constructorArgumentsResolved = true;
 						mbd.resolvedConstructorArguments = EMPTY_ARGS;
 					}
+					// 设置实例化的bean
 					bw.setBeanInstance(instantiate(beanName, mbd, factoryBean, uniqueCandidate, EMPTY_ARGS));
 					return bw;
 				}
 			}
 
+			// 数量超过1 . 进行 order 排序
 			if (candidates.size() > 1) {  // explicitly skip immutable singletonList
 				candidates.sort(AutowireUtils.EXECUTABLE_COMPARATOR);
 			}
@@ -647,6 +667,9 @@ class ConstructorResolver {
 		return bw;
 	}
 
+	/**
+	 * 通过实例化策略接口进行实例化对象
+	 */
 	private Object instantiate(String beanName, RootBeanDefinition mbd,
 			@Nullable Object factoryBean, Method factoryMethod, Object[] args) {
 

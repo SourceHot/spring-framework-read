@@ -1524,6 +1524,197 @@ protected BeanWrapper createBeanInstance(String beanName, RootBeanDefinition mbd
 
 
 
+###### instantiateUsingFactoryMethod
+
+- `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#instantiateUsingFactoryMethod`
+- 通过 xml 中 bean 标签的 `factory-method` 属性进行初始化
+
+
+
+
+
+- 第一部分
+
+  1. 获取 factoryBean 
+
+  2. 获取 factoryBeanClass
+
+  3. 找出所有方法
+
+  4. 在所有方法中找出匹配的方法
+
+     ```xml
+     <!--  工厂方法创建-->
+     <bean id="factory-use" class="org.source.hot.spring.overview.ioc.bean.init.UserBean"
+          factory-bean="userFactory" factory-method="factory"></bean>
+     <!--user 工厂bean-->
+     <bean id="userFactory"
+          class="org.source.hot.spring.overview.ioc.bean.init.UserBeanFactoryImpl"/>
+     ```
+
+     - 如上代码所示. 会在方法列表中找出 方法名称为 `factory` 的方法放入 `candidates`
+
+  5. 当需要执行的方法数量是1的时候直接执行
+
+     ```java
+     bw.setBeanInstance(instantiate(beanName, mbd, factoryBean, uniqueCandidate, EMPTY_ARGS))
+     ```
+
+  6. 当数量大于1 的时候会有别的调用方式
+
+  **就用例而言目前是只有一个. 我先按照这个方法走下去**
+
+```java
+public BeanWrapper instantiateUsingFactoryMethod(
+      String beanName, RootBeanDefinition mbd, @Nullable Object[] explicitArgs) {
+
+   // beanWrapper 对象创建
+   BeanWrapperImpl bw = new BeanWrapperImpl();
+   // initBeanWrapper 方法调用
+   this.beanFactory.initBeanWrapper(bw);
+
+   // 创建bean 的类
+   Object factoryBean;
+   //
+   Class<?> factoryClass;
+   // 是否静态
+   boolean isStatic;
+
+   // 获取 factory bean
+   String factoryBeanName = mbd.getFactoryBeanName();
+   if (factoryBeanName != null) {
+      if (factoryBeanName.equals(beanName)) {
+         throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
+               "factory-bean reference points back to the same bean definition");
+      }
+      // 从容器中获取bean
+      factoryBean = this.beanFactory.getBean(factoryBeanName);
+      if (mbd.isSingleton() && this.beanFactory.containsSingleton(beanName)) {
+         throw new ImplicitlyAppearedSingletonException();
+      }
+      // 获取class
+      factoryClass = factoryBean.getClass();
+      // 是否静态
+      isStatic = false;
+   }
+   else {
+      // It's a static factory method on the bean class.
+      if (!mbd.hasBeanClass()) {
+         throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
+               "bean definition declares neither a bean class nor a factory-bean reference");
+      }
+      factoryBean = null;
+      factoryClass = mbd.getBeanClass();
+      isStatic = true;
+   }
+
+   // 工厂方法
+   Method factoryMethodToUse = null;
+   // 参数列表
+   ArgumentsHolder argsHolderToUse = null;
+   // 参数列表
+   Object[] argsToUse = null;
+
+   if (explicitArgs != null) {
+      argsToUse = explicitArgs;
+   }
+   else {
+      Object[] argsToResolve = null;
+      synchronized (mbd.constructorArgumentLock) {
+         factoryMethodToUse = (Method) mbd.resolvedConstructorOrFactoryMethod;
+         if (factoryMethodToUse != null && mbd.constructorArgumentsResolved) {
+            // Found a cached factory method...
+            argsToUse = mbd.resolvedConstructorArguments;
+            if (argsToUse == null) {
+               argsToResolve = mbd.preparedConstructorArguments;
+            }
+         }
+      }
+      if (argsToResolve != null) {
+         argsToUse = resolvePreparedArguments(beanName, mbd, bw, factoryMethodToUse, argsToResolve, true);
+      }
+   }
+
+   if (factoryMethodToUse == null || argsToUse == null) {
+      // Need to determine the factory method...
+      // Try all methods with this name to see if they match the given arguments.
+      factoryClass = ClassUtils.getUserClass(factoryClass);
+
+      // 需要执行的工厂方法
+      List<Method> candidates = null;
+      if (mbd.isFactoryMethodUnique) {
+         if (factoryMethodToUse == null) {
+            factoryMethodToUse = mbd.getResolvedFactoryMethod();
+         }
+         if (factoryMethodToUse != null) {
+            // 转换 list
+            candidates = Collections.singletonList(factoryMethodToUse);
+         }
+      }
+      if (candidates == null) {
+         candidates = new ArrayList<>();
+         // 获取所有方法
+         Method[] rawCandidates = getCandidateMethods(factoryClass, mbd);
+         for (Method candidate : rawCandidates) {
+            // 名字是否和定义的相同
+            if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
+               candidates.add(candidate);
+            }
+         }
+      }
+
+      if (candidates.size() == 1 && explicitArgs == null && !mbd.hasConstructorArgumentValues()) {
+         // 取出第一个方法执行
+         Method uniqueCandidate = candidates.get(0);
+         // 参数是否没有
+         if (uniqueCandidate.getParameterCount() == 0) {
+            mbd.factoryMethodToIntrospect = uniqueCandidate;
+            synchronized (mbd.constructorArgumentLock) {
+               mbd.resolvedConstructorOrFactoryMethod = uniqueCandidate;
+               mbd.constructorArgumentsResolved = true;
+               mbd.resolvedConstructorArguments = EMPTY_ARGS;
+            }
+            // 设置实例化的bean
+            bw.setBeanInstance(instantiate(beanName, mbd, factoryBean, uniqueCandidate, EMPTY_ARGS));
+            return bw;
+         }
+      }
+```
+
+
+
+###### instantiate
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+
+
+
+
+
 
 
 
