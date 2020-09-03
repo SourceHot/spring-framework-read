@@ -154,6 +154,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
 
+	/**
+	 * 依赖的bean
+	 */
 	@Nullable
 	private String[] dependsOn;
 
@@ -733,6 +736,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Return a callback for creating an instance of the bean, if any.
+	 *
+	 * 返回一个用来创建bean实例的回调接口
 	 * @since 5.0
 	 */
 	@Nullable
@@ -1146,6 +1151,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Clone this bean definition.
 	 * To be implemented by concrete subclasses.
+	 *
+	 * 克隆 BeanDefinition
 	 * @return the cloned bean definition object
 	 */
 	public abstract AbstractBeanDefinition cloneBeanDefinition();

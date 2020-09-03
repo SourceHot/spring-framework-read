@@ -21,4 +21,9 @@
 		  class="org.source.hot.spring.overview.ioc.bean.init.UserFactoryBean"/>
 
 	<alias name="factory-bean-user" alias="userFactoryBean"/>
+
+
+	<bean class="org.source.hot.spring.overview.ioc.bean.init.SystemUserBean" >
+		<property name="userBean" ref="factory-use"/>
+	</bean>
 </beans>

@@ -27,6 +27,7 @@ import org.springframework.lang.Nullable;
  * org.springframework.context.ApplicationContext} implementations will provide expression support
  * out of the box.
  *
+ * bean 占位符解析, 表达式解析
  * @author Juergen Hoeller
  * @since 3.0
  */

@@ -46,24 +46,30 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	@Override
 	public Expression parseExpression(String expressionString, @Nullable ParserContext context) throws ParseException {
 		if (context != null && context.isTemplate()) {
+			// 是否使用 template 解析
 			return parseTemplate(expressionString, context);
 		}
 		else {
+			// 自定义的解析规则
 			return doParseExpression(expressionString, context);
 		}
 	}
 
 
 	private Expression parseTemplate(String expressionString, ParserContext context) throws ParseException {
+		// 表达式为空
 		if (expressionString.isEmpty()) {
+			// 创建空的 LiteralExpression
 			return new LiteralExpression("");
 		}
 
+		// 表达式解析成接口
 		Expression[] expressions = parseExpressions(expressionString, context);
 		if (expressions.length == 1) {
 			return expressions[0];
 		}
 		else {
+			// 返回字符串的表达式
 			return new CompositeStringExpression(expressionString, expressions);
 		}
 	}

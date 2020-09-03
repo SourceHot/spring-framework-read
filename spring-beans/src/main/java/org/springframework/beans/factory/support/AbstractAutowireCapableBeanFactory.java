@@ -142,6 +142,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * Cache of unfinished FactoryBean instances: FactoryBean name to BeanWrapper.
+	 * key: beanName
+	 * value: bean wrapper
 	 */
 	private final ConcurrentMap<String, BeanWrapper> factoryBeanInstanceCache = new ConcurrentHashMap<>();
 
@@ -575,12 +577,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Instantiate the bean.
 		BeanWrapper instanceWrapper = null;
 		if (mbd.isSingleton()) {
+			// beanFactory 移除当前创建的beanName
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
+		// beanWrapper 是否存在
 		if (instanceWrapper == null) {
+			// 创建 bean 实例
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
+		// 获取 实例
 		final Object bean = instanceWrapper.getWrappedInstance();
+		// beanWrapper中存储的实例.class
 		Class<?> beanType = instanceWrapper.getWrappedClass();
 		if (beanType != NullBean.class) {
 			mbd.resolvedTargetType = beanType;
@@ -1160,8 +1167,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					/**
 					 * 主要实现{@link org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation(java.lang.Class, java.lang.String)}
 					 */
+					// 前置方法
 					bean = applyBeanPostProcessorsBeforeInstantiation(targetType, beanName);
 					if (bean != null) {
+						// 后置方法
 						bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 					}
 				}
@@ -1227,12 +1236,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			);
 		}
 
+		// 返回一个用来创建bean实例的回调接口
+		// Supplier get 直接获取bean对象
 		Supplier<?> instanceSupplier = mbd.getInstanceSupplier();
 		if (instanceSupplier != null) {
 			return obtainFromSupplier(instanceSupplier, beanName);
 		}
 
 		if (mbd.getFactoryMethodName() != null) {
+			// 通过工厂方法创建
 			return instantiateUsingFactoryMethod(beanName, mbd, args);
 		}
 
@@ -1363,6 +1375,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Instantiate the given bean using its default constructor.
 	 *
+	 * 创建bean的包装
 	 * @param beanName the name of the bean
 	 * @param mbd      the bean definition for the bean
 	 *

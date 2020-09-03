@@ -28,6 +28,7 @@ import org.springframework.util.Assert;
  * and {@link org.springframework.instrument.classloading.ShadowingClassLoader},
  * providing common handling of excluded packages and classes.
  *
+ * 类加载器
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 2.5.2
@@ -41,6 +42,9 @@ public abstract class DecoratingClassLoader extends ClassLoader {
 
 	private final Set<String> excludedPackages = Collections.newSetFromMap(new ConcurrentHashMap<>(8));
 
+	/**
+	 * 排除的类
+	 */
 	private final Set<String> excludedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(8));
 
 

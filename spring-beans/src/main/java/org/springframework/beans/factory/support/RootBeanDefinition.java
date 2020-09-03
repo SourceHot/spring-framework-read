@@ -60,7 +60,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/** Common lock for the two post-processing fields below. */
 	final Object postProcessingLock = new Object();
 
-	/** Determines if the definition needs to be re-merged. */
+	/**
+	 *  Determines if the definition needs to be re-merged.
+	 * 是否需要重新合并定义
+	 * */
 	volatile boolean stale;
 
 	boolean allowCaching = true;
@@ -467,6 +470,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 
+	/**
+	 * 克隆 BeanDefinition
+	 * @return
+	 */
 	@Override
 	public RootBeanDefinition cloneBeanDefinition() {
 		return new RootBeanDefinition(this);
