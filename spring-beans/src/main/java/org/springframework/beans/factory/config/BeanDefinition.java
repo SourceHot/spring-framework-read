@@ -95,6 +95,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Set the name of the parent definition of this bean definition, if any.
+	 *
+	 * 设置父类名称
 	 */
 	void setParentName(@Nullable String parentName);
 
@@ -107,6 +109,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * the definitive bean type at runtime but rather only use it for parsing purposes at the
 	 * individual bean definition level.
 	 *
+	 * 获取 bean 类型名称 (xxx.Class)
 	 * @see #getParentName()
 	 * @see #getFactoryBeanName()
 	 * @see #getFactoryMethodName()
@@ -118,7 +121,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Specify the bean class name of this bean definition.
 	 * <p>The class name can be modified during bean factory post-processing,
 	 * typically replacing the original class name with a parsed variant of it.
-	 *
+	 * 设置 beanClass
 	 * @see #setParentName
 	 * @see #setFactoryBeanName
 	 * @see #setFactoryMethodName
@@ -127,6 +130,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Return the name of the current target scope for this bean, or {@code null} if not known yet.
+	 * 获取作用域
 	 */
 	@Nullable
 	String getScope();
@@ -134,6 +138,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Override the target scope of this bean, specifying a new scope name.
 	 *
+	 * 设置作用域
 	 * @see #SCOPE_SINGLETON
 	 * @see #SCOPE_PROTOTYPE
 	 */
@@ -142,6 +147,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Return whether this bean should be lazily initialized, i.e. not eagerly instantiated on
 	 * startup. Only applicable to a singleton bean.
+	 * 是否延迟加载
 	 */
 	boolean isLazyInit();
 
@@ -149,11 +155,13 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Set whether this bean should be lazily initialized.
 	 * <p>If {@code false}, the bean will get instantiated on startup by bean
 	 * factories that perform eager initialization of singletons.
+	 * 设置是否延迟加载
 	 */
 	void setLazyInit(boolean lazyInit);
 
 	/**
 	 * Return the bean names that this bean depends on.
+	 * 获取依赖名称
 	 */
 	@Nullable
 	String[] getDependsOn();
@@ -161,11 +169,13 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Set the names of the beans that this bean depends on being initialized. The bean factory will
 	 * guarantee that these beans get initialized first.
+	 * 设置需要的依赖
 	 */
 	void setDependsOn(@Nullable String... dependsOn);
 
 	/**
 	 * Return whether this bean is a candidate for getting autowired into some other bean.
+	 *
 	 */
 	boolean isAutowireCandidate();
 
@@ -180,6 +190,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Return whether this bean is a primary autowire candidate.
+	 * 是否主要,针对多个相同类型的情况下使用
 	 */
 	boolean isPrimary();
 

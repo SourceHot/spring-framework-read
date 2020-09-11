@@ -1804,12 +1804,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		MutablePropertyValues mpvs = null;
 		// 没有解析的属性
 		List<PropertyValue> original;
-
+		// 类型判断
 		if (pvs instanceof MutablePropertyValues) {
+			// 强制类型转换
 			mpvs = (MutablePropertyValues) pvs;
 			if (mpvs.isConverted()) {
 				// Shortcut: use the pre-converted values as-is.
 				try {
+					// 包装对象的属性设置
 					bw.setPropertyValues(mpvs);
 					return;
 				}

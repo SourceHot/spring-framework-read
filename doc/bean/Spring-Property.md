@@ -391,3 +391,254 @@ public List<E> merge(@Nullable Object parent) {
 
 
 - 在 list 视线中就是讲两个结果合并. 事实上其他的几个都是这个操作. 这里就不贴所有的代码了
+
+
+
+
+
+## getBean 流程中的属性注入
+
+- `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#populateBean`
+
+
+
+
+
+- 部分代码如下
+
+```java
+PropertyValues pvs = (mbd.hasPropertyValues() ? mbd.getPropertyValues() : null);
+// 获取自动注入的值
+int resolvedAutowireMode = mbd.getResolvedAutowireMode();
+// 自动注入
+if (resolvedAutowireMode == AUTOWIRE_BY_NAME || resolvedAutowireMode == AUTOWIRE_BY_TYPE) {
+   MutablePropertyValues newPvs = new MutablePropertyValues(pvs);
+   // Add property values based on autowire by name if applicable.
+   if (resolvedAutowireMode == AUTOWIRE_BY_NAME) {
+      // 按照名称注入
+      autowireByName(beanName, mbd, bw, newPvs);
+   }
+   // Add property values based on autowire by type if applicable.
+   if (resolvedAutowireMode == AUTOWIRE_BY_TYPE) {
+      // 按照类型注入
+      autowireByType(beanName, mbd, bw, newPvs);
+   }
+   pvs = newPvs;
+}
+
+boolean hasInstAwareBpps = hasInstantiationAwareBeanPostProcessors();
+boolean needsDepCheck = (mbd.getDependencyCheck() != AbstractBeanDefinition.DEPENDENCY_CHECK_NONE);
+
+PropertyDescriptor[] filteredPds = null;
+if (hasInstAwareBpps) {
+   if (pvs == null) {
+      pvs = mbd.getPropertyValues();
+   }
+   for (BeanPostProcessor bp : getBeanPostProcessors()) {
+      if (bp instanceof InstantiationAwareBeanPostProcessor) {
+         InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+         PropertyValues pvsToUse = ibp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName);
+         if (pvsToUse == null) {
+            if (filteredPds == null) {
+               filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
+            }
+            pvsToUse = ibp.postProcessPropertyValues(pvs, filteredPds, bw.getWrappedInstance(), beanName);
+            if (pvsToUse == null) {
+               return;
+            }
+         }
+         pvs = pvsToUse;
+      }
+   }
+}
+if (needsDepCheck) {
+   if (filteredPds == null) {
+      filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
+   }
+   // 以来检查
+   checkDependencies(beanName, mbd, filteredPds, pvs);
+}
+
+if (pvs != null) {
+   // 应用属性
+   applyPropertyValues(beanName, mbd, bw, pvs);
+}
+```
+
+
+
+
+
+- 直接看最后的方法`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyPropertyValues`
+
+
+
+
+
+
+
+- 通过一段用例代码来进行基本属性的赋值, 
+
+  ```java
+  @Component
+  public class BeanDefinitionDemo implements BeanFactoryAware {
+  
+     private BeanFactory beanFactory;
+  
+     public static void main(String[] args) {
+        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(BeanDefinitionDemo.class);
+        Person person = ctx.getBean(Person.class);
+        System.out.println(person.getName());
+  
+     }
+  
+     @Override
+     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = beanFactory;
+     }
+  
+     @PostConstruct
+     public void register() {
+        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder
+              .genericBeanDefinition(Person.class);
+        beanDefinitionBuilder.addPropertyValue("name", "张三");
+        BeanDefinitionRegistry beanFactory = (BeanDefinitionRegistry) this.beanFactory;
+        beanFactory.registerBeanDefinition("person", beanDefinitionBuilder.getBeanDefinition());
+     }
+  
+  }
+  ```
+
+  
+
+
+
+
+
+![image-20200911134220062](images/image-20200911134220062.png)
+
+
+
+- 执行完这个方法后 `name` 会被赋值为 `张三`
+
+
+
+
+
+
+
+### setPropertyValues
+
+- 执行链路
+  - `org.springframework.beans.AbstractPropertyAccessor#setPropertyValues(org.springframework.beans.PropertyValues)`
+    - `org.springframework.beans.AbstractPropertyAccessor#setPropertyValues(org.springframework.beans.PropertyValues, boolean, boolean)`
+      - `org.springframework.beans.AbstractPropertyAccessor#setPropertyValue(org.springframework.beans.PropertyValue)`
+        - `org.springframework.beans.AbstractPropertyAccessor#setPropertyValue(java.lang.String, java.lang.Object)`
+          - `org.springframework.beans.AbstractNestablePropertyAccessor#setPropertyValue(java.lang.String, java.lang.Object)`
+
+
+
+
+
+![image-20200911134534277](images/image-20200911134534277.png)
+
+先看 pv 结构. 
+
+现在 pv 结构 `name = name value = 张三`
+
+
+
+
+
+- `org.springframework.beans.AbstractNestablePropertyAccessor#processLocalProperty`
+
+  这个方法是很重要的一段. 最终的属性赋值!
+
+
+
+
+
+方法路径
+
+1. `org.springframework.beans.AbstractNestablePropertyAccessor#processLocalProperty`
+   1. `org.springframework.beans.AbstractNestablePropertyAccessor#getLocalPropertyHandler`
+
+
+
+
+
+```JAVA
+@Override
+@Nullable
+protected BeanPropertyHandler getLocalPropertyHandler(String propertyName) {
+   PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(propertyName);
+   return (pd != null ? new BeanPropertyHandler(pd) : null);
+}
+```
+
+
+
+- `PropertyDescriptor` 是什么？
+
+  - 这是一个java提供的对象,包含的属性如下. 
+
+
+```java
+public class PropertyDescriptor extends FeatureDescriptor {
+
+    private Reference<? extends Class<?>> propertyTypeRef;
+    private final MethodRef readMethodRef = new MethodRef();
+    private final MethodRef writeMethodRef = new MethodRef();
+    private Reference<? extends Class<?>> propertyEditorClassRef;
+}
+```
+
+
+
+- 继续往后代码会走到`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyPropertyValues`方法中
+
+
+
+![image-20200911150916875](images/image-20200911150916875.png)
+
+
+
+
+
+- 再往下走会到达
+
+  `org.springframework.beans.BeanWrapperImpl.BeanPropertyHandler#setValue`
+
+  查看整个方法
+
+  ```java
+  @Override
+  public void setValue(final @Nullable Object value) throws Exception {
+     final Method writeMethod = (this.pd instanceof GenericTypeAwarePropertyDescriptor ?
+           ((GenericTypeAwarePropertyDescriptor) this.pd).getWriteMethodForActualAccess() :
+           this.pd.getWriteMethod());
+     if (System.getSecurityManager() != null) {
+        AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+           ReflectionUtils.makeAccessible(writeMethod);
+           return null;
+        });
+        try {
+           AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
+                 writeMethod.invoke(getWrappedInstance(), value), acc);
+        }
+        catch (PrivilegedActionException ex) {
+           throw ex.getException();
+        }
+     }
+     else {
+        ReflectionUtils.makeAccessible(writeMethod);
+        writeMethod.invoke(getWrappedInstance(), value);
+     }
+  }
+  ```
+
+  将set方法执行.
+
+
+
+
