@@ -1685,11 +1685,34 @@ public BeanWrapper instantiateUsingFactoryMethod(
 
 ###### instantiate
 
+- 通过实例化策略接口进行实例化对象
+
+```java
+private Object instantiate(String beanName, RootBeanDefinition mbd,
+      @Nullable Object factoryBean, Method factoryMethod, Object[] args) {
+
+   try {
+      if (System.getSecurityManager() != null) {
+         return AccessController.doPrivileged((PrivilegedAction<Object>) () ->
+                     this.beanFactory.getInstantiationStrategy().instantiate(
+                           mbd, beanName, this.beanFactory, factoryBean, factoryMethod, args),
+               this.beanFactory.getAccessControlContext());
+      }
+      else {
+         return this.beanFactory.getInstantiationStrategy().instantiate(
+               mbd, beanName, this.beanFactory, factoryBean, factoryMethod, args);
+      }
+   }
+   catch (Throwable ex) {
+      throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+            "Bean instantiation via factory method failed", ex);
+   }
+}
+```
 
 
 
-
-
+- 这里最终的本质就是执行最后的 `factoryMethod` 方法.将bean 实例化返回
 
 
 

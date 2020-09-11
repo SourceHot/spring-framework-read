@@ -44,7 +44,7 @@ import org.springframework.util.ObjectUtils;
 public class PropertyValue extends BeanMetadataAttributeAccessor implements Serializable {
 
 	/**
-	 * 参数名称
+	 * 属性名称
 	 */
 	private final String name;
 

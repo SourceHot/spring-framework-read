@@ -155,6 +155,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
             Method priorInvokedFactoryMethod = currentlyInvokedFactoryMethod.get();
             try {
+            	// 找到 factory method 调用执行
                 currentlyInvokedFactoryMethod.set(factoryMethod);
                 Object result = factoryMethod.invoke(factoryBean, args);
                 if (result == null) {

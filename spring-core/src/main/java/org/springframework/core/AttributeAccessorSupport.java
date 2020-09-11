@@ -37,7 +37,13 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public abstract class AttributeAccessorSupport implements AttributeAccessor, Serializable {
 
-	/** Map with String keys and Object values. */
+	/**
+	 *
+	 * Map with String keys and Object values.
+	 * 属性值列表
+	 * key: name
+	 * value: data
+	 * */
 	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
 
@@ -84,8 +90,12 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 	 */
 	protected void copyAttributesFrom(AttributeAccessor source) {
 		Assert.notNull(source, "Source must not be null");
+		// 获取属性名称列表
 		String[] attributeNames = source.attributeNames();
+		// 循环属性名称列表
 		for (String attributeName : attributeNames) {
+			// 设置属性
+			// name: 属性名称,value: 从入参中获取属性名称对应的属性值
 			setAttribute(attributeName, source.getAttribute(attributeName));
 		}
 	}

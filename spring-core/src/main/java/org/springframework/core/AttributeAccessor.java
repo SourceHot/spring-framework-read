@@ -33,16 +33,25 @@ public interface AttributeAccessor {
 	 * <p>In general, users should take care to prevent overlaps with other
 	 * metadata attributes by using fully-qualified names, perhaps using
 	 * class or package names as prefix.
-	 * @param name the unique attribute key
+	 *
+	 * 设置属性值
+	 * @param name the unique attribute key.
+	 * 				属性值名称
 	 * @param value the attribute value to be attached
+	 * 				属性值
 	 */
 	void setAttribute(String name, @Nullable Object value);
 
 	/**
 	 * Get the value of the attribute identified by {@code name}.
 	 * Return {@code null} if the attribute doesn't exist.
+	 *
+	 * 通过属性名称获取属性值
+	 *
 	 * @param name the unique attribute key
+	 * 				属性值名称
 	 * @return the current value of the attribute, if any
+	 * 			属性值
 	 */
 	@Nullable
 	Object getAttribute(String name);
@@ -50,8 +59,13 @@ public interface AttributeAccessor {
 	/**
 	 * Remove the attribute identified by {@code name} and return its value.
 	 * Return {@code null} if no attribute under {@code name} is found.
+	 *
+	 * 移除指定属性名称的值,返回移除的属性值
+	 *
 	 * @param name the unique attribute key
+	 * 				属性值名称
 	 * @return the last value of the attribute, if any
+	 * 			移除的属性值
 	 */
 	@Nullable
 	Object removeAttribute(String name);
@@ -59,12 +73,15 @@ public interface AttributeAccessor {
 	/**
 	 * Return {@code true} if the attribute identified by {@code name} exists.
 	 * Otherwise return {@code false}.
+	 * 是否包含属性名称
 	 * @param name the unique attribute key
+	 * 				属性名称
 	 */
 	boolean hasAttribute(String name);
 
 	/**
 	 * Return the names of all attributes.
+	 * 属性名称列表
 	 */
 	String[] attributeNames();
 
