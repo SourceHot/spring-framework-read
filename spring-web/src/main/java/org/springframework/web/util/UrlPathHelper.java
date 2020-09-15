@@ -62,12 +62,21 @@ public class UrlPathHelper {
 	static volatile Boolean websphereComplianceFlag;
 
 
+	/**
+	 * 是否全路径标记
+	 */
 	private boolean alwaysUseFullPath = false;
 
+	/**
+	 * 是否需要 decode
+	 */
 	private boolean urlDecode = true;
 
 	private boolean removeSemicolonContent = true;
 
+	/**
+	 * 默认的encoding编码格式
+	 */
 	private String defaultEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
 
@@ -82,6 +91,14 @@ public class UrlPathHelper {
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
 		this.alwaysUseFullPath = alwaysUseFullPath;
+	}
+
+	/**
+	 * Whether to decode the request URI when determining the lookup path.
+	 * @since 4.3.13
+	 */
+	public boolean isUrlDecode() {
+		return this.urlDecode;
 	}
 
 	/**
@@ -107,14 +124,6 @@ public class UrlPathHelper {
 	}
 
 	/**
-	 * Whether to decode the request URI when determining the lookup path.
-	 * @since 4.3.13
-	 */
-	public boolean isUrlDecode() {
-		return this.urlDecode;
-	}
-
-	/**
 	 * Set if ";" (semicolon) content should be stripped from the request URI.
 	 * <p>Default is "true".
 	 */
@@ -127,6 +136,13 @@ public class UrlPathHelper {
 	 */
 	public boolean shouldRemoveSemicolonContent() {
 		return this.removeSemicolonContent;
+	}
+
+	/**
+	 * Return the default character encoding to use for URL decoding.
+	 */
+	protected String getDefaultEncoding() {
+		return this.defaultEncoding;
 	}
 
 	/**
@@ -147,17 +163,12 @@ public class UrlPathHelper {
 	}
 
 	/**
-	 * Return the default character encoding to use for URL decoding.
-	 */
-	protected String getDefaultEncoding() {
-		return this.defaultEncoding;
-	}
-
-
-	/**
 	 * Return the mapping lookup path for the given request, within the current
 	 * servlet mapping if applicable, else within the web application.
 	 * <p>Detects include request URL if called within a RequestDispatcher include.
+	 *
+	 *
+	 * 获取具体的url
 	 * @param request current HTTP request
 	 * @return the lookup path
 	 * @see #getPathWithinServletMapping
@@ -165,7 +176,9 @@ public class UrlPathHelper {
 	 */
 	public String getLookupPathForRequest(HttpServletRequest request) {
 		// Always use full path within current servlet context?
+		// 是否全路径
 		if (this.alwaysUseFullPath) {
+			// 获取全路径
 			return getPathWithinApplication(request);
 		}
 		// Else, use path within current servlet mapping if applicable
@@ -213,12 +226,17 @@ public class UrlPathHelper {
 	 * @see #getLookupPathForRequest
 	 */
 	public String getPathWithinServletMapping(HttpServletRequest request) {
+		// 获取 context-path + uri
 		String pathWithinApp = getPathWithinApplication(request);
+		// 获取 servlet path
 		String servletPath = getServletPath(request);
+		// 去掉双斜杠
 		String sanitizedPathWithinApp = getSanitizedPath(pathWithinApp);
+
 		String path;
 
 		// If the app container sanitized the servletPath, check against the sanitized version
+		// 是否包含 去掉斜杠后的path
 		if (servletPath.contains(sanitizedPathWithinApp)) {
 			path = getRemainingPath(sanitizedPathWithinApp, servletPath, false);
 		}
@@ -261,8 +279,11 @@ public class UrlPathHelper {
 	 * @see #getLookupPathForRequest
 	 */
 	public String getPathWithinApplication(HttpServletRequest request) {
+		// 获取 context path
 		String contextPath = getContextPath(request);
+		// 获取 uri
 		String requestUri = getRequestUri(request);
+		// 剩余路径
 		String path = getRemainingPath(requestUri, contextPath, true);
 		if (path != null) {
 			// Normal case: URI contains context path.
@@ -342,10 +363,13 @@ public class UrlPathHelper {
 	 * @return the request URI
 	 */
 	public String getRequestUri(HttpServletRequest request) {
+		// 从属性中获取
 		String uri = (String) request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
 		if (uri == null) {
+			// 调用方法获取
 			uri = request.getRequestURI();
 		}
+		//编码和清理数据
 		return decodeAndCleanUriString(request, uri);
 	}
 
@@ -358,6 +382,7 @@ public class UrlPathHelper {
 	 * @return the context path
 	 */
 	public String getContextPath(HttpServletRequest request) {
+		// 从 request 获取 context path
 		String contextPath = (String) request.getAttribute(WebUtils.INCLUDE_CONTEXT_PATH_ATTRIBUTE);
 		if (contextPath == null) {
 			contextPath = request.getContextPath();
@@ -366,6 +391,7 @@ public class UrlPathHelper {
 			// Invalid case, but happens for includes on Jetty: silently adapt it.
 			contextPath = "";
 		}
+		// decode context path
 		return decodeRequestString(request, contextPath);
 	}
 
@@ -445,7 +471,7 @@ public class UrlPathHelper {
 	 */
 	public String getOriginatingQueryString(HttpServletRequest request) {
 		if ((request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE) != null) ||
-			(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) != null)) {
+				(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) != null)) {
 			return (String) request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE);
 		}
 		else {
@@ -457,8 +483,11 @@ public class UrlPathHelper {
 	 * Decode the supplied URI string and strips any extraneous portion after a ';'.
 	 */
 	private String decodeAndCleanUriString(HttpServletRequest request, String uri) {
+		// 去掉分号
 		uri = removeSemicolonContent(uri);
+		// decoding
 		uri = decodeRequestString(request, uri);
+		// 去掉 // 双斜杠
 		uri = getSanitizedPath(uri);
 		return uri;
 	}
@@ -476,7 +505,9 @@ public class UrlPathHelper {
 	 * @see java.net.URLDecoder#decode(String)
 	 */
 	public String decodeRequestString(HttpServletRequest request, String source) {
+		// 判断是否需要编码
 		if (this.urlDecode) {
+			// 进行编码
 			return decodeInternal(request, source);
 		}
 		return source;
@@ -484,8 +515,10 @@ public class UrlPathHelper {
 
 	@SuppressWarnings("deprecation")
 	private String decodeInternal(HttpServletRequest request, String source) {
+		// 确定编码方式
 		String enc = determineEncoding(request);
 		try {
+			// 将 source 编译成 enc 的编码方式
 			return UriUtils.decode(source, enc);
 		}
 		catch (UnsupportedCharsetException ex) {
@@ -493,6 +526,7 @@ public class UrlPathHelper {
 				logger.warn("Could not decode request string [" + source + "] with encoding '" + enc +
 						"': falling back to platform default encoding; exception message: " + ex.getMessage());
 			}
+			// 直接编码,JDK底层编码
 			return URLDecoder.decode(source);
 		}
 	}
@@ -502,14 +536,17 @@ public class UrlPathHelper {
 	 * Can be overridden in subclasses.
 	 * <p>The default implementation checks the request encoding,
 	 * falling back to the default encoding specified for this resolver.
+	 * 确认编码方式
 	 * @param request current HTTP request
 	 * @return the encoding for the request (never {@code null})
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
 	 * @see #setDefaultEncoding
 	 */
 	protected String determineEncoding(HttpServletRequest request) {
+		// 从 request 中获取编码方式
 		String enc = request.getCharacterEncoding();
 		if (enc == null) {
+			// 默认编码
 			enc = getDefaultEncoding();
 		}
 		return enc;
@@ -558,11 +595,13 @@ public class UrlPathHelper {
 	 * @return the same Map or a new Map instance
 	 */
 	public Map<String, String> decodePathVariables(HttpServletRequest request, Map<String, String> vars) {
+		// 判断是否需要重写编码
 		if (this.urlDecode) {
 			return vars;
 		}
 		else {
 			Map<String, String> decodedVars = new LinkedHashMap<>(vars.size());
+			// 虚幻 decoding
 			vars.forEach((key, value) -> decodedVars.put(key, decodeInternal(request, value)));
 			return decodedVars;
 		}
@@ -580,11 +619,14 @@ public class UrlPathHelper {
 	public MultiValueMap<String, String> decodeMatrixVariables(
 			HttpServletRequest request, MultiValueMap<String, String> vars) {
 
+		// 判断是否需要重写编码
 		if (this.urlDecode) {
 			return vars;
 		}
 		else {
+			// 需要重写编码的情况
 			MultiValueMap<String, String> decodedVars = new LinkedMultiValueMap<>(vars.size());
+			// 循环, 将 value 调用decodeInternal写到结果map返回
 			vars.forEach((key, values) -> {
 				for (String value : values) {
 					decodedVars.add(key, decodeInternal(request, value));
@@ -594,6 +636,11 @@ public class UrlPathHelper {
 		}
 	}
 
+	/**
+	 * 是否删除 servlet path 后面的斜杠
+	 * @param request
+	 * @return
+	 */
 	private boolean shouldRemoveTrailingServletPathSlash(HttpServletRequest request) {
 		if (request.getAttribute(WEBSPHERE_URI_ATTRIBUTE) == null) {
 			// Regular servlet container: behaves as expected in any case,

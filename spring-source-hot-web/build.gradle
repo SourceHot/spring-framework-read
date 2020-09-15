@@ -1,0 +1,26 @@
+plugins {
+	id 'java'
+}
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'idea'
+
+
+group 'org.springframework'
+version '5.2.3.RELEASE'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	testCompile group: 'junit', name: 'junit', version: '4.12'
+	compile(project(":spring-aop"))
+	compile(project(":spring-beans"))
+	compile(project(":spring-context"))
+	compile(project(":spring-core"))
+	compile(project(":spring-expression"))
+	compile(project(":spring-web"))
+	compile(project(":spring-webmvc"))
+}

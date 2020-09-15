@@ -73,16 +73,19 @@ import org.springframework.web.util.UrlPathHelper;
 public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		implements HandlerMapping, Ordered, BeanNameAware {
 
+	private final List<Object> interceptors = new ArrayList<>();
+
+	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<>();
+
+	/**
+	 * 默认的 handler
+	 */
 	@Nullable
 	private Object defaultHandler;
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
-
-	private final List<Object> interceptors = new ArrayList<>();
-
-	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<>();
 
 	@Nullable
 	private CorsConfigurationSource corsConfigurationSource;
@@ -94,6 +97,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Nullable
 	private String beanName;
 
+	/**
+	 * Return the default handler for this handler mapping,
+	 * or {@code null} if none.
+	 */
+	@Nullable
+	public Object getDefaultHandler() {
+		return this.defaultHandler;
+	}
 
 	/**
 	 * Set the default handler for this handler mapping.
@@ -102,15 +113,6 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	public void setDefaultHandler(@Nullable Object defaultHandler) {
 		this.defaultHandler = defaultHandler;
-	}
-
-	/**
-	 * Return the default handler for this handler mapping,
-	 * or {@code null} if none.
-	 */
-	@Nullable
-	public Object getDefaultHandler() {
-		return this.defaultHandler;
 	}
 
 	/**
@@ -147,6 +149,13 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
+	 * Return the UrlPathHelper implementation to use for resolution of lookup paths.
+	 */
+	public UrlPathHelper getUrlPathHelper() {
+		return this.urlPathHelper;
+	}
+
+	/**
 	 * Set the UrlPathHelper to use for resolution of lookup paths.
 	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
 	 * or to share common UrlPathHelper settings across multiple HandlerMappings
@@ -161,10 +170,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Return the UrlPathHelper implementation to use for resolution of lookup paths.
+	 * Return the PathMatcher implementation to use for matching URL paths
+	 * against registered URL patterns.
 	 */
-	public UrlPathHelper getUrlPathHelper() {
-		return this.urlPathHelper;
+	public PathMatcher getPathMatcher() {
+		return this.pathMatcher;
 	}
 
 	/**
@@ -178,14 +188,6 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource) {
 			((UrlBasedCorsConfigurationSource) this.corsConfigurationSource).setPathMatcher(pathMatcher);
 		}
-	}
-
-	/**
-	 * Return the PathMatcher implementation to use for matching URL paths
-	 * against registered URL patterns.
-	 */
-	public PathMatcher getPathMatcher() {
-		return this.pathMatcher;
 	}
 
 	/**
@@ -235,6 +237,13 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
+	 * Return the configured {@link CorsProcessor}.
+	 */
+	public CorsProcessor getCorsProcessor() {
+		return this.corsProcessor;
+	}
+
+	/**
 	 * Configure a custom {@link CorsProcessor} to use to apply the matched
 	 * {@link CorsConfiguration} for a request.
 	 * <p>By default {@link DefaultCorsProcessor} is used.
@@ -245,11 +254,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		this.corsProcessor = corsProcessor;
 	}
 
-	/**
-	 * Return the configured {@link CorsProcessor}.
-	 */
-	public CorsProcessor getCorsProcessor() {
-		return this.corsProcessor;
+	@Override
+	public int getOrder() {
+		return this.order;
 	}
 
 	/**
@@ -259,11 +266,6 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	public void setOrder(int order) {
 		this.order = order;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
 	}
 
 	@Override
@@ -392,8 +394,10 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Override
 	@Nullable
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+		// 转换成handler
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
+			// 获取默认的 handler
 			handler = getDefaultHandler();
 		}
 		if (handler == null) {
@@ -401,6 +405,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 		// Bean name or resolved handler?
 		if (handler instanceof String) {
+			// handler 是beanName 直接从容器中获取
 			String handlerName = (String) handler;
 			handler = obtainApplicationContext().getBean(handlerName);
 		}

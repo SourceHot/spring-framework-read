@@ -87,6 +87,43 @@ public class HandlerMappingIntrospector
 		this.handlerMappings = initHandlerMappings(context);
 	}
 
+	private static List<HandlerMapping> initHandlerMappings(ApplicationContext applicationContext) {
+		Map<String, HandlerMapping> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+				applicationContext, HandlerMapping.class, true, false);
+		if (!beans.isEmpty()) {
+			List<HandlerMapping> mappings = new ArrayList<>(beans.values());
+			AnnotationAwareOrderComparator.sort(mappings);
+			return Collections.unmodifiableList(mappings);
+		}
+		return Collections.unmodifiableList(initFallback(applicationContext));
+	}
+
+	private static List<HandlerMapping> initFallback(ApplicationContext applicationContext) {
+		Properties props;
+		String path = "DispatcherServlet.properties";
+		try {
+			Resource resource = new ClassPathResource(path, DispatcherServlet.class);
+			props = PropertiesLoaderUtils.loadProperties(resource);
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Could not load '" + path + "': " + ex.getMessage());
+		}
+
+		String value = props.getProperty(HandlerMapping.class.getName());
+		String[] names = StringUtils.commaDelimitedListToStringArray(value);
+		List<HandlerMapping> result = new ArrayList<>(names.length);
+		for (String name : names) {
+			try {
+				Class<?> clazz = ClassUtils.forName(name, DispatcherServlet.class.getClassLoader());
+				Object mapping = applicationContext.getAutowireCapableBeanFactory().createBean(clazz);
+				result.add((HandlerMapping) mapping);
+			}
+			catch (ClassNotFoundException ex) {
+				throw new IllegalStateException("Could not find default HandlerMapping [" + name + "]");
+			}
+		}
+		return result;
+	}
 
 	/**
 	 * Return the configured HandlerMapping's.
@@ -94,7 +131,6 @@ public class HandlerMappingIntrospector
 	public List<HandlerMapping> getHandlerMappings() {
 		return (this.handlerMappings != null ? this.handlerMappings : Collections.emptyList());
 	}
-
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
@@ -109,7 +145,6 @@ public class HandlerMappingIntrospector
 		}
 	}
 
-
 	/**
 	 * Find the {@link HandlerMapping} that would handle the given request and
 	 * return it as a {@link MatchableHandlerMapping} that can be used to test
@@ -123,8 +158,11 @@ public class HandlerMappingIntrospector
 	@Nullable
 	public MatchableHandlerMapping getMatchableHandlerMapping(HttpServletRequest request) throws Exception {
 		Assert.notNull(this.handlerMappings, "Handler mappings not initialized");
+
+		// http servlet request wrapper
 		HttpServletRequest wrapper = new RequestAttributeChangeIgnoringWrapper(request);
 		for (HandlerMapping handlerMapping : this.handlerMappings) {
+			// 获取处理对象
 			Object handler = handlerMapping.getHandler(wrapper);
 			if (handler == null) {
 				continue;
@@ -166,46 +204,6 @@ public class HandlerMappingIntrospector
 		}
 		return null;
 	}
-
-
-	private static List<HandlerMapping> initHandlerMappings(ApplicationContext applicationContext) {
-		Map<String, HandlerMapping> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-				applicationContext, HandlerMapping.class, true, false);
-		if (!beans.isEmpty()) {
-			List<HandlerMapping> mappings = new ArrayList<>(beans.values());
-			AnnotationAwareOrderComparator.sort(mappings);
-			return Collections.unmodifiableList(mappings);
-		}
-		return Collections.unmodifiableList(initFallback(applicationContext));
-	}
-
-	private static List<HandlerMapping> initFallback(ApplicationContext applicationContext) {
-		Properties props;
-		String path = "DispatcherServlet.properties";
-		try {
-			Resource resource = new ClassPathResource(path, DispatcherServlet.class);
-			props = PropertiesLoaderUtils.loadProperties(resource);
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException("Could not load '" + path + "': " + ex.getMessage());
-		}
-
-		String value = props.getProperty(HandlerMapping.class.getName());
-		String[] names = StringUtils.commaDelimitedListToStringArray(value);
-		List<HandlerMapping> result = new ArrayList<>(names.length);
-		for (String name : names) {
-			try {
-				Class<?> clazz = ClassUtils.forName(name, DispatcherServlet.class.getClassLoader());
-				Object mapping = applicationContext.getAutowireCapableBeanFactory().createBean(clazz);
-				result.add((HandlerMapping) mapping);
-			}
-			catch (ClassNotFoundException ex) {
-				throw new IllegalStateException("Could not find default HandlerMapping [" + name + "]");
-			}
-		}
-		return result;
-	}
-
 
 	/**
 	 * Request wrapper that ignores request attribute changes.

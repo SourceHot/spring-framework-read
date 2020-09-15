@@ -87,21 +87,12 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	private static final CorsConfiguration ALLOW_CORS_CONFIG = new CorsConfiguration();
 
-	static {
-		ALLOW_CORS_CONFIG.addAllowedOrigin("*");
-		ALLOW_CORS_CONFIG.addAllowedMethod("*");
-		ALLOW_CORS_CONFIG.addAllowedHeader("*");
-		ALLOW_CORS_CONFIG.setAllowCredentials(true);
-	}
-
+	private final MappingRegistry mappingRegistry = new MappingRegistry();
 
 	private boolean detectHandlerMethodsInAncestorContexts = false;
 
 	@Nullable
 	private HandlerMethodMappingNamingStrategy<T> namingStrategy;
-
-	private final MappingRegistry mappingRegistry = new MappingRegistry();
-
 
 	/**
 	 * Whether to detect handler methods in beans in ancestor ApplicationContexts.
@@ -193,9 +184,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		this.mappingRegistry.unregister(mapping);
 	}
 
-
-	// Handler method detection
-
 	/**
 	 * Detects handler methods at initialization.
 	 * @see #initHandlerMethods
@@ -204,6 +192,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	public void afterPropertiesSet() {
 		initHandlerMethods();
 	}
+
+
+	// Handler method detection
 
 	/**
 	 * Scan beans in the ApplicationContext, detect and register handler methods.
@@ -347,30 +338,36 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected void handlerMethodsInitialized(Map<T, HandlerMethod> handlerMethods) {
 		// Total includes detected mappings + explicit registrations via registerMapping
 		int total = handlerMethods.size();
-		if ((logger.isTraceEnabled() && total == 0) || (logger.isDebugEnabled() && total > 0) ) {
+		if ((logger.isTraceEnabled() && total == 0) || (logger.isDebugEnabled() && total > 0)) {
 			logger.debug(total + " mappings in " + formatMappingName());
+		}
+	}
+
+	/**
+	 * Look up a handler method for the given request.
+	 * 求 handlerMethod 处理方法
+	 */
+	@Override
+	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+		//
+		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+		// 设置属性
+		request.setAttribute(LOOKUP_PATH, lookupPath);
+		// 上锁
+		this.mappingRegistry.acquireReadLock();
+		try {
+			// 寻找 handler method
+			HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
+			return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
+		}
+		finally {
+			// 释放锁
+			this.mappingRegistry.releaseReadLock();
 		}
 	}
 
 
 	// Handler method lookup
-
-	/**
-	 * Look up a handler method for the given request.
-	 */
-	@Override
-	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
-		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
-		request.setAttribute(LOOKUP_PATH, lookupPath);
-		this.mappingRegistry.acquireReadLock();
-		try {
-			HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
-			return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
-		}
-		finally {
-			this.mappingRegistry.releaseReadLock();
-		}
-	}
 
 	/**
 	 * Look up the best-matching handler method for the current request.
@@ -477,15 +474,15 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		return corsConfig;
 	}
 
-
-	// Abstract template methods
-
 	/**
 	 * Whether the given type is a handler with handler methods.
 	 * @param beanType the type of the bean being checked
 	 * @return "true" if this a handler type, "false" otherwise.
 	 */
 	protected abstract boolean isHandler(Class<?> beanType);
+
+
+	// Abstract template methods
 
 	/**
 	 * Provide the mapping for a handler method. A method for which no
@@ -521,11 +518,71 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	protected abstract Comparator<T> getMappingComparator(HttpServletRequest request);
 
+	private static class MappingRegistration<T> {
+
+		private final T mapping;
+
+		private final HandlerMethod handlerMethod;
+
+		private final List<String> directUrls;
+
+		@Nullable
+		private final String mappingName;
+
+		public MappingRegistration(T mapping, HandlerMethod handlerMethod,
+				@Nullable List<String> directUrls, @Nullable String mappingName) {
+
+			Assert.notNull(mapping, "Mapping must not be null");
+			Assert.notNull(handlerMethod, "HandlerMethod must not be null");
+			this.mapping = mapping;
+			this.handlerMethod = handlerMethod;
+			this.directUrls = (directUrls != null ? directUrls : Collections.emptyList());
+			this.mappingName = mappingName;
+		}
+
+		public T getMapping() {
+			return this.mapping;
+		}
+
+		public HandlerMethod getHandlerMethod() {
+			return this.handlerMethod;
+		}
+
+		public List<String> getDirectUrls() {
+			return this.directUrls;
+		}
+
+		@Nullable
+		public String getMappingName() {
+			return this.mappingName;
+		}
+	}
+
+	private static class EmptyHandler {
+
+		@SuppressWarnings("unused")
+		public void handle() {
+			throw new UnsupportedOperationException("Not implemented");
+		}
+	}
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	private static class KotlinDelegate {
+
+		static private boolean isSuspend(Method method) {
+			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+			return function != null && function.isSuspend();
+		}
+	}
 
 	/**
 	 * A registry that maintains all mappings to handler methods, exposing methods
 	 * to perform lookups and providing concurrent access.
 	 * <p>Package-private for testing purposes.
+	 *
+	 * mapping 注册类
 	 */
 	class MappingRegistry {
 
@@ -628,8 +685,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			if (existingHandlerMethod != null && !existingHandlerMethod.equals(handlerMethod)) {
 				throw new IllegalStateException(
 						"Ambiguous mapping. Cannot map '" + handlerMethod.getBean() + "' method \n" +
-						handlerMethod + "\nto " + mapping + ": There is already '" +
-						existingHandlerMethod.getBean() + "' bean method\n" + existingHandlerMethod + " mapped.");
+								handlerMethod + "\nto " + mapping + ": There is already '" +
+								existingHandlerMethod.getBean() + "' bean method\n" + existingHandlerMethod + " mapped.");
 			}
 		}
 
@@ -714,48 +771,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 	}
 
-
-	private static class MappingRegistration<T> {
-
-		private final T mapping;
-
-		private final HandlerMethod handlerMethod;
-
-		private final List<String> directUrls;
-
-		@Nullable
-		private final String mappingName;
-
-		public MappingRegistration(T mapping, HandlerMethod handlerMethod,
-				@Nullable List<String> directUrls, @Nullable String mappingName) {
-
-			Assert.notNull(mapping, "Mapping must not be null");
-			Assert.notNull(handlerMethod, "HandlerMethod must not be null");
-			this.mapping = mapping;
-			this.handlerMethod = handlerMethod;
-			this.directUrls = (directUrls != null ? directUrls : Collections.emptyList());
-			this.mappingName = mappingName;
-		}
-
-		public T getMapping() {
-			return this.mapping;
-		}
-
-		public HandlerMethod getHandlerMethod() {
-			return this.handlerMethod;
-		}
-
-		public List<String> getDirectUrls() {
-			return this.directUrls;
-		}
-
-		@Nullable
-		public String getMappingName() {
-			return this.mappingName;
-		}
-	}
-
-
 	/**
 	 * A thin wrapper around a matched HandlerMethod and its mapping, for the purpose of
 	 * comparing the best match with a comparator in the context of the current request.
@@ -777,7 +792,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 	}
 
-
 	private class MatchComparator implements Comparator<Match> {
 
 		private final Comparator<T> comparator;
@@ -792,24 +806,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 	}
 
-
-	private static class EmptyHandler {
-
-		@SuppressWarnings("unused")
-		public void handle() {
-			throw new UnsupportedOperationException("Not implemented");
-		}
-	}
-
-	/**
-	 * Inner class to avoid a hard dependency on Kotlin at runtime.
-	 */
-	private static class KotlinDelegate {
-
-		static private boolean isSuspend(Method method) {
-			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			return function != null && function.isSuspend();
-		}
+	static {
+		ALLOW_CORS_CONFIG.addAllowedOrigin("*");
+		ALLOW_CORS_CONFIG.addAllowedMethod("*");
+		ALLOW_CORS_CONFIG.addAllowedHeader("*");
+		ALLOW_CORS_CONFIG.setAllowCredentials(true);
 	}
 
 }
