@@ -349,7 +349,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Override
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
-		//
+		// 获取当前请求路径
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		// 设置属性
 		request.setAttribute(LOOKUP_PATH, lookupPath);
@@ -381,28 +381,41 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	@Nullable
 	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
 		List<Match> matches = new ArrayList<>();
+		// 从 MultiValueMap 获取
 		List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath);
+		// 如果不为空
 		if (directPathMatches != null) {
+			// 添加匹配映射
 			addMatchingMappings(directPathMatches, matches, request);
 		}
 		if (matches.isEmpty()) {
 			// No choice but to go through all mappings...
+			// 添加匹配映射
 			addMatchingMappings(this.mappingRegistry.getMappings().keySet(), matches, request);
 		}
 
 		if (!matches.isEmpty()) {
+			// 比较对象
 			Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
+			// 排序
 			matches.sort(comparator);
+			// 获取第一个 match 对象
 			Match bestMatch = matches.get(0);
 			if (matches.size() > 1) {
 				if (logger.isTraceEnabled()) {
 					logger.trace(matches.size() + " matching mappings: " + matches);
 				}
+
+				// 是否跨域请求
 				if (CorsUtils.isPreFlightRequest(request)) {
 					return PREFLIGHT_AMBIGUOUS_MATCH;
 				}
+				// 取出第二个元素.
 				Match secondBestMatch = matches.get(1);
+				// 如果比较结果相同
 				if (comparator.compare(bestMatch, secondBestMatch) == 0) {
+					// 第二个元素和第一个元素的比较过程
+					// 拿出 handlerMethod 进行比较
 					Method m1 = bestMatch.handlerMethod.getMethod();
 					Method m2 = secondBestMatch.handlerMethod.getMethod();
 					String uri = request.getRequestURI();
@@ -410,19 +423,26 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 							"Ambiguous handler methods mapped for '" + uri + "': {" + m1 + ", " + m2 + "}");
 				}
 			}
+			// 设置属性
 			request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, bestMatch.handlerMethod);
+			// 处理匹配的结果
 			handleMatch(bestMatch.mapping, lookupPath, request);
 			return bestMatch.handlerMethod;
 		}
 		else {
+			// 处理没有匹配的结果
 			return handleNoMatch(this.mappingRegistry.getMappings().keySet(), lookupPath, request);
 		}
 	}
 
 	private void addMatchingMappings(Collection<T> mappings, List<Match> matches, HttpServletRequest request) {
 		for (T mapping : mappings) {
+			// 抽象方法
+			// 通过抽象方法获取 match 结果
 			T match = getMatchingMapping(mapping, request);
+			// 是否为空
 			if (match != null) {
+				// 从 mappingLookup 获取结果并且插入到matches中
 				matches.add(new Match(match, this.mappingRegistry.getMappings().get(mapping)));
 			}
 		}

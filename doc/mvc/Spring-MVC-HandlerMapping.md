@@ -78,24 +78,25 @@ public final HandlerExecutionChain getHandler(HttpServletRequest request) throws
 
 
 ```java
-@Override
-protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
-   //
-   String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
-   // 设置属性 
-   request.setAttribute(LOOKUP_PATH, lookupPath);
-   // 上锁
-   this.mappingRegistry.acquireReadLock();
-   try {
-      // 寻找 handler method
-      HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
-      return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
-   }
-   finally {
-      // 释放锁
-      this.mappingRegistry.releaseReadLock();
-   }
-}
+	@Override
+	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+		// 获取当前请求路径
+		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+		// 设置属性
+		request.setAttribute(LOOKUP_PATH, lookupPath);
+		// 上锁
+		this.mappingRegistry.acquireReadLock();
+		try {
+			// 寻找 handler method
+			HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
+			return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
+		}
+		finally {
+			// 释放锁
+			this.mappingRegistry.releaseReadLock();
+		}
+	}
+
 ```
 
 
@@ -407,6 +408,379 @@ public Map<String, String> decodePathVariables(HttpServletRequest request, Map<S
 
 
 
-### getPathWithinServletMapping
+- 回到`org.springframework.web.servlet.handler.AbstractHandlerMethodMapping#getHandlerInternal`
 
-- 获取匹配的url
+```JAVA
+String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+```
+
+
+
+- 设置属性上锁开锁就不具体展开了.
+
+
+
+## lookupHandlerMethod
+
+- `org.springframework.web.servlet.handler.AbstractHandlerMethodMapping#lookupHandlerMethod` 方法
+
+
+
+- 第一部分
+
+
+
+```java
+@Nullable
+protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
+   List<Match> matches = new ArrayList<>();
+   // 从 MultiValueMap 获取
+   List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath);
+   // 如果不为空
+   if (directPathMatches != null) {
+      // 添加匹配映射
+      addMatchingMappings(directPathMatches, matches, request);
+   }
+   if (matches.isEmpty()) {
+      // No choice but to go through all mappings...
+      // 添加匹配映射
+      addMatchingMappings(this.mappingRegistry.getMappings().keySet(), matches, request);
+   }
+ 
+    //...
+}
+```
+
+
+
+- 创建一个匹配list,将匹配结果放入
+
+  ```
+  List<Match> matches = new ArrayList<>();
+  ```
+
+- 从 map 中获取数据
+
+  ```
+  List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath);
+  ```
+
+  ```JAVA
+  @Nullable
+  public List<T> getMappingsByUrl(String urlPath) {
+     return this.urlLookup.get(urlPath);
+  }
+  ```
+
+  urlLookup 是`MultiValueMap`接口. 
+
+  key:url value:mapping
+
+- addMatchingMappings 方法
+
+  ```java
+  if (directPathMatches != null) {
+     // 添加匹配映射
+     addMatchingMappings(directPathMatches, matches, request);
+  }
+  if (matches.isEmpty()) {
+     // No choice but to go through all mappings...
+     // 添加匹配映射
+     addMatchingMappings(this.mappingRegistry.getMappings().keySet(), matches, request);
+  }
+  ```
+
+  ```java
+  private void addMatchingMappings(Collection<T> mappings, List<Match> matches, HttpServletRequest request) {
+     for (T mapping : mappings) {
+        // 抽象方法
+        // 通过抽象方法获取 match 结果
+        T match = getMatchingMapping(mapping, request);
+        // 是否为空
+        if (match != null) {
+           // 从 mappingLookup 获取结果并且插入到matches中
+           matches.add(new Match(match, this.mappingRegistry.getMappings().get(mapping)));
+        }
+     }
+  }
+  ```
+
+
+
+- `getMatchingMapping` 方法是一个抽象方法
+
+  ```java
+  protected abstract T getMatchingMapping(T mapping, HttpServletRequest request);
+  ```
+
+- `org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping#getMatchingMapping`
+
+  ```java
+  @Override
+  protected RequestMappingInfo getMatchingMapping(RequestMappingInfo info, HttpServletRequest request) {
+     return info.getMatchingCondition(request);
+  }
+  ```
+
+
+
+
+
+
+
+- 第二部分
+
+
+
+```java
+if (!matches.isEmpty()) {
+   // 比较对象
+   Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
+   // 排序
+   matches.sort(comparator);
+   // 获取第一个 match 对象
+   Match bestMatch = matches.get(0);
+   if (matches.size() > 1) {
+      if (logger.isTraceEnabled()) {
+         logger.trace(matches.size() + " matching mappings: " + matches);
+      }
+
+      if (CorsUtils.isPreFlightRequest(request)) {
+         return PREFLIGHT_AMBIGUOUS_MATCH;
+      }
+      Match secondBestMatch = matches.get(1);
+      if (comparator.compare(bestMatch, secondBestMatch) == 0) {
+         // 拿出 handlerMethod 进行比较
+         Method m1 = bestMatch.handlerMethod.getMethod();
+         Method m2 = secondBestMatch.handlerMethod.getMethod();
+         String uri = request.getRequestURI();
+         throw new IllegalStateException(
+               "Ambiguous handler methods mapped for '" + uri + "': {" + m1 + ", " + m2 + "}");
+      }
+   }
+   request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, bestMatch.handlerMethod);
+   handleMatch(bestMatch.mapping, lookupPath, request);
+   return bestMatch.handlerMethod;
+}
+else {
+   return handleNoMatch(this.mappingRegistry.getMappings().keySet(), lookupPath, request);
+}
+```
+
+
+
+
+
+- 一行行开始分析
+
+```java
+Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
+```
+
+- 抽象方法`getMappingComparator`
+
+```java
+protected abstract Comparator<T> getMappingComparator(HttpServletRequest request);
+```
+
+- 实现方法
+
+  ```java
+  @Override
+  protected Comparator<RequestMappingInfo> getMappingComparator(final HttpServletRequest request) {
+     return (info1, info2) -> info1.compareTo(info2, request);
+  }
+  ```
+
+  内部定义了 compareTo 方法
+
+- 执行完成比较方法后创建对象`MatchComparator`
+- 对象创建后进行排序，排序后取出第一个元素作为后续操作的基准对象
+
+
+
+```java
+// 排序
+matches.sort(comparator);
+// 获取第一个 match 对象
+Match bestMatch = matches.get(0);
+```
+
+
+
+
+
+```java
+if (matches.size() > 1) {
+   if (logger.isTraceEnabled()) {
+      logger.trace(matches.size() + " matching mappings: " + matches);
+   }
+
+   // 是否跨域请求
+   if (CorsUtils.isPreFlightRequest(request)) {
+      return PREFLIGHT_AMBIGUOUS_MATCH;
+   }
+   // 取出第二个元素.
+   Match secondBestMatch = matches.get(1);
+   // 如果比较结果相同
+   if (comparator.compare(bestMatch, secondBestMatch) == 0) {
+      // 第二个元素和第一个元素的比较过程
+      // 拿出 handlerMethod 进行比较
+      Method m1 = bestMatch.handlerMethod.getMethod();
+      Method m2 = secondBestMatch.handlerMethod.getMethod();
+      String uri = request.getRequestURI();
+      throw new IllegalStateException(
+            "Ambiguous handler methods mapped for '" + uri + "': {" + m1 + ", " + m2 + "}");
+   }
+}
+```
+
+- 取出第一个元素和第二个元素进行比较. 如果两个 match 相同, 出现异常
+
+
+
+最后两个方法
+
+
+
+```java
+    // 设置属性
+   request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, bestMatch.handlerMethod);
+   // 处理匹配的结果
+   handleMatch(bestMatch.mapping, lookupPath, request);
+   return bestMatch.handlerMethod;
+}
+else {
+   // 处理没有匹配的结果
+   return handleNoMatch(this.mappingRegistry.getMappings().keySet(), lookupPath, request);
+}
+```
+
+
+
+- `handleMatch`
+
+  ```java
+  protected void handleMatch(T mapping, String lookupPath, HttpServletRequest request) {
+     request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, lookupPath);
+  }
+  ```
+
+  设置一次属性
+
+  这个方法子类会继续实现
+
+  - `org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping#handleMatch`
+
+
+
+```java
+@Override
+protected void handleMatch(RequestMappingInfo info, String lookupPath, HttpServletRequest request) {
+   super.handleMatch(info, lookupPath, request);
+
+   String bestPattern;
+   Map<String, String> uriVariables;
+
+   // 匹配器
+   Set<String> patterns = info.getPatternsCondition().getPatterns();
+   // 如果空设置基本数据
+   if (patterns.isEmpty()) {
+      bestPattern = lookupPath;
+      uriVariables = Collections.emptyMap();
+   }
+   else {
+      // 取出一个匹配器
+      bestPattern = patterns.iterator().next();
+
+      // 地址匹配器比较 路由地址和匹配器比较
+      uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
+   }
+
+   request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
+
+   if (isMatrixVariableContentAvailable()) {
+      // 处理多层参数, 带有;分号的处理
+      Map<String, MultiValueMap<String, String>> matrixVars = extractMatrixVariables(request, uriVariables);
+      request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, matrixVars);
+   }
+
+   // 编码url参数
+   Map<String, String> decodedUriVariables = getUrlPathHelper().decodePathVariables(request, uriVariables);
+   request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedUriVariables);
+
+   if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
+      // 获取 media type
+      Set<MediaType> mediaTypes = info.getProducesCondition().getProducibleMediaTypes();
+      request.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
+   }
+}
+```
+
+
+
+
+
+- `handleNoMatch` 也是同类型操作
+  - `org.springframework.web.servlet.handler.AbstractHandlerMethodMapping#handleNoMatch`
+    - `org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping#handleNoMatch`
+
+```java
+@Override
+protected HandlerMethod handleNoMatch(
+      Set<RequestMappingInfo> infos, String lookupPath, HttpServletRequest request) throws ServletException {
+
+   // 创建对象 PartialMatchHelper
+   PartialMatchHelper helper = new PartialMatchHelper(infos, request);
+   if (helper.isEmpty()) {
+      return null;
+   }
+
+   // 函数是否匹配
+   if (helper.hasMethodsMismatch()) {
+      Set<String> methods = helper.getAllowedMethods();
+      // 请求方式比较
+      if (HttpMethod.OPTIONS.matches(request.getMethod())) {
+         // handler 转换
+         HttpOptionsHandler handler = new HttpOptionsHandler(methods);
+         // 构建 handler method
+         return new HandlerMethod(handler, HTTP_OPTIONS_HANDLE_METHOD);
+      }
+      throw new HttpRequestMethodNotSupportedException(request.getMethod(), methods);
+   }
+
+   if (helper.hasConsumesMismatch()) {
+      Set<MediaType> mediaTypes = helper.getConsumableMediaTypes();
+      MediaType contentType = null;
+      if (StringUtils.hasLength(request.getContentType())) {
+         try {
+            // 字符串转换成对象
+            contentType = MediaType.parseMediaType(request.getContentType());
+         }
+         catch (InvalidMediaTypeException ex) {
+            throw new HttpMediaTypeNotSupportedException(ex.getMessage());
+         }
+      }
+      throw new HttpMediaTypeNotSupportedException(contentType, new ArrayList<>(mediaTypes));
+   }
+
+   if (helper.hasProducesMismatch()) {
+      Set<MediaType> mediaTypes = helper.getProducibleMediaTypes();
+      throw new HttpMediaTypeNotAcceptableException(new ArrayList<>(mediaTypes));
+   }
+
+   if (helper.hasParamsMismatch()) {
+      List<String[]> conditions = helper.getParamConditions();
+      throw new UnsatisfiedServletRequestParameterException(conditions, request.getParameterMap());
+   }
+
+   return null;
+}
+```
+
+
+
+
+
+
+

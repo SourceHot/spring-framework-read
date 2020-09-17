@@ -59,21 +59,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 	private static final Method HTTP_OPTIONS_HANDLE_METHOD;
 
-	static {
-		try {
-			HTTP_OPTIONS_HANDLE_METHOD = HttpOptionsHandler.class.getMethod("handle");
-		}
-		catch (NoSuchMethodException ex) {
-			// Should never happen
-			throw new IllegalStateException("Failed to retrieve internal handler method for HTTP OPTIONS", ex);
-		}
-	}
-
-
 	protected RequestMappingInfoHandlerMapping() {
 		setHandlerMethodMappingNamingStrategy(new RequestMappingInfoHandlerMethodMappingNamingStrategy());
 	}
-
 
 	/**
 	 * Get the URL path patterns associated with the supplied {@link RequestMappingInfo}.
@@ -115,27 +103,35 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		String bestPattern;
 		Map<String, String> uriVariables;
 
+		// 匹配器
 		Set<String> patterns = info.getPatternsCondition().getPatterns();
+		// 如果空设置基本数据
 		if (patterns.isEmpty()) {
 			bestPattern = lookupPath;
 			uriVariables = Collections.emptyMap();
 		}
 		else {
+			// 取出一个匹配器
 			bestPattern = patterns.iterator().next();
+
+			// 地址匹配器比较 路由地址和匹配器比较
 			uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
 		}
 
 		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
 
 		if (isMatrixVariableContentAvailable()) {
+			// 处理多层参数, 带有;分号的处理
 			Map<String, MultiValueMap<String, String>> matrixVars = extractMatrixVariables(request, uriVariables);
 			request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, matrixVars);
 		}
 
+		// 编码url参数
 		Map<String, String> decodedUriVariables = getUrlPathHelper().decodePathVariables(request, uriVariables);
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedUriVariables);
 
 		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
+			// 获取 media type
 			Set<MediaType> mediaTypes = info.getProducesCondition().getProducibleMediaTypes();
 			request.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
 		}
@@ -187,15 +183,20 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected HandlerMethod handleNoMatch(
 			Set<RequestMappingInfo> infos, String lookupPath, HttpServletRequest request) throws ServletException {
 
+		// 创建对象 PartialMatchHelper
 		PartialMatchHelper helper = new PartialMatchHelper(infos, request);
 		if (helper.isEmpty()) {
 			return null;
 		}
 
+		// 函数是否匹配
 		if (helper.hasMethodsMismatch()) {
 			Set<String> methods = helper.getAllowedMethods();
+			// 请求方式比较
 			if (HttpMethod.OPTIONS.matches(request.getMethod())) {
+				// handler 转换
 				HttpOptionsHandler handler = new HttpOptionsHandler(methods);
+				// 构建 handler method
 				return new HandlerMethod(handler, HTTP_OPTIONS_HANDLE_METHOD);
 			}
 			throw new HttpRequestMethodNotSupportedException(request.getMethod(), methods);
@@ -206,6 +207,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			MediaType contentType = null;
 			if (StringUtils.hasLength(request.getContentType())) {
 				try {
+					// 字符串转换成对象
 					contentType = MediaType.parseMediaType(request.getContentType());
 				}
 				catch (InvalidMediaTypeException ex) {
@@ -228,7 +230,6 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		return null;
 	}
 
-
 	/**
 	 * Aggregate all partial matches and expose methods checking across them.
 	 */
@@ -237,6 +238,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		private final List<PartialMatch> partialMatches = new ArrayList<>();
 
 		public PartialMatchHelper(Set<RequestMappingInfo> infos, HttpServletRequest request) {
+			// 循环将内部对象设置出来
 			for (RequestMappingInfo info : infos) {
 				if (info.getPatternsCondition().getMatchingCondition(request) != null) {
 					this.partialMatches.add(new PartialMatch(info, request));
@@ -418,7 +420,6 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 	}
 
-
 	/**
 	 * Default handler for HTTP OPTIONS.
 	 */
@@ -455,6 +456,16 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		@SuppressWarnings("unused")
 		public HttpHeaders handle() {
 			return this.headers;
+		}
+	}
+
+	static {
+		try {
+			HTTP_OPTIONS_HANDLE_METHOD = HttpOptionsHandler.class.getMethod("handle");
+		}
+		catch (NoSuchMethodException ex) {
+			// Should never happen
+			throw new IllegalStateException("Failed to retrieve internal handler method for HTTP OPTIONS", ex);
 		}
 	}
 

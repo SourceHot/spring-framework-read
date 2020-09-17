@@ -178,15 +178,17 @@ public class UrlPathHelper {
 		// Always use full path within current servlet context?
 		// 是否全路径
 		if (this.alwaysUseFullPath) {
-			// 获取全路径
+			// 获取带有application的地址
 			return getPathWithinApplication(request);
 		}
 		// Else, use path within current servlet mapping if applicable
+		// 获取带有servlet 地址的路由
 		String rest = getPathWithinServletMapping(request);
 		if (!"".equals(rest)) {
 			return rest;
 		}
 		else {
+			// 获取带有application的地址
 			return getPathWithinApplication(request);
 		}
 	}
