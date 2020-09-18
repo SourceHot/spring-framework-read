@@ -45,5 +45,4 @@ rootProject.children.each {project ->
 	project.buildFileName = "${project.name}.gradle"
 }
 include 'spring-source-hot'
-include 'spring-source-hot-web'
 

@@ -311,12 +311,15 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	/**
 	 * Create the HandlerMethod instance.
+	 * 创建 handler method
 	 * @param handler either a bean name or an actual handler instance
 	 * @param method the target method
 	 * @return the created HandlerMethod
 	 */
 	protected HandlerMethod createHandlerMethod(Object handler, Method method) {
+		// 是否是字符串
 		if (handler instanceof String) {
+			// 创建对象
 			return new HandlerMethod((String) handler,
 					obtainApplicationContext().getAutowireCapableBeanFactory(), method);
 		}
@@ -606,16 +609,39 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	class MappingRegistry {
 
+		/**
+		 * key:mapping
+		 * value: mapping registration
+		 */
 		private final Map<T, MappingRegistration<T>> registry = new HashMap<>();
 
+		/**
+		 * key: mapping
+		 * value: handlerMethod
+		 */
 		private final Map<T, HandlerMethod> mappingLookup = new LinkedHashMap<>();
 
+		/**
+		 * key: url
+		 * value: list mapping
+		 */
 		private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<>();
 
+		/**
+		 * key: name
+		 * value: handler method
+		 */
 		private final Map<String, List<HandlerMethod>> nameLookup = new ConcurrentHashMap<>();
 
+		/**
+		 * key:handler method
+		 * value: 跨域配置
+		 */
 		private final Map<HandlerMethod, CorsConfiguration> corsLookup = new ConcurrentHashMap<>();
 
+		/**
+		 * 读写锁
+		 */
 		private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
 		/**
@@ -672,10 +698,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 			this.readWriteLock.writeLock().lock();
 			try {
+				// handler method 创建
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
+				// 验证 method mapping
 				validateMethodMapping(handlerMethod, mapping);
+				// 放入缓存
 				this.mappingLookup.put(mapping, handlerMethod);
 
+				// 通过 requestMappingInfo 找到 url
 				List<String> directUrls = getDirectUrls(mapping);
 				for (String url : directUrls) {
 					this.urlLookup.add(url, mapping);
@@ -683,7 +713,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 				String name = null;
 				if (getNamingStrategy() != null) {
+					// 获取名字
+					// 类名#方法名
 					name = getNamingStrategy().getName(handlerMethod, mapping);
+					// 设置 handlerMethod + name 的关系
 					addMappingName(name, handlerMethod);
 				}
 
@@ -701,7 +734,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private void validateMethodMapping(HandlerMethod handlerMethod, T mapping) {
 			// Assert that the supplied mapping is unique.
+			// 从缓存中获取
 			HandlerMethod existingHandlerMethod = this.mappingLookup.get(mapping);
+			// 是否为空 , 是否相同
 			if (existingHandlerMethod != null && !existingHandlerMethod.equals(handlerMethod)) {
 				throw new IllegalStateException(
 						"Ambiguous mapping. Cannot map '" + handlerMethod.getBean() + "' method \n" +
@@ -710,9 +745,16 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 		}
 
+		/**
+		 * 通过 mapping {@link org.springframework.web.servlet.mvc.method.RequestMappingInfo} 转换成url
+		 * @param mapping
+		 * @return
+		 */
 		private List<String> getDirectUrls(T mapping) {
 			List<String> urls = new ArrayList<>(1);
+			// mapping.getPatternsCondition().getPatterns()
 			for (String path : getMappingPathPatterns(mapping)) {
+				// 是否匹配
 				if (!getPathMatcher().isPattern(path)) {
 					urls.add(path);
 				}

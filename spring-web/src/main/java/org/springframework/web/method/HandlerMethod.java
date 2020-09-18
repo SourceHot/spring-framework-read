@@ -64,17 +64,32 @@ public class HandlerMethod {
 	/** Logger that is available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * beanName 或者 bean 实例
+	 */
 	private final Object bean;
 
+	/**
+	 * 上下文
+	 */
 	@Nullable
 	private final BeanFactory beanFactory;
 
+	/**
+	 * bean 类型
+	 */
 	private final Class<?> beanType;
 
+	/**
+	 * 处理方法
+	 */
 	private final Method method;
 
 	private final Method bridgedMethod;
 
+	/**
+	 * 方法参数
+	 */
 	private final MethodParameter[] parameters;
 
 	@Nullable
