@@ -250,6 +250,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		// 需要设置的字段名称
 		PropertyTokenHolder tokens = (PropertyTokenHolder) pv.resolvedTokens;
 		if (tokens == null) {
+			// 属性名称
 			// 获取属性名称
 			String propertyName = pv.getName();
 			AbstractNestablePropertyAccessor nestedPa;

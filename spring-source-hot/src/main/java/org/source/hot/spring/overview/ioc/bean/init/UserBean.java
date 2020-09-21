@@ -3,7 +3,6 @@ package org.source.hot.spring.overview.ioc.bean.init;
 public class UserBean {
 
 	private String name;
-
 	private Integer age;
 
 	public static UserBean createInstance() {

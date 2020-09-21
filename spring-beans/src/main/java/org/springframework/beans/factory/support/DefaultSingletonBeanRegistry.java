@@ -85,7 +85,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * */
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
-	/** Cache of early singleton objects: bean name to bean instance. */
+	/**
+	 *  Cache of early singleton objects: bean name to bean instance.
+	 *
+	 * early 概念, 可能是一个没有被实例化的或者说没有被调用的对象
+	 * */
 	private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
 	/**
@@ -212,7 +216,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			// 锁
 			synchronized (this.singletonObjects) {
-				// 从延迟加载的map中获取
+				// 从早期加载的map中获取
 				singletonObject = this.earlySingletonObjects.get(beanName);
 				// 对象是否空 ， 是否允许提前应用
 				if (singletonObject == null && allowEarlyReference) {

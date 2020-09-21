@@ -3,13 +3,22 @@
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+
+
+
 	<bean class="org.source.hot.spring.overview.ioc.bean.init.UserBean"
 		  init-method="initMethod">
 		<property name="age" value="30"/>
 	</bean>
+
+
+
 	<bean class="org.source.hot.spring.overview.ioc.bean.init.SystemUserBean">
 		<property name="userBean" ref="factory-use"/>
 	</bean>
+
+
+
 	<!--  静态方法-->
 	<bean id="static-method-user"
 		  class="org.source.hot.spring.overview.ioc.bean.init.UserBean"
@@ -28,4 +37,5 @@
 	<alias name="factory-bean-user" alias="userFactoryBean"/>
 
 
+	<alias name="factory-bean-user" alias="asfasfasf"/>
 </beans>

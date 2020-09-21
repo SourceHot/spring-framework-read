@@ -1375,6 +1375,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					}
 					else {
 						// 将 beanDefinition 创建成 RootBeanDefinition
+						// merge BeanDefinition
 						mbd = new RootBeanDefinition(bd);
 					}
 				}
