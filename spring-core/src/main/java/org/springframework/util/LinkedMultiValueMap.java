@@ -80,19 +80,25 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	@Override
 	@Nullable
 	public V getFirst(K key) {
+		// 获取list
 		List<V> values = this.targetMap.get(key);
+		// 获取 list 的第一个
 		return (values != null && !values.isEmpty() ? values.get(0) : null);
 	}
 
 	@Override
 	public void add(K key, @Nullable V value) {
+		// 从当前内存中获取key对应的list.
 		List<V> values = this.targetMap.computeIfAbsent(key, k -> new LinkedList<>());
+		// 将value 插入到values中
 		values.add(value);
 	}
 
 	@Override
 	public void addAll(K key, List<? extends V> values) {
+		// 从当前内存中获取key对应的list.
 		List<V> currentValues = this.targetMap.computeIfAbsent(key, k -> new LinkedList<>());
+		// 将value 插入到values中
 		currentValues.addAll(values);
 	}
 
@@ -105,21 +111,28 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 
 	@Override
 	public void set(K key, @Nullable V value) {
+		// 构造list
 		List<V> values = new LinkedList<>();
+		// 添加
 		values.add(value);
+		// 添加
 		this.targetMap.put(key, values);
 	}
 
 	@Override
 	public void setAll(Map<K, V> values) {
+		// 循环执行 set 方法
 		values.forEach(this::set);
 	}
 
 	@Override
 	public Map<K, V> toSingleValueMap() {
+		// 返回结果定义
 		LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<>(this.targetMap.size());
+		// 循环
 		this.targetMap.forEach((key, values) -> {
 			if (values != null && !values.isEmpty()) {
+				// value 获取原来list中的第一个元素
 				singleValueMap.put(key, values.get(0));
 			}
 		});
