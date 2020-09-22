@@ -61,3 +61,28 @@ public void registerBeanDefinitions(Document doc, XmlReaderContext readerContext
 ```
 
 - 最终会交给`doRegisterBeanDefinitions`执行
+
+
+
+
+
+## createDelegate
+
+
+
+```java
+this.delegate = createDelegate(getReaderContext(), root, parent)
+```
+
+- 参数说明
+  1. xml 解析器
+  2. element xml节点
+  3. 父`BeanDefinitionParserDelegate`
+
+```java
+protected final XmlReaderContext getReaderContext() {
+   Assert.state(this.readerContext != null, "No XmlReaderContext available");
+   return this.readerContext;
+}
+```
+

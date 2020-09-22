@@ -29,21 +29,39 @@ import org.springframework.lang.Nullable;
  */
 public class DocumentDefaultsDefinition implements DefaultsDefinition {
 
+	/**
+	 * true or false
+	 */
 	@Nullable
 	private String lazyInit;
 
+	/**
+	 * true or false
+	 */
 	@Nullable
 	private String merge;
 
+	/**
+	 * no or byName or byType
+	 */
 	@Nullable
 	private String autowire;
 
+	/**
+	 * default-autowire-candidates 属性值
+	 */
 	@Nullable
 	private String autowireCandidates;
 
+	/**
+	 * 实例化方法
+	 */
 	@Nullable
 	private String initMethod;
 
+	/**
+	 * 摧毁方法
+	 */
 	@Nullable
 	private String destroyMethod;
 

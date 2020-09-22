@@ -73,6 +73,7 @@ import org.springframework.util.xml.DomUtils;
  * {@link BeanDefinitionParser BeanDefinitionParsers} or
  * {@link BeanDefinitionDecorator BeanDefinitionDecorators}.
  *
+ * xml 解析的委托类.
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -318,7 +319,9 @@ public class BeanDefinitionParserDelegate {
 	 * @param root the root element of the current bean definition document (or nested beans element)
 	 */
 	protected void populateDefaults(DocumentDefaultsDefinition defaults, @Nullable DocumentDefaultsDefinition parentDefaults, Element root) {
+		// 获取 default-lazy-init 属性值
 		String lazyInit = root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE);
+		// 判断是否是默认值
 		if (isDefaultValue(lazyInit)) {
 			// Potentially inherited from outer <beans> sections, otherwise falling back to false.
 			lazyInit = (parentDefaults != null ? parentDefaults.getLazyInit() : FALSE_VALUE);
@@ -408,15 +411,23 @@ public class BeanDefinitionParserDelegate {
 	 * Parses the supplied {@code <bean>} element. May return {@code null}
 	 * if there were errors during parse. Errors are reported to the
 	 * {@link org.springframework.beans.factory.parsing.ProblemReporter}.
+	 *
+	 * 解析 bean 标签
 	 */
 	@Nullable
 	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, @Nullable BeanDefinition containingBean) {
+		// 获取 id
 		String id = ele.getAttribute(ID_ATTRIBUTE);
+		// 获取 name
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
+		// 别名列表
 		List<String> aliases = new ArrayList<>();
+		// 是否有 name 属性
 		if (StringUtils.hasLength(nameAttr)) {
+			// 别名列表
 			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, MULTI_VALUE_ATTRIBUTE_DELIMITERS);
+			// 添加所有
 			aliases.addAll(Arrays.asList(nameArr));
 		}
 
@@ -1532,7 +1543,13 @@ public class BeanDefinitionParserDelegate {
 		return isDefaultNamespace(getNamespaceURI(node));
 	}
 
+	/**
+	 * 是否默认值
+	 * @param value value
+	 * @return true、false
+	 */
 	private boolean isDefaultValue(String value) {
+		// 如果是 default 或者 "" 那就true
 		return (DEFAULT_VALUE.equals(value) || "".equals(value));
 	}
 
