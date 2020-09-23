@@ -237,6 +237,8 @@ public class BeanDefinitionParserDelegate {
 	 * Stores all used bean names so we can enforce uniqueness on a per
 	 * beans-element basis. Duplicate bean ids/names may not exist within the
 	 * same level of beans element nesting, but may be duplicated across levels.
+	 *
+	 * 已经使用过的beanName
 	 */
 	private final Set<String> usedNames = new HashSet<>();
 
@@ -425,14 +427,16 @@ public class BeanDefinitionParserDelegate {
 		List<String> aliases = new ArrayList<>();
 		// 是否有 name 属性
 		if (StringUtils.hasLength(nameAttr)) {
-			// 别名列表
+			// 获取名称列表, 根据 `,; `进行分割
 			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, MULTI_VALUE_ATTRIBUTE_DELIMITERS);
 			// 添加所有
 			aliases.addAll(Arrays.asList(nameArr));
 		}
 
+		// beanName = id
 		String beanName = id;
 		if (!StringUtils.hasText(beanName) && !aliases.isEmpty()) {
+			// 别名的第一个she'ziw为beanName
 			beanName = aliases.remove(0);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No XML 'id' specified - using '" + beanName +
@@ -441,9 +445,11 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		if (containingBean == null) {
+			// 判断 beanName 是否被使用, bean 别名是否被使用
 			checkNameUniqueness(beanName, aliases, ele);
 		}
 
+		// 解析 bean 定义
 		AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
 		if (beanDefinition != null) {
 			if (!StringUtils.hasText(beanName)) {
@@ -484,20 +490,28 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Validate that the specified bean name and aliases have not been used already
 	 * within the current level of beans element nesting.
+	 *
+	 * 判断 beanName 是否被使用, bean 别名是否被使用
 	 */
 	protected void checkNameUniqueness(String beanName, List<String> aliases, Element beanElement) {
+		// 当前寻找的name
 		String foundName = null;
 
+		// 是否有 beanName
+		// 使用过的name中是否存在
 		if (StringUtils.hasText(beanName) && this.usedNames.contains(beanName)) {
 			foundName = beanName;
 		}
 		if (foundName == null) {
+			// 寻找匹配的第一个
 			foundName = CollectionUtils.findFirstMatch(this.usedNames, aliases);
 		}
+		// 抛出异常
 		if (foundName != null) {
 			error("Bean name '" + foundName + "' is already used in this <beans> element", beanElement);
 		}
 
+		// 加入使用队列
 		this.usedNames.add(beanName);
 		this.usedNames.addAll(aliases);
 	}
@@ -505,6 +519,8 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse the bean definition itself, without regard to name or aliases. May return
 	 * {@code null} if problems occurred during the parsing of the bean definition.
+	 *
+	 * 解析 bean 定义
 	 */
 	@Nullable
 	public AbstractBeanDefinition parseBeanDefinitionElement(
@@ -513,29 +529,39 @@ public class BeanDefinitionParserDelegate {
 		this.parseState.push(new BeanEntry(beanName));
 
 		String className = null;
+		// 是否包含属性 class
 		if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
 			className = ele.getAttribute(CLASS_ATTRIBUTE).trim();
 		}
 		String parent = null;
+		// 是否包含属性 parent
 		if (ele.hasAttribute(PARENT_ATTRIBUTE)) {
 			parent = ele.getAttribute(PARENT_ATTRIBUTE);
 		}
 
 		try {
+			// 创建 bean definition
 			AbstractBeanDefinition bd = createBeanDefinition(className, parent);
 
+			// bean definition 属性设置
 			parseBeanDefinitionAttributes(ele, beanName, containingBean, bd);
 			bd.setDescription(DomUtils.getChildElementValueByTagName(ele, DESCRIPTION_ELEMENT));
-
+			// 元信息设置
 			parseMetaElements(ele, bd);
+			// lookup-override 标签解析
 			parseLookupOverrideSubElements(ele, bd.getMethodOverrides());
+			// replaced-method sub-elements 标签解析
 			parseReplacedMethodSubElements(ele, bd.getMethodOverrides());
 
+			// constructor arg 标签解析
 			parseConstructorArgElements(ele, bd);
+			// property 标签解析
 			parsePropertyElements(ele, bd);
+			// qualifier 标签解析
 			parseQualifierElements(ele, bd);
-
+			// 资源设置
 			bd.setResource(this.readerContext.getResource());
+			// source 设置
 			bd.setSource(extractSource(ele));
 
 			return bd;
@@ -566,28 +592,41 @@ public class BeanDefinitionParserDelegate {
 	public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String beanName,
 			@Nullable BeanDefinition containingBean, AbstractBeanDefinition bd) {
 
+		// 是否存在 singleton 属性
 		if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
 			error("Old 1.x 'singleton' attribute in use - upgrade to 'scope' declaration", ele);
 		}
+		// 是否存在 scope 属性
 		else if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
+			// 设置 scope 属性
 			bd.setScope(ele.getAttribute(SCOPE_ATTRIBUTE));
 		}
+		// bean 定义是否为空
 		else if (containingBean != null) {
 			// Take default from containing bean in case of an inner bean definition.
+			// 设置 bean definition 中的 scope
 			bd.setScope(containingBean.getScope());
 		}
 
+		// 是否存在 abstract 属性
 		if (ele.hasAttribute(ABSTRACT_ATTRIBUTE)) {
+			// 设置 abstract 属性
 			bd.setAbstract(TRUE_VALUE.equals(ele.getAttribute(ABSTRACT_ATTRIBUTE)));
 		}
 
+		// 获取 lazy-init 属性
 		String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
+		// 是否是默认的 lazy-init 属性
 		if (isDefaultValue(lazyInit)) {
+			// 获取默认值
 			lazyInit = this.defaults.getLazyInit();
 		}
+		// 设置 lazy-init 属性
 		bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
 
+		// 获取注入方式
 		String autowire = ele.getAttribute(AUTOWIRE_ATTRIBUTE);
+		// 设置注入方式
 		bd.setAutowireMode(getAutowireMode(autowire));
 
 		if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
@@ -641,6 +680,8 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Create a bean definition for the given class name and parent name.
+	 *
+	 * 创建 bean definition
 	 * @param className the name of the bean class
 	 * @param parentName the name of the bean's parent bean
 	 * @return the newly created bean definition
@@ -648,6 +689,7 @@ public class BeanDefinitionParserDelegate {
 	 */
 	protected AbstractBeanDefinition createBeanDefinition(@Nullable String className, @Nullable String parentName)
 			throws ClassNotFoundException {
+
 
 		return BeanDefinitionReaderUtils.createBeanDefinition(
 				parentName, className, this.readerContext.getBeanClassLoader());
@@ -673,6 +715,8 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Parse the given autowire attribute value into
+	 *
+	 * 将注入方式转换成 数字
 	 * {@link AbstractBeanDefinition} autowire constants.
 	 */
 	@SuppressWarnings("deprecation")

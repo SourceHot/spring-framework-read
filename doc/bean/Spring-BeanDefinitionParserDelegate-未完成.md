@@ -270,7 +270,93 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 
 
 
+## checkNameUniqueness
+
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#checkNameUniqueness`
+
+- 判断 beanName 是否被使用, bean 别名是否被使用
+
+```java
+/**
+ * Validate that the specified bean name and aliases have not been used already
+ * within the current level of beans element nesting.
+ *
+ * 判断 beanName 是否被使用, bean 别名是否被使用
+ */
+protected void checkNameUniqueness(String beanName, List<String> aliases, Element beanElement) {
+   // 当前寻找的name
+   String foundName = null;
+
+   // 是否有 beanName
+   // 使用过的name中是否存在
+   if (StringUtils.hasText(beanName) && this.usedNames.contains(beanName)) {
+      foundName = beanName;
+   }
+   if (foundName == null) {
+      // 寻找匹配的第一个
+      foundName = CollectionUtils.findFirstMatch(this.usedNames, aliases);
+   }
+   // 抛出异常
+   if (foundName != null) {
+      error("Bean name '" + foundName + "' is already used in this <beans> element", beanElement);
+   }
+
+   // 加入使用队列
+   this.usedNames.add(beanName);
+   this.usedNames.addAll(aliases);
+}
+```
+
+
+
+
+
+## createBeanDefinition
+
+- `org.springframework.beans.factory.support.BeanDefinitionReaderUtils#createBeanDefinition`
+- 创建具有基本信息的**BeanDefinition**
+  1. parent bean name 
+  2. bean clsss
+  3. bean class name 
+
+```java
+public static AbstractBeanDefinition createBeanDefinition(
+      @Nullable String parentName, @Nullable String className, @Nullable ClassLoader classLoader) throws ClassNotFoundException {
+
+   GenericBeanDefinition bd = new GenericBeanDefinition();
+   // 设置 父bean
+   bd.setParentName(parentName);
+   if (className != null) {
+      if (classLoader != null) {
+         // 设置 class
+         // 内部是通过反射创建 class
+         bd.setBeanClass(ClassUtils.forName(className, classLoader));
+      }
+      else {
+         // 设置 class name
+         bd.setBeanClassName(className);
+      }
+   }
+   return bd;
+}
+```
+
+
+
+
+
 ## parseBeanDefinitionElement
 
 - `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parseBeanDefinitionElement(org.w3c.dom.Element, org.springframework.beans.factory.config.BeanDefinition)`
 - 该方法用来解析 `<bean/>` 标签信息
+
+
+
+
+
+
+
+## parseBeanDefinitionElement
+
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parseBeanDefinitionElement(org.w3c.dom.Element, java.lang.String, org.springframework.beans.factory.config.BeanDefinition)`
+
