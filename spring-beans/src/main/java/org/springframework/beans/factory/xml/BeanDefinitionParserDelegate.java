@@ -629,16 +629,19 @@ public class BeanDefinitionParserDelegate {
 		// 设置注入方式
 		bd.setAutowireMode(getAutowireMode(autowire));
 
+		// 依赖的bean
 		if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 			String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
 			bd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, MULTI_VALUE_ATTRIBUTE_DELIMITERS));
 		}
 
+		// autowire-candidate 是否自动注入判断
 		String autowireCandidate = ele.getAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE);
 		if (isDefaultValue(autowireCandidate)) {
 			String candidatePattern = this.defaults.getAutowireCandidates();
 			if (candidatePattern != null) {
 				String[] patterns = StringUtils.commaDelimitedListToStringArray(candidatePattern);
+				// * 匹配 设置数据
 				bd.setAutowireCandidate(PatternMatchUtils.simpleMatch(patterns, beanName));
 			}
 		}
@@ -646,31 +649,38 @@ public class BeanDefinitionParserDelegate {
 			bd.setAutowireCandidate(TRUE_VALUE.equals(autowireCandidate));
 		}
 
+		// 获取 primary 书信
 		if (ele.hasAttribute(PRIMARY_ATTRIBUTE)) {
 			bd.setPrimary(TRUE_VALUE.equals(ele.getAttribute(PRIMARY_ATTRIBUTE)));
 		}
 
+		// 获取 init-method 属性
 		if (ele.hasAttribute(INIT_METHOD_ATTRIBUTE)) {
 			String initMethodName = ele.getAttribute(INIT_METHOD_ATTRIBUTE);
 			bd.setInitMethodName(initMethodName);
 		}
+		// 没有 init-method 的情况处理
 		else if (this.defaults.getInitMethod() != null) {
 			bd.setInitMethodName(this.defaults.getInitMethod());
 			bd.setEnforceInitMethod(false);
 		}
 
+		// 获取 destroy-method 属性
 		if (ele.hasAttribute(DESTROY_METHOD_ATTRIBUTE)) {
 			String destroyMethodName = ele.getAttribute(DESTROY_METHOD_ATTRIBUTE);
 			bd.setDestroyMethodName(destroyMethodName);
 		}
+		// 没有 destroy-method 的情况处理
 		else if (this.defaults.getDestroyMethod() != null) {
 			bd.setDestroyMethodName(this.defaults.getDestroyMethod());
 			bd.setEnforceDestroyMethod(false);
 		}
 
+		// 获取 factory-method 属性
 		if (ele.hasAttribute(FACTORY_METHOD_ATTRIBUTE)) {
 			bd.setFactoryMethodName(ele.getAttribute(FACTORY_METHOD_ATTRIBUTE));
 		}
+		// 获取 factory-bean 属性
 		if (ele.hasAttribute(FACTORY_BEAN_ATTRIBUTE)) {
 			bd.setFactoryBeanName(ele.getAttribute(FACTORY_BEAN_ATTRIBUTE));
 		}
@@ -699,15 +709,23 @@ public class BeanDefinitionParserDelegate {
 	 * Parse the meta elements underneath the given element, if any.
 	 */
 	public void parseMetaElements(Element ele, BeanMetadataAttributeAccessor attributeAccessor) {
+		// 获取下级标签
 		NodeList nl = ele.getChildNodes();
+		// 循环子标签
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
+			// 设置数据
 			if (isCandidateElement(node) && nodeNameEquals(node, META_ELEMENT)) {
 				Element metaElement = (Element) node;
+				// 获取 key 属性
 				String key = metaElement.getAttribute(KEY_ATTRIBUTE);
+				// 获取 value 属性
 				String value = metaElement.getAttribute(VALUE_ATTRIBUTE);
+				// 元数据对象设置
 				BeanMetadataAttribute attribute = new BeanMetadataAttribute(key, value);
+				// 设置 source
 				attribute.setSource(extractSource(metaElement));
+				// 信息添加
 				attributeAccessor.addMetadataAttribute(attribute);
 			}
 		}
@@ -721,20 +739,27 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@SuppressWarnings("deprecation")
 	public int getAutowireMode(String attrValue) {
+		// autowire 字符
 		String attr = attrValue;
+		// 是否默认
 		if (isDefaultValue(attr)) {
 			attr = this.defaults.getAutowire();
 		}
+		// 没有注入方式
 		int autowire = AbstractBeanDefinition.AUTOWIRE_NO;
+		// 是否等于 by_name
 		if (AUTOWIRE_BY_NAME_VALUE.equals(attr)) {
 			autowire = AbstractBeanDefinition.AUTOWIRE_BY_NAME;
 		}
+		// 是否等于 by_type
 		else if (AUTOWIRE_BY_TYPE_VALUE.equals(attr)) {
 			autowire = AbstractBeanDefinition.AUTOWIRE_BY_TYPE;
 		}
+		// 是否等于 constructor
 		else if (AUTOWIRE_CONSTRUCTOR_VALUE.equals(attr)) {
 			autowire = AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR;
 		}
+		// 是否等于 autodetect
 		else if (AUTOWIRE_AUTODETECT_VALUE.equals(attr)) {
 			autowire = AbstractBeanDefinition.AUTOWIRE_AUTODETECT;
 		}
