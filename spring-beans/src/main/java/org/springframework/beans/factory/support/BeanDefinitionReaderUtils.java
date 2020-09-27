@@ -94,6 +94,8 @@ public abstract class BeanDefinitionReaderUtils {
 	/**
 	 * Generate a bean name for the given bean definition, unique within the
 	 * given bean factory.
+	 *
+	 * 生成一个beanName
 	 * @param definition the bean definition to generate a bean name for
 	 * @param registry the bean factory that the definition is going to be
 	 * registered with (to check for existing bean names)
@@ -108,11 +110,15 @@ public abstract class BeanDefinitionReaderUtils {
 			BeanDefinition definition, BeanDefinitionRegistry registry, boolean isInnerBean)
 			throws BeanDefinitionStoreException {
 
+		// 获取 bean class 的名称
+		// Class.getName()
 		String generatedBeanName = definition.getBeanClassName();
 		if (generatedBeanName == null) {
+			// 父类名称是否存在
 			if (definition.getParentName() != null) {
 				generatedBeanName = definition.getParentName() + "$child";
 			}
+			// 工厂 beanName 是否为空
 			else if (definition.getFactoryBeanName() != null) {
 				generatedBeanName = definition.getFactoryBeanName() + "$created";
 			}
@@ -125,10 +131,14 @@ public abstract class BeanDefinitionReaderUtils {
 		String id = generatedBeanName;
 		if (isInnerBean) {
 			// Inner bean: generate identity hashcode suffix.
+			// 组装名称
+			// 生成名称 + # + 16 进制的一个字符串
 			id = generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(definition);
 		}
 		else {
 			// Top-level bean: use plain class name with unique suffix if necessary.
+			// 唯一beanName设置
+			// // beanName + # + 序号
 			return uniqueBeanName(generatedBeanName, registry);
 		}
 		return id;
@@ -150,6 +160,7 @@ public abstract class BeanDefinitionReaderUtils {
 		// Increase counter until the id is unique.
 		while (counter == -1 || registry.containsBeanDefinition(id)) {
 			counter++;
+			// beanName + # + 序号
 			id = beanName + GENERATED_BEAN_NAME_SEPARATOR + counter;
 		}
 		return id;
@@ -166,11 +177,15 @@ public abstract class BeanDefinitionReaderUtils {
 			throws BeanDefinitionStoreException {
 
 		// Register bean definition under primary name.
+		// 获取 beanName
 		String beanName = definitionHolder.getBeanName();
+		// 注册bean definition
 		registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
 
 		// Register aliases for bean name, if any.
+		// 别名列表
 		String[] aliases = definitionHolder.getAliases();
+		// 注册别名列表
 		if (aliases != null) {
 			for (String alias : aliases) {
 				registry.registerAlias(beanName, alias);
@@ -191,7 +206,9 @@ public abstract class BeanDefinitionReaderUtils {
 			AbstractBeanDefinition definition, BeanDefinitionRegistry registry)
 			throws BeanDefinitionStoreException {
 
+		// 生成一个 beanName
 		String generatedName = generateBeanName(definition, registry, false);
+		// 注册 bean Definition
 		registry.registerBeanDefinition(generatedName, definition);
 		return generatedName;
 	}

@@ -43,6 +43,11 @@ import org.springframework.util.ObjectUtils;
  */
 public class ConstructorArgumentValues {
 
+	/**
+	 * 构造函数信息
+	 * key: 索引
+	 * value: 标签数据
+	 */
 	private final Map<Integer, ValueHolder> indexedArgumentValues = new LinkedHashMap<>();
 
 	private final List<ValueHolder> genericArgumentValues = new ArrayList<>();
@@ -103,6 +108,7 @@ public class ConstructorArgumentValues {
 
 	/**
 	 * Add an argument value for the given index in the constructor argument list.
+	 * 添加构造函数信息.
 	 * @param index the index in the constructor argument list
 	 * @param newValue the argument value in the form of a ValueHolder
 	 */
@@ -432,23 +438,43 @@ public class ConstructorArgumentValues {
 	/**
 	 * Holder for a constructor argument value, with an optional type
 	 * attribute indicating the target type of the actual constructor argument.
+	 *
+	 * 属性控制类
 	 */
 	public static class ValueHolder implements BeanMetadataElement {
 
+		/**
+		 * 值
+		 */
 		@Nullable
 		private Object value;
 
+		/**
+		 * 类型
+		 */
 		@Nullable
 		private String type;
 
+		/**
+		 * 名称
+		 */
 		@Nullable
 		private String name;
 
+		/**
+		 * 源
+		 */
 		@Nullable
 		private Object source;
 
+		/**
+		 * 是否需要转换
+		 */
 		private boolean converted = false;
 
+		/**
+		 * 转换的值
+		 */
 		@Nullable
 		private Object convertedValue;
 

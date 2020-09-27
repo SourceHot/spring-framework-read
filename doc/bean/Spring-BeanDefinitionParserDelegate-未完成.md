@@ -609,6 +609,31 @@ System.out.println(attribute);
 
 
 
+```java
+public void parseLookupOverrideSubElements(Element beanEle, MethodOverrides overrides) {
+   // 获取子标签
+   NodeList nl = beanEle.getChildNodes();
+   for (int i = 0; i < nl.getLength(); i++) {
+      Node node = nl.item(i);
+      // 是否有 lookup-method 属性
+      if (isCandidateElement(node) && nodeNameEquals(node, LOOKUP_METHOD_ELEMENT)) {
+         Element ele = (Element) node;
+         // 获取 name 属性
+         String methodName = ele.getAttribute(NAME_ATTRIBUTE);
+         // 获取 bean 属性
+         String beanRef = ele.getAttribute(BEAN_ELEMENT);
+         // 创建 覆盖依赖
+         LookupOverride override = new LookupOverride(methodName, beanRef);
+         // 设置 source
+         override.setSource(extractSource(ele));
+         overrides.addOverride(override);
+      }
+   }
+}
+```
+
+
+
 使用案例
 
 ```xml
@@ -628,6 +653,495 @@ public class LookupMain {
       ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("META-INF/beans/spring-lookup-method.xml");
       Shop shop = context.getBean("shop", Shop.class);
       System.out.println(shop.getFruits().getName());
+   }
+}
+```
+
+
+
+
+
+### parseReplacedMethodSubElements
+
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parseReplacedMethodSubElements`
+
+- 解析标签
+
+  `replaced-method`
+
+```java
+public void parseReplacedMethodSubElements(Element beanEle, MethodOverrides overrides) {
+   // 子节点获取
+   NodeList nl = beanEle.getChildNodes();
+   for (int i = 0; i < nl.getLength(); i++) {
+      Node node = nl.item(i);
+      // 是否包含 replaced-method 属性
+      if (isCandidateElement(node) && nodeNameEquals(node, REPLACED_METHOD_ELEMENT)) {
+         Element replacedMethodEle = (Element) node;
+         // 获取 name 属性
+         String name = replacedMethodEle.getAttribute(NAME_ATTRIBUTE);
+         // 获取 replacer
+         String callback = replacedMethodEle.getAttribute(REPLACER_ATTRIBUTE);
+         // 对象组装
+         ReplaceOverride replaceOverride = new ReplaceOverride(name, callback);
+         // Look for arg-type match elements.
+         // 子节点属性
+         // 处理 arg-type 标签
+         List<Element> argTypeEles = DomUtils.getChildElementsByTagName(replacedMethodEle, ARG_TYPE_ELEMENT);
+
+         for (Element argTypeEle : argTypeEles) {
+            // 获取 match 数据值
+            String match = argTypeEle.getAttribute(ARG_TYPE_MATCH_ATTRIBUTE);
+            // match 信息设置
+            match = (StringUtils.hasText(match) ? match : DomUtils.getTextValue(argTypeEle));
+            if (StringUtils.hasText(match)) {
+               // 添加类型标识
+               replaceOverride.addTypeIdentifier(match);
+            }
+         }
+         // 设置 source
+         replaceOverride.setSource(extractSource(replacedMethodEle));
+         // 重载列表添加
+         overrides.addOverride(replaceOverride);
+      }
+   }
+}
+```
+
+
+
+- 使用案例
+
+
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns="http://www.springframework.org/schema/beans"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+   <bean id="apple" class="org.source.hot.spring.overview.ioc.bean.lookup.Apple">
+      <replaced-method replacer="methodReplacerApple" name="hello" >
+         <arg-type>String</arg-type>
+      </replaced-method>
+
+   </bean>
+
+   <bean id="methodReplacerApple" class="org.source.hot.spring.overview.ioc.bean.lookup.MethodReplacerApple">
+
+   </bean>
+
+</beans>
+```
+
+
+
+```java
+public class MethodReplacerApple implements MethodReplacer {
+   @Override
+   public Object reimplement(Object obj, Method method, Object[] args) throws Throwable {
+      System.out.println("方法替换");
+      return obj;
+   }
+}
+```
+
+**replacer需要使用MethodReplacer实现类**
+
+
+
+
+
+
+
+### parseConstructorArgElements
+
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parseConstructorArgElements`
+
+- 解析`constructor-arg`标签
+
+
+
+```
+public void parseConstructorArgElements(Element beanEle, BeanDefinition bd) {
+   // 获取
+   NodeList nl = beanEle.getChildNodes();
+   for (int i = 0; i < nl.getLength(); i++) {
+      Node node = nl.item(i);
+      if (isCandidateElement(node) && nodeNameEquals(node, CONSTRUCTOR_ARG_ELEMENT)) {
+         // 解析 constructor-arg 下级标签
+         parseConstructorArgElement((Element) node, bd);
+      }
+   }
+}
+```
+
+
+
+
+
+```java
+public void parseConstructorArgElement(Element ele, BeanDefinition bd) {
+   // 获取 index 属性
+   String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
+   // 获取 type 属性
+   String typeAttr = ele.getAttribute(TYPE_ATTRIBUTE);
+   // 获取 name 属性
+   String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
+   if (StringUtils.hasLength(indexAttr)) {
+      try {
+         // 构造参数的所以未知
+         int index = Integer.parseInt(indexAttr);
+         if (index < 0) {
+            error("'index' cannot be lower than 0", ele);
+         }
+         else {
+            try {
+               this.parseState.push(new ConstructorArgumentEntry(index));
+               // 解析 property 标签
+               Object value = parsePropertyValue(ele, bd, null);
+               // 创建 构造函数的 属性控制类
+               ConstructorArgumentValues.ValueHolder valueHolder = new ConstructorArgumentValues.ValueHolder(value);
+               if (StringUtils.hasLength(typeAttr)) {
+                  // 类型设置
+                  valueHolder.setType(typeAttr);
+               }
+               if (StringUtils.hasLength(nameAttr)) {
+                  // 名称设置
+                  valueHolder.setName(nameAttr);
+               }
+               // 源设置
+               valueHolder.setSource(extractSource(ele));
+               if (bd.getConstructorArgumentValues().hasIndexedArgumentValue(index)) {
+                  error("Ambiguous constructor-arg entries for index " + index, ele);
+               }
+               else {
+                  // 添加 构造函数信息
+                  bd.getConstructorArgumentValues().addIndexedArgumentValue(index, valueHolder);
+               }
+            }
+            finally {
+               this.parseState.pop();
+            }
+         }
+      }
+      catch (NumberFormatException ex) {
+         error("Attribute 'index' of tag 'constructor-arg' must be an integer", ele);
+      }
+   }
+   else {
+      try {
+         this.parseState.push(new ConstructorArgumentEntry());
+         // 解析 property 标签
+         Object value = parsePropertyValue(ele, bd, null);
+         // 创建 构造函数的 属性控制类
+         ConstructorArgumentValues.ValueHolder valueHolder = new ConstructorArgumentValues.ValueHolder(value);
+         if (StringUtils.hasLength(typeAttr)) {
+            // 类型设置
+            valueHolder.setType(typeAttr);
+         }
+         if (StringUtils.hasLength(nameAttr)) {
+            // 名称设置
+            valueHolder.setName(nameAttr);
+         }
+         // 源设置
+         valueHolder.setSource(extractSource(ele));
+         // 添加 构造函数信息
+         bd.getConstructorArgumentValues().addGenericArgumentValue(valueHolder);
+      }
+      finally {
+         this.parseState.pop();
+      }
+   }
+}
+```
+
+
+
+### parseConstructorArgElement
+
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parseConstructorArgElement`
+
+- 解析 constructor-arg 下级标签
+
+```java
+@Nullable
+public Object parsePropertyValue(Element ele, BeanDefinition bd, @Nullable String propertyName) {
+   String elementName = (propertyName != null ?
+         "<property> element for property '" + propertyName + "'" :
+         "<constructor-arg> element");
+
+   // Should only have one child element: ref, value, list, etc.
+   NodeList nl = ele.getChildNodes();
+   Element subElement = null;
+   for (int i = 0; i < nl.getLength(); i++) {
+      Node node = nl.item(i);
+      if (node instanceof Element && !nodeNameEquals(node, DESCRIPTION_ELEMENT) &&
+            !nodeNameEquals(node, META_ELEMENT)) {
+         // Child element is what we're looking for.
+         if (subElement != null) {
+            error(elementName + " must not contain more than one sub-element", ele);
+         }
+         else {
+            subElement = (Element) node;
+         }
+      }
+   }
+
+   // ref 属性是否存在
+   boolean hasRefAttribute = ele.hasAttribute(REF_ATTRIBUTE);
+   // value 属性是否存在
+   boolean hasValueAttribute = ele.hasAttribute(VALUE_ATTRIBUTE);
+   if ((hasRefAttribute && hasValueAttribute) ||
+         ((hasRefAttribute || hasValueAttribute) && subElement != null)) {
+      error(elementName +
+            " is only allowed to contain either 'ref' attribute OR 'value' attribute OR sub-element", ele);
+   }
+
+   if (hasRefAttribute) {
+      // 获取 ref 属性值
+      String refName = ele.getAttribute(REF_ATTRIBUTE);
+      if (!StringUtils.hasText(refName)) {
+         error(elementName + " contains empty 'ref' attribute", ele);
+      }
+      // 创建 连接对象
+      RuntimeBeanReference ref = new RuntimeBeanReference(refName);
+
+      ref.setSource(extractSource(ele));
+      return ref;
+   }
+   else if (hasValueAttribute) {
+      // 获取 value
+      TypedStringValue valueHolder = new TypedStringValue(ele.getAttribute(VALUE_ATTRIBUTE));
+      valueHolder.setSource(extractSource(ele));
+      return valueHolder;
+   }
+   else if (subElement != null) {
+      return parsePropertySubElement(subElement, bd);
+   }
+   else {
+      // Neither child element nor "ref" or "value" attribute found.
+      error(elementName + " must specify a ref or value", ele);
+      return null;
+   }
+}
+```
+
+
+
+
+
+### parsePropertySubElement
+
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parsePropertySubElement(org.w3c.dom.Element, org.springframework.beans.factory.config.BeanDefinition)`
+
+```java
+@Nullable
+public Object parsePropertySubElement(Element ele, @Nullable BeanDefinition bd) {
+   // 解析 property 下级标签
+   return parsePropertySubElement(ele, bd, null);
+}
+```
+
+
+
+
+
+### parsePropertySubElement
+
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parsePropertySubElement(org.w3c.dom.Element, org.springframework.beans.factory.config.BeanDefinition, java.lang.String)`
+
+```
+@Nullable
+public Object parsePropertySubElement(Element ele, @Nullable BeanDefinition bd, @Nullable String defaultValueType) {
+   if (!isDefaultNamespace(ele)) {
+      // 嵌套分析
+      return parseNestedCustomElement(ele, bd);
+   }
+   else if (nodeNameEquals(ele, BEAN_ELEMENT)) {
+      // 解析 bean 标签
+      BeanDefinitionHolder nestedBd = parseBeanDefinitionElement(ele, bd);
+      if (nestedBd != null) {
+         // 装饰 bean define
+         nestedBd = decorateBeanDefinitionIfRequired(ele, nestedBd, bd);
+      }
+      return nestedBd;
+   }
+   // ref 名称判断
+   else if (nodeNameEquals(ele, REF_ELEMENT)) {
+      // A generic reference to any name of any bean.
+      // 获取 ref 属性
+      String refName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
+      boolean toParent = false;
+      if (!StringUtils.hasLength(refName)) {
+         // A reference to the id of another bean in a parent context.
+         // 获取 parent 属性
+         refName = ele.getAttribute(PARENT_REF_ATTRIBUTE);
+         toParent = true;
+         if (!StringUtils.hasLength(refName)) {
+            error("'bean' or 'parent' is required for <ref> element", ele);
+            return null;
+         }
+      }
+      if (!StringUtils.hasText(refName)) {
+         error("<ref> element contains empty target attribute", ele);
+         return null;
+      }
+      // bean 连接对象创建
+      RuntimeBeanReference ref = new RuntimeBeanReference(refName, toParent);
+      ref.setSource(extractSource(ele));
+      return ref;
+   }
+   else if (nodeNameEquals(ele, IDREF_ELEMENT)) {
+      return parseIdRefElement(ele);
+   }
+   else if (nodeNameEquals(ele, VALUE_ELEMENT)) {
+      return parseValueElement(ele, defaultValueType);
+   }
+   else if (nodeNameEquals(ele, NULL_ELEMENT)) {
+      // It's a distinguished null value. Let's wrap it in a TypedStringValue
+      // object in order to preserve the source location.
+      TypedStringValue nullHolder = new TypedStringValue(null);
+      nullHolder.setSource(extractSource(ele));
+      return nullHolder;
+   }
+   else if (nodeNameEquals(ele, ARRAY_ELEMENT)) {
+      return parseArrayElement(ele, bd);
+   }
+   else if (nodeNameEquals(ele, LIST_ELEMENT)) {
+      return parseListElement(ele, bd);
+   }
+   else if (nodeNameEquals(ele, SET_ELEMENT)) {
+      return parseSetElement(ele, bd);
+   }
+   else if (nodeNameEquals(ele, MAP_ELEMENT)) {
+      return parseMapElement(ele, bd);
+   }
+   else if (nodeNameEquals(ele, PROPS_ELEMENT)) {
+      return parsePropsElement(ele);
+   }
+   else {
+      error("Unknown property sub-element: [" + ele.getNodeName() + "]", ele);
+      return null;
+   }
+}
+```
+
+
+
+
+
+### parsePropertyElement
+
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parsePropertyElement`
+
+```java
+public void parsePropertyElement(Element ele, BeanDefinition bd) {
+   String propertyName = ele.getAttribute(NAME_ATTRIBUTE);
+   if (!StringUtils.hasLength(propertyName)) {
+      error("Tag 'property' must have a 'name' attribute", ele);
+      return;
+   }
+   this.parseState.push(new PropertyEntry(propertyName));
+   try {
+      if (bd.getPropertyValues().contains(propertyName)) {
+         error("Multiple 'property' definitions for property '" + propertyName + "'", ele);
+         return;
+      }
+      // 解析 property 标签
+      Object val = parsePropertyValue(ele, bd, propertyName);
+      // 构造 PropertyValue 对象
+      PropertyValue pv = new PropertyValue(propertyName, val);
+      // 解析元信息
+      parseMetaElements(ele, pv);
+      pv.setSource(extractSource(ele));
+      // 添加 pv 结构
+      bd.getPropertyValues().addPropertyValue(pv);
+   }
+   finally {
+      this.parseState.pop();
+   }
+}
+```
+
+
+
+
+
+
+
+### parseQualifierElements
+
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parseQualifierElements`
+- 解析 qualifier 标签和下级标签
+
+```java
+public void parseQualifierElements(Element beanEle, AbstractBeanDefinition bd) {
+   NodeList nl = beanEle.getChildNodes();
+   for (int i = 0; i < nl.getLength(); i++) {
+      Node node = nl.item(i);
+      if (isCandidateElement(node) && nodeNameEquals(node, QUALIFIER_ELEMENT)) {
+         // 单个解析
+         parseQualifierElement((Element) node, bd);
+      }
+   }
+}
+```
+
+
+
+
+
+### parseQualifierElement
+
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parseQualifierElement`
+
+```java
+public void parseQualifierElement(Element ele, AbstractBeanDefinition bd) {
+   // 获取 type 属性
+   String typeName = ele.getAttribute(TYPE_ATTRIBUTE);
+   if (!StringUtils.hasLength(typeName)) {
+      error("Tag 'qualifier' must have a 'type' attribute", ele);
+      return;
+   }
+   this.parseState.push(new QualifierEntry(typeName));
+   try {
+      // 自动注入对象创建
+      AutowireCandidateQualifier qualifier = new AutowireCandidateQualifier(typeName);
+      // 设置源
+      qualifier.setSource(extractSource(ele));
+      // 获取 value 属性
+      String value = ele.getAttribute(VALUE_ATTRIBUTE);
+      if (StringUtils.hasLength(value)) {
+         // 设置 属性 value , value
+         qualifier.setAttribute(AutowireCandidateQualifier.VALUE_KEY, value);
+      }
+      NodeList nl = ele.getChildNodes();
+      for (int i = 0; i < nl.getLength(); i++) {
+         Node node = nl.item(i);
+         if (isCandidateElement(node) && nodeNameEquals(node, QUALIFIER_ATTRIBUTE_ELEMENT)) {
+            Element attributeEle = (Element) node;
+            // 获取 key 属性
+            String attributeName = attributeEle.getAttribute(KEY_ATTRIBUTE);
+            // 获取 value 属性
+            String attributeValue = attributeEle.getAttribute(VALUE_ATTRIBUTE);
+            if (StringUtils.hasLength(attributeName) && StringUtils.hasLength(attributeValue)) {
+               // key value 属性映射
+               BeanMetadataAttribute attribute = new BeanMetadataAttribute(attributeName, attributeValue);
+               attribute.setSource(extractSource(attributeEle));
+               // 添加 qualifier 属性值
+               qualifier.addMetadataAttribute(attribute);
+            }
+            else {
+               error("Qualifier 'attribute' tag must have a 'name' and 'value'", attributeEle);
+               return;
+            }
+         }
+      }
+      // 添加 qualifier
+      bd.addQualifier(qualifier);
+   }
+   finally {
+      this.parseState.pop();
    }
 }
 ```

@@ -10,7 +10,6 @@
 	</bean>
 
 	<bean id="methodReplacerApple" class="org.source.hot.spring.overview.ioc.bean.lookup.MethodReplacerApple">
-
 	</bean>
 
 </beans>
