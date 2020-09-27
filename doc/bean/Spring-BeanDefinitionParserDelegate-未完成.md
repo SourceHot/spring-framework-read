@@ -1030,6 +1030,125 @@ public Object parsePropertySubElement(Element ele, @Nullable BeanDefinition bd, 
 
 
 
+#### parseIdRefElement
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parseIdRefElement`
+
+
+```java
+@Nullable
+public Object parseIdRefElement(Element ele) {
+   // A generic reference to any name of any bean.
+   // 获取 bean 属性
+   String refName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
+   if (!StringUtils.hasLength(refName)) {
+      error("'bean' is required for <idref> element", ele);
+      return null;
+   }
+   if (!StringUtils.hasText(refName)) {
+      error("<idref> element contains empty target attribute", ele);
+      return null;
+   }
+   // 设置 bean 链接对象
+   RuntimeBeanNameReference ref = new RuntimeBeanNameReference(refName);
+   // 设置原
+   ref.setSource(extractSource(ele));
+   return ref;
+}
+```
+
+
+
+#### parseValueElement
+
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parseValueElement`
+
+
+
+```JAVA
+	public Object parseValueElement(Element ele, @Nullable String defaultTypeName) {
+		// It's a literal value.
+		// 获取 xml 中的文本变量
+		String value = DomUtils.getTextValue(ele);
+		// 获取 type 属性
+		String specifiedTypeName = ele.getAttribute(TYPE_ATTRIBUTE);
+		// 类型
+		String typeName = specifiedTypeName;
+		if (!StringUtils.hasText(typeName)) {
+			typeName = defaultTypeName;
+		}
+		try {
+			// 创建类型值
+			TypedStringValue typedValue = buildTypedStringValue(value, typeName);
+			typedValue.setSource(extractSource(ele));
+			typedValue.setSpecifiedTypeName(specifiedTypeName);
+			return typedValue;
+		}
+		catch (ClassNotFoundException ex) {
+			error("Type class [" + typeName + "] not found for <value> element", ele, ex);
+			return value;
+		}
+	}
+
+```
+
+
+
+
+
+##### buildTypedStringValue
+
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#buildTypedStringValue`
+- 构造对象, 没有创建对象
+
+```java
+protected TypedStringValue buildTypedStringValue(String value, @Nullable String targetTypeName)
+      throws ClassNotFoundException {
+   // class loader 
+   ClassLoader classLoader = this.readerContext.getBeanClassLoader();
+   TypedStringValue typedValue;
+   if (!StringUtils.hasText(targetTypeName)) {
+      typedValue = new TypedStringValue(value);
+   }
+   else if (classLoader != null) {
+      // 目标类
+      Class<?> targetType = ClassUtils.forName(targetTypeName, classLoader);
+      // 构造
+      typedValue = new TypedStringValue(value, targetType);
+   }
+   else {
+      // 构造
+      typedValue = new TypedStringValue(value, targetTypeName);
+   }
+   return typedValue;
+}
+```
+
+#### parseArrayElement
+
+
+
+
+
+#### parseListElement
+
+
+
+#### parseSetElement
+
+
+
+#### parseMapElement
+
+
+
+#### parsePropsElement
+
+
+
+
+
+
+
 ### parsePropertyElement
 
 - `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parsePropertyElement`
