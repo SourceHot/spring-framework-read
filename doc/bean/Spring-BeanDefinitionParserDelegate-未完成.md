@@ -356,7 +356,7 @@ public static AbstractBeanDefinition createBeanDefinition(
 
 
 
-## parseBeanDefinitionElement
+## 	
 
 - `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parseBeanDefinitionElement(org.w3c.dom.Element, java.lang.String, org.springframework.beans.factory.config.BeanDefinition)`
 
@@ -546,4 +546,88 @@ public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String 
 
 
 - `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parseMetaElements`
+
 - 设置元数据. 
+
+  标签`meta`的解析
+
+```java
+public void parseMetaElements(Element ele, BeanMetadataAttributeAccessor attributeAccessor) {
+   // 获取下级标签
+   NodeList nl = ele.getChildNodes();
+   // 循环子标签
+   for (int i = 0; i < nl.getLength(); i++) {
+      Node node = nl.item(i);
+      // 设置数据
+      if (isCandidateElement(node) && nodeNameEquals(node, META_ELEMENT)) {
+         Element metaElement = (Element) node;
+         // 获取 key 属性
+         String key = metaElement.getAttribute(KEY_ATTRIBUTE);
+         // 获取 value 属性
+         String value = metaElement.getAttribute(VALUE_ATTRIBUTE);
+         // 元数据对象设置
+         BeanMetadataAttribute attribute = new BeanMetadataAttribute(key, value);
+         // 设置 source
+         attribute.setSource(extractSource(metaElement));
+         // 信息添加
+         attributeAccessor.addMetadataAttribute(attribute);
+      }
+   }
+}
+```
+
+
+
+使用案例
+
+```xml
+	<bean id="apple" class="org.source.hot.spring.overview.ioc.bean.lookup.Apple">
+		<meta key="meta-key" value="meta-value"/>
+	</bean>
+```
+
+
+
+```java
+ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("META-INF/beans/spring-lookup-method.xml");
+
+ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
+BeanDefinition apple = beanFactory.getBeanDefinition("apple");
+Object attribute = apple.getAttribute("meta-key");
+System.out.println(attribute);
+```
+
+
+
+### parseLookupOverrideSubElements
+
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parseLookupOverrideSubElements`
+
+- 解析标签
+
+  `lookup-method`
+
+
+
+使用案例
+
+```xml
+<bean id="apple" class="org.source.hot.spring.overview.ioc.bean.lookup.Apple">
+		<meta key="meta-key" value="meta-value"/>
+	</bean>
+
+	<bean id="shop" class="org.source.hot.spring.overview.ioc.bean.lookup.Shop">
+		<lookup-method name="getFruits" bean="apple"/>
+	</bean>
+
+```
+
+```java
+public class LookupMain {
+   public static void main(String[] args) {
+      ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("META-INF/beans/spring-lookup-method.xml");
+      Shop shop = context.getBean("shop", Shop.class);
+      System.out.println(shop.getFruits().getName());
+   }
+}
+```

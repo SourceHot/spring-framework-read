@@ -30,6 +30,8 @@ import org.springframework.util.ObjectUtils;
  * <p>Note that the override mechanism is <em>not</em> intended as a generic
  * means of inserting crosscutting code: use AOP for that.
  *
+ *
+ * 覆盖方法
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -37,10 +39,19 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class MethodOverride implements BeanMetadataElement {
 
+	/**
+	 * 方法名称
+	 */
 	private final String methodName;
 
+	/**
+	 * 是否重载
+	 */
 	private boolean overloaded = true;
 
+	/**
+	 * 源
+	 */
 	@Nullable
 	private Object source;
 
@@ -98,6 +109,8 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	 * Subclasses must override this to indicate whether they <em>match</em> the
 	 * given method. This allows for argument list checking as well as method
 	 * name checking.
+	 *
+	 * 方法是否匹配
 	 * @param method the method to check
 	 * @return whether this override matches the given method
 	 */
