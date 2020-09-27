@@ -95,12 +95,16 @@ public abstract class ClassUtils {
 	/**
 	 * Map with primitive type name as key and corresponding primitive
 	 * type as value, for example: "int" -> "int.class".
+	 *
+	 * 基类->class
 	 */
 	private static final Map<String, Class<?>> primitiveTypeNameMap = new HashMap<>(32);
 
 	/**
 	 * Map with common Java language class name as key and corresponding Class as value.
 	 * Primarily for efficient deserialization of remote invocations.
+	 *
+	 * 公共的类缓存
 	 */
 	private static final Map<String, Class<?>> commonClassCache = new HashMap<>(64);
 
@@ -242,11 +246,14 @@ public abstract class ClassUtils {
 
 		Assert.notNull(name, "Name must not be null");
 
+		// 基类的映射关系, int -> int.class 等
 		Class<?> clazz = resolvePrimitiveClassName(name);
 		if (clazz == null) {
+			// 缓存中获取
 			clazz = commonClassCache.get(name);
 		}
 		if (clazz != null) {
+			// 返回
 			return clazz;
 		}
 
@@ -273,9 +280,11 @@ public abstract class ClassUtils {
 
 		ClassLoader clToUse = classLoader;
 		if (clToUse == null) {
+			// 获取默认的 class loader
 			clToUse = getDefaultClassLoader();
 		}
 		try {
+			// 调用  class 方法生成 class 对象
 			return Class.forName(name, false, clToUse);
 		}
 		catch (ClassNotFoundException ex) {

@@ -37,6 +37,9 @@ public class AutowireCandidateQualifier extends BeanMetadataAttributeAccessor {
 	 */
 	public static final String VALUE_KEY = "value";
 
+	/**
+	 * 注入的类型
+	 */
 	private final String typeName;
 
 

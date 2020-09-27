@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
  * <p>The currently supported {@link MethodOverride} variants are
  * {@link LookupOverride} and {@link ReplaceOverride}.
  *
+ * 覆盖的方法列表
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 1.1

@@ -47,6 +47,7 @@ public class LookupOverride extends MethodOverride {
 	 * that the overridden method should return (may be {@code null})
 	 */
 	public LookupOverride(String methodName, @Nullable String beanName) {
+		// 方法名称和 bean name 设置
 		super(methodName);
 		this.beanName = beanName;
 	}
@@ -83,9 +84,14 @@ public class LookupOverride extends MethodOverride {
 	@Override
 	public boolean matches(Method method) {
 		if (this.method != null) {
+			// 通过 equals 判断
 			return method.equals(this.method);
 		}
 		else {
+			// 1. method 名称是否相同
+			// 2. 是否需要重载
+			// 3. 是不是 ABSTRACT 方法
+			// 4. 参数列表长度是否等于0
 			return (method.getName().equals(getMethodName()) && (!isOverloaded() ||
 					Modifier.isAbstract(method.getModifiers()) || method.getParameterCount() == 0));
 		}

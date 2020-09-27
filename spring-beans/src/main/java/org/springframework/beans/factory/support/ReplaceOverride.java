@@ -37,8 +37,15 @@ import org.springframework.util.ObjectUtils;
  */
 public class ReplaceOverride extends MethodOverride {
 
+	/**
+	 * 实现 MethodReplacer 接口的bean name
+	 * @see MethodReplacer
+	 */
 	private final String methodReplacerBeanName;
 
+	/**
+	 * 标签 arg-type 数据
+	 */
 	private final List<String> typeIdentifiers = new LinkedList<>();
 
 
@@ -72,20 +79,25 @@ public class ReplaceOverride extends MethodOverride {
 
 	@Override
 	public boolean matches(Method method) {
+		// 方法名称是否相同
 		if (!method.getName().equals(getMethodName())) {
 			return false;
 		}
+		// 是否重载
 		if (!isOverloaded()) {
 			// Not overloaded: don't worry about arg type matching...
 			return true;
 		}
 		// If we get here, we need to insist on precise argument matching...
+		// 类型标识数量是否和参数列表是否不相同
 		if (this.typeIdentifiers.size() != method.getParameterCount()) {
 			return false;
 		}
+		// 获取参数类型列表
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		for (int i = 0; i < this.typeIdentifiers.size(); i++) {
 			String identifier = this.typeIdentifiers.get(i);
+			// 判断 方法参数的类型是否在类型标识列表中
 			if (!parameterTypes[i].getName().contains(identifier)) {
 				return false;
 			}
