@@ -38,10 +38,21 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 
 	private final List<DefaultsDefinition> defaults = new LinkedList<>();
 
+	/**
+	 * key: beanName
+	 * value:{@link ComponentDefinition}
+	 */
 	private final Map<String, ComponentDefinition> componentDefinitions = new LinkedHashMap<>(8);
 
+	/**
+	 * key: beanName
+	 * value: 别名定义列表
+	 */
 	private final Map<String, List<AliasDefinition>> aliasMap = new LinkedHashMap<>(8);
 
+	/**
+	 * import 定义列表
+	 */
 	private final List<ImportDefinition> imports = new LinkedList<>();
 
 
@@ -70,11 +81,14 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 
 	@Override
 	public void aliasRegistered(AliasDefinition aliasDefinition) {
+		// 获取已经注册过的beanName对应的别名
 		List<AliasDefinition> aliases = this.aliasMap.get(aliasDefinition.getBeanName());
 		if (aliases == null) {
 			aliases = new ArrayList<>();
+			// beanName 和 别名对应关系设置
 			this.aliasMap.put(aliasDefinition.getBeanName(), aliases);
 		}
+		// 别名列表添加
 		aliases.add(aliasDefinition);
 	}
 

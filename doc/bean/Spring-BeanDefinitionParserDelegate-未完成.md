@@ -1,4 +1,6 @@
 # Spring BeanDefinitionParserDelegate
+- Author: [HuiFer](https://github.com/huifer)
+- 源码阅读仓库: [SourceHot-spring](https://github.com/SourceHot/spring-framework-read)
 
 - 全路径`org.springframework.beans.factory.xml.BeanDefinitionParserDelegate`
 - 解析 xml 中标签的委托类
@@ -497,7 +499,7 @@ public AbstractBeanDefinition parseBeanDefinitionAttributes(Element ele, String 
       bd.setAutowireCandidate(TRUE_VALUE.equals(autowireCandidate));
    }
 
-   // 获取 primary 书信
+   // 获取 primary 属性
    if (ele.hasAttribute(PRIMARY_ATTRIBUTE)) {
       bd.setPrimary(TRUE_VALUE.equals(ele.getAttribute(PRIMARY_ATTRIBUTE)));
    }

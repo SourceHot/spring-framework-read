@@ -30,11 +30,20 @@ import org.springframework.util.Assert;
  */
 public class ImportDefinition implements BeanMetadataElement {
 
+	/**
+	 * import 标签的resource 值
+	 */
 	private final String importedResource;
 
+	/**
+	 * 资源数组
+	 */
 	@Nullable
 	private final Resource[] actualResources;
 
+	/**
+	 * 源
+	 */
 	@Nullable
 	private final Object source;
 

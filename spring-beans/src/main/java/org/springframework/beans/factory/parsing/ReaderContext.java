@@ -168,6 +168,10 @@ public class ReaderContext {
 
 	/**
 	 * Fire an alias-registered event.
+	 * 执行 别名注册事件
+	 * @param beanName beanName
+	 * @param alias  bean 别名
+	 * @param source
 	 */
 	public void fireAliasRegistered(String beanName, String alias, @Nullable Object source) {
 		this.eventListener.aliasRegistered(new AliasDefinition(beanName, alias, source));
@@ -185,6 +189,11 @@ public class ReaderContext {
 
 	/**
 	 * Fire an import-processed event.
+	 *
+	 * 执行 import 事件
+	 * @param importedResource 导入的文件
+	 * @param actualResources 资源路径
+	 * @param source source
 	 */
 	public void fireImportProcessed(String importedResource, Resource[] actualResources, @Nullable Object source) {
 		this.eventListener.importProcessed(new ImportDefinition(importedResource, actualResources, source));

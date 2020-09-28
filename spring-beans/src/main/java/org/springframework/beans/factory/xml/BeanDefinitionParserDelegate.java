@@ -330,6 +330,7 @@ public class BeanDefinitionParserDelegate {
 		}
 		defaults.setLazyInit(lazyInit);
 
+		// 获取 default-merge 属性值
 		String merge = root.getAttribute(DEFAULT_MERGE_ATTRIBUTE);
 		if (isDefaultValue(merge)) {
 			// Potentially inherited from outer <beans> sections, otherwise falling back to false.
@@ -337,6 +338,7 @@ public class BeanDefinitionParserDelegate {
 		}
 		defaults.setMerge(merge);
 
+		// 获取 default-autowire 属性
 		String autowire = root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE);
 		if (isDefaultValue(autowire)) {
 			// Potentially inherited from outer <beans> sections, otherwise falling back to 'no'.
@@ -344,6 +346,7 @@ public class BeanDefinitionParserDelegate {
 		}
 		defaults.setAutowire(autowire);
 
+		// 是否存在 default-autowire-candidates
 		if (root.hasAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE)) {
 			defaults.setAutowireCandidates(root.getAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE));
 		}
@@ -1603,6 +1606,8 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Decorate the given bean definition through a namespace handler, if applicable.
+	 *
+	 * bean definition 装饰
 	 * @param ele the current element
 	 * @param originalDef the current bean definition
 	 * @return the decorated bean definition

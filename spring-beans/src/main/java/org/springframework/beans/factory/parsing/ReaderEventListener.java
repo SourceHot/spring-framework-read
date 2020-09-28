@@ -32,6 +32,7 @@ public interface ReaderEventListener extends EventListener {
 	/**
 	 * Notification that the given defaults has been registered.
 	 *
+	 * 默认 bean definition 注册
 	 * @param defaultsDefinition a descriptor for the defaults
 	 *
 	 * @see org.springframework.beans.factory.xml.DocumentDefaultsDefinition
@@ -40,7 +41,7 @@ public interface ReaderEventListener extends EventListener {
 
 	/**
 	 * Notification that the given component has been registered.
-	 *
+	 * component 注册
 	 * @param componentDefinition a descriptor for the new component
 	 *
 	 * @see BeanComponentDefinition
@@ -50,14 +51,16 @@ public interface ReaderEventListener extends EventListener {
 	/**
 	 * Notification that the given alias has been registered.
 	 *
+	 * 别名事件触发
+	 *
 	 * @param aliasDefinition a descriptor for the new alias
 	 */
-	void aliasRegistered(AliasDefinition aliasDefinition);
+		void aliasRegistered(AliasDefinition aliasDefinition);
 
 	/**
 	 * Notification that the given import has been processed.
 	 * <p>
-	 * 通知import 处理结果
+	 * import 事件触发, 通知执行 import 事件
 	 *
 	 * @param importDefinition a descriptor for the import
 	 */
