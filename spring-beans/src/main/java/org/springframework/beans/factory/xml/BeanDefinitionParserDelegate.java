@@ -330,6 +330,7 @@ public class BeanDefinitionParserDelegate {
 		}
 		defaults.setLazyInit(lazyInit);
 
+		// 获取 default-merge 属性值
 		String merge = root.getAttribute(DEFAULT_MERGE_ATTRIBUTE);
 		if (isDefaultValue(merge)) {
 			// Potentially inherited from outer <beans> sections, otherwise falling back to false.
@@ -337,6 +338,7 @@ public class BeanDefinitionParserDelegate {
 		}
 		defaults.setMerge(merge);
 
+		// 获取 default-autowire 属性
 		String autowire = root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE);
 		if (isDefaultValue(autowire)) {
 			// Potentially inherited from outer <beans> sections, otherwise falling back to 'no'.
@@ -344,6 +346,7 @@ public class BeanDefinitionParserDelegate {
 		}
 		defaults.setAutowire(autowire);
 
+		// 是否存在 default-autowire-candidates
 		if (root.hasAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE)) {
 			defaults.setAutowireCandidates(root.getAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE));
 		}
@@ -1297,12 +1300,16 @@ public class BeanDefinitionParserDelegate {
 	 * Parse an array element.
 	 */
 	public Object parseArrayElement(Element arrayEle, @Nullable BeanDefinition bd) {
+		// 获取 value-type 属性
 		String elementType = arrayEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
+		// 子节点
 		NodeList nl = arrayEle.getChildNodes();
+		// 合并 array 的类
 		ManagedArray target = new ManagedArray(elementType, nl.getLength());
 		target.setSource(extractSource(arrayEle));
 		target.setElementTypeName(elementType);
 		target.setMergeEnabled(parseMergeAttribute(arrayEle));
+		// 处理 collection 节点
 		parseCollectionElements(nl, target, bd, elementType);
 		return target;
 	}
@@ -1341,6 +1348,7 @@ public class BeanDefinitionParserDelegate {
 		for (int i = 0; i < elementNodes.getLength(); i++) {
 			Node node = elementNodes.item(i);
 			if (node instanceof Element && !nodeNameEquals(node, DESCRIPTION_ELEMENT)) {
+				// 处理子节点
 				target.add(parsePropertySubElement((Element) node, bd, defaultElementType));
 			}
 		}
@@ -1350,16 +1358,21 @@ public class BeanDefinitionParserDelegate {
 	 * Parse a map element.
 	 */
 	public Map<Object, Object> parseMapElement(Element mapEle, @Nullable BeanDefinition bd) {
+		// key-type 属性获取
 		String defaultKeyType = mapEle.getAttribute(KEY_TYPE_ATTRIBUTE);
+		// value-type 属性互殴去
 		String defaultValueType = mapEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 
+		// entry 标签获取
 		List<Element> entryEles = DomUtils.getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
+		// 合并 map 对象
 		ManagedMap<Object, Object> map = new ManagedMap<>(entryEles.size());
 		map.setSource(extractSource(mapEle));
 		map.setKeyTypeName(defaultKeyType);
 		map.setValueTypeName(defaultValueType);
 		map.setMergeEnabled(parseMergeAttribute(mapEle));
 
+		// 循环 entry 节点
 		for (Element entryEle : entryEles) {
 			// Should only have one value child element: ref, value, list, etc.
 			// Optionally, there might be a key child element.
@@ -1370,6 +1383,7 @@ public class BeanDefinitionParserDelegate {
 				Node node = entrySubNodes.item(j);
 				if (node instanceof Element) {
 					Element candidateEle = (Element) node;
+					// 节点名称是否为 key
 					if (nodeNameEquals(candidateEle, KEY_ELEMENT)) {
 						if (keyEle != null) {
 							error("<entry> element is only allowed to contain one <key> sub-element", entryEle);
@@ -1395,7 +1409,9 @@ public class BeanDefinitionParserDelegate {
 
 			// Extract key from attribute or sub-element.
 			Object key = null;
+			// key 属性
 			boolean hasKeyAttribute = entryEle.hasAttribute(KEY_ATTRIBUTE);
+			// key-ref 属性
 			boolean hasKeyRefAttribute = entryEle.hasAttribute(KEY_REF_ATTRIBUTE);
 			if ((hasKeyAttribute && hasKeyRefAttribute) ||
 					(hasKeyAttribute || hasKeyRefAttribute) && keyEle != null) {
@@ -1403,18 +1419,22 @@ public class BeanDefinitionParserDelegate {
 						"a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element", entryEle);
 			}
 			if (hasKeyAttribute) {
+				// TypedStringValue 构建
 				key = buildTypedStringValueForMap(entryEle.getAttribute(KEY_ATTRIBUTE), defaultKeyType, entryEle);
 			}
 			else if (hasKeyRefAttribute) {
+				// key-ref 属性获取
 				String refName = entryEle.getAttribute(KEY_REF_ATTRIBUTE);
 				if (!StringUtils.hasText(refName)) {
 					error("<entry> element contains empty 'key-ref' attribute", entryEle);
 				}
+				// 创建 bean 连接对象
 				RuntimeBeanReference ref = new RuntimeBeanReference(refName);
 				ref.setSource(extractSource(entryEle));
 				key = ref;
 			}
 			else if (keyEle != null) {
+				// 获取 key 数据
 				key = parseKeyElement(keyEle, bd, defaultKeyType);
 			}
 			else {
@@ -1423,8 +1443,11 @@ public class BeanDefinitionParserDelegate {
 
 			// Extract value from attribute or sub-element.
 			Object value = null;
+			// value 属性是否存在
 			boolean hasValueAttribute = entryEle.hasAttribute(VALUE_ATTRIBUTE);
+			// value-ref 属性是否存在
 			boolean hasValueRefAttribute = entryEle.hasAttribute(VALUE_REF_ATTRIBUTE);
+			// 是否存在 value-type 属性
 			boolean hasValueTypeAttribute = entryEle.hasAttribute(VALUE_TYPE_ATTRIBUTE);
 			if ((hasValueAttribute && hasValueRefAttribute) ||
 					(hasValueAttribute || hasValueRefAttribute) && valueEle != null) {
@@ -1438,17 +1461,22 @@ public class BeanDefinitionParserDelegate {
 						"attribute when it has a 'value' attribute", entryEle);
 			}
 			if (hasValueAttribute) {
+				// 获取 value-type 属性
 				String valueType = entryEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 				if (!StringUtils.hasText(valueType)) {
+					// 设置默认value-type
 					valueType = defaultValueType;
 				}
+				// 创建 TypedStringValue
 				value = buildTypedStringValueForMap(entryEle.getAttribute(VALUE_ATTRIBUTE), valueType, entryEle);
 			}
 			else if (hasValueRefAttribute) {
+				// 获取 value-ref 属性
 				String refName = entryEle.getAttribute(VALUE_REF_ATTRIBUTE);
 				if (!StringUtils.hasText(refName)) {
 					error("<entry> element contains empty 'value-ref' attribute", entryEle);
 				}
+				// 创建 bean 链接对象
 				RuntimeBeanReference ref = new RuntimeBeanReference(refName);
 				ref.setSource(extractSource(entryEle));
 				value = ref;
@@ -1473,6 +1501,7 @@ public class BeanDefinitionParserDelegate {
 	 */
 	protected final Object buildTypedStringValueForMap(String value, String defaultTypeName, Element entryEle) {
 		try {
+			// 创建字符串类型值
 			TypedStringValue typedValue = buildTypedStringValue(value, defaultTypeName);
 			typedValue.setSource(extractSource(entryEle));
 			return typedValue;
@@ -1505,6 +1534,7 @@ public class BeanDefinitionParserDelegate {
 		if (subElement == null) {
 			return null;
 		}
+		// 解析 property 子节点
 		return parsePropertySubElement(subElement, bd, defaultKeyTypeName);
 	}
 
@@ -1512,6 +1542,7 @@ public class BeanDefinitionParserDelegate {
 	 * Parse a props element.
 	 */
 	public Properties parsePropsElement(Element propsEle) {
+		// 合并对象
 		ManagedProperties props = new ManagedProperties();
 		props.setSource(extractSource(propsEle));
 		props.setMergeEnabled(parseMergeAttribute(propsEle));
@@ -1575,6 +1606,8 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Decorate the given bean definition through a namespace handler, if applicable.
+	 *
+	 * bean definition 装饰
 	 * @param ele the current element
 	 * @param originalDef the current bean definition
 	 * @return the decorated bean definition

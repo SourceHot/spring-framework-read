@@ -624,6 +624,7 @@ public abstract class StringUtils {
 	 * @return the full file path that results from applying the relative path
 	 */
 	public static String applyRelativePath(String path, String relativePath) {
+		//
 		int separatorIndex = path.lastIndexOf(FOLDER_SEPARATOR);
 		if (separatorIndex != -1) {
 			String newPath = path.substring(0, separatorIndex);
