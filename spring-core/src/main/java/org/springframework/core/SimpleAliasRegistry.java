@@ -45,28 +45,40 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Map from alias to canonical name. */
+	/**
+	 * Map from alias to canonical name.
+	 * key: 别名
+	 * value: 真名
+	 *  */
 	private final Map<String, String> aliasMap = new ConcurrentHashMap<>(16);
 
 
 	@Override
 	public void registerAlias(String name, String alias) {
+		// 参数验证
 		Assert.hasText(name, "'name' must not be empty");
 		Assert.hasText(alias, "'alias' must not be empty");
+		// 上锁
 		synchronized (this.aliasMap) {
+			// 别名和真名是否相同
 			if (alias.equals(name)) {
+				// 移除
 				this.aliasMap.remove(alias);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Alias definition '" + alias + "' ignored since it points to same name");
 				}
 			}
 			else {
+				// 通过别名获取真名
 				String registeredName = this.aliasMap.get(alias);
+				// 真名不为空
 				if (registeredName != null) {
+					// 真名等于参数的真名
 					if (registeredName.equals(name)) {
 						// An existing alias - no need to re-register
 						return;
 					}
+					// 是否覆盖别名
 					if (!allowAliasOverriding()) {
 						throw new IllegalStateException("Cannot define alias '" + alias + "' for name '" +
 								name + "': It is already registered for name '" + registeredName + "'.");
@@ -76,7 +88,9 @@ public class SimpleAliasRegistry implements AliasRegistry {
 								registeredName + "' with new target name '" + name + "'");
 					}
 				}
+				// 别名是否循环使用
 				checkForAliasCircle(name, alias);
+				// 设置 别名对应真名
 				this.aliasMap.put(alias, name);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Alias definition '" + alias + "' registered for name '" + name + "'");
@@ -100,7 +114,10 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	 * @since 4.2.1
 	 */
 	public boolean hasAlias(String name, String alias) {
+		// 从别名map中获取已注册的真名
 		String registeredName = this.aliasMap.get(alias);
+		// 注册的真名和 参数真名是否相同,
+		// 递归判断是否存在别名
 		return ObjectUtils.nullSafeEquals(registeredName, name) || (registeredName != null
 				&& hasAlias(name, registeredName));
 	}
@@ -108,6 +125,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	@Override
 	public void removeAlias(String alias) {
 		synchronized (this.aliasMap) {
+			// 移除别名
 			String name = this.aliasMap.remove(alias);
 			if (name == null) {
 				throw new IllegalStateException("No alias '" + alias + "' registered");
@@ -194,6 +212,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	 * @see #hasAlias
 	 */
 	protected void checkForAliasCircle(String name, String alias) {
+		// 是否存在别名
 		if (hasAlias(alias, name)) {
 			throw new IllegalStateException("Cannot register alias '" + alias +
 					"' for name '" + name + "': Circular reference - '" +

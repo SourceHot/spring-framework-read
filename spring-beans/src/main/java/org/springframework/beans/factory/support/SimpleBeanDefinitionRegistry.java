@@ -36,7 +36,11 @@ import org.springframework.util.StringUtils;
  */
 public class SimpleBeanDefinitionRegistry extends SimpleAliasRegistry implements BeanDefinitionRegistry {
 
-	/** Map of bean definition objects, keyed by bean name. */
+	/**
+	 *  Map of bean definition objects, keyed by bean name.
+	 * key:beanName
+	 * value: bean definition
+	 * */
 	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(64);
 
 
