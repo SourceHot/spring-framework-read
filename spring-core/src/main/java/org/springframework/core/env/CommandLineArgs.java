@@ -35,7 +35,14 @@ import org.springframework.lang.Nullable;
  */
 class CommandLineArgs {
 
+	/**
+	 * 选项参数列表
+	 */
 	private final Map<String, List<String>> optionArgs = new HashMap<>();
+
+	/**
+	 * 非选项参数列表
+	 */
 	private final List<String> nonOptionArgs = new ArrayList<>();
 
 	/**
@@ -43,6 +50,8 @@ class CommandLineArgs {
 	 * list of values associated with this option (of which there may be zero or more).
 	 * The given value may be {@code null}, indicating that the option was specified
 	 * without an associated value (e.g. "--foo" vs. "--foo=bar").
+	 *
+	 * 添加 选项参数
 	 */
 	public void addOptionArg(String optionName, @Nullable String optionValue) {
 		if (!this.optionArgs.containsKey(optionName)) {
@@ -55,6 +64,7 @@ class CommandLineArgs {
 
 	/**
 	 * Return the set of all option arguments present on the command line.
+	 * 获取选项参数列表
 	 */
 	public Set<String> getOptionNames() {
 		return Collections.unmodifiableSet(this.optionArgs.keySet());

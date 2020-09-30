@@ -21,6 +21,7 @@ import org.springframework.lang.Nullable;
 /**
  * Interface for resolving properties against any underlying source.
  *
+ * 属性解析接口
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.1
@@ -32,12 +33,16 @@ public interface PropertyResolver {
 	/**
 	 * Return whether the given property key is available for resolution,
 	 * i.e. if the value for the given key is not {@code null}.
+	 *
+	 * 是否存在属性key
 	 */
 	boolean containsProperty(String key);
 
 	/**
 	 * Return the property value associated with the given key,
 	 * or {@code null} if the key cannot be resolved.
+	 *
+	 * 获取属性值
 	 * @param key the property name to resolve
 	 * @see #getProperty(String, String)
 	 * @see #getProperty(String, Class)
@@ -49,6 +54,8 @@ public interface PropertyResolver {
 	/**
 	 * Return the property value associated with the given key, or
 	 * {@code defaultValue} if the key cannot be resolved.
+	 *
+	 * 获取属性值带默认值
 	 * @param key the property name to resolve
 	 * @param defaultValue the default value to return if no value is found
 	 * @see #getRequiredProperty(String)
@@ -59,6 +66,7 @@ public interface PropertyResolver {
 	/**
 	 * Return the property value associated with the given key,
 	 * or {@code null} if the key cannot be resolved.
+	 * 带有泛型的属性获取
 	 * @param key the property name to resolve
 	 * @param targetType the expected type of the property value
 	 * @see #getRequiredProperty(String, Class)
@@ -69,6 +77,7 @@ public interface PropertyResolver {
 	/**
 	 * Return the property value associated with the given key,
 	 * or {@code defaultValue} if the key cannot be resolved.
+	 * 泛型+默认值获取属性
 	 * @param key the property name to resolve
 	 * @param targetType the expected type of the property value
 	 * @param defaultValue the default value to return if no value is found

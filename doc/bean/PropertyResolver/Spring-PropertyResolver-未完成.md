@@ -161,3 +161,17 @@ public interface PropertyResolver {
 - 类图
 
 ![AbstractPropertyResolver.png](./images/AbstractPropertyResolver.png)
+
+
+
+- 内部属性
+
+  ```java
+  @Nullable
+  private final PropertySources propertySources;
+  ```
+
+
+
+
+

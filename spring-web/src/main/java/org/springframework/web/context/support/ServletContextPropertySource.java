@@ -38,12 +38,14 @@ public class ServletContextPropertySource extends EnumerablePropertySource<Servl
 
 	@Override
 	public String[] getPropertyNames() {
+		// javax.servlet.ServletContext.getInitParameterNames 方法调用
 		return StringUtils.toStringArray(this.source.getInitParameterNames());
 	}
 
 	@Override
 	@Nullable
 	public String getProperty(String name) {
+		// javax.servlet.ServletContext.getInitParameter
 		return this.source.getInitParameter(name);
 	}
 
