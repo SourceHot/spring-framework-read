@@ -439,7 +439,7 @@ public class BeanDefinitionParserDelegate {
 		// beanName = id
 		String beanName = id;
 		if (!StringUtils.hasText(beanName) && !aliases.isEmpty()) {
-			// 别名的第一个she'ziw为beanName
+			// 别名的第一个设置为beanName
 			beanName = aliases.remove(0);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No XML 'id' specified - using '" + beanName +
