@@ -154,6 +154,9 @@ public interface PropertyResolver {
 
 
 
+
+
+
 ## PropertySourcesPropertyResolver
 
 - 全路径: `org.springframework.core.env.PropertySourcesPropertyResolver`
@@ -173,5 +176,12 @@ public interface PropertyResolver {
 
 
 
+关于 PropertySources 的操作就具体讲解了, 详细内容在[PropertySource](/doc/bean/PropertyResolver)
 
 
+
+
+
+### getProperty
+
+- `org.springframework.core.env.PropertySourcesPropertyResolver#getProperty(java.lang.String, java.lang.Class<T>, boolean)`
