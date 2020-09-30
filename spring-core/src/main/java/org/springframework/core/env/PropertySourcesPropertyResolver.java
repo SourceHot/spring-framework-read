@@ -84,10 +84,15 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 				}
 				Object value = propertySource.getProperty(key);
 				if (value != null) {
+					// 是否需要处理嵌套
+					// 是否是 string 类型
 					if (resolveNestedPlaceholders && value instanceof String) {
+						// 嵌套获取数据
 						value = resolveNestedPlaceholders((String) value);
 					}
+					// 日志
 					logKeyFound(key, propertySource, value);
+					//
 					return convertValueIfNecessary(value, targetValueType);
 				}
 			}

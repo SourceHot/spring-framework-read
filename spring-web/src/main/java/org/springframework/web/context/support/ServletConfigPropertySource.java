@@ -38,12 +38,14 @@ public class ServletConfigPropertySource extends EnumerablePropertySource<Servle
 
 	@Override
 	public String[] getPropertyNames() {
+		// javax.servlet.ServletConfig.getInitParameterNames
 		return StringUtils.toStringArray(this.source.getInitParameterNames());
 	}
 
 	@Override
 	@Nullable
 	public String getProperty(String name) {
+		// javax.servlet.ServletConfig.getInitParameter
 		return this.source.getInitParameter(name);
 	}
 

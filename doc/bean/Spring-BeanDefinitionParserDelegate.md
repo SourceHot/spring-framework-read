@@ -1471,3 +1471,17 @@ public void parseQualifierElement(Element ele, AbstractBeanDefinition bd) {
    }
 }
 ```
+
+
+
+
+
+
+
+    ## parseCustomElement
+
+自定义标签解析
+
+
+
+[Spring 自定义标签解析](../context/Spring-自定义标签解析.md)

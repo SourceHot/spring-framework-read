@@ -88,17 +88,19 @@ public class MockPropertySource extends PropertiesPropertySource {
 	 * Set the given property on the underlying {@link Properties} object.
 	 */
 	public void setProperty(String name, Object value) {
+		// map 操作
 		this.source.put(name, value);
 	}
 
 	/**
 	 * Convenient synonym for {@link #setProperty} that returns the current instance.
 	 * Useful for method chaining and fluent-style use.
+	 * 设置属性名称和属性值
 	 * @return this {@link MockPropertySource} instance
 	 */
-	public MockPropertySource withProperty(String name, Object value) {
-		this.setProperty(name, value);
-		return this;
-	}
+		public MockPropertySource withProperty(String name, Object value) {
+			this.setProperty(name, value);
+			return this;
+		}
 
 }

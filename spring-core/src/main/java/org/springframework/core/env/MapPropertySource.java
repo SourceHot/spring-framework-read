@@ -39,16 +39,19 @@ public class MapPropertySource extends EnumerablePropertySource<Map<String, Obje
 	@Override
 	@Nullable
 	public Object getProperty(String name) {
+		// 从map中获取 name 对应的value
 		return this.source.get(name);
 	}
 
 	@Override
 	public boolean containsProperty(String name) {
+		// 判断是否存在 name 属性
 		return this.source.containsKey(name);
 	}
 
 	@Override
 	public String[] getPropertyNames() {
+		// 互殴去 map 的所有key
 		return StringUtils.toStringArray(this.source.keySet());
 	}
 

@@ -222,6 +222,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	 * {@value #COMMAND_LINE_PROPERTY_SOURCE_NAME} and backed by the given source object.
 	 */
 	public CommandLinePropertySource(T source) {
+		// 命令行参数, 属性值
 		super(COMMAND_LINE_PROPERTY_SOURCE_NAME, source);
 	}
 
@@ -230,6 +231,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	 * and backed by the given source object.
 	 */
 	public CommandLinePropertySource(String name, T source) {
+		// 参数名称, 参数值
 		super(name, source);
 	}
 
@@ -251,9 +253,12 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	 */
 	@Override
 	public final boolean containsProperty(String name) {
+		// 输入值是否等于nonOptionArgs
 		if (this.nonOptionArgsPropertyName.equals(name)) {
+			// 等于后判断参数列表是否为空
 			return !this.getNonOptionArgs().isEmpty();
 		}
+		// 是否存在 name 属性
 		return this.containsOption(name);
 	}
 
@@ -270,11 +275,13 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	@Nullable
 	public final String getProperty(String name) {
 		if (this.nonOptionArgsPropertyName.equals(name)) {
+			// 获取 非可选项参数列表
 			Collection<String> nonOptionArguments = this.getNonOptionArgs();
 			if (nonOptionArguments.isEmpty()) {
 				return null;
 			}
 			else {
+				// 可选参数命令行参数
 				return StringUtils.collectionToCommaDelimitedString(nonOptionArguments);
 			}
 		}
@@ -283,6 +290,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 			return null;
 		}
 		else {
+			// 命令行参数
 			return StringUtils.collectionToCommaDelimitedString(optionValues);
 		}
 	}
@@ -291,6 +299,8 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	/**
 	 * Return whether the set of option arguments parsed from the command line contains
 	 * an option with the given name.
+	 *
+	 * 是否存在 name 的命令行参数
 	 */
 	protected abstract boolean containsOption(String name);
 
@@ -307,6 +317,8 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	 * having elements for each value ({@code ["bar", "baz"]})</li>
 	 * <li>if the option is not present, return {@code null}</li>
 	 * </ul>
+	 *
+	 * 获取参数列表集合
 	 */
 	@Nullable
 	protected abstract List<String> getOptionValues(String name);
@@ -314,6 +326,8 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	/**
 	 * Return the collection of non-option arguments parsed from the command line.
 	 * Never {@code null}.
+	 *
+	 * 获取 non-option 参数列表
 	 */
 	protected abstract List<String> getNonOptionArgs();
 

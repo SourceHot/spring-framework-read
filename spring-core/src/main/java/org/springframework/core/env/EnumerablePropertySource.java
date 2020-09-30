@@ -57,6 +57,8 @@ public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
 	 * Return whether this {@code PropertySource} contains a property with the given name.
 	 * <p>This implementation checks for the presence of the given name within the
 	 * {@link #getPropertyNames()} array.
+	 *
+	 * 在属性列表中是否存在 properties
 	 * @param name the name of the property to find
 	 */
 	@Override
@@ -66,6 +68,7 @@ public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
 
 	/**
 	 * Return the names of all properties contained by the
+	 * 获取所有的 properties 名称
 	 * {@linkplain #getSource() source} object (never {@code null}).
 	 */
 	public abstract String[] getPropertyNames();

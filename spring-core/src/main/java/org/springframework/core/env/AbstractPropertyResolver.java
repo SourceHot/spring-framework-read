@@ -248,6 +248,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	@Nullable
 	protected <T> T convertValueIfNecessary(Object value, @Nullable Class<T> targetType) {
 		if (targetType == null) {
+			// 类型强制转换
 			return (T) value;
 		}
 		ConversionService conversionServiceToUse = this.conversionService;

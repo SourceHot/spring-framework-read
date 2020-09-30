@@ -54,7 +54,10 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 	 * loaded from the given encoded resource.
 	 */
 	public ResourcePropertySource(String name, EncodedResource resource) throws IOException {
+		// 设置 name + map 对象
+		// map 对象是 资源信息
 		super(name, PropertiesLoaderUtils.loadProperties(resource));
+		// 获取 resource name
 		this.resourceName = getNameForResource(resource.getResource());
 	}
 
@@ -64,6 +67,8 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 	 * {@link Resource#getDescription() description} of the given resource.
 	 */
 	public ResourcePropertySource(EncodedResource resource) throws IOException {
+		// 设置 key: name, resource 的 name
+		// 设置 value: resource 资源信息
 		super(getNameForResource(resource.getResource()), PropertiesLoaderUtils.loadProperties(resource));
 		this.resourceName = null;
 	}
@@ -93,6 +98,7 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 	 * resource (assuming it is prefixed with {@code classpath:}).
 	 */
 	public ResourcePropertySource(String name, String location, ClassLoader classLoader) throws IOException {
+		// 默认资源读取器读取 location 转换成 resource
 		this(name, new DefaultResourceLoader(classLoader).getResource(location));
 	}
 
@@ -131,6 +137,20 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 		this.resourceName = resourceName;
 	}
 
+	/**
+	 * Return the description for the given Resource; if the description is
+	 * empty, return the class name of the resource plus its identity hash code.
+	 * @see org.springframework.core.io.Resource#getDescription()
+	 */
+	private static String getNameForResource(Resource resource) {
+		// 获取 resource 的介绍
+		String name = resource.getDescription();
+		if (!StringUtils.hasText(name)) {
+			// 短类名+@+hashcode
+			name = resource.getClass().getSimpleName() + "@" + System.identityHashCode(resource);
+		}
+		return name;
+	}
 
 	/**
 	 * Return a potentially adapted variant of this {@link ResourcePropertySource},
@@ -167,20 +187,6 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 			return this;
 		}
 		return new ResourcePropertySource(this.resourceName, null, this.source);
-	}
-
-
-	/**
-	 * Return the description for the given Resource; if the description is
-	 * empty, return the class name of the resource plus its identity hash code.
-	 * @see org.springframework.core.io.Resource#getDescription()
-	 */
-	private static String getNameForResource(Resource resource) {
-		String name = resource.getDescription();
-		if (!StringUtils.hasText(name)) {
-			name = resource.getClass().getSimpleName() + "@" + System.identityHashCode(resource);
-		}
-		return name;
 	}
 
 }

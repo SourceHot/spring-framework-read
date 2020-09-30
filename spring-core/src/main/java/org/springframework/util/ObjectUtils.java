@@ -181,6 +181,8 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Check whether the given array contains the given element.
+	 *
+	 * 判断元素是否存在
 	 * @param array the array to check (may be {@code null},
 	 * in which case the return value will always be {@code false})
 	 * @param element the element to check for

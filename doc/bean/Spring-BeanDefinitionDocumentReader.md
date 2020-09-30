@@ -69,44 +69,48 @@ public void registerBeanDefinitions(Document doc, XmlReaderContext readerContext
 
 
 ```java
-@SuppressWarnings("deprecation")  // for Environment.acceptsProfiles(String...)
-protected void doRegisterBeanDefinitions(Element root) {
-   // Any nested <beans> elements will cause recursion in this method. In
-   // order to propagate and preserve <beans> default-* attributes correctly,
-   // keep track of the current (parent) delegate, which may be null. Create
-   // the new (child) delegate with a reference to the parent for fallback purposes,
-   // then ultimately reset this.delegate back to its original (parent) reference.
-   // this behavior emulates a stack of delegates without actually necessitating one.
-   BeanDefinitionParserDelegate parent = this.delegate;
-   // 创建 BeanDefinitionParserDelegate
-   this.delegate = createDelegate(getReaderContext(), root, parent);
+	@SuppressWarnings("deprecation")  // for Environment.acceptsProfiles(String...)
+	protected void doRegisterBeanDefinitions(Element root) {
+		// Any nested <beans> elements will cause recursion in this method. In
+		// order to propagate and preserve <beans> default-* attributes correctly,
+		// keep track of the current (parent) delegate, which may be null. Create
+		// the new (child) delegate with a reference to the parent for fallback purposes,
+		// then ultimately reset this.delegate back to its original (parent) reference.
+		// this behavior emulates a stack of delegates without actually necessitating one.
+		BeanDefinitionParserDelegate parent = this.delegate;
+		// 创建 BeanDefinitionParserDelegate
+		this.delegate = createDelegate(getReaderContext(), root, parent);
 
-   if (this.delegate.isDefaultNamespace(root)) {
-      String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
-      if (StringUtils.hasText(profileSpec)) {
-         String[] specifiedProfiles = StringUtils.tokenizeToStringArray(
-               profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
-         // We cannot use Profiles.of(...) since profile expressions are not supported
-         // in XML config. See SPR-12458 for details.
-         if (!getReaderContext().getEnvironment().acceptsProfiles(specifiedProfiles)) {
-            if (logger.isDebugEnabled()) {
-               logger.debug("Skipped XML bean definition file due to specified profiles [" + profileSpec +
-                     "] not matching: " + getReaderContext().getResource());
-            }
-            return;
-         }
-      }
-   }
+		if (this.delegate.isDefaultNamespace(root)) {
+			// profile 属性获取
+			String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
+			// 是否存在 profile
+			if (StringUtils.hasText(profileSpec)) {
+				// profile 切分后的数据
+				String[] specifiedProfiles = StringUtils.tokenizeToStringArray(
+						profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
+				// We cannot use Profiles.of(...) since profile expressions are not supported
+				// in XML config. See SPR-12458 for details.
+				if (!getReaderContext().getEnvironment().acceptsProfiles(specifiedProfiles)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Skipped XML bean definition file due to specified profiles [" + profileSpec +
+								"] not matching: " + getReaderContext().getResource());
+					}
+					return;
+				}
+			}
+		}
 
-   // 前置处理
-   preProcessXml(root);
-   // bean definition 处理
-   parseBeanDefinitions(root, this.delegate);
-   // 后置 xml 处理
-   postProcessXml(root);
+		// 前置处理
+		preProcessXml(root);
+		// bean definition 处理
+		parseBeanDefinitions(root, this.delegate);
+		// 后置 xml 处理
+		postProcessXml(root);
 
-   this.delegate = parent;
-}
+		this.delegate = parent;
+	}
+
 ```
 
 #### createDelegate
@@ -338,6 +342,12 @@ protected void processAliasRegistration(Element ele) {
 
 
 
+- 别名注册
+
+  [别名注册相关源码分析](/doc/bean/register/Spring-AliasRegistry.md)
+
+
+
 ### processBeanDefinition
 
 - `org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader#processBeanDefinition`
@@ -368,7 +378,9 @@ protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate d
 
 
 
+- [BeanDefinitionParserDelegate](Spring-BeanDefinitionParserDelegate.md)
 
+- [Bean Definition 注册](/doc/bean/register/Spring-BeanDefinitionRegistry.md)
 
 ## ClassPathContextResource
 

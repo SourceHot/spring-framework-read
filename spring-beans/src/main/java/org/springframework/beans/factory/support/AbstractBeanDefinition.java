@@ -1105,15 +1105,19 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Validate this bean definition.
+	 * bean 定义验证
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	public void validate() throws BeanDefinitionValidationException {
+		// 是否存在重写方法, factory_method_name 是否为空
 		if (hasMethodOverrides() && getFactoryMethodName() != null) {
 			throw new BeanDefinitionValidationException(
 					"Cannot combine factory method with container-generated method overrides: " +
 							"the factory method must create the concrete bean instance.");
 		}
+		//  bean class 是否等于 Class
 		if (hasBeanClass()) {
+			// 方法重写验证
 			prepareMethodOverrides();
 		}
 	}

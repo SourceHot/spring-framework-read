@@ -42,6 +42,9 @@ import org.springframework.util.StringUtils;
  */
 public class CompositePropertySource extends EnumerablePropertySource<Object> {
 
+	/**
+	 * set 集合
+	 */
 	private final Set<PropertySource<?>> propertySources = new LinkedHashSet<>();
 
 
@@ -57,7 +60,9 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 	@Override
 	@Nullable
 	public Object getProperty(String name) {
+		// 循环
 		for (PropertySource<?> propertySource : this.propertySources) {
+			// 获取存储内容
 			Object candidate = propertySource.getProperty(name);
 			if (candidate != null) {
 				return candidate;
@@ -69,6 +74,7 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 	@Override
 	public boolean containsProperty(String name) {
 		for (PropertySource<?> propertySource : this.propertySources) {
+			// 是否存在name
 			if (propertySource.containsProperty(name)) {
 				return true;
 			}
@@ -80,12 +86,15 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 	public String[] getPropertyNames() {
 		Set<String> names = new LinkedHashSet<>();
 		for (PropertySource<?> propertySource : this.propertySources) {
+			// 类型不同抛出异常
 			if (!(propertySource instanceof EnumerablePropertySource)) {
 				throw new IllegalStateException(
 						"Failed to enumerate property names due to non-enumerable property source: " + propertySource);
 			}
+			// 批量添加
 			names.addAll(Arrays.asList(((EnumerablePropertySource<?>) propertySource).getPropertyNames()));
 		}
+		// 转换成 array
 		return StringUtils.toStringArray(names);
 	}
 
@@ -104,6 +113,7 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 	 * @since 4.1
 	 */
 	public void addFirstPropertySource(PropertySource<?> propertySource) {
+		// 头插
 		List<PropertySource<?>> existing = new ArrayList<>(this.propertySources);
 		this.propertySources.clear();
 		this.propertySources.add(propertySource);
