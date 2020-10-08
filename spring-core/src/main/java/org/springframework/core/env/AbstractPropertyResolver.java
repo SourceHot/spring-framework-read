@@ -52,6 +52,9 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	@Nullable
 	private PropertyPlaceholderHelper strictHelper;
 
+	/**
+	 * 遇到无法解析的占位符是否需要抛出异常
+	 */
 	private boolean ignoreUnresolvableNestedPlaceholders = false;
 
 	private String placeholderPrefix = SystemPropertyUtils.PLACEHOLDER_PREFIX;
@@ -129,6 +132,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	 * ${...} form.
 	 * <p>The default is {@code false}.
 	 * @since 3.2
+	 * 遇到无法解析的占位符是否需要抛出异常
 	 */
 	@Override
 	public void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders) {
@@ -267,6 +271,8 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	/**
 	 * Retrieve the specified property as a raw String,
 	 * i.e. without resolution of nested placeholders.
+	 *
+	 * 获取属性
 	 * @param key the property name to resolve
 	 * @return the property value or {@code null} if none found
 	 */

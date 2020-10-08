@@ -97,6 +97,7 @@ public abstract class ServletContextPropertyUtils {
 		@Nullable
 		public String resolvePlaceholder(String placeholderName) {
 			try {
+				// servlet 上下文获取
 				String propVal = this.servletContext.getInitParameter(placeholderName);
 				if (propVal == null) {
 					// Fall back to system properties.

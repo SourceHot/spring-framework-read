@@ -35,19 +35,35 @@ import org.springframework.lang.Nullable;
  */
 public abstract class SystemPropertyUtils {
 
-	/** Prefix for system property placeholders: "${". */
+	/**
+	 *
+	 * Prefix for system property placeholders: "${".
+	 * 前缀占位符
+	 * */
 	public static final String PLACEHOLDER_PREFIX = "${";
 
-	/** Suffix for system property placeholders: "}". */
+	/**
+	 *  Suffix for system property placeholders: "}".
+	 *  后缀占位符
+	 * */
 	public static final String PLACEHOLDER_SUFFIX = "}";
 
-	/** Value separator for system property placeholders: ":". */
+	/**
+	 * Value separator for system property placeholders: ":".
+	 * 值分割符号
+	 * */
 	public static final String VALUE_SEPARATOR = ":";
 
 
+	/**
+	 * 占位符解析类
+	 */
 	private static final PropertyPlaceholderHelper strictHelper =
 			new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, false);
 
+	/**
+	 * 占位符解析类
+	 */
 	private static final PropertyPlaceholderHelper nonStrictHelper =
 			new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, true);
 
@@ -102,6 +118,7 @@ public abstract class SystemPropertyUtils {
 				String propVal = System.getProperty(placeholderName);
 				if (propVal == null) {
 					// Fall back to searching the system environment.
+					// 获取系统属性
 					propVal = System.getenv(placeholderName);
 				}
 				return propVal;

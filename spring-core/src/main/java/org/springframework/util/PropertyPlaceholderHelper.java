@@ -41,6 +41,9 @@ public class PropertyPlaceholderHelper {
 
 	private static final Log logger = LogFactory.getLog(PropertyPlaceholderHelper.class);
 
+	/**
+	 * 前缀后缀对应表
+	 */
 	private static final Map<String, String> wellKnownSimplePrefixes = new HashMap<>(4);
 
 	static {
@@ -50,15 +53,30 @@ public class PropertyPlaceholderHelper {
 	}
 
 
+	/**
+	 * 前缀占位符
+	 */
 	private final String placeholderPrefix;
 
+	/**
+	 * 后缀占位符
+	 */
 	private final String placeholderSuffix;
 
+	/**
+	 * 前缀
+	 */
 	private final String simplePrefix;
 
+	/**
+	 * 值分隔符号
+	 */
 	@Nullable
 	private final String valueSeparator;
 
+	/**
+	 * 是否忽略占位符
+	 */
 	private final boolean ignoreUnresolvablePlaceholders;
 
 
@@ -66,7 +84,9 @@ public class PropertyPlaceholderHelper {
 	 * Creates a new {@code PropertyPlaceholderHelper} that uses the supplied prefix and suffix.
 	 * Unresolvable placeholders are ignored.
 	 * @param placeholderPrefix the prefix that denotes the start of a placeholder
+	 *                          前缀占位符
 	 * @param placeholderSuffix the suffix that denotes the end of a placeholder
+	 * 							后缀占位符
 	 */
 	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix) {
 		this(placeholderPrefix, placeholderSuffix, null, true);
@@ -127,15 +147,19 @@ public class PropertyPlaceholderHelper {
 	protected String parseStringValue(
 			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
 
+		// 占位符所在位置
 		int startIndex = value.indexOf(this.placeholderPrefix);
 		if (startIndex == -1) {
 			return value;
 		}
 
+		// 返回值
 		StringBuilder result = new StringBuilder(value);
 		while (startIndex != -1) {
+			// 寻找结尾占位符
 			int endIndex = findPlaceholderEndIndex(result, startIndex);
 			if (endIndex != -1) {
+				// 返回值切分留下中间内容
 				String placeholder = result.substring(startIndex + this.placeholderPrefix.length(), endIndex);
 				String originalPlaceholder = placeholder;
 				if (visitedPlaceholders == null) {
@@ -146,8 +170,10 @@ public class PropertyPlaceholderHelper {
 							"Circular placeholder reference '" + originalPlaceholder + "' in property definitions");
 				}
 				// Recursive invocation, parsing placeholders contained in the placeholder key.
+				// 递归获取占位符内容
 				placeholder = parseStringValue(placeholder, placeholderResolver, visitedPlaceholders);
 				// Now obtain the value for the fully resolved key...
+				// 解析占位符内容获得真正的属性值
 				String propVal = placeholderResolver.resolvePlaceholder(placeholder);
 				if (propVal == null && this.valueSeparator != null) {
 					int separatorIndex = placeholder.indexOf(this.valueSeparator);
@@ -187,6 +213,9 @@ public class PropertyPlaceholderHelper {
 		return result.toString();
 	}
 
+	/**
+	 * 寻找结尾占位符索引
+	 */
 	private int findPlaceholderEndIndex(CharSequence buf, int startIndex) {
 		int index = startIndex + this.placeholderPrefix.length();
 		int withinNestedPlaceholder = 0;
