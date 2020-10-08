@@ -46,6 +46,7 @@ package org.springframework.core.env;
  * prefix will be considered as "non-option arguments" and made available through the
  * {@link CommandLineArgs#getNonOptionArgs()} method.
  *
+ * 命令行参数解析
  * @author Chris Beams
  * @since 3.1
  */
@@ -61,12 +62,16 @@ class SimpleCommandLineArgsParser {
 		CommandLineArgs commandLineArgs = new CommandLineArgs();
 		for (String arg : args) {
 			if (arg.startsWith("--")) {
+				// 切掉 --
 				String optionText = arg.substring(2, arg.length());
 				String optionName;
 				String optionValue = null;
 				if (optionText.contains("=")) {
+					// 切掉 =
+					// 参数名称
 					optionName = optionText.substring(0, optionText.indexOf('='));
-					optionValue = optionText.substring(optionText.indexOf('=')+1, optionText.length());
+					// 参数值
+					optionValue = optionText.substring(optionText.indexOf('=') + 1, optionText.length());
 				}
 				else {
 					optionName = optionText;

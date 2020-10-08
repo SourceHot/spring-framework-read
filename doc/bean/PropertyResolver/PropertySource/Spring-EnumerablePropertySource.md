@@ -1,4 +1,8 @@
 # Spring EnumerablePropertySource
+
+- Author: [HuiFer](https://github.com/huifer)
+- 源码阅读仓库: [SourceHot-spring](https://github.com/SourceHot/spring-framework-read)
+
 - 全路径: `org.springframework.core.env.EnumerablePropertySource`
 - 在这个类中定义了一个抽象方法`getPropertyNames` 用来获取所有的 property 的名称
 
