@@ -56,6 +56,7 @@ public interface JdbcOperations {
 	 * JDBC SQLExceptions into Spring's DataAccessException hierarchy.
 	 * <p>The callback action can return a result object, for example a domain
 	 * object or a collection of domain objects.
+	 * 执行
 	 * @param action a callback object that specifies the action
 	 * @return a result object returned by the action, or {@code null} if none
 	 * @throws DataAccessException if there is any problem
@@ -76,6 +77,7 @@ public interface JdbcOperations {
 	 * converting JDBC SQLExceptions into Spring's DataAccessException hierarchy.
 	 * <p>The callback action can return a result object, for example a domain
 	 * object or a collection of domain objects.
+	 * 执行
 	 * @param action a callback that specifies the action
 	 * @return a result object returned by the action, or {@code null} if none
 	 * @throws DataAccessException if there is any problem
@@ -85,6 +87,7 @@ public interface JdbcOperations {
 
 	/**
 	 * Issue a single SQL execute, typically a DDL statement.
+	 * 执行
 	 * @param sql static SQL to execute
 	 * @throws DataAccessException if there is any problem
 	 */
@@ -96,6 +99,7 @@ public interface JdbcOperations {
 	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
 	 * execute a static query with a PreparedStatement, use the overloaded
 	 * {@code query} method with {@code null} as argument array.
+	 * 查询
 	 * @param sql the SQL query to execute
 	 * @param rse a callback that will extract all rows of results
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
@@ -111,6 +115,8 @@ public interface JdbcOperations {
 	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
 	 * execute a static query with a PreparedStatement, use the overloaded
 	 * {@code query} method with {@code null} as argument array.
+	 *
+	 * 查询
 	 * @param sql the SQL query to execute
 	 * @param rch a callback that will extract results, one row at a time
 	 * @throws DataAccessException if there is any problem executing the query
@@ -124,6 +130,7 @@ public interface JdbcOperations {
 	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
 	 * execute a static query with a PreparedStatement, use the overloaded
 	 * {@code query} method with {@code null} as argument array.
+	 * 查询
 	 * @param sql the SQL query to execute
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the result List, containing mapped objects
@@ -139,6 +146,7 @@ public interface JdbcOperations {
 	 * execute a static query with a PreparedStatement, use the overloaded
 	 * {@link #queryForObject(String, RowMapper, Object...)} method with
 	 * {@code null} as argument array.
+	 * 查询结果映射成object
 	 * @param sql the SQL query to execute
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the single mapped object (may be {@code null} if the given
@@ -160,6 +168,7 @@ public interface JdbcOperations {
 	 * <p>This method is useful for running static SQL with a known outcome.
 	 * The query is expected to be a single row/single column query; the returned
 	 * result will be directly mapped to the corresponding object type.
+	 * 查询结果映射成object
 	 * @param sql the SQL query to execute
 	 * @param requiredType the type that the result object is expected to match
 	 * @return the result object of the required type, or {@code null} in case of SQL NULL
@@ -179,6 +188,8 @@ public interface JdbcOperations {
 	 * as argument array.
 	 * <p>The query is expected to be a single row query; the result row will be
 	 * mapped to a Map (one entry for each column, using the column name as the key).
+	 *
+	 * 查询结果映射成 map
 	 * @param sql the SQL query to execute
 	 * @return the result Map (one entry per column, with column name as key)
 	 * @throws IncorrectResultSizeDataAccessException if the query does not
@@ -196,6 +207,7 @@ public interface JdbcOperations {
 	 * {@code queryForList} method with {@code null} as argument array.
 	 * <p>The results will be mapped to a List (one entry for each row) of
 	 * result objects, each of them matching the specified element type.
+	 * 查询结果映射成 lsit
 	 * @param sql the SQL query to execute
 	 * @param elementType the required type of element in the result list
 	 * (for example, {@code Integer.class})
@@ -215,6 +227,7 @@ public interface JdbcOperations {
 	 * Maps (one entry for each column using the column name as the key).
 	 * Each element in the list will be of the form returned by this interface's
 	 * {@code queryForMap} methods.
+	 * 查询结果映射成 list map
 	 * @param sql the SQL query to execute
 	 * @return an List that contains a Map per row
 	 * @throws DataAccessException if there is any problem executing the query
@@ -233,6 +246,7 @@ public interface JdbcOperations {
 	 * be available at runtime: by default, Sun's {@code com.sun.rowset.CachedRowSetImpl}
 	 * class is used, which is part of JDK 1.5+ and also available separately as part of
 	 * Sun's JDBC RowSet Implementations download (rowset.jar).
+	 * 查询结果映射成 SqlRowSet
 	 * @param sql the SQL query to execute
 	 * @return an SqlRowSet representation (possibly a wrapper around a
 	 * {@code javax.sql.rowset.CachedRowSet})
@@ -245,6 +259,8 @@ public interface JdbcOperations {
 
 	/**
 	 * Issue a single SQL update operation (such as an insert, update or delete statement).
+	 *
+	 * 更新语句
 	 * @param sql static SQL to execute
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem.
@@ -255,6 +271,8 @@ public interface JdbcOperations {
 	 * Issue multiple SQL updates on a single JDBC Statement using batching.
 	 * <p>Will fall back to separate updates on a single Statement if the JDBC
 	 * driver does not support batch updates.
+	 *
+	 * 批量更新
 	 * @param sql defining an array of SQL statements that will be executed.
 	 * @return an array of the number of rows affected by each statement
 	 * @throws DataAccessException if there is any problem executing the batch
