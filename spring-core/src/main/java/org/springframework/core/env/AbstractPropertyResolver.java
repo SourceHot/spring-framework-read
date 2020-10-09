@@ -262,8 +262,10 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 			if (ClassUtils.isAssignableValue(targetType, value)) {
 				return (T) value;
 			}
+			// 默认的转换接口
 			conversionServiceToUse = DefaultConversionService.getSharedInstance();
 		}
+		// 通过默认接口进行转换
 		return conversionServiceToUse.convert(value, targetType);
 	}
 

@@ -67,8 +67,9 @@ protected <T> T getProperty(String key, Class<T> targetValueType, boolean resolv
 
 
 
-
 ## resolveNestedPlaceholders
+
+- 处理占位符,获取真实数据
 
 - `org.springframework.core.env.AbstractPropertyResolver#resolveNestedPlaceholders`
 
@@ -91,7 +92,7 @@ protected String resolveNestedPlaceholders(String value) {
 
 
 
-
+PropertyPlaceholderHelper 解析请看: [Spring-PropertyPlaceholderHelper](Spring-PropertyPlaceholderHelper.md)
 
 
 
@@ -106,3 +107,30 @@ protected String resolveNestedPlaceholders(String value) {
 
 
 ## convertValueIfNecessary
+
+- 值类型转换
+
+- `org.springframework.core.env.AbstractPropertyResolver#convertValueIfNecessary`
+
+```java
+@SuppressWarnings("unchecked")
+@Nullable
+protected <T> T convertValueIfNecessary(Object value, @Nullable Class<T> targetType) {
+   if (targetType == null) {
+      // 类型强制转换
+      return (T) value;
+   }
+   ConversionService conversionServiceToUse = this.conversionService;
+   if (conversionServiceToUse == null) {
+      // Avoid initialization of shared DefaultConversionService if
+      // no standard type conversion is needed in the first place...
+      if (ClassUtils.isAssignableValue(targetType, value)) {
+         return (T) value;
+      }
+      // 默认的转换接口
+      conversionServiceToUse = DefaultConversionService.getSharedInstance();
+   }
+   // 通过默认接口进行转换
+   return conversionServiceToUse.convert(value, targetType);
+}
+```

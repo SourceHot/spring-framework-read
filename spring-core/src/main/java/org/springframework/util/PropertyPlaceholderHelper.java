@@ -243,12 +243,14 @@ public class PropertyPlaceholderHelper {
 
 	/**
 	 * Strategy interface used to resolve replacement values for placeholders contained in Strings.
+	 * 占位符中间内容解析接口
 	 */
 	@FunctionalInterface
 	public interface PlaceholderResolver {
 
 		/**
 		 * Resolve the supplied placeholder name to the replacement value.
+		 * 获得占位符中间内容的对应信息
 		 * @param placeholderName the name of the placeholder to resolve
 		 * @return the replacement value, or {@code null} if no replacement is to be made
 		 */
