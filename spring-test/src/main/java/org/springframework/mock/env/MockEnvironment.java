@@ -31,12 +31,16 @@ import org.springframework.core.env.ConfigurableEnvironment;
  */
 public class MockEnvironment extends AbstractEnvironment {
 
-	private MockPropertySource propertySource = new MockPropertySource();
+	/**
+	 * mock 属性表
+	 */
+	private final MockPropertySource propertySource = new MockPropertySource();
 
 	/**
 	 * Create a new {@code MockEnvironment} with a single {@link MockPropertySource}.
 	 */
 	public MockEnvironment() {
+		// 获取属性对象添加
 		getPropertySources().addLast(this.propertySource);
 	}
 
@@ -44,6 +48,7 @@ public class MockEnvironment extends AbstractEnvironment {
 	 * Set a property on the underlying {@link MockPropertySource} for this environment.
 	 */
 	public void setProperty(String key, String value) {
+		// 属性对象添加 k v
 		this.propertySource.setProperty(key, value);
 	}
 
@@ -54,6 +59,7 @@ public class MockEnvironment extends AbstractEnvironment {
 	 * @see MockPropertySource#withProperty
 	 */
 	public MockEnvironment withProperty(String key, String value) {
+		// 属性对象添加 k v
 		this.setProperty(key, value);
 		return this;
 	}

@@ -57,7 +57,7 @@ public interface ReaderEventListener extends EventListener {
 
 类图
 
-![ReaderEventListener](./images/ReaderEventListener.png)
+![ReaderEventListener](images/ReaderEventListener.png)
 
 
 

@@ -47,7 +47,7 @@ private static final PropertyPlaceholderHelper nonStrictHelper =
 
 - 解析属性
 
-![SystemPropertyUtils-resolvePlaceholders.png](./images/SystemPropertyUtils-resolvePlaceholders.png)
+![SystemPropertyUtils-resolvePlaceholders.png](images/SystemPropertyUtils-resolvePlaceholders.png)
 
 
 

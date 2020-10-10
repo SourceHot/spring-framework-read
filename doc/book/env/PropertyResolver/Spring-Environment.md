@@ -4,6 +4,8 @@
 
 
 
+
+
 ```java
 public interface Environment extends PropertyResolver {
 
@@ -62,3 +64,14 @@ public interface Environment extends PropertyResolver {
 
 }
 ```
+
+
+
+
+
+类图
+
+![env](./images/Environment.png)
+
+
+

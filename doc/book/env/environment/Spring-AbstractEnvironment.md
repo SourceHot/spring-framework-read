@@ -479,3 +479,4 @@ public void merge(ConfigurableEnvironment parent) {
 
 
 
+- 在该类中还有其他的方法主要围绕`ConfigurablePropertyResolver`接口做处理.
