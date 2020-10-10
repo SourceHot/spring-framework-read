@@ -109,7 +109,7 @@ public interface PlaceholderResolver {
 
 
 
-占位符解析请查看: [PlaceholderResolver](./PlaceholderResolver)
+占位符解析请查看: [PlaceholderResolver](PlaceholderResolver)
 
 
 

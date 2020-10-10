@@ -23,4 +23,4 @@
 
 - 类图如下
 
-![PropertyPlaceholderConfigurerResolver](./images/PropertyPlaceholderConfigurerResolver.png)
+![PropertyPlaceholderConfigurerResolver](images/PropertyPlaceholderConfigurerResolver.png)

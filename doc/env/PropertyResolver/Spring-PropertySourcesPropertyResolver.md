@@ -3,7 +3,7 @@
 - 类全路径: `org.springframework.core.env.PropertySourcesPropertyResolver`
 
 类图
-![AbstractPropertyResolver.png](./images/AbstractPropertyResolver.png)
+![AbstractPropertyResolver.png](images/AbstractPropertyResolver.png)
 
 
 
@@ -18,7 +18,7 @@
 
 
 
-关于 PropertySources 详见: [PropertySources-分析](./Spring-PropertySources.md)
+关于 PropertySources 详见: [PropertySources-分析](Spring-PropertySources.md)
 
 
 

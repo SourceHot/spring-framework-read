@@ -62,6 +62,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * resolvable otherwise. Consider switching this flag to "true" if you experience
 	 * log warnings from {@code getenv} calls coming from Spring, e.g. on WebSphere
 	 * with strict SecurityManager settings and AccessControlExceptions warnings.
+	 *
+	 * Spring 忽略的系统变量
 	 * @see #suppressGetenvAccess()
 	 */
 	public static final String IGNORE_GETENV_PROPERTY_NAME = "spring.getenv.ignore";
@@ -103,10 +105,19 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 激活的 profile
+	 */
 	private final Set<String> activeProfiles = new LinkedHashSet<>();
 
+	/**
+	 * 默认的 profile
+	 */
 	private final Set<String> defaultProfiles = new LinkedHashSet<>(getReservedDefaultProfiles());
 
+	/**
+	 * 属性源集合
+	 */
 	private final MutablePropertySources propertySources = new MutablePropertySources();
 
 	private final ConfigurablePropertyResolver propertyResolver =
@@ -225,6 +236,26 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	/**
+	 * 设置 激活的 profile
+	 * @param profiles
+	 */
+	@Override
+	public void setActiveProfiles(String... profiles) {
+		Assert.notNull(profiles, "Profile array must not be null");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Activating profiles " + Arrays.asList(profiles));
+		}
+		synchronized (this.activeProfiles) {
+			this.activeProfiles.clear();
+			for (String profile : profiles) {
+				// profile 验证
+				validateProfile(profile);
+				this.activeProfiles.add(profile);
+			}
+		}
+	}
+
+	/**
 	 * Return the set of active profiles as explicitly set through
 	 * {@link #setActiveProfiles} or if the current set of active profiles
 	 * is empty, check for the presence of the {@value #ACTIVE_PROFILES_PROPERTY_NAME}
@@ -235,8 +266,12 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	protected Set<String> doGetActiveProfiles() {
 		synchronized (this.activeProfiles) {
 			if (this.activeProfiles.isEmpty()) {
+				// 通过 PropertySourcesPropertyResolver 获取prfiles
 				String profiles = getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 				if (StringUtils.hasText(profiles)) {
+					// 设置 profile
+					// 1. 按照逗号切分
+					// 2. 设置
 					setActiveProfiles(StringUtils.commaDelimitedListToStringArray(
 							StringUtils.trimAllWhitespace(profiles)));
 				}
@@ -246,28 +281,16 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
-	public void setActiveProfiles(String... profiles) {
-		Assert.notNull(profiles, "Profile array must not be null");
-		if (logger.isDebugEnabled()) {
-			logger.debug("Activating profiles " + Arrays.asList(profiles));
-		}
-		synchronized (this.activeProfiles) {
-			this.activeProfiles.clear();
-			for (String profile : profiles) {
-				validateProfile(profile);
-				this.activeProfiles.add(profile);
-			}
-		}
-	}
-
-	@Override
 	public void addActiveProfile(String profile) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Activating profile '" + profile + "'");
 		}
+		// 验证
 		validateProfile(profile);
+		// 设置 profile
 		doGetActiveProfiles();
 		synchronized (this.activeProfiles) {
+			// 添加 profile
 			this.activeProfiles.add(profile);
 		}
 	}
@@ -276,31 +299,6 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	@Override
 	public String[] getDefaultProfiles() {
 		return StringUtils.toStringArray(doGetDefaultProfiles());
-	}
-
-	/**
-	 * Return the set of default profiles explicitly set via
-	 * {@link #setDefaultProfiles(String...)} or if the current set of default profiles
-	 * consists only of {@linkplain #getReservedDefaultProfiles() reserved default
-	 * profiles}, then check for the presence of the
-	 * {@value #DEFAULT_PROFILES_PROPERTY_NAME} property and assign its value (if any)
-	 * to the set of default profiles.
-	 * @see #AbstractEnvironment()
-	 * @see #getDefaultProfiles()
-	 * @see #DEFAULT_PROFILES_PROPERTY_NAME
-	 * @see #getReservedDefaultProfiles()
-	 */
-	protected Set<String> doGetDefaultProfiles() {
-		synchronized (this.defaultProfiles) {
-			if (this.defaultProfiles.equals(getReservedDefaultProfiles())) {
-				String profiles = getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
-				if (StringUtils.hasText(profiles)) {
-					setDefaultProfiles(StringUtils.commaDelimitedListToStringArray(
-							StringUtils.trimAllWhitespace(profiles)));
-				}
-			}
-			return this.defaultProfiles;
-		}
 	}
 
 	/**
@@ -317,9 +315,37 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		synchronized (this.defaultProfiles) {
 			this.defaultProfiles.clear();
 			for (String profile : profiles) {
+				// 验证
 				validateProfile(profile);
 				this.defaultProfiles.add(profile);
 			}
+		}
+	}
+
+	/**
+	 * Return the set of default profiles explicitly set via
+	 * {@link #setDefaultProfiles(String...)} or if the current set of default profiles
+	 * consists only of {@linkplain #getReservedDefaultProfiles() reserved default
+	 * profiles}, then check for the presence of the
+	 * {@value #DEFAULT_PROFILES_PROPERTY_NAME} property and assign its value (if any)
+	 * to the set of default profiles.
+	 * @see #AbstractEnvironment()
+	 * @see #getDefaultProfiles()
+	 * @see #DEFAULT_PROFILES_PROPERTY_NAME
+	 * @see #getReservedDefaultProfiles()
+	 */
+	protected Set<String> doGetDefaultProfiles() {
+		synchronized (this.defaultProfiles) {
+			// 1. 获取默认的 profile
+			if (this.defaultProfiles.equals(getReservedDefaultProfiles())) {
+				String profiles = getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
+				if (StringUtils.hasText(profiles)) {
+					// 设置默认的 profile
+					setDefaultProfiles(StringUtils.commaDelimitedListToStringArray(
+							StringUtils.trimAllWhitespace(profiles)));
+				}
+			}
+			return this.defaultProfiles;
 		}
 	}
 
@@ -329,6 +355,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		Assert.notEmpty(profiles, "Must specify at least one profile");
 		for (String profile : profiles) {
 			if (StringUtils.hasLength(profile) && profile.charAt(0) == '!') {
+				// 判断是否激活
 				if (!isProfileActive(profile.substring(1))) {
 					return true;
 				}
@@ -353,7 +380,11 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	protected boolean isProfileActive(String profile) {
 		validateProfile(profile);
+		// 当前激活的profile
 		Set<String> currentActiveProfiles = doGetActiveProfiles();
+		// 当前激活的profile 中是否包含 参数profile
+		// 当前激活的 profile 是否为空
+		// 当前激活的profile 中是否包含 参数profile
 		return (currentActiveProfiles.contains(profile) ||
 				(currentActiveProfiles.isEmpty() && doGetDefaultProfiles().contains(profile)));
 	}
@@ -362,6 +393,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * Validate the given profile, called internally prior to adding to the set of
 	 * active or default profiles.
 	 * <p>Subclasses may override to impose further restrictions on profile syntax.
+	 *
+	 * 验证profile是否合法
 	 * @throws IllegalArgumentException if the profile is null, empty, whitespace-only or
 	 * begins with the profile NOT operator (!).
 	 * @see #acceptsProfiles
@@ -369,9 +402,11 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @see #setDefaultProfiles
 	 */
 	protected void validateProfile(String profile) {
+		// 是否存在
 		if (!StringUtils.hasText(profile)) {
 			throw new IllegalArgumentException("Invalid profile [" + profile + "]: must contain text");
 		}
+		// 是否有 !
 		if (profile.charAt(0) == '!') {
 			throw new IllegalArgumentException("Invalid profile [" + profile + "]: must not begin with ! operator");
 		}
@@ -386,6 +421,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public Map<String, Object> getSystemProperties() {
 		try {
+			// 获取系统属性
 			return (Map) System.getProperties();
 		}
 		catch (AccessControlException ex) {
@@ -394,6 +430,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 				@Nullable
 				protected String getSystemAttribute(String attributeName) {
 					try {
+						// 获取系统属性
 						return System.getProperty(attributeName);
 					}
 					catch (AccessControlException ex) {
@@ -449,6 +486,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @see SpringProperties#getFlag
 	 */
 	protected boolean suppressGetenvAccess() {
+		// 读取spring中spring.getenv.ignore的属性
 		return SpringProperties.getFlag(IGNORE_GETENV_PROPERTY_NAME);
 	}
 

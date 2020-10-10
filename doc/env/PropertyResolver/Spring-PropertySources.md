@@ -506,4 +506,4 @@ public abstract class PropertySource<T> {
 
 类图
 
-![PropertySource.png](./images/PropertySource.png)
+![PropertySource.png](images/PropertySource.png)

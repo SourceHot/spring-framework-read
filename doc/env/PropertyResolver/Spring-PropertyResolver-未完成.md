@@ -115,7 +115,7 @@ public interface PropertyResolver {
 
 类图
 
-![PropertyResolver](./images/PropertyResolver.png)
+![PropertyResolver](images/PropertyResolver.png)
 
 
 
@@ -150,7 +150,7 @@ public interface PropertyResolver {
 - 到这一步我们发现了`PropertySourcesPropertyResolver`和`MutablePropertySources`两个关键信息. 接下来的内容将是围绕这两个类的展开
 
 
-- [MutablePropertySources 解析](/doc/bean/PropertyResolver/Spring-PropertySources.md)
+- [MutablePropertySources 解析](/doc/env/PropertyResolver/Spring-PropertySources.md)
 
 
 
@@ -163,7 +163,7 @@ public interface PropertyResolver {
 
 - 类图
 
-![AbstractPropertyResolver.png](./images/AbstractPropertyResolver.png)
+![AbstractPropertyResolver.png](images/AbstractPropertyResolver.png)
 
 
 
@@ -176,7 +176,7 @@ public interface PropertyResolver {
 
 
 
-关于 PropertySources 的操作就具体讲解了, 详细内容在[PropertySource](/doc/bean/PropertyResolver)
+关于 PropertySources 的操作就具体讲解了, 详细内容在[PropertySource](/doc/env/PropertyResolver)
 
 
 
@@ -185,3 +185,44 @@ public interface PropertyResolver {
 ### getProperty
 
 - `org.springframework.core.env.PropertySourcesPropertyResolver#getProperty(java.lang.String, java.lang.Class<T>, boolean)`
+
+
+
+```java
+@Nullable
+protected <T> T getProperty(String key, Class<T> targetValueType, boolean resolveNestedPlaceholders) {
+   if (this.propertySources != null) {
+      // 循环
+      for (PropertySource<?> propertySource : this.propertySources) {
+         if (logger.isTraceEnabled()) {
+            logger.trace("Searching for key '" + key + "' in PropertySource '" +
+                  propertySource.getName() + "'");
+         }
+         // 获取对象结果
+         Object value = propertySource.getProperty(key);
+         if (value != null) {
+            // 是否需要处理嵌套
+            // 是否是 string 类型
+            if (resolveNestedPlaceholders && value instanceof String) {
+               // 嵌套获取数据
+               value = resolveNestedPlaceholders((String) value);
+            }
+            // 日志
+            logKeyFound(key, propertySource, value);
+            // 类型转换
+            return convertValueIfNecessary(value, targetValueType);
+         }
+      }
+   }
+   if (logger.isTraceEnabled()) {
+      logger.trace("Could not find key '" + key + "' in any property source");
+   }
+   return null;
+}
+```
+
+
+
+
+
+这个类的解析详情: [PropertySourcesPropertyResolver](Spring-PropertySourcesPropertyResolver.md)
