@@ -37,19 +37,13 @@ import org.springframework.util.StringUtils;
  * @since 3.2
  * @see org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory
  */
-public class DateTimeFormatAnnotationFormatterFactory  extends EmbeddedValueResolutionSupport
+public class DateTimeFormatAnnotationFormatterFactory extends EmbeddedValueResolutionSupport
 		implements AnnotationFormatterFactory<DateTimeFormat> {
 
+	/**
+	 * 字段类型
+	 */
 	private static final Set<Class<?>> FIELD_TYPES;
-
-	static {
-		Set<Class<?>> fieldTypes = new HashSet<>(4);
-		fieldTypes.add(Date.class);
-		fieldTypes.add(Calendar.class);
-		fieldTypes.add(Long.class);
-		FIELD_TYPES = Collections.unmodifiableSet(fieldTypes);
-	}
-
 
 	@Override
 	public Set<Class<?>> getFieldTypes() {
@@ -68,16 +62,30 @@ public class DateTimeFormatAnnotationFormatterFactory  extends EmbeddedValueReso
 
 	protected Formatter<Date> getFormatter(DateTimeFormat annotation, Class<?> fieldType) {
 		DateFormatter formatter = new DateFormatter();
+		// style
 		String style = resolveEmbeddedValue(annotation.style());
+		// 判断时间格式是否村子啊
 		if (StringUtils.hasLength(style)) {
 			formatter.setStylePattern(style);
 		}
+		// iso 设置
 		formatter.setIso(annotation.iso());
+		// date time pattern
 		String pattern = resolveEmbeddedValue(annotation.pattern());
+		// 设置
 		if (StringUtils.hasLength(pattern)) {
 			formatter.setPattern(pattern);
 		}
 		return formatter;
+	}
+
+	static {
+		Set<Class<?>> fieldTypes = new HashSet<>(4);
+		// 加入字段类型
+		fieldTypes.add(Date.class);
+		fieldTypes.add(Calendar.class);
+		fieldTypes.add(Long.class);
+		FIELD_TYPES = Collections.unmodifiableSet(fieldTypes);
 	}
 
 }

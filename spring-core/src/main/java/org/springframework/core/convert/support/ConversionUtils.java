@@ -38,6 +38,7 @@ abstract class ConversionUtils {
 			TypeDescriptor sourceType, TypeDescriptor targetType) {
 
 		try {
+			// converter 方法调用
 			return converter.convert(source, sourceType, targetType);
 		}
 		catch (ConversionFailedException ex) {
@@ -63,6 +64,8 @@ abstract class ConversionUtils {
 			// yes
 			return true;
 		}
+		// 右侧类型是否可以赋值给左侧类型
+		// 是否是父子类
 		if (ClassUtils.isAssignable(sourceElementType.getType(), targetElementType.getType())) {
 			// maybe
 			return true;

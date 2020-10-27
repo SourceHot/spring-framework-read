@@ -214,8 +214,14 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 
 	private class PlaceholderResolvingStringValueResolver implements StringValueResolver {
 
+		/**
+		 * 属性解析帮助工具
+		 */
 		private final PropertyPlaceholderHelper helper;
 
+		/**
+		 * 占位符解析
+		 */
 		private final PlaceholderResolver resolver;
 
 		public PlaceholderResolvingStringValueResolver(Properties props) {
@@ -227,6 +233,7 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 		@Override
 		@Nullable
 		public String resolveStringValue(String strVal) throws BeansException {
+			// 占位符解析
 			String resolved = this.helper.replacePlaceholders(strVal, this.resolver);
 			if (trimValues) {
 				resolved = resolved.trim();

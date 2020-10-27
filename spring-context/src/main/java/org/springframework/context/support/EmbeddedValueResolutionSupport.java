@@ -46,6 +46,7 @@ public class EmbeddedValueResolutionSupport implements EmbeddedValueResolverAwar
 	 */
 	@Nullable
 	protected String resolveEmbeddedValue(String value) {
+		// 通过 StringValueResolver 解析字符串, 或者直接返回
 		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
 

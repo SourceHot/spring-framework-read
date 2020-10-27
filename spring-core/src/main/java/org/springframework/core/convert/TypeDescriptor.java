@@ -39,6 +39,7 @@ import org.springframework.util.ObjectUtils;
  * Contextual descriptor about a type to convert from or to.
  * Capable of representing arrays and generic collection types.
  *
+ * 类型描述
  * @author Keith Donald
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -52,28 +53,35 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class TypeDescriptor implements Serializable {
 
+	/**
+	 * 空注解列表
+	 */
 	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
+	/**
+	 * 公共类型和 TypeDescriptor 的关系缓存
+	 */
 	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<>(32);
 
+	/**
+	 * 公共类型
+	 */
 	private static final Class<?>[] CACHED_COMMON_TYPES = {
 			boolean.class, Boolean.class, byte.class, Byte.class, char.class, Character.class,
 			double.class, Double.class, float.class, Float.class, int.class, Integer.class,
 			long.class, Long.class, short.class, Short.class, String.class, Object.class};
 
-	static {
-		for (Class<?> preCachedClass : CACHED_COMMON_TYPES) {
-			commonTypesCache.put(preCachedClass, valueOf(preCachedClass));
-		}
-	}
-
-
 	private final Class<?> type;
 
+	/**
+	 * 解析类型
+	 */
 	private final ResolvableType resolvableType;
 
+	/**
+	 * 注解集合
+	 */
 	private final AnnotatedElementAdapter annotatedElement;
-
 
 	/**
 	 * Create a new type descriptor from a {@link MethodParameter}.
@@ -87,6 +95,7 @@ public class TypeDescriptor implements Serializable {
 		this.annotatedElement = new AnnotatedElementAdapter(methodParameter.getParameterIndex() == -1 ?
 				methodParameter.getMethodAnnotations() : methodParameter.getParameterAnnotations());
 	}
+
 
 	/**
 	 * Create a new type descriptor from a {@link Field}.
@@ -128,6 +137,216 @@ public class TypeDescriptor implements Serializable {
 		this.annotatedElement = new AnnotatedElementAdapter(annotations);
 	}
 
+	/**
+	 * Create a new type descriptor for an object.
+	 * <p>Use this factory method to introspect a source object before asking the
+	 * conversion system to convert it to some another type.
+	 * <p>If the provided object is {@code null}, returns {@code null}, else calls
+	 * {@link #valueOf(Class)} to build a TypeDescriptor from the object's class.
+	 * @param source the source object
+	 * @return the type descriptor
+	 */
+	@Nullable
+	public static TypeDescriptor forObject(@Nullable Object source) {
+		return (source != null ? valueOf(source.getClass()) : null);
+	}
+
+	/**
+	 * Create a new type descriptor from the given type.
+	 * <p>Use this to instruct the conversion system to convert an object to a
+	 * specific target type, when no type location such as a method parameter or
+	 * field is available to provide additional conversion context.
+	 * <p>Generally prefer use of {@link #forObject(Object)} for constructing type
+	 * descriptors from source objects, as it handles the {@code null} object case.
+	 * @param type the class (may be {@code null} to indicate {@code Object.class})
+	 * @return the corresponding type descriptor
+	 */
+	public static TypeDescriptor valueOf(@Nullable Class<?> type) {
+		// 类型判断是否为空
+		if (type == null) {
+			type = Object.class;
+		}
+		// 缓存中获取 TypeDescriptor
+		TypeDescriptor desc = commonTypesCache.get(type);
+
+		// 判空后进行手动创建
+		return (desc != null ? desc : new TypeDescriptor(ResolvableType.forClass(type), null, null));
+	}
+
+	/**
+	 * Create a new type descriptor from a {@link java.util.Collection} type.
+	 * <p>Useful for converting to typed Collections.
+	 * <p>For example, a {@code List<String>} could be converted to a
+	 * {@code List<EmailAddress>} by converting to a targetType built with this method.
+	 * The method call to construct such a {@code TypeDescriptor} would look something
+	 * like: {@code collection(List.class, TypeDescriptor.valueOf(EmailAddress.class));}
+	 * @param collectionType the collection type, which must implement {@link Collection}.
+	 * @param elementTypeDescriptor a descriptor for the collection's element type,
+	 * used to convert collection elements
+	 * @return the collection type descriptor
+	 */
+	public static TypeDescriptor collection(Class<?> collectionType, @Nullable TypeDescriptor elementTypeDescriptor) {
+		Assert.notNull(collectionType, "Collection type must not be null");
+		if (!Collection.class.isAssignableFrom(collectionType)) {
+			throw new IllegalArgumentException("Collection type must be a [java.util.Collection]");
+		}
+		ResolvableType element = (elementTypeDescriptor != null ? elementTypeDescriptor.resolvableType : null);
+		return new TypeDescriptor(ResolvableType.forClassWithGenerics(collectionType, element), null, null);
+	}
+
+	/**
+	 * Create a new type descriptor from a {@link java.util.Map} type.
+	 * <p>Useful for converting to typed Maps.
+	 * <p>For example, a Map&lt;String, String&gt; could be converted to a Map&lt;Id, EmailAddress&gt;
+	 * by converting to a targetType built with this method:
+	 * The method call to construct such a TypeDescriptor would look something like:
+	 * <pre class="code">
+	 * map(Map.class, TypeDescriptor.valueOf(Id.class), TypeDescriptor.valueOf(EmailAddress.class));
+	 * </pre>
+	 * @param mapType the map type, which must implement {@link Map}
+	 * @param keyTypeDescriptor a descriptor for the map's key type, used to convert map keys
+	 * @param valueTypeDescriptor the map's value type, used to convert map values
+	 * @return the map type descriptor
+	 */
+	public static TypeDescriptor map(Class<?> mapType, @Nullable TypeDescriptor keyTypeDescriptor,
+			@Nullable TypeDescriptor valueTypeDescriptor) {
+
+		Assert.notNull(mapType, "Map type must not be null");
+		if (!Map.class.isAssignableFrom(mapType)) {
+			throw new IllegalArgumentException("Map type must be a [java.util.Map]");
+		}
+		ResolvableType key = (keyTypeDescriptor != null ? keyTypeDescriptor.resolvableType : null);
+		ResolvableType value = (valueTypeDescriptor != null ? valueTypeDescriptor.resolvableType : null);
+		return new TypeDescriptor(ResolvableType.forClassWithGenerics(mapType, key, value), null, null);
+	}
+
+	/**
+	 * Create a new type descriptor as an array of the specified type.
+	 * <p>For example to create a {@code Map<String,String>[]} use:
+	 * <pre class="code">
+	 * TypeDescriptor.array(TypeDescriptor.map(Map.class, TypeDescriptor.value(String.class), TypeDescriptor.value(String.class)));
+	 * </pre>
+	 * @param elementTypeDescriptor the {@link TypeDescriptor} of the array element or {@code null}
+	 * @return an array {@link TypeDescriptor} or {@code null} if {@code elementTypeDescriptor} is {@code null}
+	 * @since 3.2.1
+	 */
+	@Nullable
+	public static TypeDescriptor array(@Nullable TypeDescriptor elementTypeDescriptor) {
+		if (elementTypeDescriptor == null) {
+			return null;
+		}
+		return new TypeDescriptor(ResolvableType.forArrayComponent(elementTypeDescriptor.resolvableType),
+				null, elementTypeDescriptor.getAnnotations());
+	}
+
+	/**
+	 * Create a type descriptor for a nested type declared within the method parameter.
+	 * <p>For example, if the methodParameter is a {@code List<String>} and the
+	 * nesting level is 1, the nested type descriptor will be String.class.
+	 * <p>If the methodParameter is a {@code List<List<String>>} and the nesting
+	 * level is 2, the nested type descriptor will also be a String.class.
+	 * <p>If the methodParameter is a {@code Map<Integer, String>} and the nesting
+	 * level is 1, the nested type descriptor will be String, derived from the map value.
+	 * <p>If the methodParameter is a {@code List<Map<Integer, String>>} and the
+	 * nesting level is 2, the nested type descriptor will be String, derived from the map value.
+	 * <p>Returns {@code null} if a nested type cannot be obtained because it was not declared.
+	 * For example, if the method parameter is a {@code List<?>}, the nested type
+	 * descriptor returned will be {@code null}.
+	 * @param methodParameter the method parameter with a nestingLevel of 1
+	 * @param nestingLevel the nesting level of the collection/array element or
+	 * map key/value declaration within the method parameter
+	 * @return the nested type descriptor at the specified nesting level,
+	 * or {@code null} if it could not be obtained
+	 * @throws IllegalArgumentException if the nesting level of the input
+	 * {@link MethodParameter} argument is not 1, or if the types up to the
+	 * specified nesting level are not of collection, array, or map types
+	 */
+	@Nullable
+	public static TypeDescriptor nested(MethodParameter methodParameter, int nestingLevel) {
+		if (methodParameter.getNestingLevel() != 1) {
+			throw new IllegalArgumentException("MethodParameter nesting level must be 1: " +
+					"use the nestingLevel parameter to specify the desired nestingLevel for nested type traversal");
+		}
+		return nested(new TypeDescriptor(methodParameter), nestingLevel);
+	}
+
+	/**
+	 * Create a type descriptor for a nested type declared within the field.
+	 * <p>For example, if the field is a {@code List<String>} and the nesting
+	 * level is 1, the nested type descriptor will be {@code String.class}.
+	 * <p>If the field is a {@code List<List<String>>} and the nesting level is
+	 * 2, the nested type descriptor will also be a {@code String.class}.
+	 * <p>If the field is a {@code Map<Integer, String>} and the nesting level
+	 * is 1, the nested type descriptor will be String, derived from the map value.
+	 * <p>If the field is a {@code List<Map<Integer, String>>} and the nesting
+	 * level is 2, the nested type descriptor will be String, derived from the map value.
+	 * <p>Returns {@code null} if a nested type cannot be obtained because it was not
+	 * declared. For example, if the field is a {@code List<?>}, the nested type
+	 * descriptor returned will be {@code null}.
+	 * @param field the field
+	 * @param nestingLevel the nesting level of the collection/array element or
+	 * map key/value declaration within the field
+	 * @return the nested type descriptor at the specified nesting level,
+	 * or {@code null} if it could not be obtained
+	 * @throws IllegalArgumentException if the types up to the specified nesting
+	 * level are not of collection, array, or map types
+	 */
+	@Nullable
+	public static TypeDescriptor nested(Field field, int nestingLevel) {
+		return nested(new TypeDescriptor(field), nestingLevel);
+	}
+
+	/**
+	 * Create a type descriptor for a nested type declared within the property.
+	 * <p>For example, if the property is a {@code List<String>} and the nesting
+	 * level is 1, the nested type descriptor will be {@code String.class}.
+	 * <p>If the property is a {@code List<List<String>>} and the nesting level
+	 * is 2, the nested type descriptor will also be a {@code String.class}.
+	 * <p>If the property is a {@code Map<Integer, String>} and the nesting level
+	 * is 1, the nested type descriptor will be String, derived from the map value.
+	 * <p>If the property is a {@code List<Map<Integer, String>>} and the nesting
+	 * level is 2, the nested type descriptor will be String, derived from the map value.
+	 * <p>Returns {@code null} if a nested type cannot be obtained because it was not
+	 * declared. For example, if the property is a {@code List<?>}, the nested type
+	 * descriptor returned will be {@code null}.
+	 * @param property the property
+	 * @param nestingLevel the nesting level of the collection/array element or
+	 * map key/value declaration within the property
+	 * @return the nested type descriptor at the specified nesting level, or
+	 * {@code null} if it could not be obtained
+	 * @throws IllegalArgumentException if the types up to the specified nesting
+	 * level are not of collection, array, or map types
+	 */
+	@Nullable
+	public static TypeDescriptor nested(Property property, int nestingLevel) {
+		return nested(new TypeDescriptor(property), nestingLevel);
+	}
+
+	@Nullable
+	private static TypeDescriptor nested(TypeDescriptor typeDescriptor, int nestingLevel) {
+		ResolvableType nested = typeDescriptor.resolvableType;
+		for (int i = 0; i < nestingLevel; i++) {
+			if (Object.class == nested.getType()) {
+				// Could be a collection type but we don't know about its element type,
+				// so let's just assume there is an element type of type Object...
+			}
+			else {
+				nested = nested.getNested(2);
+			}
+		}
+		if (nested == ResolvableType.NONE) {
+			return null;
+		}
+		return getRelatedIfResolvable(typeDescriptor, nested);
+	}
+
+	@Nullable
+	private static TypeDescriptor getRelatedIfResolvable(TypeDescriptor source, ResolvableType type) {
+		if (type.resolve() == null) {
+			return null;
+		}
+		return new TypeDescriptor(type, null, source.getAnnotations());
+	}
 
 	/**
 	 * Variation of {@link #getType()} that accounts for a primitive type by
@@ -292,7 +511,7 @@ public class TypeDescriptor implements Serializable {
 		}
 		else if (isMap() && typeDescriptor.isMap()) {
 			return isNestedAssignable(getMapKeyTypeDescriptor(), typeDescriptor.getMapKeyTypeDescriptor()) &&
-				isNestedAssignable(getMapValueTypeDescriptor(), typeDescriptor.getMapValueTypeDescriptor());
+					isNestedAssignable(getMapValueTypeDescriptor(), typeDescriptor.getMapValueTypeDescriptor());
 		}
 		else {
 			return true;
@@ -519,215 +738,6 @@ public class TypeDescriptor implements Serializable {
 		return builder.toString();
 	}
 
-
-	/**
-	 * Create a new type descriptor for an object.
-	 * <p>Use this factory method to introspect a source object before asking the
-	 * conversion system to convert it to some another type.
-	 * <p>If the provided object is {@code null}, returns {@code null}, else calls
-	 * {@link #valueOf(Class)} to build a TypeDescriptor from the object's class.
-	 * @param source the source object
-	 * @return the type descriptor
-	 */
-	@Nullable
-	public static TypeDescriptor forObject(@Nullable Object source) {
-		return (source != null ? valueOf(source.getClass()) : null);
-	}
-
-	/**
-	 * Create a new type descriptor from the given type.
-	 * <p>Use this to instruct the conversion system to convert an object to a
-	 * specific target type, when no type location such as a method parameter or
-	 * field is available to provide additional conversion context.
-	 * <p>Generally prefer use of {@link #forObject(Object)} for constructing type
-	 * descriptors from source objects, as it handles the {@code null} object case.
-	 * @param type the class (may be {@code null} to indicate {@code Object.class})
-	 * @return the corresponding type descriptor
-	 */
-	public static TypeDescriptor valueOf(@Nullable Class<?> type) {
-		if (type == null) {
-			type = Object.class;
-		}
-		TypeDescriptor desc = commonTypesCache.get(type);
-		return (desc != null ? desc : new TypeDescriptor(ResolvableType.forClass(type), null, null));
-	}
-
-	/**
-	 * Create a new type descriptor from a {@link java.util.Collection} type.
-	 * <p>Useful for converting to typed Collections.
-	 * <p>For example, a {@code List<String>} could be converted to a
-	 * {@code List<EmailAddress>} by converting to a targetType built with this method.
-	 * The method call to construct such a {@code TypeDescriptor} would look something
-	 * like: {@code collection(List.class, TypeDescriptor.valueOf(EmailAddress.class));}
-	 * @param collectionType the collection type, which must implement {@link Collection}.
-	 * @param elementTypeDescriptor a descriptor for the collection's element type,
-	 * used to convert collection elements
-	 * @return the collection type descriptor
-	 */
-	public static TypeDescriptor collection(Class<?> collectionType, @Nullable TypeDescriptor elementTypeDescriptor) {
-		Assert.notNull(collectionType, "Collection type must not be null");
-		if (!Collection.class.isAssignableFrom(collectionType)) {
-			throw new IllegalArgumentException("Collection type must be a [java.util.Collection]");
-		}
-		ResolvableType element = (elementTypeDescriptor != null ? elementTypeDescriptor.resolvableType : null);
-		return new TypeDescriptor(ResolvableType.forClassWithGenerics(collectionType, element), null, null);
-	}
-
-	/**
-	 * Create a new type descriptor from a {@link java.util.Map} type.
-	 * <p>Useful for converting to typed Maps.
-	 * <p>For example, a Map&lt;String, String&gt; could be converted to a Map&lt;Id, EmailAddress&gt;
-	 * by converting to a targetType built with this method:
-	 * The method call to construct such a TypeDescriptor would look something like:
-	 * <pre class="code">
-	 * map(Map.class, TypeDescriptor.valueOf(Id.class), TypeDescriptor.valueOf(EmailAddress.class));
-	 * </pre>
-	 * @param mapType the map type, which must implement {@link Map}
-	 * @param keyTypeDescriptor a descriptor for the map's key type, used to convert map keys
-	 * @param valueTypeDescriptor the map's value type, used to convert map values
-	 * @return the map type descriptor
-	 */
-	public static TypeDescriptor map(Class<?> mapType, @Nullable TypeDescriptor keyTypeDescriptor,
-			@Nullable TypeDescriptor valueTypeDescriptor) {
-
-		Assert.notNull(mapType, "Map type must not be null");
-		if (!Map.class.isAssignableFrom(mapType)) {
-			throw new IllegalArgumentException("Map type must be a [java.util.Map]");
-		}
-		ResolvableType key = (keyTypeDescriptor != null ? keyTypeDescriptor.resolvableType : null);
-		ResolvableType value = (valueTypeDescriptor != null ? valueTypeDescriptor.resolvableType : null);
-		return new TypeDescriptor(ResolvableType.forClassWithGenerics(mapType, key, value), null, null);
-	}
-
-	/**
-	 * Create a new type descriptor as an array of the specified type.
-	 * <p>For example to create a {@code Map<String,String>[]} use:
-	 * <pre class="code">
-	 * TypeDescriptor.array(TypeDescriptor.map(Map.class, TypeDescriptor.value(String.class), TypeDescriptor.value(String.class)));
-	 * </pre>
-	 * @param elementTypeDescriptor the {@link TypeDescriptor} of the array element or {@code null}
-	 * @return an array {@link TypeDescriptor} or {@code null} if {@code elementTypeDescriptor} is {@code null}
-	 * @since 3.2.1
-	 */
-	@Nullable
-	public static TypeDescriptor array(@Nullable TypeDescriptor elementTypeDescriptor) {
-		if (elementTypeDescriptor == null) {
-			return null;
-		}
-		return new TypeDescriptor(ResolvableType.forArrayComponent(elementTypeDescriptor.resolvableType),
-				null, elementTypeDescriptor.getAnnotations());
-	}
-
-	/**
-	 * Create a type descriptor for a nested type declared within the method parameter.
-	 * <p>For example, if the methodParameter is a {@code List<String>} and the
-	 * nesting level is 1, the nested type descriptor will be String.class.
-	 * <p>If the methodParameter is a {@code List<List<String>>} and the nesting
-	 * level is 2, the nested type descriptor will also be a String.class.
-	 * <p>If the methodParameter is a {@code Map<Integer, String>} and the nesting
-	 * level is 1, the nested type descriptor will be String, derived from the map value.
-	 * <p>If the methodParameter is a {@code List<Map<Integer, String>>} and the
-	 * nesting level is 2, the nested type descriptor will be String, derived from the map value.
-	 * <p>Returns {@code null} if a nested type cannot be obtained because it was not declared.
-	 * For example, if the method parameter is a {@code List<?>}, the nested type
-	 * descriptor returned will be {@code null}.
-	 * @param methodParameter the method parameter with a nestingLevel of 1
-	 * @param nestingLevel the nesting level of the collection/array element or
-	 * map key/value declaration within the method parameter
-	 * @return the nested type descriptor at the specified nesting level,
-	 * or {@code null} if it could not be obtained
-	 * @throws IllegalArgumentException if the nesting level of the input
-	 * {@link MethodParameter} argument is not 1, or if the types up to the
-	 * specified nesting level are not of collection, array, or map types
-	 */
-	@Nullable
-	public static TypeDescriptor nested(MethodParameter methodParameter, int nestingLevel) {
-		if (methodParameter.getNestingLevel() != 1) {
-			throw new IllegalArgumentException("MethodParameter nesting level must be 1: " +
-					"use the nestingLevel parameter to specify the desired nestingLevel for nested type traversal");
-		}
-		return nested(new TypeDescriptor(methodParameter), nestingLevel);
-	}
-
-	/**
-	 * Create a type descriptor for a nested type declared within the field.
-	 * <p>For example, if the field is a {@code List<String>} and the nesting
-	 * level is 1, the nested type descriptor will be {@code String.class}.
-	 * <p>If the field is a {@code List<List<String>>} and the nesting level is
-	 * 2, the nested type descriptor will also be a {@code String.class}.
-	 * <p>If the field is a {@code Map<Integer, String>} and the nesting level
-	 * is 1, the nested type descriptor will be String, derived from the map value.
-	 * <p>If the field is a {@code List<Map<Integer, String>>} and the nesting
-	 * level is 2, the nested type descriptor will be String, derived from the map value.
-	 * <p>Returns {@code null} if a nested type cannot be obtained because it was not
-	 * declared. For example, if the field is a {@code List<?>}, the nested type
-	 * descriptor returned will be {@code null}.
-	 * @param field the field
-	 * @param nestingLevel the nesting level of the collection/array element or
-	 * map key/value declaration within the field
-	 * @return the nested type descriptor at the specified nesting level,
-	 * or {@code null} if it could not be obtained
-	 * @throws IllegalArgumentException if the types up to the specified nesting
-	 * level are not of collection, array, or map types
-	 */
-	@Nullable
-	public static TypeDescriptor nested(Field field, int nestingLevel) {
-		return nested(new TypeDescriptor(field), nestingLevel);
-	}
-
-	/**
-	 * Create a type descriptor for a nested type declared within the property.
-	 * <p>For example, if the property is a {@code List<String>} and the nesting
-	 * level is 1, the nested type descriptor will be {@code String.class}.
-	 * <p>If the property is a {@code List<List<String>>} and the nesting level
-	 * is 2, the nested type descriptor will also be a {@code String.class}.
-	 * <p>If the property is a {@code Map<Integer, String>} and the nesting level
-	 * is 1, the nested type descriptor will be String, derived from the map value.
-	 * <p>If the property is a {@code List<Map<Integer, String>>} and the nesting
-	 * level is 2, the nested type descriptor will be String, derived from the map value.
-	 * <p>Returns {@code null} if a nested type cannot be obtained because it was not
-	 * declared. For example, if the property is a {@code List<?>}, the nested type
-	 * descriptor returned will be {@code null}.
-	 * @param property the property
-	 * @param nestingLevel the nesting level of the collection/array element or
-	 * map key/value declaration within the property
-	 * @return the nested type descriptor at the specified nesting level, or
-	 * {@code null} if it could not be obtained
-	 * @throws IllegalArgumentException if the types up to the specified nesting
-	 * level are not of collection, array, or map types
-	 */
-	@Nullable
-	public static TypeDescriptor nested(Property property, int nestingLevel) {
-		return nested(new TypeDescriptor(property), nestingLevel);
-	}
-
-	@Nullable
-	private static TypeDescriptor nested(TypeDescriptor typeDescriptor, int nestingLevel) {
-		ResolvableType nested = typeDescriptor.resolvableType;
-		for (int i = 0; i < nestingLevel; i++) {
-			if (Object.class == nested.getType()) {
-				// Could be a collection type but we don't know about its element type,
-				// so let's just assume there is an element type of type Object...
-			}
-			else {
-				nested = nested.getNested(2);
-			}
-		}
-		if (nested == ResolvableType.NONE) {
-			return null;
-		}
-		return getRelatedIfResolvable(typeDescriptor, nested);
-	}
-
-	@Nullable
-	private static TypeDescriptor getRelatedIfResolvable(TypeDescriptor source, ResolvableType type) {
-		if (type.resolve() == null) {
-			return null;
-		}
-		return new TypeDescriptor(type, null, source.getAnnotations());
-	}
-
-
 	/**
 	 * Adapter class for exposing a {@code TypeDescriptor}'s annotations as an
 	 * {@link AnnotatedElement}, in particular to {@link AnnotatedElementUtils}.
@@ -793,6 +803,12 @@ public class TypeDescriptor implements Serializable {
 		@Override
 		public String toString() {
 			return TypeDescriptor.this.toString();
+		}
+	}
+
+	static {
+		for (Class<?> preCachedClass : CACHED_COMMON_TYPES) {
+			commonTypesCache.put(preCachedClass, valueOf(preCachedClass));
 		}
 	}
 

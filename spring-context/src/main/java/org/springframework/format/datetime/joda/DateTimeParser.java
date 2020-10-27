@@ -46,6 +46,7 @@ public final class DateTimeParser implements Parser<DateTime> {
 
 	@Override
 	public DateTime parse(String text, Locale locale) throws ParseException {
+		// DateTimeFormatter 转换字符串事件类型
 		return JodaTimeContextHolder.getFormatter(this.formatter, locale).parseDateTime(text);
 	}
 

@@ -53,19 +53,46 @@ import org.springframework.util.StringValueResolver;
 public class FormattingConversionService extends GenericConversionService
 		implements FormatterRegistry, EmbeddedValueResolverAware {
 
-	@Nullable
-	private StringValueResolver embeddedValueResolver;
-
 	private final Map<AnnotationConverterKey, GenericConverter> cachedPrinters = new ConcurrentHashMap<>(64);
 
 	private final Map<AnnotationConverterKey, GenericConverter> cachedParsers = new ConcurrentHashMap<>(64);
 
+	@Nullable
+	private StringValueResolver embeddedValueResolver;
+
+	static Class<?> getFieldType(Formatter<?> formatter) {
+		return getFieldType(formatter, Formatter.class);
+	}
+
+	private static <T> Class<?> getFieldType(T instance, Class<T> genericInterface) {
+		// 从 instance 上获取 genericInterface 的泛型标记
+		Class<?> fieldType = GenericTypeResolver.resolveTypeArgument(instance.getClass(), genericInterface);
+		if (fieldType == null && instance instanceof DecoratingProxy) {
+			fieldType = GenericTypeResolver.resolveTypeArgument(
+					((DecoratingProxy) instance).getDecoratedClass(), genericInterface);
+		}
+		Assert.notNull(fieldType, () -> "Unable to extract the parameterized field type from " +
+				ClassUtils.getShortName(genericInterface) + " [" + instance.getClass().getName() +
+				"]; does the class parameterize the <T> generic type?");
+		return fieldType;
+	}
+
+	@SuppressWarnings("unchecked")
+	static Class<? extends Annotation> getAnnotationType(AnnotationFormatterFactory<? extends Annotation> factory) {
+		Class<? extends Annotation> annotationType = (Class<? extends Annotation>)
+				GenericTypeResolver.resolveTypeArgument(factory.getClass(), AnnotationFormatterFactory.class);
+		if (annotationType == null) {
+			throw new IllegalArgumentException("Unable to extract parameterized Annotation type argument from " +
+					"AnnotationFormatterFactory [" + factory.getClass().getName() +
+					"]; does the factory parameterize the <A extends Annotation> generic type?");
+		}
+		return annotationType;
+	}
 
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
 	}
-
 
 	@Override
 	public void addPrinter(Printer<?> printer) {
@@ -98,56 +125,44 @@ public class FormattingConversionService extends GenericConversionService
 
 	@Override
 	public void addFormatterForFieldAnnotation(AnnotationFormatterFactory<? extends Annotation> annotationFormatterFactory) {
+		// 获取 annotationFormatterFactory 的注解类型
 		Class<? extends Annotation> annotationType = getAnnotationType(annotationFormatterFactory);
 		if (this.embeddedValueResolver != null && annotationFormatterFactory instanceof EmbeddedValueResolverAware) {
+			// 设置字符串解析类
 			((EmbeddedValueResolverAware) annotationFormatterFactory).setEmbeddedValueResolver(this.embeddedValueResolver);
 		}
+		// 调用 AnnotationFormatterFactory 获取字段类型
 		Set<Class<?>> fieldTypes = annotationFormatterFactory.getFieldTypes();
 		for (Class<?> fieldType : fieldTypes) {
+			// 设置 converter
+			// 1. 设置 printer
 			addConverter(new AnnotationPrinterConverter(annotationType, annotationFormatterFactory, fieldType));
+			// 2. 设置 parser
 			addConverter(new AnnotationParserConverter(annotationType, annotationFormatterFactory, fieldType));
 		}
 	}
 
-
-	static Class<?> getFieldType(Formatter<?> formatter) {
-		return getFieldType(formatter, Formatter.class);
-	}
-
-	private static <T> Class<?> getFieldType(T instance, Class<T> genericInterface) {
-		Class<?> fieldType = GenericTypeResolver.resolveTypeArgument(instance.getClass(), genericInterface);
-		if (fieldType == null && instance instanceof DecoratingProxy) {
-			fieldType = GenericTypeResolver.resolveTypeArgument(
-					((DecoratingProxy) instance).getDecoratedClass(), genericInterface);
-		}
-		Assert.notNull(fieldType, () -> "Unable to extract the parameterized field type from " +
-					ClassUtils.getShortName(genericInterface) + " [" + instance.getClass().getName() +
-					"]; does the class parameterize the <T> generic type?");
-		return fieldType;
-	}
-
-	@SuppressWarnings("unchecked")
-	static Class<? extends Annotation> getAnnotationType(AnnotationFormatterFactory<? extends Annotation> factory) {
-		Class<? extends Annotation> annotationType = (Class<? extends Annotation>)
-				GenericTypeResolver.resolveTypeArgument(factory.getClass(), AnnotationFormatterFactory.class);
-		if (annotationType == null) {
-			throw new IllegalArgumentException("Unable to extract parameterized Annotation type argument from " +
-					"AnnotationFormatterFactory [" + factory.getClass().getName() +
-					"]; does the factory parameterize the <A extends Annotation> generic type?");
-		}
-		return annotationType;
-	}
-
-
 	private static class PrinterConverter implements GenericConverter {
 
+		/**
+		 * 类型
+		 */
 		private final Class<?> fieldType;
 
+		/**
+		 * 类型描述
+		 */
 		private final TypeDescriptor printerObjectType;
 
+		/**
+		 * 打印接口
+		 */
 		@SuppressWarnings("rawtypes")
 		private final Printer printer;
 
+		/**
+		 * 转换服务
+		 */
 		private final ConversionService conversionService;
 
 		public PrinterConverter(Class<?> fieldType, Printer<?> printer, ConversionService conversionService) {
@@ -166,11 +181,13 @@ public class FormattingConversionService extends GenericConversionService
 		@SuppressWarnings("unchecked")
 		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			if (!sourceType.isAssignableTo(this.printerObjectType)) {
+				// 值转换
 				source = this.conversionService.convert(source, sourceType, this.printerObjectType);
 			}
 			if (source == null) {
 				return "";
 			}
+			// 获取 print 值
 			return this.printer.print(source, LocaleContextHolder.getLocale());
 		}
 
@@ -188,10 +205,19 @@ public class FormattingConversionService extends GenericConversionService
 
 	private static class ParserConverter implements GenericConverter {
 
+		/**
+		 * 类型
+		 */
 		private final Class<?> fieldType;
 
+		/**
+		 * 解析接口
+		 */
 		private final Parser<?> parser;
 
+		/**
+		 * 转换服务
+		 */
 		private final ConversionService conversionService;
 
 		public ParserConverter(Class<?> fieldType, Parser<?> parser, ConversionService conversionService) {
@@ -208,12 +234,14 @@ public class FormattingConversionService extends GenericConversionService
 		@Override
 		@Nullable
 		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			// 强制转换
 			String text = (String) source;
 			if (!StringUtils.hasText(text)) {
 				return null;
 			}
 			Object result;
 			try {
+				// 解析器解析
 				result = this.parser.parse(text, LocaleContextHolder.getLocale());
 			}
 			catch (IllegalArgumentException ex) {
@@ -222,8 +250,10 @@ public class FormattingConversionService extends GenericConversionService
 			catch (Throwable ex) {
 				throw new IllegalArgumentException("Parse attempt failed for value [" + text + "]", ex);
 			}
+			// 获取类型描述
 			TypeDescriptor resultType = TypeDescriptor.valueOf(result.getClass());
 			if (!resultType.isAssignableTo(targetType)) {
+				// 转换
 				result = this.conversionService.convert(result, resultType, targetType);
 			}
 			return result;
@@ -235,6 +265,42 @@ public class FormattingConversionService extends GenericConversionService
 		}
 	}
 
+	private static class AnnotationConverterKey {
+
+		private final Annotation annotation;
+
+		private final Class<?> fieldType;
+
+		public AnnotationConverterKey(Annotation annotation, Class<?> fieldType) {
+			this.annotation = annotation;
+			this.fieldType = fieldType;
+		}
+
+		public Annotation getAnnotation() {
+			return this.annotation;
+		}
+
+		public Class<?> getFieldType() {
+			return this.fieldType;
+		}
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof AnnotationConverterKey)) {
+				return false;
+			}
+			AnnotationConverterKey otherKey = (AnnotationConverterKey) other;
+			return (this.fieldType == otherKey.fieldType && this.annotation.equals(otherKey.annotation));
+		}
+
+		@Override
+		public int hashCode() {
+			return (this.fieldType.hashCode() * 29 + this.annotation.hashCode());
+		}
+	}
 
 	private class AnnotationPrinterConverter implements ConditionalGenericConverter {
 
@@ -272,14 +338,19 @@ public class FormattingConversionService extends GenericConversionService
 				throw new IllegalStateException(
 						"Expected [" + this.annotationType.getName() + "] to be present on " + sourceType);
 			}
+			// 缓存key
 			AnnotationConverterKey converterKey = new AnnotationConverterKey(ann, sourceType.getObjectType());
+			// 从缓存中获取
 			GenericConverter converter = cachedPrinters.get(converterKey);
 			if (converter == null) {
 				Printer<?> printer = this.annotationFormatterFactory.getPrinter(
 						converterKey.getAnnotation(), converterKey.getFieldType());
+				// 创建缓存value
 				converter = new PrinterConverter(this.fieldType, printer, FormattingConversionService.this);
+				// 设置缓存
 				cachedPrinters.put(converterKey, converter);
 			}
+			// 执行转换
 			return converter.convert(source, sourceType, targetType);
 		}
 
@@ -289,7 +360,6 @@ public class FormattingConversionService extends GenericConversionService
 					String.class.getName() + ": " + this.annotationFormatterFactory);
 		}
 	}
-
 
 	private class AnnotationParserConverter implements ConditionalGenericConverter {
 
@@ -342,44 +412,6 @@ public class FormattingConversionService extends GenericConversionService
 		public String toString() {
 			return (String.class.getName() + " -> @" + this.annotationType.getName() + " " +
 					this.fieldType.getName() + ": " + this.annotationFormatterFactory);
-		}
-	}
-
-
-	private static class AnnotationConverterKey {
-
-		private final Annotation annotation;
-
-		private final Class<?> fieldType;
-
-		public AnnotationConverterKey(Annotation annotation, Class<?> fieldType) {
-			this.annotation = annotation;
-			this.fieldType = fieldType;
-		}
-
-		public Annotation getAnnotation() {
-			return this.annotation;
-		}
-
-		public Class<?> getFieldType() {
-			return this.fieldType;
-		}
-
-		@Override
-		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof AnnotationConverterKey)) {
-				return false;
-			}
-			AnnotationConverterKey otherKey = (AnnotationConverterKey) other;
-			return (this.fieldType == otherKey.fieldType && this.annotation.equals(otherKey.annotation));
-		}
-
-		@Override
-		public int hashCode() {
-			return (this.fieldType.hashCode() * 29 + this.annotation.hashCode());
 		}
 	}
 

@@ -25,6 +25,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>Implementations may additionally implement {@link ConditionalConverter}.
  *
+ * 转换接口
  * @author Keith Donald
  * @since 3.0
  * @param <S> the source type
@@ -35,6 +36,7 @@ public interface Converter<S, T> {
 
 	/**
 	 * Convert the source object of type {@code S} to target type {@code T}.
+	 * 从 source 转换成 t
 	 * @param source the source object to convert, which must be an instance of {@code S} (never {@code null})
 	 * @return the converted object, which must be an instance of {@code T} (potentially {@code null})
 	 * @throws IllegalArgumentException if the source cannot be converted to the desired target type

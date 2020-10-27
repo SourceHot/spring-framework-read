@@ -150,7 +150,7 @@ public interface PropertyResolver {
 - 到这一步我们发现了`PropertySourcesPropertyResolver`和`MutablePropertySources`两个关键信息. 接下来的内容将是围绕这两个类的展开
 
 
-- [MutablePropertySources 解析](/doc/env/PropertyResolver/Spring-PropertySources.md)
+- [MutablePropertySources 解析](./Spring-PropertySources.md)
 
 
 
@@ -225,4 +225,4 @@ protected <T> T getProperty(String key, Class<T> targetValueType, boolean resolv
 
 
 
-这个类的解析详情: [PropertySourcesPropertyResolver](Spring-PropertySourcesPropertyResolver.md)
+这个类的解析详情: [PropertySourcesPropertyResolver](./Spring-PropertySourcesPropertyResolver.md)

@@ -38,6 +38,8 @@ public interface ConversionService {
 	 * even though a convert invocation may still generate a {@link ConversionException} if the
 	 * underlying elements are not convertible. Callers are expected to handle this exceptional case
 	 * when working with collections and maps.
+	 *
+	 * 是否能够转换
 	 * @param sourceType the source type to convert from (may be {@code null} if source is {@code null})
 	 * @param targetType the target type to convert to (required)
 	 * @return {@code true} if a conversion can be performed, {@code false} if not
@@ -56,6 +58,7 @@ public interface ConversionService {
 	 * even though a convert invocation may still generate a {@link ConversionException} if the
 	 * underlying elements are not convertible. Callers are expected to handle this exceptional case
 	 * when working with collections and maps.
+	 * 是否能够转换
 	 * @param sourceType context about the source type to convert from
 	 * (may be {@code null} if source is {@code null})
 	 * @param targetType context about the target type to convert to (required)
@@ -67,6 +70,7 @@ public interface ConversionService {
 
 	/**
 	 * Convert the given {@code source} to the specified {@code targetType}.
+	 * 转换
 	 * @param source the source object to convert (may be {@code null})
 	 * @param targetType the target type to convert to (required)
 	 * @return the converted object, an instance of targetType
@@ -80,6 +84,7 @@ public interface ConversionService {
 	 * Convert the given {@code source} to the specified {@code targetType}.
 	 * The TypeDescriptors provide additional context about the source and target locations
 	 * where conversion will occur, often object fields or property locations.
+	 * 转换
 	 * @param source the source object to convert (may be {@code null})
 	 * @param sourceType context about the source type to convert from
 	 * (may be {@code null} if source is {@code null})
