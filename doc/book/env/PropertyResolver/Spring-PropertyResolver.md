@@ -123,6 +123,8 @@ public interface PropertyResolver {
 
 
 
+
+
 ## 寻找入口
 
 - 通过查询 `containsProperty` 有哪些类实现了,有如下几个类.(绿色是测试类)
@@ -229,3 +231,4 @@ protected <T> T getProperty(String key, Class<T> targetValueType, boolean resolv
 
 
 这个类的解析详情: [PropertySourcesPropertyResolver](./Spring-PropertySourcesPropertyResolver.md)
+
