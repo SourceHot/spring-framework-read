@@ -43,12 +43,23 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private final Set<String> requiredProperties = new LinkedHashSet<>();
+
+	/**
+	 * 配置过的 转换服务
+	 */
 	@Nullable
 	private volatile ConfigurableConversionService conversionService;
 
+	/**
+	 * 占位符解析工具
+	 */
 	@Nullable
 	private PropertyPlaceholderHelper nonStrictHelper;
 
+	/**
+	 * 占位符解析工具
+	 */
 	@Nullable
 	private PropertyPlaceholderHelper strictHelper;
 
@@ -57,15 +68,21 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	 */
 	private boolean ignoreUnresolvableNestedPlaceholders = false;
 
+	/**
+	 * 前缀
+	 */
 	private String placeholderPrefix = SystemPropertyUtils.PLACEHOLDER_PREFIX;
 
+	/**
+	 * 后缀
+	 */
 	private String placeholderSuffix = SystemPropertyUtils.PLACEHOLDER_SUFFIX;
 
+	/**
+	 * 值分割符号
+	 */
 	@Nullable
 	private String valueSeparator = SystemPropertyUtils.VALUE_SEPARATOR;
-
-	private final Set<String> requiredProperties = new LinkedHashSet<>();
-
 
 	@Override
 	public ConfigurableConversionService getConversionService() {
