@@ -1128,9 +1128,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		clearByTypeCache();
 	}
 
-		private void removeManualSingletonName(String beanName) {
-			updateManualSingletonNames(set -> set.remove(beanName), set -> set.contains(beanName));
-		}
+	private void removeManualSingletonName(String beanName) {
+		updateManualSingletonNames(set -> set.remove(beanName), set -> set.contains(beanName));
+	}
 
 	/**
 	 * Update the factory's internal set of manual singleton names.

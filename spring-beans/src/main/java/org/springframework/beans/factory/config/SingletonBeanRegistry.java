@@ -119,6 +119,8 @@ public interface SingletonBeanRegistry {
 	 * (see {@link #registerSingleton}). Can also be used to check which singletons defined by a
 	 * bean definition have already been created. 获取单例 beanName
 	 *
+	 * 获取所有的单例对象beanName
+	 *
 	 * @return the list of names as a String array (never {@code null})
 	 *
 	 * @see #registerSingleton

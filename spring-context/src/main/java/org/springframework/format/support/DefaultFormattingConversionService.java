@@ -112,6 +112,7 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 
 		// Default handling of monetary values
 		if (jsr354Present) {
+			// 添加  jsr 354 中时间和金钱的format
 			formatterRegistry.addFormatter(new CurrencyUnitFormatter());
 			formatterRegistry.addFormatter(new MonetaryAmountFormatter());
 			formatterRegistry.addFormatterForFieldAnnotation(new Jsr354NumberFormatAnnotationFormatterFactory());
@@ -120,6 +121,7 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 		// Default handling of date-time values
 
 		// just handling JSR-310 specific date and time types
+		// 追加 format register
 		new DateTimeFormatterRegistrar().registerFormatters(formatterRegistry);
 
 		if (jodaTimePresent) {
