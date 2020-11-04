@@ -62,6 +62,7 @@ public interface FactoryBean<T> {
 	 * set} on a {@link org.springframework.beans.factory.config.BeanDefinition} so that factory
 	 * beans can signal their object type when it can't be deduced from the factory bean class.
 	 *
+	 * object 类型
 	 * @since 5.2
 	 */
 	String OBJECT_TYPE_ATTRIBUTE = "factoryBeanObjectType";
