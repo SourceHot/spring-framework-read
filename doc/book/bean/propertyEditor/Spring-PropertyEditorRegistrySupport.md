@@ -652,3 +652,23 @@ private void addStrippedPropertyPaths(List<String> strippedPaths, String nestedP
    }
 }
 ```
+
+
+
+
+
+
+
+### overrideDefaultEditor
+
+- 方法作用: 设置覆盖的 PropertyEditor 
+- 代码是对map的一个操作
+
+```java
+public void overrideDefaultEditor(Class<?> requiredType, PropertyEditor propertyEditor) {
+   if (this.overriddenDefaultEditors == null) {
+      this.overriddenDefaultEditors = new HashMap<>();
+   }
+   this.overriddenDefaultEditors.put(requiredType, propertyEditor);
+}
+```
