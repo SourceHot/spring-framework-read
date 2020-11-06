@@ -49,13 +49,22 @@ import org.springframework.util.Assert;
  */
 public class ServletContextScope implements Scope, DisposableBean {
 
+	/**
+	 * servlet 上下文
+	 */
 	private final ServletContext servletContext;
 
+	/**
+	 * 摧毁方法容器
+	 * key: name
+	 * value: 摧毁方法
+	 */
 	private final Map<String, Runnable> destructionCallbacks = new LinkedHashMap<>();
 
 
 	/**
 	 * Create a new Scope wrapper for the given ServletContext.
+	 * 构造函数. 设置 servletContext
 	 * @param servletContext the ServletContext to wrap
 	 */
 	public ServletContextScope(ServletContext servletContext) {
@@ -66,9 +75,13 @@ public class ServletContextScope implements Scope, DisposableBean {
 
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
+		// 从 servlet-context 根据name 获取实例
 		Object scopedObject = this.servletContext.getAttribute(name);
+		// 实例为空
 		if (scopedObject == null) {
+			// objectFactory 获取
 			scopedObject = objectFactory.getObject();
+			// 放入缓存
 			this.servletContext.setAttribute(name, scopedObject);
 		}
 		return scopedObject;
@@ -77,12 +90,16 @@ public class ServletContextScope implements Scope, DisposableBean {
 	@Override
 	@Nullable
 	public Object remove(String name) {
+		// 从 servlet-context 根据name 获取实例
 		Object scopedObject = this.servletContext.getAttribute(name);
 		if (scopedObject != null) {
 			synchronized (this.destructionCallbacks) {
+				// 删除 name 对应的回调方法
 				this.destructionCallbacks.remove(name);
 			}
+			// 删除 servlet-context 中 name 对应的值
 			this.servletContext.removeAttribute(name);
+			// 返回删除对象
 			return scopedObject;
 		}
 		else {

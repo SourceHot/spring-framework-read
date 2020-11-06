@@ -66,10 +66,15 @@ public class SimpleThreadScope implements Scope {
 
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
+		// ThreadLocal 中获取容器
 		Map<String, Object> scope = this.threadScope.get();
+		// 容器中获取
 		Object scopedObject = scope.get(name);
+		// 不存在
 		if (scopedObject == null) {
+			// 从 ObjectFactory 中获取
 			scopedObject = objectFactory.getObject();
+			// 设置到容器
 			scope.put(name, scopedObject);
 		}
 		return scopedObject;

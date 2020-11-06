@@ -50,6 +50,15 @@ public class SimpAttributes {
 
 	private final String sessionId;
 
+	/**
+	 * 属性列表. 存储两种信息
+	 * 1. 存储 name 和 实体的映射关系
+	 * key: name
+	 * value: object
+	 * 2. 存储 name 和 回调方法的映射
+	 * key: {@link DESTRUCTION_CALLBACK_NAME_PREFIX} + name
+	 * value: Runnable
+	 */
 	private final Map<String, Object> attributes;
 
 
@@ -65,6 +74,24 @@ public class SimpAttributes {
 		this.attributes = attributes;
 	}
 
+	/**
+	 * Extract the SiMP session attributes from the given message and
+	 * wrap them in a {@link SimpAttributes} instance.
+	 * @param message the message to extract session attributes from
+	 */
+	public static SimpAttributes fromMessage(Message<?> message) {
+		Assert.notNull(message, "Message must not be null");
+		MessageHeaders headers = message.getHeaders();
+		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
+		Map<String, Object> sessionAttributes = SimpMessageHeaderAccessor.getSessionAttributes(headers);
+		if (sessionId == null) {
+			throw new IllegalStateException("No session id in " + message);
+		}
+		if (sessionAttributes == null) {
+			throw new IllegalStateException("No session attributes in " + message);
+		}
+		return new SimpAttributes(sessionId, sessionAttributes);
+	}
 
 	/**
 	 * Return the value for the attribute of the given name, if any.
@@ -177,26 +204,6 @@ public class SimpAttributes {
 				}
 			}
 		});
-	}
-
-
-	/**
-	 * Extract the SiMP session attributes from the given message and
-	 * wrap them in a {@link SimpAttributes} instance.
-	 * @param message the message to extract session attributes from
-	 */
-	public static SimpAttributes fromMessage(Message<?> message) {
-		Assert.notNull(message, "Message must not be null");
-		MessageHeaders headers = message.getHeaders();
-		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
-		Map<String, Object> sessionAttributes = SimpMessageHeaderAccessor.getSessionAttributes(headers);
-		if (sessionId == null) {
-			throw new IllegalStateException("No session id in " + message);
-		}
-		if (sessionAttributes == null) {
-			throw new IllegalStateException("No session attributes in " + message);
-		}
-		return new SimpAttributes(sessionId, sessionAttributes);
 	}
 
 }

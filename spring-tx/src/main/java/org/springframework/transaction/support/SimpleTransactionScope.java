@@ -44,15 +44,22 @@ public class SimpleTransactionScope implements Scope {
 
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
+		// 事务管理器中获取 作用域对象容器
 		ScopedObjectsHolder scopedObjects = (ScopedObjectsHolder) TransactionSynchronizationManager.getResource(this);
 		if (scopedObjects == null) {
 			scopedObjects = new ScopedObjectsHolder();
+
+			// 设置空的作用域对象
 			TransactionSynchronizationManager.registerSynchronization(new CleanupSynchronization(scopedObjects));
+			// 绑定当前对象和 作用域对象容器
 			TransactionSynchronizationManager.bindResource(this, scopedObjects);
 		}
+		// 获取作用域对象的map容器
 		Object scopedObject = scopedObjects.scopedInstances.get(name);
 		if (scopedObject == null) {
+			// 从 object factory 创建
 			scopedObject = objectFactory.getObject();
+			// 获取作用域对象的map容器, 向里面插入数据
 			scopedObjects.scopedInstances.put(name, scopedObject);
 		}
 		return scopedObject;
@@ -61,9 +68,12 @@ public class SimpleTransactionScope implements Scope {
 	@Override
 	@Nullable
 	public Object remove(String name) {
+		// 事务管理器中获取 作用域对象容器
 		ScopedObjectsHolder scopedObjects = (ScopedObjectsHolder) TransactionSynchronizationManager.getResource(this);
 		if (scopedObjects != null) {
+			// 摧毁回调容器删除 name
 			scopedObjects.destructionCallbacks.remove(name);
+			// 实例容器删除 name
 			return scopedObjects.scopedInstances.remove(name);
 		}
 		else {
@@ -94,17 +104,30 @@ public class SimpleTransactionScope implements Scope {
 
 	/**
 	 * Holder for scoped objects.
+	 *
+	 * 作用域对象持有
 	 */
 	static class ScopedObjectsHolder {
 
+		/**
+		 * 作用域实例
+		 */
 		final Map<String, Object> scopedInstances = new HashMap<>();
 
+		/**
+		 * 摧毁回调map
+		 */
 		final Map<String, Runnable> destructionCallbacks = new LinkedHashMap<>();
 	}
 
-
+	/**
+	 * 事务相关方法
+	 */
 	private class CleanupSynchronization extends TransactionSynchronizationAdapter {
 
+		/**
+		 * 作用域对象持有
+		 */
 		private final ScopedObjectsHolder scopedObjects;
 
 		public CleanupSynchronization(ScopedObjectsHolder scopedObjects) {
@@ -113,20 +136,29 @@ public class SimpleTransactionScope implements Scope {
 
 		@Override
 		public void suspend() {
+			// 解绑
 			TransactionSynchronizationManager.unbindResource(SimpleTransactionScope.this);
 		}
 
 		@Override
 		public void resume() {
+			// 绑定
 			TransactionSynchronizationManager.bindResource(SimpleTransactionScope.this, this.scopedObjects);
 		}
 
+		/**
+		 * 事务完成后需要执行的内容
+		 * @param status
+		 */
 		@Override
 		public void afterCompletion(int status) {
+			// 解绑
 			TransactionSynchronizationManager.unbindResourceIfPossible(SimpleTransactionScope.this);
+			// 执行素有的回调方法
 			for (Runnable callback : this.scopedObjects.destructionCallbacks.values()) {
 				callback.run();
 			}
+			// 数据容器清除
 			this.scopedObjects.destructionCallbacks.clear();
 			this.scopedObjects.scopedInstances.clear();
 		}

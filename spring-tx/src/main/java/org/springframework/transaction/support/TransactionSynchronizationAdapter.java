@@ -27,6 +27,7 @@ import org.springframework.core.Ordered;
  * {@link #getOrder() order} is {@link Ordered#LOWEST_PRECEDENCE}, indicating
  * late execution; return a lower value for earlier execution.
  *
+ * 事务同步适配器, 抽象类, 定义事务相关方法
  * @author Juergen Hoeller
  * @since 22.01.2004
  */

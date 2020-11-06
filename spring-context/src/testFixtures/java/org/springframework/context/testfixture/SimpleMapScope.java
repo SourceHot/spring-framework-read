@@ -32,8 +32,16 @@ import org.springframework.beans.factory.config.Scope;
 @SuppressWarnings("serial")
 public class SimpleMapScope implements Scope, Serializable {
 
+	/**
+	 * 存储对象容器
+	 * key: name
+	 * value: object instance
+	 */
 	private final Map<String, Object> map = new HashMap<>();
 
+	/**
+	 * 存储回调方法
+	 */
 	private final List<Runnable> callbacks = new LinkedList<>();
 
 
@@ -48,9 +56,12 @@ public class SimpleMapScope implements Scope, Serializable {
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		synchronized (this.map) {
+			// 从 容器中获取 .
 			Object scopedObject = this.map.get(name);
+			// 不存在从 ObjectFactory 中获取
 			if (scopedObject == null) {
 				scopedObject = objectFactory.getObject();
+				// 添加到容器
 				this.map.put(name, scopedObject);
 			}
 			return scopedObject;
