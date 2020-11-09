@@ -93,6 +93,11 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 		this.mergeEnabled = mergeEnabled;
 	}
 
+	/**
+	 * set 合并操作
+	 * @param parent the object to merge with
+	 * @return
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public Set<E> merge(@Nullable Object parent) {

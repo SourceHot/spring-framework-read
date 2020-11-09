@@ -25,6 +25,11 @@ import org.springframework.util.ObjectUtils;
  * Keeps track of the definition source in addition to the key-value pair.
  *
  * bean 元属性
+ * {@code
+ * 	<bean>
+ * 	    <meat key="",value=""/>
+ * 	</bean
+ * }
  * @author Juergen Hoeller
  * @since 2.5
  */

@@ -67,15 +67,19 @@ public class ManagedProperties extends Properties implements Mergeable, BeanMeta
 
 	@Override
 	public Object merge(@Nullable Object parent) {
+		// 是否允许合并
 		if (!this.mergeEnabled) {
 			throw new IllegalStateException("Not allowed to merge when the 'mergeEnabled' property is set to 'false'");
 		}
+		// 入参为空, 直接返回自己
 		if (parent == null) {
 			return this;
 		}
+		// 判断入参是否时 Properties
 		if (!(parent instanceof Properties)) {
 			throw new IllegalArgumentException("Cannot merge with object of type [" + parent.getClass() + "]");
 		}
+		// 创建 Properties , 通过两次 putAll 将数据填充返回
 		Properties merged = new ManagedProperties();
 		merged.putAll((Properties) parent);
 		merged.putAll(this);

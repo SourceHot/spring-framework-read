@@ -51,7 +51,7 @@ public class MapPropertySource extends EnumerablePropertySource<Map<String, Obje
 
 	@Override
 	public String[] getPropertyNames() {
-		// 互殴去 map 的所有key
+		// 获取 map 的所有key
 		return StringUtils.toStringArray(this.source.keySet());
 	}
 

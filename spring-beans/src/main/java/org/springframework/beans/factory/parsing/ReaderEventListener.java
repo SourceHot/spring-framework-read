@@ -55,7 +55,7 @@ public interface ReaderEventListener extends EventListener {
 	 *
 	 * @param aliasDefinition a descriptor for the new alias
 	 */
-		void aliasRegistered(AliasDefinition aliasDefinition);
+	void aliasRegistered(AliasDefinition aliasDefinition);
 
 	/**
 	 * Notification that the given import has been processed.

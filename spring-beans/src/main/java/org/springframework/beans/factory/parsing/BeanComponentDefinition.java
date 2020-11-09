@@ -35,9 +35,14 @@ import org.springframework.lang.Nullable;
  * @since 2.0
  */
 public class BeanComponentDefinition extends BeanDefinitionHolder implements ComponentDefinition {
-
+	/**
+	 * bean 定义列表
+	 */
 	private final BeanDefinition[] innerBeanDefinitions;
 
+	/**
+	 *  bean 连接列表
+	 */
 	private final BeanReference[] beanReferences;
 
 
@@ -70,9 +75,12 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 
 		List<BeanDefinition> innerBeans = new ArrayList<>();
 		List<BeanReference> references = new ArrayList<>();
+		// 从 beanDefinition 中获取 PropertyValues
 		PropertyValues propertyValues = beanDefinitionHolder.getBeanDefinition().getPropertyValues();
+		// 循环 PropertyValues 对象中的元素
 		for (PropertyValue propertyValue : propertyValues.getPropertyValues()) {
 			Object value = propertyValue.getValue();
+			// 类型判断 加入各自对应的集合中进行存储
 			if (value instanceof BeanDefinitionHolder) {
 				innerBeans.add(((BeanDefinitionHolder) value).getBeanDefinition());
 			}
@@ -83,6 +91,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 				references.add((BeanReference) value);
 			}
 		}
+		// 转换成array
 		this.innerBeanDefinitions = innerBeans.toArray(new BeanDefinition[0]);
 		this.beanReferences = references.toArray(new BeanReference[0]);
 	}
@@ -100,7 +109,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 
 	@Override
 	public BeanDefinition[] getBeanDefinitions() {
-		return new BeanDefinition[] { getBeanDefinition() };
+		return new BeanDefinition[] {getBeanDefinition()};
 	}
 
 	@Override

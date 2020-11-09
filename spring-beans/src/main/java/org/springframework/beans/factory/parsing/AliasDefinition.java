@@ -28,11 +28,19 @@ import org.springframework.util.Assert;
  * @see ReaderEventListener#aliasRegistered(AliasDefinition)
  */
 public class AliasDefinition implements BeanMetadataElement {
-
+	/**
+	 * bean name
+	 */
 	private final String beanName;
 
+	/**
+	 * bean 别称
+	 */
 	private final String alias;
 
+	/**
+	 * 对象
+	 */
 	@Nullable
 	private final Object source;
 
