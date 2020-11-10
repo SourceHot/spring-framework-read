@@ -25,18 +25,34 @@ import org.springframework.util.Assert;
  * {@link org.springframework.beans.factory.parsing.ComponentDefinition}
  * implementation that holds a pointcut definition.
  *
+ * 切点的组件描述
  * @author Rob Harrop
  * @since 2.0
  */
 public class PointcutComponentDefinition extends AbstractComponentDefinition {
 
+	/**
+	 * 切点bean名称
+	 */
 	private final String pointcutBeanName;
 
+	/**
+	 * 切点的bean定义
+	 */
 	private final BeanDefinition pointcutDefinition;
 
+	/**
+	 * 切点描述
+	 */
 	private final String description;
 
 
+	/**
+	 *
+	 * @param pointcutBeanName 切点 bean
+	 * @param pointcutDefinition 切点描述
+	 * @param expression 表达式
+	 */
 	public PointcutComponentDefinition(String pointcutBeanName, BeanDefinition pointcutDefinition, String expression) {
 		Assert.notNull(pointcutBeanName, "Bean name must not be null");
 		Assert.notNull(pointcutDefinition, "Pointcut definition must not be null");

@@ -31,6 +31,7 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 
 	/**
 	 * true or false
+	 * 是否懒加载
 	 */
 	@Nullable
 	private String lazyInit;
@@ -43,12 +44,14 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 
 	/**
 	 * no or byName or byType
+	 * 自动注入方式
 	 */
 	@Nullable
 	private String autowire;
 
 	/**
-	 * default-autowire-candidates 属性值
+	 * default-autowire-candidates
+	 *
 	 */
 	@Nullable
 	private String autowireCandidates;
@@ -65,6 +68,9 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 	@Nullable
 	private String destroyMethod;
 
+	/**
+	 * 源对象
+	 */
 	@Nullable
 	private Object source;
 

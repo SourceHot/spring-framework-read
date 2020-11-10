@@ -491,10 +491,12 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		@Nullable
 		public Constructor<?>[] getPreferredConstructors() {
 			Class<?> clazz = getBeanClass();
+			// 方法内是 Kotlin 的一个检索构造函数的过程
 			Constructor<?> primaryCtor = BeanUtils.findPrimaryConstructor(clazz);
 			if (primaryCtor != null) {
 				return new Constructor<?>[] {primaryCtor};
 			}
+			// 通过 class 直接获取构造函数列表
 			Constructor<?>[] publicCtors = clazz.getConstructors();
 			if (publicCtors.length > 0) {
 				return publicCtors;

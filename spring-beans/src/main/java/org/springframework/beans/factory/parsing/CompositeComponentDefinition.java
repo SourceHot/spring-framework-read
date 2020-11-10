@@ -33,11 +33,20 @@ import org.springframework.util.Assert;
  */
 public class CompositeComponentDefinition extends AbstractComponentDefinition {
 
+	/**
+	 * 名称
+	 */
 	private final String name;
 
+	/**
+	 * 源对象
+	 */
 	@Nullable
 	private final Object source;
 
+	/**
+	 * 嵌套的 Comment 定义
+	 */
 	private final List<ComponentDefinition> nestedComponents = new ArrayList<>();
 
 

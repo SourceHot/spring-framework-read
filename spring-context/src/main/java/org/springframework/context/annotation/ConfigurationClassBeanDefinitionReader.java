@@ -395,8 +395,14 @@ class ConfigurationClassBeanDefinitionReader {
 	@SuppressWarnings("serial")
 	private static class ConfigurationClassBeanDefinition extends RootBeanDefinition implements AnnotatedBeanDefinition {
 
+		/**
+		 * 注解元信息
+		 */
 		private final AnnotationMetadata annotationMetadata;
 
+		/**
+		 * 方法元信息
+		 */
 		private final MethodMetadata factoryMethodMetadata;
 
 		public ConfigurationClassBeanDefinition(ConfigurationClass configClass, MethodMetadata beanMethodMetadata) {

@@ -42,9 +42,14 @@ import org.springframework.util.Assert;
  */
 @SuppressWarnings("serial")
 public class AnnotatedGenericBeanDefinition extends GenericBeanDefinition implements AnnotatedBeanDefinition {
-
+	/**
+	 * 注解元信息
+	 */
 	private final AnnotationMetadata metadata;
 
+	/**
+	 * 方法元信息
+	 */
 	@Nullable
 	private MethodMetadata factoryMethodMetadata;
 

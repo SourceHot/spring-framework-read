@@ -32,9 +32,14 @@ import org.springframework.lang.Nullable;
  * @see PointcutComponentDefinition
  */
 public class AspectComponentDefinition extends CompositeComponentDefinition {
-
+	/**
+	 * bean定义列表
+	 */
 	private final BeanDefinition[] beanDefinitions;
 
+	/**
+	 * 外链的bean列表
+	 */
 	private final BeanReference[] beanReferences;
 
 

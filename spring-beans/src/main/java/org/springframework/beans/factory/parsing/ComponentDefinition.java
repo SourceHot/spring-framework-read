@@ -80,6 +80,8 @@ public interface ComponentDefinition extends BeanMetadataElement {
 	 * Get the user-visible name of this {@code ComponentDefinition}.
 	 * <p>This should link back directly to the corresponding configuration data
 	 * for this component in a given context.
+	 *
+	 * 获取名称
 	 */
 	String getName();
 
@@ -87,6 +89,7 @@ public interface ComponentDefinition extends BeanMetadataElement {
 	 * Return a friendly description of the described component.
 	 * <p>Implementations are encouraged to return the same value from
 	 * {@code toString()}.
+	 * 获取描述
 	 */
 	String getDescription();
 
@@ -97,6 +100,10 @@ public interface ComponentDefinition extends BeanMetadataElement {
 	 * other {@link BeanDefinition BeanDefinitions} via {@link BeanReference references},
 	 * however these are <strong>not</strong> included as they may be not available immediately.
 	 * Important {@link BeanReference BeanReferences} are available from {@link #getBeanReferences()}.
+	 *
+	 * 获取bean定义列表
+	 *
+	 *
 	 * @return the array of BeanDefinitions, or an empty array if none
 	 */
 	BeanDefinition[] getBeanDefinitions();
@@ -106,6 +113,8 @@ public interface ComponentDefinition extends BeanMetadataElement {
 	 * inner beans within this component.
 	 * <p>Other inner beans may exist within the associated {@link BeanDefinition BeanDefinitions},
 	 * however these are not considered to be needed for validation or for user visualization.
+	 *
+	 * 获取内部的 bean定义列表
 	 * @return the array of BeanDefinitions, or an empty array if none
 	 */
 	BeanDefinition[] getInnerBeanDefinitions();
@@ -116,6 +125,8 @@ public interface ComponentDefinition extends BeanMetadataElement {
 	 * <p>Other {@link BeanReference BeanReferences} may exist within the associated
 	 * {@link BeanDefinition BeanDefinitions}, however these are not considered
 	 * to be needed for validation or for user visualization.
+	 *
+	 * 获取关联的bean定义列表
 	 * @return the array of BeanReferences, or an empty array if none
 	 */
 	BeanReference[] getBeanReferences();
