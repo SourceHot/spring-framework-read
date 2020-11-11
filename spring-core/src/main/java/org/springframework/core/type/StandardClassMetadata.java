@@ -84,16 +84,20 @@ public class StandardClassMetadata implements ClassMetadata {
         return Modifier.isFinal(this.introspectedClass.getModifiers());
     }
 
-    @Override
-    public boolean isIndependent() {
-        return (!hasEnclosingClass() ||
-                (this.introspectedClass.getDeclaringClass() != null &&
-                        Modifier.isStatic(this.introspectedClass.getModifiers())));
-    }
+	@Override
+	public boolean isIndependent() {
+    	// 是否存在内部类
+		// 是否有 class
+		// 是否有 static 修饰
+		return (!hasEnclosingClass() ||
+				(this.introspectedClass.getDeclaringClass() != null &&
+						Modifier.isStatic(this.introspectedClass.getModifiers())));
+	}
 
     @Override
     @Nullable
     public String getEnclosingClassName() {
+    	// 内部类名称
         Class<?> enclosingClass = this.introspectedClass.getEnclosingClass();
         return (enclosingClass != null ? enclosingClass.getName() : null);
     }

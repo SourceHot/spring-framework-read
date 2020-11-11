@@ -63,12 +63,15 @@ public interface MergedAnnotation<A extends Annotation> {
 
 	/**
 	 * The attribute name for annotations with a single element.
+	 * 属性字段
 	 */
 	String VALUE = "value";
 
 
 	/**
 	 * Get the {@code Class} reference for the actual annotation type.
+	 *
+	 * 获取注解类型
 	 * @return the annotation type
 	 */
 	Class<A> getType();
@@ -78,6 +81,8 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * {@linkplain #isDirectlyPresent() directly present} and
 	 * {@linkplain #isMetaPresent() meta-present} annotations within the context
 	 * of the {@link SearchStrategy} used.
+	 *
+	 * 是否使用
 	 * @return {@code true} if the annotation is present
 	 */
 	boolean isPresent();
@@ -87,6 +92,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * <p>A directly present annotation is one that the user has explicitly
 	 * declared and not one that is {@linkplain #isMetaPresent() meta-present}
 	 * or {@link Inherited @Inherited}.
+	 * 注解是否直接使用. 非注解嵌套
 	 * @return {@code true} if the annotation is directly present
 	 */
 	boolean isDirectlyPresent();
@@ -96,6 +102,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * <p>A meta-present annotation is an annotation that the user hasn't
 	 * explicitly declared, but has been used as a meta-annotation somewhere in
 	 * the annotation hierarchy.
+	 * 是否元注解使用
 	 * @return {@code true} if the annotation is meta-present
 	 */
 	boolean isMetaPresent();
@@ -107,6 +114,12 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * meta-annotation has a distance of {@code 1}, a meta-annotation on a
 	 * meta-annotation has a distance of {@code 2}, etc. A {@linkplain #missing()
 	 * missing} annotation will always return a distance of {@code -1}.
+	 *
+	 * 注解距离
+	 * 0  => 直接使用注解
+	 * 1  => 元注解
+	 * 2  => 元注解的元注解
+	 * -1 => 没有注解
 	 * @return the annotation distance or {@code -1} if the annotation is missing
 	 */
 	int getDistance();
@@ -132,6 +145,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * can be of any type, but should have a sensible {@code toString()}.
 	 * Meta-annotations will always return the same source as the
 	 * {@link #getRoot() root}.
+	 * 元对象
 	 * @return the source, or {@code null}
 	 */
 	@Nullable
@@ -142,6 +156,8 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * annotation is not {@linkplain #isMetaPresent() meta-present}.
 	 * <p>The meta-source is the annotation that was meta-annotated with this
 	 * annotation.
+	 *
+	 * 注解元对象
 	 * @return the meta-annotation source or {@code null}
 	 * @see #getRoot()
 	 */
@@ -151,6 +167,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Get the root annotation, i.e. the {@link #getDistance() distance} {@code 0}
 	 * annotation as directly declared on the source.
+	 * 获取根注解
 	 * @return the root annotation
 	 * @see #getMetaSource()
 	 */
@@ -160,6 +177,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * Get the complete list of annotation types within the annotation hierarchy
 	 * from this annotation to the {@link #getRoot() root}.
 	 * <p>Provides a useful way to uniquely identify a merged annotation instance.
+	 * 获取注解列表
 	 * @return the meta types for the annotation
 	 * @see MergedAnnotationPredicates#unique(Function)
 	 * @see #getRoot()
@@ -171,6 +189,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Determine if the specified attribute name has a non-default value when
 	 * compared to the annotation declaration.
+	 * 是否不存在默认属性值
 	 * @param attributeName the attribute name
 	 * @return {@code true} if the attribute value is different from the default
 	 * value
@@ -180,6 +199,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Determine if the specified attribute name has a default value when compared
 	 * to the annotation declaration.
+	 * 是否存在默认属性值
 	 * @param attributeName the attribute name
 	 * @return {@code true} if the attribute value is the same as the default
 	 * value
@@ -386,6 +406,7 @@ public interface MergedAnnotation<A extends Annotation> {
 
 	/**
 	 * Get an optional attribute value from the annotation.
+	 * 获取属性值
 	 * @param attributeName the attribute name
 	 * @return an optional value or {@link Optional#empty()} if there is no
 	 * matching attribute
@@ -394,6 +415,7 @@ public interface MergedAnnotation<A extends Annotation> {
 
 	/**
 	 * Get an optional attribute value from the annotation.
+	 * 通过属性名称+类型返回属性值
 	 * @param attributeName the attribute name
 	 * @param type the attribute type. Must be compatible with the underlying
 	 * attribute type or {@code Object.class}.
@@ -405,6 +427,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Get the default attribute value from the annotation as specified in
 	 * the annotation declaration.
+	 * 获取默认属性值
 	 * @param attributeName the attribute name
 	 * @return an optional of the default value or {@link Optional#empty()} if
 	 * there is no matching attribute or no defined default
@@ -414,6 +437,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Get the default attribute value from the annotation as specified in
 	 * the annotation declaration.
+	 * 获取默认属性值带类型
 	 * @param attributeName the attribute name
 	 * @param type the attribute type. Must be compatible with the underlying
 	 * attribute type or {@code Object.class}.
@@ -425,6 +449,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Create a new view of the annotation with all attributes that have default
 	 * values removed.
+	 * 创建一个新的 MergedAnnotation 删除默认属性值
 	 * @return a filtered view of the annotation without any attributes that
 	 * have a default value
 	 * @see #filterAttributes(Predicate)
@@ -434,6 +459,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Create a new view of the annotation with only attributes that match the
 	 * given predicate.
+	 * 创建一个新的 MergedAnnotation 过滤部分属性
 	 * @param predicate a predicate used to filter attribute names
 	 * @return a filtered view of the annotation
 	 * @see #filterDefaultValues()
@@ -446,6 +472,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * <p>Methods from this view will return attribute values with only alias mirroring
 	 * rules applied. Aliases to {@link #getMetaSource() meta-source} attributes will
 	 * not be applied.
+	 * 创建于给新的 MergedAnnotation 具有所有属性, 不合并属性
 	 * @return a non-merged view of the annotation
 	 */
 	MergedAnnotation<A> withNonMergedAttributes();
@@ -455,6 +482,8 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * merged annotation.
 	 * <p>The {@link Adapt adaptations} may be used to change the way that values
 	 * are added.
+	 *
+	 * 获取注解属性
 	 * @param adaptations adaptations that should be applied to the annotation values
 	 * @return an immutable map containing the attributes and values
 	 */
@@ -463,6 +492,8 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Get an immutable {@link Map} that contains all the annotation attributes.
 	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
+	 *
+	 * 将注解属性转换成 map
 	 * @param adaptations adaptations that should be applied to the annotation values
 	 * @return an immutable map containing the attributes and values
 	 */
@@ -472,6 +503,8 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * Create a new {@link Map} instance of the given type that contains all the annotation
 	 * attributes.
 	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
+	 *
+	 * 注解转 map
 	 * @param factory a map factory
 	 * @param adaptations adaptations that should be applied to the annotation values
 	 * @return a map containing the attributes and values
@@ -483,6 +516,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * used directly in code.
 	 * <p>The result is synthesized using a JDK {@link Proxy} and as a result may
 	 * incur a computational cost when first invoked.
+	 * 注解合并
 	 * @return a synthesized version of the annotation.
 	 * @throws NoSuchElementException on a missing annotation
 	 */
@@ -493,6 +527,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * on a condition predicate.
 	 * <p>The result is synthesized using a JDK {@link Proxy} and as a result may
 	 * incur a computational cost when first invoked.
+	 * 注解合并
 	 * @param condition the test to determine if the annotation can be synthesized
 	 * @return a optional containing the synthesized version of the annotation or
 	 * an empty optional if the condition doesn't match
@@ -500,101 +535,6 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * @see MergedAnnotationPredicates
 	 */
 	Optional<A> synthesize(Predicate<? super MergedAnnotation<A>> condition) throws NoSuchElementException;
-
-
-	/**
-	 * Create a {@link MergedAnnotation} that represents a missing annotation
-	 * (i.e. one that is not present).
-	 * @return an instance representing a missing annotation
-	 */
-	static <A extends Annotation> MergedAnnotation<A> missing() {
-		return MissingMergedAnnotation.getInstance();
-	}
-
-	/**
-	 * Create a new {@link MergedAnnotation} instance from the specified
-	 * annotation.
-	 * @param annotation the annotation to include
-	 * @return a {@link MergedAnnotation} instance containing the annotation
-	 */
-	static <A extends Annotation> MergedAnnotation<A> from(A annotation) {
-		return from(null, annotation);
-	}
-
-	/**
-	 * Create a new {@link MergedAnnotation} instance from the specified
-	 * annotation.
-	 * @param source the source for the annotation. This source is used only for
-	 * information and logging. It does not need to <em>actually</em> contain
-	 * the specified annotations, and it will not be searched.
-	 * @param annotation the annotation to include
-	 * @return a {@link MergedAnnotation} instance for the annotation
-	 */
-	static <A extends Annotation> MergedAnnotation<A> from(@Nullable Object source, A annotation) {
-		return TypeMappedAnnotation.from(source, annotation);
-	}
-
-	/**
-	 * Create a new {@link MergedAnnotation} instance of the specified
-	 * annotation type. The resulting annotation will not have any attribute
-	 * values but may still be used to query default values.
-	 * @param annotationType the annotation type
-	 * @return a {@link MergedAnnotation} instance for the annotation
-	 */
-	static <A extends Annotation> MergedAnnotation<A> of(Class<A> annotationType) {
-		return of(null, annotationType, null);
-	}
-
-	/**
-	 * Create a new {@link MergedAnnotation} instance of the specified
-	 * annotation type with attribute values supplied by a map.
-	 * @param annotationType the annotation type
-	 * @param attributes the annotation attributes or {@code null} if just default
-	 * values should be used
-	 * @return a {@link MergedAnnotation} instance for the annotation and attributes
-	 * @see #of(AnnotatedElement, Class, Map)
-	 */
-	static <A extends Annotation> MergedAnnotation<A> of(
-			Class<A> annotationType, @Nullable Map<String, ?> attributes) {
-
-		return of(null, annotationType, attributes);
-	}
-
-	/**
-	 * Create a new {@link MergedAnnotation} instance of the specified
-	 * annotation type with attribute values supplied by a map.
-	 * @param source the source for the annotation. This source is used only for
-	 * information and logging. It does not need to <em>actually</em> contain
-	 * the specified annotations and it will not be searched.
-	 * @param annotationType the annotation type
-	 * @param attributes the annotation attributes or {@code null} if just default
-	 * values should be used
-	 * @return a {@link MergedAnnotation} instance for the annotation and attributes
-	 */
-	static <A extends Annotation> MergedAnnotation<A> of(
-			@Nullable AnnotatedElement source, Class<A> annotationType, @Nullable Map<String, ?> attributes) {
-
-		return of(null, source, annotationType, attributes);
-	}
-
-	/**
-	 * Create a new {@link MergedAnnotation} instance of the specified
-	 * annotation type with attribute values supplied by a map.
-	 * @param classLoader the class loader used to resolve class attributes
-	 * @param source the source for the annotation. This source is used only for
-	 * information and logging. It does not need to <em>actually</em> contain
-	 * the specified annotations and it will not be searched.
-	 * @param annotationType the annotation type
-	 * @param attributes the annotation attributes or {@code null} if just default
-	 * values should be used
-	 * @return a {@link MergedAnnotation} instance for the annotation and attributes
-	 */
-	static <A extends Annotation> MergedAnnotation<A> of(
-			@Nullable ClassLoader classLoader, @Nullable Object source,
-			Class<A> annotationType, @Nullable Map<String, ?> attributes) {
-
-		return TypeMappedAnnotation.of(classLoader, source, annotationType, attributes);
-	}
 
 
 	/**
@@ -606,23 +546,17 @@ public interface MergedAnnotation<A extends Annotation> {
 
 		/**
 		 * Adapt class or class array attributes to strings.
+		 *
+		 * class 转换成 string
 		 */
 		CLASS_TO_STRING,
 
 		/**
 		 * Adapt nested annotation or annotation arrays to maps rather
 		 * than synthesizing the values.
+		 * 注解 转换成 map
 		 */
 		ANNOTATION_TO_MAP;
-
-		protected final boolean isIn(Adapt... adaptations) {
-			for (Adapt candidate : adaptations) {
-				if (candidate == this) {
-					return true;
-				}
-			}
-			return false;
-		}
 
 		/**
 		 * Factory method to create an {@link Adapt} array from a set of boolean flags.
@@ -641,6 +575,15 @@ public interface MergedAnnotation<A extends Annotation> {
 			if (test) {
 				result.add(value);
 			}
+		}
+
+		protected final boolean isIn(Adapt... adaptations) {
+			for (Adapt candidate : adaptations) {
+				if (candidate == this) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 

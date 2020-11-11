@@ -163,6 +163,9 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	/**
 	 * Determine if the specified annotation is directly present.
 	 * <p>Equivalent to calling {@code get(annotationType).isDirectlyPresent()}.
+	 *
+	 * 是否直接包含注解
+	 *
 	 * @param annotationType the fully qualified class name of the annotation type
 	 * to check
 	 * @return {@code true} if the annotation is directly present

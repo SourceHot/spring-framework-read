@@ -54,7 +54,7 @@ public interface MethodMetadata extends AnnotatedTypeMetadata {
      * Return whether the underlying method is effectively abstract:
      * i.e. marked as abstract on a class or declared as a regular,
      * non-default method in an interface.
-     * 是不是abstrac修饰
+     * 是不是 abstract 修饰
      * @since 4.2
      */
     boolean isAbstract();

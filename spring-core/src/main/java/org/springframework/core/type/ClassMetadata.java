@@ -95,7 +95,7 @@ public interface ClassMetadata {
     /**
      * Return the name of the enclosing class of the underlying class,
      * or {@code null} if the underlying class is a top-level class.
-     * 是否是基础类
+     * 获取内部类名称
      */
     @Nullable
     String getEnclosingClassName();
@@ -121,7 +121,7 @@ public interface ClassMetadata {
      * Return the names of all interfaces that the underlying class
      * implements, or an empty array if there are none.
      *
-     * 实现类名称列表
+     * 实现接口列表
      */
     String[] getInterfaceNames();
 

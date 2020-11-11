@@ -63,7 +63,7 @@ public interface AnnotatedTypeMetadata {
      * type to look for
      * @return whether a matching annotation is defined
      *
-     * 是否有注解
+     * 是否有注解, 是否被参数注解修饰
      */
     default boolean isAnnotated(String annotationName) {
         return getAnnotations().isPresent(annotationName);
@@ -90,6 +90,8 @@ public interface AnnotatedTypeMetadata {
      * Retrieve the attributes of the annotation of the given type, if any (i.e. if
      * defined on the underlying element, as direct annotation or meta-annotation),
      * also taking attribute overrides on composed annotations into account.
+	 *
+	 * 获取注解属性表
      * @param annotationName the fully qualified class name of the annotation
      * type to look for
      * @param classValuesAsString whether to convert class references to String
@@ -116,6 +118,8 @@ public interface AnnotatedTypeMetadata {
      * Retrieve all attributes of all annotations of the given type, if any (i.e. if
      * defined on the underlying element, as direct annotation or meta-annotation).
      * Note that this variant does <i>not</i> take attribute overrides into account.
+	 *
+	 * 获取注解的属性表
      * @param annotationName the fully qualified class name of the annotation
      * type to look for
      * @return a MultiMap of attributes, with the attribute name as key (e.g. "value")
@@ -132,6 +136,8 @@ public interface AnnotatedTypeMetadata {
      * Retrieve all attributes of all annotations of the given type, if any (i.e. if
      * defined on the underlying element, as direct annotation or meta-annotation).
      * Note that this variant does <i>not</i> take attribute overrides into account.
+	 *
+	 * 获取注解属性表
      * @param annotationName the fully qualified class name of the annotation
      * type to look for
      * @param classValuesAsString  whether to convert class references to String

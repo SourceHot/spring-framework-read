@@ -48,8 +48,11 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 	 */
 	default Set<String> getAnnotationTypes() {
 		return getAnnotations().stream()
+				// 判断是否直接使用注解
 				.filter(MergedAnnotation::isDirectlyPresent)
+				// 获取注解的名字
 				.map(annotation -> annotation.getType().getName())
+				// 转换成set
 				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
@@ -63,10 +66,14 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
      * 注解全类名
 	 */
 	default Set<String> getMetaAnnotationTypes(String annotationName) {
+		// 获取注解合并后的结果
 		MergedAnnotation<?> annotation = getAnnotations().get(annotationName, MergedAnnotation::isDirectlyPresent);
+		// 判断注解是否使用
 		if (!annotation.isPresent()) {
+			// 不使用直接返回空
 			return Collections.emptySet();
 		}
+		// 注解使用 继承查找获得所有注解名称(类名)
 		return MergedAnnotations.from(annotation.getType(), SearchStrategy.INHERITED_ANNOTATIONS).stream()
 				.map(mergedAnnotation -> mergedAnnotation.getType().getName())
 				.collect(Collectors.toCollection(LinkedHashSet::new));
