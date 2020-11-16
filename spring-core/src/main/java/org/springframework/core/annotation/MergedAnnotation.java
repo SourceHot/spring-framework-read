@@ -538,6 +538,101 @@ public interface MergedAnnotation<A extends Annotation> {
 
 
 	/**
+	 * Create a {@link MergedAnnotation} that represents a missing annotation
+	 * (i.e. one that is not present).
+	 * @return an instance representing a missing annotation
+	 */
+	static <A extends Annotation> MergedAnnotation<A> missing() {
+		return MissingMergedAnnotation.getInstance();
+	}
+
+	/**
+	 * Create a new {@link MergedAnnotation} instance from the specified
+	 * annotation.
+	 * @param annotation the annotation to include
+	 * @return a {@link MergedAnnotation} instance containing the annotation
+	 */
+	static <A extends Annotation> MergedAnnotation<A> from(A annotation) {
+		return from(null, annotation);
+	}
+
+	/**
+	 * Create a new {@link MergedAnnotation} instance from the specified
+	 * annotation.
+	 * @param source the source for the annotation. This source is used only for
+	 * information and logging. It does not need to <em>actually</em> contain
+	 * the specified annotations, and it will not be searched.
+	 * @param annotation the annotation to include
+	 * @return a {@link MergedAnnotation} instance for the annotation
+	 */
+	static <A extends Annotation> MergedAnnotation<A> from(@Nullable Object source, A annotation) {
+		return TypeMappedAnnotation.from(source, annotation);
+	}
+
+	/**
+	 * Create a new {@link MergedAnnotation} instance of the specified
+	 * annotation type. The resulting annotation will not have any attribute
+	 * values but may still be used to query default values.
+	 * @param annotationType the annotation type
+	 * @return a {@link MergedAnnotation} instance for the annotation
+	 */
+	static <A extends Annotation> MergedAnnotation<A> of(Class<A> annotationType) {
+		return of(null, annotationType, null);
+	}
+
+	/**
+	 * Create a new {@link MergedAnnotation} instance of the specified
+	 * annotation type with attribute values supplied by a map.
+	 * @param annotationType the annotation type
+	 * @param attributes the annotation attributes or {@code null} if just default
+	 * values should be used
+	 * @return a {@link MergedAnnotation} instance for the annotation and attributes
+	 * @see #of(AnnotatedElement, Class, Map)
+	 */
+	static <A extends Annotation> MergedAnnotation<A> of(
+			Class<A> annotationType, @Nullable Map<String, ?> attributes) {
+
+		return of(null, annotationType, attributes);
+	}
+
+	/**
+	 * Create a new {@link MergedAnnotation} instance of the specified
+	 * annotation type with attribute values supplied by a map.
+	 * @param source the source for the annotation. This source is used only for
+	 * information and logging. It does not need to <em>actually</em> contain
+	 * the specified annotations and it will not be searched.
+	 * @param annotationType the annotation type
+	 * @param attributes the annotation attributes or {@code null} if just default
+	 * values should be used
+	 * @return a {@link MergedAnnotation} instance for the annotation and attributes
+	 */
+	static <A extends Annotation> MergedAnnotation<A> of(
+			@Nullable AnnotatedElement source, Class<A> annotationType, @Nullable Map<String, ?> attributes) {
+
+		return of(null, source, annotationType, attributes);
+	}
+
+	/**
+	 * Create a new {@link MergedAnnotation} instance of the specified
+	 * annotation type with attribute values supplied by a map.
+	 * @param classLoader the class loader used to resolve class attributes
+	 * @param source the source for the annotation. This source is used only for
+	 * information and logging. It does not need to <em>actually</em> contain
+	 * the specified annotations and it will not be searched.
+	 * @param annotationType the annotation type
+	 * @param attributes the annotation attributes or {@code null} if just default
+	 * values should be used
+	 * @return a {@link MergedAnnotation} instance for the annotation and attributes
+	 */
+	static <A extends Annotation> MergedAnnotation<A> of(
+			@Nullable ClassLoader classLoader, @Nullable Object source,
+			Class<A> annotationType, @Nullable Map<String, ?> attributes) {
+
+		return TypeMappedAnnotation.of(classLoader, source, annotationType, attributes);
+	}
+
+
+	/**
 	 * Adaptations that can be applied to attribute values when creating
 	 * {@linkplain MergedAnnotation#asMap(Adapt...) Maps} or
 	 * {@link MergedAnnotation#asAnnotationAttributes(Adapt...) AnnotationAttributes}.
@@ -558,6 +653,15 @@ public interface MergedAnnotation<A extends Annotation> {
 		 */
 		ANNOTATION_TO_MAP;
 
+		protected final boolean isIn(Adapt... adaptations) {
+			for (Adapt candidate : adaptations) {
+				if (candidate == this) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		/**
 		 * Factory method to create an {@link Adapt} array from a set of boolean flags.
 		 * @param classToString if {@link Adapt#CLASS_TO_STRING} is included
@@ -575,15 +679,6 @@ public interface MergedAnnotation<A extends Annotation> {
 			if (test) {
 				result.add(value);
 			}
-		}
-
-		protected final boolean isIn(Adapt... adaptations) {
-			for (Adapt candidate : adaptations) {
-				if (candidate == this) {
-					return true;
-				}
-			}
-			return false;
 		}
 	}
 

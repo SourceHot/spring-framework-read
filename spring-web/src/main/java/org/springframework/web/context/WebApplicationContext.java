@@ -37,6 +37,7 @@ import org.springframework.lang.Nullable;
  * WebApplicationContext implementations need to detect {@link ServletContextAware}
  * beans and invoke the {@code setServletContext} method accordingly.
  *
+ * web 应用上下文
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since January 19, 2001
@@ -57,23 +58,28 @@ public interface WebApplicationContext extends ApplicationContext {
 	/**
 	 * Scope identifier for request scope: "request".
 	 * Supported in addition to the standard scopes "singleton" and "prototype".
+	 *
+	 * 作用域: request
 	 */
 	String SCOPE_REQUEST = "request";
 
 	/**
 	 * Scope identifier for session scope: "session".
 	 * Supported in addition to the standard scopes "singleton" and "prototype".
+	 * 作用域: session
 	 */
 	String SCOPE_SESSION = "session";
 
 	/**
 	 * Scope identifier for the global web application scope: "application".
 	 * Supported in addition to the standard scopes "singleton" and "prototype".
+	 * 作用域: application
 	 */
 	String SCOPE_APPLICATION = "application";
 
 	/**
 	 * Name of the ServletContext environment bean in the factory.
+	 * servlet上下文名称 (bean name)
 	 * @see javax.servlet.ServletContext
 	 */
 	String SERVLET_CONTEXT_BEAN_NAME = "servletContext";
@@ -82,6 +88,8 @@ public interface WebApplicationContext extends ApplicationContext {
 	 * Name of the ServletContext init-params environment bean in the factory.
 	 * <p>Note: Possibly merged with ServletConfig parameters.
 	 * ServletConfig parameters override ServletContext parameters of the same name.
+	 *
+	 * servlet 上下文参数名称(bean name).
 	 * @see javax.servlet.ServletContext#getInitParameterNames()
 	 * @see javax.servlet.ServletContext#getInitParameter(String)
 	 * @see javax.servlet.ServletConfig#getInitParameterNames()
@@ -91,6 +99,7 @@ public interface WebApplicationContext extends ApplicationContext {
 
 	/**
 	 * Name of the ServletContext attributes environment bean in the factory.
+	 * servlet 上下文属性名称(bean name)
 	 * @see javax.servlet.ServletContext#getAttributeNames()
 	 * @see javax.servlet.ServletContext#getAttribute(String)
 	 */
@@ -99,6 +108,7 @@ public interface WebApplicationContext extends ApplicationContext {
 
 	/**
 	 * Return the standard Servlet API ServletContext for this application.
+	 * 获取 servlet 上下文
 	 */
 	@Nullable
 	ServletContext getServletContext();

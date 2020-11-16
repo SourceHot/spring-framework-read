@@ -61,6 +61,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * and ignores any singleton beans that have been registered by other means than bean
 	 * definitions.
 	 *
+	 * 是否存在bean定义
 	 * @param beanName the name of the bean to look for
 	 *
 	 * @return if this bean factory contains a bean definition with the given name
@@ -75,6 +76,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * and ignores any singleton beans that have been registered by other means than bean
 	 * definitions.
 	 *
+	 * 获取bean定义的数量
 	 * @return the number of beans defined in the factory
 	 */
 	int getBeanDefinitionCount();
@@ -85,6 +87,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * and ignores any singleton beans that have been registered by other means than bean
 	 * definitions.
 	 *
+	 * 获取bean定义的名字列表
 	 * @return the names of all beans defined in this factory, or an empty array if none defined
 	 */
 	String[] getBeanDefinitionNames();
@@ -108,6 +111,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>Bean names returned by this method should always return bean names <i>in the
 	 * order of definition</i> in the backend configuration, as far as possible.
 	 *
+	 * 获取类型对应的bean名称
 	 * @param type the generically typed class or interface to match
 	 *
 	 * @return the names of beans (or objects created by FactoryBeans) matching the given object
@@ -138,6 +142,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>Bean names returned by this method should always return bean names <i>in the
 	 * order of definition</i> in the backend configuration, as far as possible.
 	 *
+	 * 获取类型对应的bean名称
 	 * @param type                 the generically typed class or interface to match
 	 * @param includeNonSingletons whether to include prototype or scoped beans too or just
 	 *                             singletons (also applies to FactoryBeans)
@@ -177,6 +182,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>Bean names returned by this method should always return bean names <i>in the
 	 * order of definition</i> in the backend configuration, as far as possible.
 	 *
+	 * 获取类型对应的bean名称
 	 * @param type the class or interface to match, or {@code null} for all bean names
 	 *
 	 * @return the names of beans (or objects created by FactoryBeans) matching the given object
@@ -281,6 +287,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>The Map returned by this method should always return bean names and
 	 * corresponding bean instances <i>in the order of definition</i> in the backend configuration,
 	 * as far as possible.
+	 * 获取类型对应的bean名称
 	 *
 	 * @param type                 the class or interface to match, or {@code null} for all concrete
 	 *                             beans
@@ -310,6 +317,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>Note that this method considers objects created by FactoryBeans, which means
 	 * that FactoryBeans will get initialized in order to determine their object type.
 	 *
+	 * 根据注解返回bean名称
 	 * @param annotationType the type of annotation to look for (at class, interface or factory
 	 *                       method level of the specified bean)
 	 *
@@ -326,6 +334,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * <p>Note that this method considers objects created by FactoryBeans, which means
 	 * that FactoryBeans will get initialized in order to determine their object type.
 	 *
+	 * 获取带有注解的bean
 	 * @param annotationType the type of annotation to look for (at class, interface or factory
 	 *                       method level of the specified bean)
 	 *
@@ -343,6 +352,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * interfaces and super classes if no annotation can be found on the given class itself, as well
 	 * as checking the bean's factory method (if any).
 	 *
+	 * 通过 bean 名称 + 注解类型, 获取注解. 即通过bean获取注解
 	 * @param beanName       the name of the bean to look for annotations on
 	 * @param annotationType the type of annotation to look for (at class, interface or factory
 	 *                       method level of the specified bean)

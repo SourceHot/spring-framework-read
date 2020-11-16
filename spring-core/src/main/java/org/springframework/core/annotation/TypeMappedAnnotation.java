@@ -70,6 +70,11 @@ import org.springframework.util.ReflectionUtils;
  */
 final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnnotation<A> {
 
+	/**
+	 * 空数组容器
+	 * key: 类型
+	 * value: 类型数组
+	 */
 	private static final Map<Class<?>, Object> EMPTY_ARRAYS;
 	static {
 		Map<Class<?>, Object> emptyArrays = new HashMap<>();
@@ -85,14 +90,26 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		EMPTY_ARRAYS = Collections.unmodifiableMap(emptyArrays);
 	}
 
+	/**
+	 * 注解类型映射
+	 */
 	private final AnnotationTypeMapping mapping;
 
+	/**
+	 * 类加载器
+	 */
 	@Nullable
 	private final ClassLoader classLoader;
 
+	/**
+	 * 元对象
+	 */
 	@Nullable
 	private final Object source;
 
+	/**
+	 * 根属性
+	 */
 	@Nullable
 	private final Object rootAttributes;
 
@@ -102,6 +119,9 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	private final boolean useMergedValues;
 
+	/**
+	 * 属性过滤器
+	 */
 	@Nullable
 	private final Predicate<String> attributeFilter;
 

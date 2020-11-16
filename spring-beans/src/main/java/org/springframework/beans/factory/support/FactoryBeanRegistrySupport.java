@@ -38,6 +38,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>Serves as base class for {@link AbstractBeanFactory}.
  *
+ * 工厂bean注册
  * @author Juergen Hoeller
  * @since 2.5.1
  */

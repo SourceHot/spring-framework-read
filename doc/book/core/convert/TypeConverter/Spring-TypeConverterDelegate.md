@@ -117,7 +117,7 @@
 
 ### convertToTypedArray
 
-
+- 转换成 array
 
 ```java
 	/**
@@ -174,7 +174,7 @@
 
 ### convertToTypedCollection
 
-
+- 转换成collection
 
 ```java
 	/**
@@ -277,7 +277,7 @@
 
 ### convertToTypedMap
 
-
+- 转换成map
 
 ```java
 	/**
@@ -375,6 +375,8 @@
 
 ### attemptToConvertStringToEnum
 
+- 字符串转换成枚举的方法
+
 ```
 /**
  * string to enum
@@ -430,4 +432,59 @@ private Object attemptToConvertStringToEnum(Class<?> requiredType, String trimme
 
 
 
+
+
+
+
+
+### 额外概念
+
+- 在 `convertToTypedMap` 和 `convertToTypedCollection` 都出现了一个类似方法 判断是否是类似值. 
+
+  ```java
+  boolean approximable = CollectionFactory.isApproximableCollectionType(requiredType);
+  ```
+
+  ```java
+  boolean approximable = CollectionFactory.isApproximableMapType(requiredType);
+  ```
+
+  
+
+这里的值类似判断其实是判断是否在`set`集合中,与之相关的类: `org.springframework.core.CollectionFactory`
+
+
+
+
+
+```java
+	private static final Set<Class<?>> approximableCollectionTypes = new HashSet<>();
+
+	private static final Set<Class<?>> approximableMapTypes = new HashSet<>();
+
+
+	static {
+		// Standard collection interfaces
+		approximableCollectionTypes.add(Collection.class);
+		approximableCollectionTypes.add(List.class);
+		approximableCollectionTypes.add(Set.class);
+		approximableCollectionTypes.add(SortedSet.class);
+		approximableCollectionTypes.add(NavigableSet.class);
+		approximableMapTypes.add(Map.class);
+		approximableMapTypes.add(SortedMap.class);
+		approximableMapTypes.add(NavigableMap.class);
+
+		// Common concrete collection classes
+		approximableCollectionTypes.add(ArrayList.class);
+		approximableCollectionTypes.add(LinkedList.class);
+		approximableCollectionTypes.add(HashSet.class);
+		approximableCollectionTypes.add(LinkedHashSet.class);
+		approximableCollectionTypes.add(TreeSet.class);
+		approximableCollectionTypes.add(EnumSet.class);
+		approximableMapTypes.add(HashMap.class);
+		approximableMapTypes.add(LinkedHashMap.class);
+		approximableMapTypes.add(TreeMap.class);
+		approximableMapTypes.add(EnumMap.class);
+	}
+```
 

@@ -40,6 +40,8 @@ import org.springframework.util.StringUtils;
  * Provides mapping information for a single annotation (or meta-annotation) in
  * the context of a root annotation type.
  *
+ *
+ * 注解类型映射
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 5.2
@@ -48,23 +50,50 @@ import org.springframework.util.StringUtils;
 final class AnnotationTypeMapping {
 
 
+	/**
+	 * 镜像数组
+	 */
 	private static final MirrorSet[] EMPTY_MIRROR_SETS = new MirrorSet[0];
 
-
+	/**
+	 * 注解映射的源对象
+	 */
 	@Nullable
 	private final AnnotationTypeMapping source;
 
+	/**
+	 * 注解映射的根对象
+	 */
 	private final AnnotationTypeMapping root;
 
+	/**
+	 * 距离
+	 * 0  => 直接使用注解
+	 * 1  => 元注解
+	 * 2  => 元注解的元注解
+	 * -1 => 没有注解
+	 */
 	private final int distance;
 
+	/**
+	 * 注解类型
+	 */
 	private final Class<? extends Annotation> annotationType;
 
+	/**
+	 * 元注解列表
+	 */
 	private final List<Class<? extends Annotation>> metaTypes;
 
+	/**
+	 * 注解
+	 */
 	@Nullable
 	private final Annotation annotation;
 
+	/**
+	 * 属性方法
+	 */
 	private final AttributeMethods attributes;
 
 	private final MirrorSets mirrorSets;
@@ -116,6 +145,66 @@ final class AnnotationTypeMapping {
 		return Collections.unmodifiableList(merged);
 	}
 
+	private static int[] filledIntArray(int size) {
+		int[] array = new int[size];
+		Arrays.fill(array, -1);
+		return array;
+	}
+
+	private static boolean isEquivalentToDefaultValue(Method attribute, Object value,
+			BiFunction<Method, Object, Object> valueExtractor) {
+
+		return areEquivalent(attribute.getDefaultValue(), value, valueExtractor);
+	}
+
+	private static boolean areEquivalent(@Nullable Object value, @Nullable Object extractedValue,
+			BiFunction<Method, Object, Object> valueExtractor) {
+
+		if (ObjectUtils.nullSafeEquals(value, extractedValue)) {
+			return true;
+		}
+		if (value instanceof Class && extractedValue instanceof String) {
+			return areEquivalent((Class<?>) value, (String) extractedValue);
+		}
+		if (value instanceof Class[] && extractedValue instanceof String[]) {
+			return areEquivalent((Class[]) value, (String[]) extractedValue);
+		}
+		if (value instanceof Annotation) {
+			return areEquivalent((Annotation) value, extractedValue, valueExtractor);
+		}
+		return false;
+	}
+
+	private static boolean areEquivalent(Class<?>[] value, String[] extractedValue) {
+		if (value.length != extractedValue.length) {
+			return false;
+		}
+		for (int i = 0; i < value.length; i++) {
+			if (!areEquivalent(value[i], extractedValue[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static boolean areEquivalent(Class<?> value, String extractedValue) {
+		return value.getName().equals(extractedValue);
+	}
+
+	private static boolean areEquivalent(Annotation annotation, @Nullable Object extractedValue,
+			BiFunction<Method, Object, Object> valueExtractor) {
+
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
+		for (int i = 0; i < attributes.size(); i++) {
+			Method attribute = attributes.get(i);
+			if (!areEquivalent(ReflectionUtils.invokeMethod(attribute, annotation),
+					valueExtractor.apply(attribute, extractedValue), valueExtractor)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private Map<Method, List<Method>> resolveAliasedForTargets() {
 		Map<Method, List<Method>> aliasedBy = new HashMap<>();
 		for (int i = 0; i < this.attributes.size(); i++) {
@@ -137,7 +226,7 @@ final class AnnotationTypeMapping {
 		if (StringUtils.hasText(aliasFor.value()) && StringUtils.hasText(aliasFor.attribute())) {
 			throw new AnnotationConfigurationException(String.format(
 					"In @AliasFor declared on %s, attribute 'attribute' and its alias 'value' " +
-					"are present with values of '%s' and '%s', but only one is permitted.",
+							"are present with values of '%s' and '%s', but only one is permitted.",
 					AttributeMethods.describe(attribute), aliasFor.attribute(),
 					aliasFor.value()));
 		}
@@ -167,7 +256,7 @@ final class AnnotationTypeMapping {
 		if (target.equals(attribute)) {
 			throw new AnnotationConfigurationException(String.format(
 					"@AliasFor declaration on %s points to itself. " +
-					"Specify 'annotation' to point to a same-named attribute on a meta-annotation.",
+							"Specify 'annotation' to point to a same-named attribute on a meta-annotation.",
 					AttributeMethods.describe(attribute)));
 		}
 		if (!isCompatibleReturnType(attribute.getReturnType(), target.getReturnType())) {
@@ -481,77 +570,15 @@ final class AnnotationTypeMapping {
 		return this.mirrorSets;
 	}
 
-
-	private static int[] filledIntArray(int size) {
-		int[] array = new int[size];
-		Arrays.fill(array, -1);
-		return array;
-	}
-
-	private static boolean isEquivalentToDefaultValue(Method attribute, Object value,
-			BiFunction<Method, Object, Object> valueExtractor) {
-
-		return areEquivalent(attribute.getDefaultValue(), value, valueExtractor);
-	}
-
-	private static boolean areEquivalent(@Nullable Object value, @Nullable Object extractedValue,
-			BiFunction<Method, Object, Object> valueExtractor) {
-
-		if (ObjectUtils.nullSafeEquals(value, extractedValue)) {
-			return true;
-		}
-		if (value instanceof Class && extractedValue instanceof String) {
-			return areEquivalent((Class<?>) value, (String) extractedValue);
-		}
-		if (value instanceof Class[] && extractedValue instanceof String[]) {
-			return areEquivalent((Class[]) value, (String[]) extractedValue);
-		}
-		if (value instanceof Annotation) {
-			return areEquivalent((Annotation) value, extractedValue, valueExtractor);
-		}
-		return false;
-	}
-
-	private static boolean areEquivalent(Class<?>[] value, String[] extractedValue) {
-		if (value.length != extractedValue.length) {
-			return false;
-		}
-		for (int i = 0; i < value.length; i++) {
-			if (!areEquivalent(value[i], extractedValue[i])) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private static boolean areEquivalent(Class<?> value, String extractedValue) {
-		return value.getName().equals(extractedValue);
-	}
-
-	private static boolean areEquivalent(Annotation annotation, @Nullable Object extractedValue,
-			BiFunction<Method, Object, Object> valueExtractor) {
-
-		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
-		for (int i = 0; i < attributes.size(); i++) {
-			Method attribute = attributes.get(i);
-			if (!areEquivalent(ReflectionUtils.invokeMethod(attribute, annotation),
-					valueExtractor.apply(attribute, extractedValue), valueExtractor)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-
 	/**
 	 * A collection of {@link MirrorSet} instances that provides details of all
 	 * defined mirrors.
 	 */
 	class MirrorSets {
 
-		private MirrorSet[] mirrorSets;
-
 		private final MirrorSet[] assigned;
+
+		private MirrorSet[] mirrorSets;
 
 		MirrorSets() {
 			this.assigned = new MirrorSet[attributes.size()];
@@ -620,9 +647,9 @@ final class AnnotationTypeMapping {
 		 */
 		class MirrorSet {
 
-			private int size;
-
 			private final int[] indexes = new int[attributes.size()];
+
+			private int size;
 
 			void update() {
 				this.size = 0;
@@ -655,7 +682,7 @@ final class AnnotationTypeMapping {
 						String on = (source != null) ? " declared on " + source : "";
 						throw new AnnotationConfigurationException(String.format(
 								"Different @AliasFor mirror values for annotation [%s]%s; attribute '%s' " +
-								"and its alias '%s' are declared with values of [%s] and [%s].",
+										"and its alias '%s' are declared with values of [%s] and [%s].",
 								getAnnotationType().getName(), on,
 								attributes.get(result).getName(),
 								attribute.getName(),

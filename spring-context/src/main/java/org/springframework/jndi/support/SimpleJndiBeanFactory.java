@@ -63,13 +63,23 @@ import org.springframework.lang.Nullable;
  */
 public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFactory {
 
-	/** JNDI names of resources that are known to be shareable, i.e. can be cached */
+	/**
+	 * JNDI names of resources that are known to be shareable, i.e. can be cached
+	 * 存储资源名称
+	 * */
 	private final Set<String> shareableResources = new HashSet<>();
 
-	/** Cache of shareable singleton objects: bean name to bean instance. */
+	/**
+	 * Cache of shareable singleton objects: bean name to bean instance.
+	 * 存储单例bean和bean实例
+	 * */
 	private final Map<String, Object> singletonObjects = new HashMap<>();
 
-	/** Cache of the types of nonshareable resources: bean name to bean type. */
+	/**
+	 * Cache of the types of nonshareable resources: bean name to bean type.
+	 * key: beanName
+	 * value: bean class
+	 * */
 	private final Map<String, Class<?>> resourceTypes = new HashMap<>();
 
 
@@ -104,6 +114,9 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	//---------------------------------------------------------------------
 
 
+	/**
+	 * 获取bean
+	 */
 	@Override
 	public Object getBean(String name) throws BeansException {
 		return getBean(name, Object.class);
@@ -112,9 +125,11 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	@Override
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		try {
+			// 判断是否是单例bean
 			if (isSingleton(name)) {
 				return doGetSingleton(name, requiredType);
 			}
+			// 寻找
 			else {
 				return lookup(name, requiredType);
 			}
@@ -160,10 +175,12 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 			public T getObject() throws BeansException {
 				return getBean(requiredType);
 			}
+
 			@Override
 			public T getObject(Object... args) throws BeansException {
 				return getBean(requiredType, args);
 			}
+
 			@Override
 			@Nullable
 			public T getIfAvailable() throws BeansException {
@@ -177,6 +194,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 					return null;
 				}
 			}
+
 			@Override
 			@Nullable
 			public T getIfUnique() throws BeansException {
@@ -212,11 +230,13 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 
 	@Override
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
+		// 判断资源名称容器中是否存在
 		return this.shareableResources.contains(name);
 	}
 
 	@Override
 	public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
+		// 判断资源名称容器中是否存在
 		return !this.shareableResources.contains(name);
 	}
 
@@ -252,23 +272,33 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 		}
 	}
 
+
+	/**
+	 * 返回空数组, 没有别名
+	 */
 	@Override
 	public String[] getAliases(String name) {
 		return new String[0];
 	}
 
-
+	/**
+	 * 获取单例对象的方法
+	 */
 	@SuppressWarnings("unchecked")
 	private <T> T doGetSingleton(String name, @Nullable Class<T> requiredType) throws NamingException {
 		synchronized (this.singletonObjects) {
+			// 从单例对象容器中根据名称获取
 			Object singleton = this.singletonObjects.get(name);
+			// 对象不为空
 			if (singleton != null) {
+				// 类型相同
 				if (requiredType != null && !requiredType.isInstance(singleton)) {
 					throw new TypeMismatchNamingException(convertJndiName(name), requiredType, singleton.getClass());
 				}
 				return (T) singleton;
 			}
 			T jndiObject = lookup(name, requiredType);
+			// 放入容器
 			this.singletonObjects.put(name, jndiObject);
 			return jndiObject;
 		}
@@ -276,6 +306,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 
 	private Class<?> doGetType(String name) throws NamingException {
 		if (isSingleton(name)) {
+			// 获取单例对象的类型
 			return doGetSingleton(name, null).getClass();
 		}
 		else {
