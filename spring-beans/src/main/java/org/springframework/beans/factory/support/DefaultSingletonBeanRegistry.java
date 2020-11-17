@@ -513,13 +513,14 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
-	 *
+	 * 判断是否存在依赖
 	 * @param beanName beanName
 	 * @param dependentBeanName 依赖的beanName
 	 * @param alreadySeen 已经找到的beanName
 	 * @return
 	 */
 	private boolean isDependent(String beanName, String dependentBeanName, @Nullable Set<String> alreadySeen) {
+		// 已找到的 beanName 不为空
 		if (alreadySeen != null && alreadySeen.contains(beanName)) {
 			return false;
 		}

@@ -1,7 +1,7 @@
 # Spring ListableBeanFactory
 - 类全路径: `org.springframework.beans.factory.ListableBeanFactory`
 
-
+- `ListableBeanFactory` 继承自 `BeanFactory`  , 增强了 `BeanFactory` 在原有基础上补充下面这些方法,
 
 ## 方法列表
 
