@@ -2457,16 +2457,108 @@ private void copyRelevantMergedBeanDefinitionCaches(RootBeanDefinition previous,
 
 - 方法签名: `org.springframework.beans.factory.support.AbstractBeanFactory#getType(java.lang.String, boolean)`
 
+- 方法作用: 获取bean的类型
+
+```java
+String beanName = transformedBeanName(name);
+
+// Check manually registered singletons.
+// 获取 bean 实例
+Object beanInstance = getSingleton(beanName, false);
+// bean 实例是否为空, bean 实例的类型是否是 NullBean
+if (beanInstance != null && beanInstance.getClass() != NullBean.class) {
+    if (beanInstance instanceof FactoryBean && !BeanFactoryUtils.isFactoryDereference(name)) {
+        // 从 FactoryBean 中获取类型 factoryBean.getObjectType()
+        return getTypeForFactoryBean((FactoryBean<?>) beanInstance);
+    }
+    else {
+        // 获取实例的类型
+        return beanInstance.getClass();
+    }
+}
+```
+
+上方的代码片段是`getType`的最开始部分, 主要行为:
+    1. 获取bean实例
+    2. bean实例的验证
+        1. 非空判断
+        2. 类型验证(NullBean)
+        3. FactoryBean 验证
+        4. 是否是 & 开头
+    3. 返回类型
+        1. 通过FactoryBean的`getObjectType`方法返回
+        2. 通过bean实例的`getClass`返回
 
 
+继续阅读方法
+
+```
+// No singleton instance found -> check bean definition.
+// 获取父bean工厂
+BeanFactory parentBeanFactory = getParentBeanFactory();
+if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
+    // No bean definition found in this factory -> delegate to parent.
+    // 从父工厂中获取
+    return parentBeanFactory.getType(originalBeanName(name));
+}
+```
+
+上述代码通过获取父bean工厂来进行类型获取. 这段代码就不展开了. 
 
 
+继续阅读
+
+```java
+// 获取合并的 beanDefinition
+RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+
+// Check decorated bean definition, if any: We assume it'll be easier
+// to determine the decorated bean's type than the proxy's type.
+// beanDefinition 持有类
+BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
+if (dbd != null && !BeanFactoryUtils.isFactoryDereference(name)) {
+    // 获取合并的 beanDefinition
+    RootBeanDefinition tbd = getMergedBeanDefinition(dbd.getBeanName(), dbd.getBeanDefinition(), mbd);
+    // 类型推测
+    Class<?> targetClass = predictBeanType(dbd.getBeanName(), tbd);
+    if (targetClass != null && !FactoryBean.class.isAssignableFrom(targetClass)) {
+        return targetClass;
+    }
+}
+```
+
+- 获取合并的beanDefinition 
+    从 mergedBeanDefinition 中获持有帮助类, 进行判断后再从中进行一个类型推断. 获取类型后返回
+    
 
 
+接下来阅读最后的一段代码
 
+```java
+// 推测bean类型
+Class<?> beanClass = predictBeanType(beanName, mbd);
 
+// Check bean class whether we're dealing with a FactoryBean.
+// 推测的bean类型不为空 且非 FactoryBean 来源
+if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
+    if (!BeanFactoryUtils.isFactoryDereference(name)) {
+        // If it's a FactoryBean, we want to look at what it creates, not at the factory class.
+        return getTypeForFactoryBean(beanName, mbd, allowFactoryBeanInit).resolve();
+    }
+    else {
+        return beanClass;
+    }
+}
+else {
+    // 是否是 & 开头, 返回 null 或者 推测的beanClass
+    return (!BeanFactoryUtils.isFactoryDereference(name) ? beanClass : null);
+}
+```
 
-### registerDisposableBeanIfNecessary
+- 最后这段代码围绕两个方法进行
+    1. `predictBeanType` 类型推测方法, 推测类型后经过验证返回
+    2. `getTypeForFactoryBean` 从`FactoryBean`中获取bean类型返回
+    
 
 
 
@@ -2619,3 +2711,123 @@ protected void registerCustomEditors(PropertyEditorRegistry registry) {
 5. 循环判断是否相同, 不相同的加入别名容器
 6. 获取父beanFactory, 再获取别名列表
 7. 返回别名列表
+
+
+
+
+
+### addBeanPostProcessor
+- 方法签名: `org.springframework.beans.factory.support.AbstractBeanFactory.addBeanPostProcessor`
+- 方法作用: 将 `BeanPostProcessor` 放入内存容器中. 
+
+详细代码如下
+```java
+	@Override
+	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
+		Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be null");
+		// Remove from old position, if any
+		// 删除历史的 BeanPostProcessor
+		this.beanPostProcessors.remove(beanPostProcessor);
+		// Track whether it is instantiation/destruction aware
+		// 类型判断, 根据类型设置具体的数据
+		if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
+			this.hasInstantiationAwareBeanPostProcessors = true;
+		}
+		if (beanPostProcessor instanceof DestructionAwareBeanPostProcessor) {
+			this.hasDestructionAwareBeanPostProcessors = true;
+		}
+		// Add to end of list
+		this.beanPostProcessors.add(beanPostProcessor);
+	}
+
+```
+
+### registerScope
+- 方法签名: `org.springframework.beans.factory.support.AbstractBeanFactory.registerScope`
+- 方法作用:  作用域信息注册, 存储容器是一个map结构
+详细代码
+```java
+	@Override
+	public void registerScope(String scopeName, Scope scope) {
+
+		Assert.notNull(scopeName, "Scope identifier must not be null");
+		Assert.notNull(scope, "Scope must not be null");
+		if (SCOPE_SINGLETON.equals(scopeName) || SCOPE_PROTOTYPE.equals(scopeName)) {
+			throw new IllegalArgumentException("Cannot replace existing scopes 'singleton' and 'prototype'");
+		}
+		Scope previous = this.scopes.put(scopeName, scope);
+		if (previous != null && previous != scope) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Replacing scope '" + scopeName + "' from [" + previous + "] to [" + scope + "]");
+			}
+		}
+		else {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Registering scope '" + scopeName + "' with implementation [" + scope + "]");
+			}
+		}
+	}
+
+```
+
+### requiresDestruction
+- 方法签名: `org.springframework.beans.factory.support.AbstractBeanFactory.requiresDestruction`
+- 方法作用: 确定 bean 是否需要摧毁
+
+
+```java
+	protected boolean requiresDestruction(Object bean, RootBeanDefinition mbd) {
+		return (bean.getClass() != NullBean.class &&
+				// 是否拥有摧毁方法
+				(DisposableBeanAdapter.hasDestroyMethod(bean, mbd) ||
+						// 是否拥有摧毁方法的后置处理器
+						(hasDestructionAwareBeanPostProcessors() &&
+								// 摧毁bean的适配器是否存在
+								DisposableBeanAdapter.hasApplicableProcessors(bean, getBeanPostProcessors()))));
+	}
+
+```
+
+
+### isBeanNameInUse
+- 方法签名: `org.springframework.beans.factory.support.AbstractBeanFactory.isBeanNameInUse`
+- 方法作用:  bean 名称是否被使用
+
+```java
+	public boolean isBeanNameInUse(String beanName) {
+		return isAlias(beanName) || containsLocalBean(beanName) || hasDependentBean(beanName);
+	}
+
+```
+
+### registerDisposableBeanIfNecessary
+- 方法签名: `org.springframework.beans.factory.support.AbstractBeanFactory.registerDisposableBeanIfNecessary`
+- 方法作用: 注册一次性的bean.
+相关注册方法不在此进行描述. 有兴趣的可以查看下面两个方法
+    1. `org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.registerDisposableBean`
+    2. `org.springframework.beans.factory.config.Scope.registerDestructionCallback`
+
+```java
+	protected void registerDisposableBeanIfNecessary(String beanName, Object bean, RootBeanDefinition mbd) {
+		AccessControlContext acc = (System.getSecurityManager() != null ? getAccessControlContext() : null);
+		if (!mbd.isPrototype() && requiresDestruction(bean, mbd)) {
+			if (mbd.isSingleton()) {
+				// Register a DisposableBean implementation that performs all destruction
+				// work for the given bean: DestructionAwareBeanPostProcessors,
+				// DisposableBean interface, custom destroy method.
+				registerDisposableBean(beanName,
+						new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors(), acc));
+			}
+			else {
+				// A bean with a custom scope...
+				Scope scope = this.scopes.get(mbd.getScope());
+				if (scope == null) {
+					throw new IllegalStateException("No Scope registered for scope name '" + mbd.getScope() + "'");
+				}
+				scope.registerDestructionCallback(beanName,
+						new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors(), acc));
+			}
+		}
+	}
+
+```

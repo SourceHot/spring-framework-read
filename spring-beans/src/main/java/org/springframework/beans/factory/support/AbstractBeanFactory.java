@@ -853,42 +853,55 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	@Override
 	@Nullable
 	public Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
+		// 获取 beanName
 		String beanName = transformedBeanName(name);
 
 		// Check manually registered singletons.
+		// 获取 bean 实例
 		Object beanInstance = getSingleton(beanName, false);
+		// bean 实例是否为空, bean 实例的类型是否是 NullBean
 		if (beanInstance != null && beanInstance.getClass() != NullBean.class) {
 			if (beanInstance instanceof FactoryBean && !BeanFactoryUtils.isFactoryDereference(name)) {
+				// 从 FactoryBean 中获取类型 factoryBean.getObjectType()
 				return getTypeForFactoryBean((FactoryBean<?>) beanInstance);
 			}
 			else {
+				// 获取实例的类型
 				return beanInstance.getClass();
 			}
 		}
 
 		// No singleton instance found -> check bean definition.
+		// 获取父bean工厂
 		BeanFactory parentBeanFactory = getParentBeanFactory();
 		if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
 			// No bean definition found in this factory -> delegate to parent.
+			// 从父工厂中获取
 			return parentBeanFactory.getType(originalBeanName(name));
 		}
 
+		// 获取合并的 beanDefinition
 		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 
 		// Check decorated bean definition, if any: We assume it'll be easier
 		// to determine the decorated bean's type than the proxy's type.
+		// beanDefinition 持有类
 		BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
 		if (dbd != null && !BeanFactoryUtils.isFactoryDereference(name)) {
+			// 获取合并的 beanDefinition
 			RootBeanDefinition tbd = getMergedBeanDefinition(dbd.getBeanName(), dbd.getBeanDefinition(), mbd);
+			// 类型推测
 			Class<?> targetClass = predictBeanType(dbd.getBeanName(), tbd);
 			if (targetClass != null && !FactoryBean.class.isAssignableFrom(targetClass)) {
 				return targetClass;
 			}
 		}
 
+		// 推测bean类型
 		Class<?> beanClass = predictBeanType(beanName, mbd);
 
 		// Check bean class whether we're dealing with a FactoryBean.
+		// 推测的bean类型不为空 且非 FactoryBean 来源
 		if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
 			if (!BeanFactoryUtils.isFactoryDereference(name)) {
 				// If it's a FactoryBean, we want to look at what it creates, not at the factory class.
@@ -899,6 +912,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 		}
 		else {
+			// 是否是 & 开头, 返回 null 或者 推测的beanClass
 			return (!BeanFactoryUtils.isFactoryDereference(name) ? beanClass : null);
 		}
 	}
@@ -1118,8 +1132,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
 		Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be null");
 		// Remove from old position, if any
+		// 删除历史的 BeanPostProcessor
 		this.beanPostProcessors.remove(beanPostProcessor);
 		// Track whether it is instantiation/destruction aware
+		// 类型判断, 根据类型设置具体的数据
 		if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
 			this.hasInstantiationAwareBeanPostProcessors = true;
 		}
@@ -1165,6 +1181,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	@Override
 	public void registerScope(String scopeName, Scope scope) {
+
 		Assert.notNull(scopeName, "Scope identifier must not be null");
 		Assert.notNull(scope, "Scope must not be null");
 		if (SCOPE_SINGLETON.equals(scopeName) || SCOPE_PROTOTYPE.equals(scopeName)) {
@@ -2128,6 +2145,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanName the name to check
 	 */
 	public boolean isBeanNameInUse(String beanName) {
+		// 是否存在别名
+		// 是否在容器中存在
+		// 是否拥有依赖
 		return isAlias(beanName) || containsLocalBean(beanName) || hasDependentBean(beanName);
 	}
 
@@ -2143,8 +2163,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected boolean requiresDestruction(Object bean, RootBeanDefinition mbd) {
 		return (bean.getClass() != NullBean.class &&
-				(DisposableBeanAdapter.hasDestroyMethod(bean, mbd) || (hasDestructionAwareBeanPostProcessors() &&
-						DisposableBeanAdapter.hasApplicableProcessors(bean, getBeanPostProcessors()))));
+				// 是否拥有摧毁方法
+				(DisposableBeanAdapter.hasDestroyMethod(bean, mbd) ||
+						// 是否拥有摧毁方法的后置处理器
+						(hasDestructionAwareBeanPostProcessors() &&
+								// 摧毁bean的适配器是否存在
+								DisposableBeanAdapter.hasApplicableProcessors(bean, getBeanPostProcessors()))));
 	}
 
 	/**
