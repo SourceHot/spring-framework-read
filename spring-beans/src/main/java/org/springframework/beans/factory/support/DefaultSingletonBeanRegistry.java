@@ -88,7 +88,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/**
 	 *  Cache of early singleton objects: bean name to bean instance.
 	 *
-	 * early 概念, 可能是一个没有被实例化的或者说没有被调用的对象
+	 * 提前暴露的对象 key: beanName , value: object
 	 * */
 	private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
