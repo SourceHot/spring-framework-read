@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
  * emitted at compile time, and looking for argname annotation values optionally
  * accompanying AspectJ annotated methods.
  *
+ * 参数名称发现器
  * @author Rod Johnson
  * @author Adrian Colyer
  * @since 2.0

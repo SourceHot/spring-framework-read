@@ -65,17 +65,20 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor {
 
 	/**
 	 * Return the bean instance wrapped by this object.
+	 * 获取bean实例(包装过的)
 	 */
 	Object getWrappedInstance();
 
 	/**
 	 * Return the type of the wrapped bean instance.
+	 * bean 包装后的类型
 	 */
 	Class<?> getWrappedClass();
 
 	/**
 	 * Obtain the PropertyDescriptors for the wrapped object
 	 * (as determined by standard JavaBeans introspection).
+	 * 属性描述列表
 	 * @return the PropertyDescriptors for the wrapped object
 	 */
 	PropertyDescriptor[] getPropertyDescriptors();
@@ -83,6 +86,7 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor {
 	/**
 	 * Obtain the property descriptor for a specific property
 	 * of the wrapped object.
+	 * 获取属性名称对应的属性描述对象
 	 * @param propertyName the property to obtain the descriptor for
 	 * (may be a nested path, but no indexed/mapped property)
 	 * @return the property descriptor for the specified property

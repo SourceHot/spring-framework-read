@@ -394,6 +394,7 @@ public abstract class ClassUtils {
 	/**
 	 * Check whether the given class is cache-safe in the given context,
 	 * i.e. whether it is loaded by the given ClassLoader or a parent of it.
+	 * 判断是否需要缓存
 	 * @param clazz the class to analyze
 	 * @param classLoader the ClassLoader to potentially cache metadata in
 	 * (may be {@code null} which indicates the system class loader)
@@ -883,6 +884,8 @@ public abstract class ClassUtils {
 	 * Return the user-defined class for the given instance: usually simply
 	 * the class of the given instance, but the original class in case of a
 	 * CGLIB-generated subclass.
+	 *
+	 * 获取使用的类. 这里会处理代理对象
 	 * @param instance the instance to check
 	 * @return the user-defined class
 	 */

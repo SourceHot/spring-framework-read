@@ -125,18 +125,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Dependency types to ignore on dependency check and autowire, as Set of Class objects: for
 	 * example, String. Default is none.
+	 *
+	 * 忽略的依赖类型
 	 */
 	private final Set<Class<?>> ignoredDependencyTypes = new HashSet<>();
 
 	/**
 	 * Dependency interfaces to ignore on dependency check and autowire, as Set of Class objects. By
 	 * default, only the BeanFactory interface is ignored.
+	 * 忽略的依赖接口
 	 */
 	private final Set<Class<?>> ignoredDependencyInterfaces = new HashSet<>();
 
 	/**
 	 * The name of the currently created bean, for implicit dependency registration on getBean etc
 	 * invocations triggered from a user-specified Supplier callback.
+	 * 正在创建的 bean Name
 	 */
 	private final NamedThreadLocal<String> currentlyCreatedBean = new NamedThreadLocal<>("Currently created bean");
 
@@ -149,34 +153,43 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * Cache of candidate factory methods per factory class.
+	 * 工厂方法缓存
+	 * key: 工厂类
+	 * value: 方法列表
 	 */
 	private final ConcurrentMap<Class<?>, Method[]> factoryMethodCandidateCache = new ConcurrentHashMap<>();
 
 	/**
 	 * Cache of filtered PropertyDescriptors: bean Class to PropertyDescriptor array.
+	 * key: 类
+	 * value: 属性描述
 	 */
 	private final ConcurrentMap<Class<?>, PropertyDescriptor[]> filteredPropertyDescriptorsCache =
 			new ConcurrentHashMap<>();
 
 	/**
 	 * Strategy for creating bean instances.
+	 * 实例化策略
 	 */
 	private InstantiationStrategy instantiationStrategy = new CglibSubclassingInstantiationStrategy();
 
 	/**
 	 * Resolver strategy for method parameter names.
+	 * 参数名称发现接口
 	 */
 	@Nullable
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	/**
 	 * Whether to automatically try to resolve circular references between beans.
+	 * 是否允许循环引用
 	 */
 	private boolean allowCircularReferences = true;
 
 	/**
 	 * Whether to resort to injecting a raw bean instance in case of circular reference, even if the
 	 * injected bean eventually got wrapped.
+	 * 原始注解
 	 */
 	private boolean allowRawInjectionDespiteWrapping = false;
 
@@ -186,6 +199,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	public AbstractAutowireCapableBeanFactory() {
 		super();
+		// 添加忽略的依赖接口
 		ignoreDependencyInterface(BeanNameAware.class);
 		ignoreDependencyInterface(BeanFactoryAware.class);
 		ignoreDependencyInterface(BeanClassLoaderAware.class);
@@ -286,6 +300,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * <p>By default, only the BeanFactoryAware interface is ignored.
 	 * For further types to ignore, invoke this method for each type.
 	 *
+	 * 添加忽略的依赖接口
 	 * @see org.springframework.beans.factory.BeanFactoryAware
 	 * @see org.springframework.context.ApplicationContextAware
 	 */
@@ -293,6 +308,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		this.ignoredDependencyInterfaces.add(ifc);
 	}
 
+	/**
+	 * 配置拷贝
+	 */
 	@Override
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
 		super.copyConfigurationFrom(otherFactory);
@@ -317,10 +335,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Use prototype bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass);
 		bd.setScope(SCOPE_PROTOTYPE);
+		// 确认是否需要缓存
 		bd.allowCaching = ClassUtils.isCacheSafe(beanClass, getBeanClassLoader());
+		// 创建 bean
 		return (T) createBean(beanClass.getName(), bd, null);
 	}
 
+	/**
+	 * 注入 bean
+	 */
 	@Override
 	public void autowireBean(Object existingBean) {
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
@@ -332,13 +355,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		populateBean(bd.getBeanClass().getName(), bd, bw);
 	}
 
+	/**
+	 * 配置bean信息
+	 *
+	 */
 	@Override
 	public Object configureBean(Object existingBean, String beanName) throws BeansException {
+		// 标记 beanName 正在创建
 		markBeanAsCreated(beanName);
+		// 获取合并的 beanDefinition
 		BeanDefinition mbd = getMergedBeanDefinition(beanName);
 		RootBeanDefinition bd = null;
 		if (mbd instanceof RootBeanDefinition) {
 			RootBeanDefinition rbd = (RootBeanDefinition) mbd;
+			// 是否原型bean. 如果是原型bean会做深度拷贝
 			bd = (rbd.isPrototype() ? rbd : rbd.cloneBeanDefinition());
 		}
 		if (bd == null) {
@@ -348,6 +378,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			bd.setScope(SCOPE_PROTOTYPE);
 			bd.allowCaching = ClassUtils.isCacheSafe(ClassUtils.getUserClass(existingBean), getBeanClassLoader());
 		}
+		// bean 包装接口
 		BeanWrapper bw = new BeanWrapperImpl(existingBean);
 		initBeanWrapper(bw);
 		populateBean(beanName, bd, bw);

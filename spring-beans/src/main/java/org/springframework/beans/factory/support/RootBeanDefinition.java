@@ -536,7 +536,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	/**
 	 * 克隆 BeanDefinition
-	 * @return
+	 * 深度拷贝.
+	 * 原型模式的时候用
 	 */
 	@Override
 	public RootBeanDefinition cloneBeanDefinition() {

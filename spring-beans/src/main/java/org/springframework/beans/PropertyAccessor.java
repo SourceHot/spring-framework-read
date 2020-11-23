@@ -37,11 +37,13 @@ public interface PropertyAccessor {
 	/**
 	 * Path separator for nested properties.
 	 * Follows normal Java conventions: getFoo().getBar() would be "foo.bar".
+	 * 嵌套属性的分隔符
 	 */
 	String NESTED_PROPERTY_SEPARATOR = ".";
 
 	/**
 	 * Path separator for nested properties.
+	 * 嵌套属性的分隔符
 	 * Follows normal Java conventions: getFoo().getBar() would be "foo.bar".
 	 */
 	char NESTED_PROPERTY_SEPARATOR_CHAR = '.';
@@ -74,6 +76,7 @@ public interface PropertyAccessor {
 	/**
 	 * Determine whether the specified property is readable.
 	 * <p>Returns {@code false} if the property doesn't exist.
+	 * 该属性是否可读
 	 * @param propertyName the property to check
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return whether the property is readable
@@ -83,6 +86,7 @@ public interface PropertyAccessor {
 	/**
 	 * Determine whether the specified property is writable.
 	 * <p>Returns {@code false} if the property doesn't exist.
+	 * 该属性是否可写
 	 * @param propertyName the property to check
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return whether the property is writable
@@ -93,6 +97,7 @@ public interface PropertyAccessor {
 	 * Determine the property type for the specified property,
 	 * either checking the property descriptor or checking the value
 	 * in case of an indexed or mapped element.
+	 * 获取属性名称的类型
 	 * @param propertyName the property to check
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the property type for the particular property,
@@ -106,6 +111,8 @@ public interface PropertyAccessor {
 	/**
 	 * Return a type descriptor for the specified property:
 	 * preferably from the read method, falling back to the write method.
+	 *
+	 * 获取属性的类型描述
 	 * @param propertyName the property to check
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the property type for the particular property,
@@ -118,6 +125,7 @@ public interface PropertyAccessor {
 
 	/**
 	 * Get the current value of the specified property.
+	 * 获取属性值
 	 * @param propertyName the name of the property to get the value of
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the value of the property
@@ -131,6 +139,7 @@ public interface PropertyAccessor {
 
 	/**
 	 * Set the specified value as current property value.
+	 * 设置属性值
 	 * @param propertyName the name of the property to set the value of
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @param value the new value
@@ -143,6 +152,7 @@ public interface PropertyAccessor {
 
 	/**
 	 * Set the specified value as current property value.
+	 * 设置PropertyValue对象
 	 * @param pv an object containing the new property value
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
@@ -156,6 +166,8 @@ public interface PropertyAccessor {
 	 * <p>Bulk updates from PropertyValues are more powerful: This method is
 	 * provided for convenience. Behavior will be identical to that of
 	 * the {@link #setPropertyValues(PropertyValues)} method.
+	 *
+	 * 设置属性
 	 * @param map a Map to take properties from. Contains property value objects,
 	 * keyed by property name
 	 * @throws InvalidPropertyException if there is no such property or
@@ -177,6 +189,8 @@ public interface PropertyAccessor {
 	 * This exception can be examined later to see all binding errors.
 	 * Properties that were successfully updated remain changed.
 	 * <p>Does not allow unknown fields or invalid fields.
+	 *
+	 * 设置多个属性
 	 * @param pvs a PropertyValues to set on the target object
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
@@ -197,6 +211,8 @@ public interface PropertyAccessor {
 	 * {@link PropertyBatchUpdateException} containing all the individual errors.
 	 * This exception can be examined later to see all binding errors.
 	 * Properties that were successfully updated remain changed.
+	 *
+	 * 设置多个属性
 	 * @param pvs a PropertyValues to set on the target object
 	 * @param ignoreUnknown should we ignore unknown properties (not found in the bean)
 	 * @throws InvalidPropertyException if there is no such property or
@@ -219,6 +235,7 @@ public interface PropertyAccessor {
 	 * {@link PropertyBatchUpdateException} containing all the individual errors.
 	 * This exception can be examined later to see all binding errors.
 	 * Properties that were successfully updated remain changed.
+	 * 设置多个属性
 	 * @param pvs a PropertyValues to set on the target object
 	 * @param ignoreUnknown should we ignore unknown properties (not found in the bean)
 	 * @param ignoreInvalid should we ignore invalid properties (found but not accessible)

@@ -76,17 +76,31 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 */
 	private static final Log logger = LogFactory.getLog(AbstractNestablePropertyAccessor.class);
 
+	/**
+	 * 包装对象 ，BeanWrapper
+	 */
 	@Nullable
 	Object wrappedObject;
 
+	/**
+	 * 根对象
+	 */
 	@Nullable
 	Object rootObject;
 
 	private int autoGrowCollectionLimit = Integer.MAX_VALUE;
 
+	/**
+	 * 当前 包装对象对应的属性名
+	 */
 	private String nestedPath = "";
 
-	/** Map with cached nested Accessors: nested path -> Accessor instance. */
+	/**
+	 * Map with cached nested Accessors: nested path -> Accessor instance.
+	 *
+	 * key: 嵌套的属性地址
+	 * value: BeanWrapper
+	 * */
 	@Nullable
 	private Map<String, AbstractNestablePropertyAccessor> nestedPropertyAccessors;
 
@@ -235,13 +249,18 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	public void setPropertyValue(String propertyName, @Nullable Object value) throws BeansException {
 		AbstractNestablePropertyAccessor nestedPa;
 		try {
+			// 计算嵌套地址属性对象
 			nestedPa = getPropertyAccessorForPropertyPath(propertyName);
 		}
 		catch (NotReadablePropertyException ex) {
 			throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName,
 					"Nested property in path '" + propertyName + "' does not exist", ex);
 		}
-		PropertyTokenHolder tokens = getPropertyNameTokens(getFinalPath(nestedPa, propertyName));
+		// 获取 PropertyTokenHolder
+		PropertyTokenHolder tokens = getPropertyNameTokens(
+				// 确定最终地址
+				getFinalPath(nestedPa, propertyName)
+		);
 		nestedPa.setPropertyValue(tokens, new PropertyValue(propertyName, value));
 	}
 
@@ -814,11 +833,15 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 */
 	@SuppressWarnings("unchecked")  // avoid nested generic
 	protected AbstractNestablePropertyAccessor getPropertyAccessorForPropertyPath(String propertyPath) {
+		// 获取属性嵌套符号的第一个位置
 		int pos = PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(propertyPath);
 		// Handle nested properties recursively.
 		if (pos > -1) {
+			// 切出第一个属性值名称
 			String nestedProperty = propertyPath.substring(0, pos);
+			// 切除嵌套的属性路径
 			String nestedPath = propertyPath.substring(pos + 1);
+			// 创建对象
 			AbstractNestablePropertyAccessor nestedPa = getNestedPropertyAccessor(nestedProperty);
 			return nestedPa.getPropertyAccessorForPropertyPath(nestedPath);
 		}
@@ -932,6 +955,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @return representation of the parsed property tokens
 	 */
 	private PropertyTokenHolder getPropertyNameTokens(String propertyName) {
+		// [ 前的字符串
 		String actualName = null;
 		List<String> keys = new ArrayList<>(2);
 		int searchIndex = 0;
@@ -944,6 +968,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 					if (actualName == null) {
 						actualName = propertyName.substring(0, keyStart);
 					}
+					// []中的字符串
 					String key = propertyName.substring(keyStart + PROPERTY_KEY_PREFIX.length(), keyEnd);
 					if (key.length() > 1 && (key.startsWith("'") && key.endsWith("'")) ||
 							(key.startsWith("\"") && key.endsWith("\""))) {
@@ -1063,11 +1088,19 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * Holder class used to store property tokens.
 	 */
 	protected static class PropertyTokenHolder {
-
+		/**
+		 * 属性名称
+		 */
 		public String actualName;
 
+		/**
+		 * 属性规则名称
+		 */
 		public String canonicalName;
 
+		/**
+		 * 属性key
+		 */
 		@Nullable
 		public String[] keys;
 

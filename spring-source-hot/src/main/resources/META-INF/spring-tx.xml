@@ -15,7 +15,7 @@
 
 	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
 		<property name="url"
-				value="jdbc:mysql://47.98.225.144:3306/scrum?useSSL=false"/>
+				value="jdbc:mysql://localhost:3306/scrum?useSSL=false"/>
 		<property name="username" value="huifer"/>
 		<property name="password" value="a12345"/>
 		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>

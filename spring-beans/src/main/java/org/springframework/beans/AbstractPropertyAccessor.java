@@ -133,6 +133,7 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 
 	/**
 	 * Actually get the value of a property.
+	 * 获取属性值
 	 * @param propertyName name of the property to get the value of
 	 * @return the value of the property
 	 * @throws InvalidPropertyException if there is no such property or
@@ -146,6 +147,8 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 
 	/**
 	 * Actually set a property value.
+	 *
+	 * 设置属性名称和值
 	 * @param propertyName name of the property to set value of
 	 * @param value the new value
 	 * @throws InvalidPropertyException if there is no such property or
