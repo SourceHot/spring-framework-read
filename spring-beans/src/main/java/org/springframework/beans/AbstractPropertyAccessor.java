@@ -36,8 +36,14 @@ import org.springframework.lang.Nullable;
  */
 public abstract class AbstractPropertyAccessor extends TypeConverterSupport implements ConfigurablePropertyAccessor {
 
+	/**
+	 * 是否需要提取历史数据
+	 */
 	private boolean extractOldValueForEditor = false;
 
+	/**
+	 * 嵌套注入的时候是否为null的情况下是否需要创建对象
+	 */
 	private boolean autoGrowNestedPaths = false;
 
 	@Override
@@ -84,6 +90,7 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
 			throws BeansException {
 
+		// 异常集合
 		List<PropertyAccessException> propertyAccessExceptions = null;
 		// 获取属性值列表
 		List<PropertyValue> propertyValues = (pvs instanceof MutablePropertyValues ?

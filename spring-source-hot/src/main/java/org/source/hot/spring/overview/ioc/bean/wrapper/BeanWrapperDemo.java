@@ -26,7 +26,7 @@ public class BeanWrapperDemo {
 		beanWrapperImpl.setPropertyValue("addresses[1].id", 2);
 //		beanWrapperImpl.setPropertyValue("addresses[2]", new Address("bbbbbb"));
 //		beanWrapperImpl.setPropertyValue("address.name", "ads");
-//		beanWrapperImpl.setPropertyValue("map['t1']", "zzzzzzzzzz");
+		beanWrapperImpl.setPropertyValue("map['t1']", "zzzzzzzzzz");
 		PropertyDescriptor[] propertyDescriptors = beanWrapperImpl.getPropertyDescriptors();
 		System.out.println();
 	}

@@ -95,6 +95,8 @@ public final class CachedIntrospectionResults {
 	/**
 	 * Set of ClassLoaders that this CachedIntrospectionResults class will always
 	 * accept classes from, even if the classes do not qualify as cache-safe.
+	 *
+	 * 容器, 存储对象`ClassLoader`
 	 */
 	static final Set<ClassLoader> acceptedClassLoaders =
 			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
@@ -102,6 +104,7 @@ public final class CachedIntrospectionResults {
 	/**
 	 * Map keyed by Class containing CachedIntrospectionResults, strongly held.
 	 * This variant is being used for cache-safe bean classes.
+	 * 容器,存储线程安全的bean
 	 */
 	static final ConcurrentMap<Class<?>, CachedIntrospectionResults> strongClassCache =
 			new ConcurrentHashMap<>(64);
@@ -109,26 +112,44 @@ public final class CachedIntrospectionResults {
 	/**
 	 * Map keyed by Class containing CachedIntrospectionResults, softly held.
 	 * This variant is being used for non-cache-safe bean classes.
+	 * `容器,存储线程不安全的bean
 	 */
 	static final ConcurrentMap<Class<?>, CachedIntrospectionResults> softClassCache =
 			new ConcurrentReferenceHashMap<>(64);
 
+	/**
+	 * 读取 spring.beaninfo.ignore 配置
+	 * 读取`IGNORE_BEANINFO_PROPERTY_NAME`后的结果值
+	 *
+	 */
 	private static final boolean shouldIntrospectorIgnoreBeaninfoClasses =
 			SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
 
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
 
-	/** Stores the BeanInfoFactory instances. */
+	/**
+	 * Stores the BeanInfoFactory instances.
+	 * `BeanInfoFactory` 容器
+	 *  */
 	private static final List<BeanInfoFactory> beanInfoFactories = SpringFactoriesLoader.loadFactories(
 			BeanInfoFactory.class, CachedIntrospectionResults.class.getClassLoader());
 
-	/** The BeanInfo object for the introspected bean class. */
+	/**
+	 *  The BeanInfo object for the introspected bean class.
+	 *  BeanInfo 接口
+	 * */
 	private final BeanInfo beanInfo;
 
-	/** PropertyDescriptor objects keyed by property name String. */
+	/**
+	 * PropertyDescriptor objects keyed by property name String.
+	 * 属性名称 -> 属性描述对象
+	 * */
 	private final Map<String, PropertyDescriptor> propertyDescriptorCache;
 
-	/** TypeDescriptor objects keyed by PropertyDescriptor. */
+	/**
+	 * TypeDescriptor objects keyed by PropertyDescriptor.
+	 * 属性描述对象 -> 类型描述对象
+	 * */
 	private final ConcurrentMap<PropertyDescriptor, TypeDescriptor> typeDescriptorCache;
 
 	/**
@@ -141,16 +162,20 @@ public final class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
 			}
+			// 获取 beanInfo
 			this.beanInfo = getBeanInfo(beanClass);
 
 			if (logger.isTraceEnabled()) {
 				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
 			}
+			// 对象初始化
 			this.propertyDescriptorCache = new LinkedHashMap<>();
 
 			// This call is slow so we do it once.
+			// 获取 beanInfo的属性描述对象列表
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (PropertyDescriptor pd : pds) {
+				// 数据验证
 				if (Class.class == beanClass &&
 						("classLoader".equals(pd.getName()) || "protectionDomain".equals(pd.getName()))) {
 					// Ignore Class.getClassLoader() and getProtectionDomain() methods - nobody needs to bind to those
@@ -162,7 +187,9 @@ public final class CachedIntrospectionResults {
 							(pd.getPropertyEditorClass() != null ?
 									"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
 				}
+				// pd 数据修正
 				pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
+				// 建立 属性名称和属性描述符的绑定关系
 				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}
 
@@ -170,6 +197,7 @@ public final class CachedIntrospectionResults {
 			// in particular for Java 8 default methods...
 			Class<?> currClass = beanClass;
 			while (currClass != null && currClass != Object.class) {
+				// 接口检查
 				introspectInterfaces(beanClass, currClass);
 				currClass = currClass.getSuperclass();
 			}
@@ -306,8 +334,11 @@ public final class CachedIntrospectionResults {
 	}
 
 	private void introspectInterfaces(Class<?> beanClass, Class<?> currClass) throws IntrospectionException {
+		// 获取所有的实现接口
 		for (Class<?> ifc : currClass.getInterfaces()) {
+			// 判断是否是 java 的接口
 			if (!ClassUtils.isJavaLanguageInterface(ifc)) {
+				// 获取 PropertyDescriptor 列表循环处理
 				for (PropertyDescriptor pd : getBeanInfo(ifc).getPropertyDescriptors()) {
 					PropertyDescriptor existingPd = this.propertyDescriptorCache.get(pd.getName());
 					if (existingPd == null ||
@@ -332,6 +363,9 @@ public final class CachedIntrospectionResults {
 		return this.beanInfo.getBeanDescriptor().getBeanClass();
 	}
 
+	/**
+	 * 从容器中获取 PropertyDescriptor
+	 */
 	@Nullable
 	PropertyDescriptor getPropertyDescriptor(String name) {
 		PropertyDescriptor pd = this.propertyDescriptorCache.get(name);
@@ -357,6 +391,12 @@ public final class CachedIntrospectionResults {
 		return pds;
 	}
 
+	/**
+	 * 创建 GenericTypeAwarePropertyDescriptor 对象
+	 * @param beanClass
+	 * @param pd
+	 * @return
+	 */
 	private PropertyDescriptor buildGenericTypeAwarePropertyDescriptor(Class<?> beanClass, PropertyDescriptor pd) {
 		try {
 			return new GenericTypeAwarePropertyDescriptor(beanClass, pd.getName(), pd.getReadMethod(),

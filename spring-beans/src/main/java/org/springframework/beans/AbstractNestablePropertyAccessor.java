@@ -304,17 +304,22 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	@SuppressWarnings("unchecked")
 	private void processKeyedProperty(PropertyTokenHolder tokens, PropertyValue pv) {
+		// 属性值
 		Object propValue = getPropertyHoldingValue(tokens);
+		//  PropertyHandler 对象
 		PropertyHandler ph = getLocalPropertyHandler(tokens.actualName);
 		if (ph == null) {
 			throw new InvalidPropertyException(
 					getRootClass(), this.nestedPath + tokens.actualName, "No property handler found");
 		}
 		Assert.state(tokens.keys != null, "No token keys");
+		// 获取最后一个 key
 		String lastKey = tokens.keys[tokens.keys.length - 1];
 
 		if (propValue.getClass().isArray()) {
+			// 类型
 			Class<?> requiredType = propValue.getClass().getComponentType();
+			// 获取索引
 			int arrayIndex = Integer.parseInt(lastKey);
 			Object oldValue = null;
 			try {
@@ -456,10 +461,14 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			// 获取 PV 的属性值
 			Object originalValue = pv.getValue();
 			Object valueToApply = originalValue;
+
+			// 是否需要
 			if (!Boolean.FALSE.equals(pv.conversionNecessary)) {
+				// 是否能够转换
 				if (pv.isConverted()) {
 					valueToApply = pv.getConvertedValue();
 				}
+				// 不能转换换
 				else {
 					if (isExtractOldValueForEditor() && ph.isReadable()) {
 						try {
@@ -539,18 +548,24 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	@Nullable
 	public TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException {
 		try {
+			// 嵌套属性访问器
 			AbstractNestablePropertyAccessor nestedPa = getPropertyAccessorForPropertyPath(propertyName);
+			// 寻找属性地址
 			String finalPath = getFinalPath(nestedPa, propertyName);
+			// 获取 PropertyTokenHolder
 			PropertyTokenHolder tokens = getPropertyNameTokens(finalPath);
+			// 获取 PropertyHandler
 			PropertyHandler ph = nestedPa.getLocalPropertyHandler(tokens.actualName);
 			if (ph != null) {
 				if (tokens.keys != null) {
 					if (ph.isReadable() || ph.isWritable()) {
+						// 计算类型描述符
 						return ph.nested(tokens.keys.length);
 					}
 				}
 				else {
 					if (ph.isReadable() || ph.isWritable()) {
+						// 计算类型描述符
 						return ph.toTypeDescriptor();
 					}
 				}
@@ -642,15 +657,19 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	protected Object getPropertyValue(PropertyTokenHolder tokens) throws BeansException {
 		String propertyName = tokens.canonicalName;
 		String actualName = tokens.actualName;
+		// 子类得到属性处理器
 		PropertyHandler ph = getLocalPropertyHandler(actualName);
 		if (ph == null || !ph.isReadable()) {
 			throw new NotReadablePropertyException(getRootClass(), this.nestedPath + propertyName);
 		}
 		try {
+			// 属性执行器中获取值
 			Object value = ph.getValue();
 			if (tokens.keys != null) {
 				if (value == null) {
+					// 判断是否需要设置属性
 					if (isAutoGrowNestedPaths()) {
+						// 设置属性
 						value = setDefaultValue(new PropertyTokenHolder(tokens.actualName));
 					}
 					else {
@@ -659,6 +678,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 										"property path '" + propertyName + "': returned null");
 					}
 				}
+				//
 				StringBuilder indexedPropertyName = new StringBuilder(tokens.actualName);
 				// apply indexes and map keys
 				for (int i = 0; i < tokens.keys.length; i++) {
@@ -668,6 +688,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 								"Cannot access indexed value of property referenced in indexed " +
 										"property path '" + propertyName + "': returned null");
 					}
+					// 值类型判断+设计数据
 					else if (value.getClass().isArray()) {
 						int index = Integer.parseInt(key);
 						value = growArrayIfNecessary(value, index, indexedPropertyName.toString());
@@ -855,6 +876,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * Create a new one if not found in the cache.
 	 * <p>Note: Caching nested PropertyAccessors is necessary now,
 	 * to keep registered custom editors for nested properties.
+	 * 获取嵌套属性访问器
 	 * @param nestedProperty property to create the PropertyAccessor for
 	 * @return the PropertyAccessor instance, either cached or newly created
 	 */
@@ -863,11 +885,15 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			this.nestedPropertyAccessors = new HashMap<>();
 		}
 		// Get value of bean property.
+		// 获取 PropertyTokenHolder 对象
 		PropertyTokenHolder tokens = getPropertyNameTokens(nestedProperty);
+		// 提取 canonicalName 信息
 		String canonicalName = tokens.canonicalName;
+		// 获取属性值
 		Object value = getPropertyValue(tokens);
 		if (value == null || (value instanceof Optional && !((Optional<?>) value).isPresent())) {
 			if (isAutoGrowNestedPaths()) {
+				// 设置属性
 				value = setDefaultValue(tokens);
 			}
 			else {
@@ -876,15 +902,20 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		}
 
 		// Lookup cached sub-PropertyAccessor, create new one if not found.
+		// 获取嵌套的属性访问对戏
 		AbstractNestablePropertyAccessor nestedPa = this.nestedPropertyAccessors.get(canonicalName);
 		if (nestedPa == null || nestedPa.getWrappedInstance() != ObjectUtils.unwrapOptional(value)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Creating new nested " + getClass().getSimpleName() + " for property '" + canonicalName + "'");
 			}
+			// 获取嵌套的属性访问对象
+			// 子类实现
 			nestedPa = newNestedPropertyAccessor(value, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR);
 			// Inherit all type-specific PropertyEditors.
+			// 属性编辑器拷贝
 			copyDefaultEditorsTo(nestedPa);
 			copyCustomEditorsTo(nestedPa, canonicalName);
+			// 设置到容器
 			this.nestedPropertyAccessors.put(canonicalName, nestedPa);
 		}
 		else {
@@ -896,19 +927,24 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 	private Object setDefaultValue(PropertyTokenHolder tokens) {
+		// 创建 属性对象
 		PropertyValue pv = createDefaultPropertyValue(tokens);
+		// 设置属性值
 		setPropertyValue(tokens, pv);
+		// 获取属性值(默认值)
 		Object defaultValue = getPropertyValue(tokens);
 		Assert.state(defaultValue != null, "Default value must not be null");
 		return defaultValue;
 	}
 
 	private PropertyValue createDefaultPropertyValue(PropertyTokenHolder tokens) {
+		// 获取属性的 类型描述对象
 		TypeDescriptor desc = getPropertyTypeDescriptor(tokens.canonicalName);
 		if (desc == null) {
 			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + tokens.canonicalName,
 					"Could not determine property type for auto-growing a default value");
 		}
+		// 创建数据值
 		Object defaultValue = newValue(desc.getType(), desc, tokens.canonicalName);
 		return new PropertyValue(tokens.canonicalName, defaultValue);
 	}
@@ -1030,11 +1066,19 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * A handler for a specific property.
 	 */
 	protected abstract static class PropertyHandler {
-
+		/**
+		 * 属性类型
+		 */
 		private final Class<?> propertyType;
 
+		/**
+		 * 是否可读
+		 */
 		private final boolean readable;
 
+		/**
+		 * 是否可写
+		 */
 		private final boolean writable;
 
 		public PropertyHandler(Class<?> propertyType, boolean readable, boolean writable) {

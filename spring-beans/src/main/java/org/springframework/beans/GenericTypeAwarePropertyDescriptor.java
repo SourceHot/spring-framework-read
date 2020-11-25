@@ -38,6 +38,7 @@ import org.springframework.util.StringUtils;
  * overriding {@code getPropertyType()} such that a generically declared
  * type variable will be resolved against the containing bean class.
  *
+ * 通用类型感知属性描述符
  * @author Juergen Hoeller
  * @since 2.5.2
  */

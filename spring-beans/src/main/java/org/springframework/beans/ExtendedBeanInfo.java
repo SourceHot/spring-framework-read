@@ -16,7 +16,7 @@
 
 package org.springframework.beans;
 
-import java.awt.Image;
+import java.awt.*;
 import java.beans.BeanDescriptor;
 import java.beans.BeanInfo;
 import java.beans.EventSetDescriptor;
@@ -81,8 +81,14 @@ class ExtendedBeanInfo implements BeanInfo {
 
 	private static final Log logger = LogFactory.getLog(ExtendedBeanInfo.class);
 
+	/**
+	 * beanInfo 接口
+	 */
 	private final BeanInfo delegate;
 
+	/**
+	 * 属性描述集合
+	 */
 	private final Set<PropertyDescriptor> propertyDescriptors = new TreeSet<>(new PropertyDescriptorComparator());
 
 
