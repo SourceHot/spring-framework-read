@@ -43,27 +43,56 @@ import org.springframework.util.StringUtils;
  * @since 2.5.2
  */
 final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
-
+	/**
+	 * 类型
+	 */
 	private final Class<?> beanClass;
 
+	/**
+	 * 可读方法
+	 */
 	@Nullable
 	private final Method readMethod;
 
+	/**
+	 * 可写方法
+	 */
 	@Nullable
 	private final Method writeMethod;
 
+	/**
+	 * 属性编辑器类型
+	 */
 	private final Class<?> propertyEditorClass;
 
+	/**
+	 * 可能的可写方法
+	 */
 	@Nullable
 	private volatile Set<Method> ambiguousWriteMethods;
 
+	/**
+	 * 可写方法的参数
+	 */
 	@Nullable
 	private MethodParameter writeMethodParameter;
 
+	/**
+	 * 属性类型
+	 */
 	@Nullable
 	private Class<?> propertyType;
 
 
+	/**
+	 * 构造函数
+	 * @param beanClass 对象蕾西
+	 * @param propertyName 属性名称
+	 * @param readMethod 可读函数
+	 * @param writeMethod 可写函数
+	 * @param propertyEditorClass 属性编辑器类型
+	 * @throws IntrospectionException
+	 */
 	public GenericTypeAwarePropertyDescriptor(Class<?> beanClass, String propertyName,
 			@Nullable Method readMethod, @Nullable Method writeMethod, Class<?> propertyEditorClass)
 			throws IntrospectionException {
@@ -71,12 +100,16 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		super(propertyName, null, null);
 		this.beanClass = beanClass;
 
+		// 计算可读方法
 		Method readMethodToUse = (readMethod != null ? BridgeMethodResolver.findBridgedMethod(readMethod) : null);
+		// 计算可写方法
 		Method writeMethodToUse = (writeMethod != null ? BridgeMethodResolver.findBridgedMethod(writeMethod) : null);
 		if (writeMethodToUse == null && readMethodToUse != null) {
 			// Fallback: Original JavaBeans introspection might not have found matching setter
 			// method due to lack of bridge method resolution, in case of the getter using a
 			// covariant return type whereas the setter is defined for the concrete property type.
+			// 获取方法
+			// 获取set 方法
 			Method candidate = ClassUtils.getMethodIfAvailable(
 					this.beanClass, "set" + StringUtils.capitalize(getName()), (Class<?>[]) null);
 			if (candidate != null && candidate.getParameterCount() == 1) {
@@ -92,6 +125,7 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 				// several overloaded variants, in which case an arbitrary winner has been chosen
 				// by the JDK's JavaBeans Introspector...
 				Set<Method> ambiguousCandidates = new HashSet<>();
+				// 方法推测 , 满足下面要求的就可能是 可写方法
 				for (Method method : beanClass.getMethods()) {
 					if (method.getName().equals(writeMethodToUse.getName()) &&
 							!method.equals(writeMethodToUse) && !method.isBridge() &&
@@ -100,19 +134,25 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 					}
 				}
 				if (!ambiguousCandidates.isEmpty()) {
+					// 赋值
 					this.ambiguousWriteMethods = ambiguousCandidates;
 				}
 			}
+			// 构造可写函数的参数对象
 			this.writeMethodParameter = new MethodParameter(this.writeMethod, 0).withContainingClass(this.beanClass);
 		}
 
 		if (this.readMethod != null) {
+			// 属性类型的计算
+			// 计算方式: 通过 class 中寻找 method , 将 找到的 method 的返回值作为结果
 			this.propertyType = GenericTypeResolver.resolveReturnType(this.readMethod, this.beanClass);
 		}
 		else if (this.writeMethodParameter != null) {
+			// 获取参数类型
 			this.propertyType = this.writeMethodParameter.getParameterType();
 		}
 
+		// 属性编辑器类型赋值
 		this.propertyEditorClass = propertyEditorClass;
 	}
 

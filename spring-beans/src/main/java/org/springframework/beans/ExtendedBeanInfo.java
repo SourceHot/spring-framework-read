@@ -103,9 +103,12 @@ class ExtendedBeanInfo implements BeanInfo {
 	 * @see #getPropertyDescriptors()
 	 */
 	public ExtendedBeanInfo(BeanInfo delegate) {
+		// 变量赋值
 		this.delegate = delegate;
+		// 获取属性列表
 		for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
 			try {
+				// 放入属性描述符容器中
 				this.propertyDescriptors.add(pd instanceof IndexedPropertyDescriptor ?
 						new SimpleIndexedPropertyDescriptor((IndexedPropertyDescriptor) pd) :
 						new SimplePropertyDescriptor(pd));
@@ -117,10 +120,13 @@ class ExtendedBeanInfo implements BeanInfo {
 				}
 			}
 		}
+		// 函数描述符
 		MethodDescriptor[] methodDescriptors = delegate.getMethodDescriptors();
 		if (methodDescriptors != null) {
+			// 查询可写方法
 			for (Method method : findCandidateWriteMethods(methodDescriptors)) {
 				try {
+					// 处理可写函数
 					handleCandidateWriteMethod(method);
 				}
 				catch (IntrospectionException ex) {
@@ -133,6 +139,9 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 	}
 
+	/**
+	 * 判断函数是否可写
+	 */
 	public static boolean isCandidateWriteMethod(Method method) {
 		String methodName = method.getName();
 		int nParams = method.getParameterCount();
@@ -141,6 +150,9 @@ class ExtendedBeanInfo implements BeanInfo {
 				(nParams == 1 || (nParams == 2 && int.class == method.getParameterTypes()[0])));
 	}
 
+	/**
+	 * 查询所有的 可写函数
+	 */
 	private List<Method> findCandidateWriteMethods(MethodDescriptor[] methodDescriptors) {
 		List<Method> matches = new ArrayList<>();
 		for (MethodDescriptor methodDescriptor : methodDescriptors) {
@@ -156,11 +168,21 @@ class ExtendedBeanInfo implements BeanInfo {
 		return matches;
 	}
 
+	/**
+	 * 处理可写函数
+	 * @param method
+	 * @throws IntrospectionException
+	 */
 	private void handleCandidateWriteMethod(Method method) throws IntrospectionException {
+		// 参数数量
 		int nParams = method.getParameterCount();
+		// 属性名称
 		String propertyName = propertyNameFor(method);
+		// 参数类型
 		Class<?> propertyType = method.getParameterTypes()[nParams - 1];
+		// 寻找属性描述符
 		PropertyDescriptor existingPd = findExistingPropertyDescriptor(propertyName, propertyType);
+		// 参数数量等于1的情况处理
 		if (nParams == 1) {
 			if (existingPd == null) {
 				this.propertyDescriptors.add(new SimplePropertyDescriptor(propertyName, null, method));
@@ -169,6 +191,7 @@ class ExtendedBeanInfo implements BeanInfo {
 				existingPd.setWriteMethod(method);
 			}
 		}
+		// 参数数量等于2的情况处理
 		else if (nParams == 2) {
 			if (existingPd == null) {
 				this.propertyDescriptors.add(
@@ -190,11 +213,16 @@ class ExtendedBeanInfo implements BeanInfo {
 
 	@Nullable
 	private PropertyDescriptor findExistingPropertyDescriptor(String propertyName, Class<?> propertyType) {
+		// 循环现有的 属性描述符列表
 		for (PropertyDescriptor pd : this.propertyDescriptors) {
+			// 待测类型
 			final Class<?> candidateType;
+			// 属性名称
 			final String candidateName = pd.getName();
+			// 类型判断
 			if (pd instanceof IndexedPropertyDescriptor) {
 				IndexedPropertyDescriptor ipd = (IndexedPropertyDescriptor) pd;
+				// 从IndexedPropertyDescriptor获取属性类型
 				candidateType = ipd.getIndexedPropertyType();
 				if (candidateName.equals(propertyName) &&
 						(candidateType.equals(propertyType) || candidateType.equals(propertyType.getComponentType()))) {
@@ -202,6 +230,7 @@ class ExtendedBeanInfo implements BeanInfo {
 				}
 			}
 			else {
+				// 设置 待测类型. 从属性描述符中虎丘属性类型
 				candidateType = pd.getPropertyType();
 				if (candidateName.equals(propertyName) &&
 						(candidateType.equals(propertyType) || propertyType.equals(candidateType.getComponentType()))) {
@@ -212,6 +241,13 @@ class ExtendedBeanInfo implements BeanInfo {
 		return null;
 	}
 
+	/**
+	 * 提取函数的后半段字符 .
+	 * getName => Name
+	 * setName => Name
+	 * @param method
+	 * @return
+	 */
 	private String propertyNameFor(Method method) {
 		return Introspector.decapitalize(method.getName().substring(3));
 	}
@@ -268,16 +304,27 @@ class ExtendedBeanInfo implements BeanInfo {
 	 * A simple {@link PropertyDescriptor}.
 	 */
 	static class SimplePropertyDescriptor extends PropertyDescriptor {
-
+		/**
+		 * 可读函数
+		 */
 		@Nullable
 		private Method readMethod;
 
+		/**
+		 * 可写函数
+		 */
 		@Nullable
 		private Method writeMethod;
 
+		/**
+		 * 属性类型
+		 */
 		@Nullable
 		private Class<?> propertyType;
 
+		/**
+		 * 属性编辑器类型
+		 */
 		@Nullable
 		private Class<?> propertyEditorClass;
 
@@ -365,13 +412,21 @@ class ExtendedBeanInfo implements BeanInfo {
 	 * A simple {@link IndexedPropertyDescriptor}.
 	 */
 	static class SimpleIndexedPropertyDescriptor extends IndexedPropertyDescriptor {
-
+		/**
+		 * 可读函数
+		 */
 		@Nullable
 		private Method readMethod;
 
+		/**
+		 * 可写函数
+		 */
 		@Nullable
 		private Method writeMethod;
 
+		/**
+		 * 属性类型
+		 */
 		@Nullable
 		private Class<?> propertyType;
 

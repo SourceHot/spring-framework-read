@@ -70,6 +70,8 @@ public final class GenericTypeResolver {
 	/**
 	 * Determine the target type for the generic return type of the given method,
 	 * where formal type variables are declared on the given class.
+	 * 计算属性类型.
+	 * 从 clazz 中 寻找到 method 得到返回值
 	 * @param method the method to introspect
 	 * @param clazz the class to resolve type variables against
 	 * @return the corresponding generic parameter or return type
