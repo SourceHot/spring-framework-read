@@ -249,15 +249,18 @@ public final class CachedIntrospectionResults {
 	 * @throws BeansException in case of introspection failure
 	 */
 	static CachedIntrospectionResults forClass(Class<?> beanClass) throws BeansException {
+		// 存储线程安全的bean的容器 中获取
 		CachedIntrospectionResults results = strongClassCache.get(beanClass);
 		if (results != null) {
 			return results;
 		}
+		// 存储线程不安全的bean的容器 中获取
 		results = softClassCache.get(beanClass);
 		if (results != null) {
 			return results;
 		}
 
+		// 创建对象
 		results = new CachedIntrospectionResults(beanClass);
 		ConcurrentMap<Class<?>, CachedIntrospectionResults> classCacheToUse;
 
@@ -272,6 +275,7 @@ public final class CachedIntrospectionResults {
 			classCacheToUse = softClassCache;
 		}
 
+		// 设置数据
 		CachedIntrospectionResults existing = classCacheToUse.putIfAbsent(beanClass, results);
 		return (existing != null ? existing : results);
 	}

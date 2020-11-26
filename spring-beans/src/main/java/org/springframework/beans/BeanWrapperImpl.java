@@ -207,11 +207,13 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	@Nullable
 	public Object convertForProperty(@Nullable Object value, String propertyName) throws TypeMismatchException {
 		CachedIntrospectionResults cachedIntrospectionResults = getCachedIntrospectionResults();
+		// 类型描述符
 		PropertyDescriptor pd = cachedIntrospectionResults.getPropertyDescriptor(propertyName);
 		if (pd == null) {
 			throw new InvalidPropertyException(getRootClass(), getNestedPath() + propertyName,
 					"No property '" + propertyName + "' found");
 		}
+		// 类型描述符
 		TypeDescriptor td = cachedIntrospectionResults.getTypeDescriptor(pd);
 		if (td == null) {
 			td = cachedIntrospectionResults.addTypeDescriptor(pd, new TypeDescriptor(property(pd)));
@@ -251,6 +253,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	@Override
 	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws InvalidPropertyException {
 		BeanWrapperImpl nestedBw = (BeanWrapperImpl) getPropertyAccessorForPropertyPath(propertyName);
+		// 确定最终地址
 		String finalPath = getFinalPath(nestedBw, propertyName);
 		PropertyDescriptor pd = nestedBw.getCachedIntrospectionResults().getPropertyDescriptor(finalPath);
 		if (pd == null) {
@@ -289,6 +292,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 		@Override
 		@Nullable
 		public Object getValue() throws Exception {
+			// 读取函数
 			final Method readMethod = this.pd.getReadMethod();
 			if (System.getSecurityManager() != null) {
 				AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
@@ -296,6 +300,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 					return null;
 				});
 				try {
+					// 读取函数调用
 					return AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
 							readMethod.invoke(getWrappedInstance(), (Object[]) null), acc);
 				}
@@ -305,6 +310,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 			}
 			else {
 				ReflectionUtils.makeAccessible(readMethod);
+				// 读取函数调用
 				return readMethod.invoke(getWrappedInstance(), (Object[]) null);
 			}
 		}
