@@ -37,12 +37,16 @@ import org.springframework.util.StringUtils;
  * <p>Does not support Method Injection, although it provides hooks for subclasses
  * to override to add Method Injection support, for example by overriding methods.
  *
+ * 简单的实例化方式
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 1.1
  */
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
+	/**
+	 * 存储 工厂方法
+	 */
     private static final ThreadLocal<Method> currentlyInvokedFactoryMethod = new ThreadLocal<>();
 
 
@@ -60,39 +64,47 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
     @Override
     public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
         // Don't override the class with CGLIB if no overrides.
-        // 不是 cglib
+		// 不是 cglib
+        // 重写方法列表是否存在
         if (!bd.hasMethodOverrides()) {
             // 构造方法
-            Constructor<?> constructorToUse;
+			Constructor<?> constructorToUse;
+			// 锁
             synchronized (bd.constructorArgumentLock) {
+            	// 提取构造函数
                 constructorToUse = (Constructor<?>) bd.resolvedConstructorOrFactoryMethod;
-                if (constructorToUse == null) {
-                    final Class<?> clazz = bd.getBeanClass();
-                    if (clazz.isInterface()) {
-                        throw new BeanInstantiationException(clazz, "Specified class is an interface");
-                    }
-                    try {
-                        // 获取构造方法
-                        if (System.getSecurityManager() != null) {
-                            constructorToUse = AccessController.doPrivileged(
-                                    (PrivilegedExceptionAction<Constructor<?>>) clazz::getDeclaredConstructor);
-                        }
-                        else {
-                            constructorToUse = clazz.getDeclaredConstructor();
-                        }
-                        bd.resolvedConstructorOrFactoryMethod = constructorToUse;
-                    }
-                    catch (Throwable ex) {
-                        throw new BeanInstantiationException(clazz, "No default constructor found", ex);
-                    }
-                }
+				if (constructorToUse == null) {
+					// 获取 bean Class
+					final Class<?> clazz = bd.getBeanClass();
+					// 确定 类型不是 接口
+					if (clazz.isInterface()) {
+						throw new BeanInstantiationException(clazz, "Specified class is an interface");
+					}
+					try {
+						// 获取构造方法
+						if (System.getSecurityManager() != null) {
+							constructorToUse = AccessController.doPrivileged(
+									(PrivilegedExceptionAction<Constructor<?>>) clazz::getDeclaredConstructor);
+						}
+						else {
+							// 获取构造函数
+							constructorToUse = clazz.getDeclaredConstructor();
+						}
+						// 数据设置
+						// 将 类的构造函数赋值给 BeanDefinition
+						bd.resolvedConstructorOrFactoryMethod = constructorToUse;
+					}
+					catch (Throwable ex) {
+						throw new BeanInstantiationException(clazz, "No default constructor found", ex);
+					}
+				}
             }
             // 调用构造方法进行构造
             return BeanUtils.instantiateClass(constructorToUse);
         }
         else {
             // Must generate CGLIB subclass.
-            // cglib 构造
+            // cglib 构造 . 本质还是 构造函数创建
             return instantiateWithMethodInjection(bd, beanName, owner);
         }
     }
@@ -111,7 +123,8 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
     public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
             final Constructor<?> ctor, Object... args) {
 
-        if (!bd.hasMethodOverrides()) {
+		// 重写方法列表是否存在
+		if (!bd.hasMethodOverrides()) {
             if (System.getSecurityManager() != null) {
                 // use own privileged to change accessibility (when security is on)
                 AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
@@ -121,6 +134,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
             }
             return BeanUtils.instantiateClass(ctor, args);
         }
+		// cglib 的初始化
         else {
             return instantiateWithMethodInjection(bd, beanName, owner, ctor, args);
         }
@@ -144,19 +158,23 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
         try {
             if (System.getSecurityManager() != null) {
-                AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+				// 设置 accessible
+				AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
                     ReflectionUtils.makeAccessible(factoryMethod);
                     return null;
                 });
             }
             else {
+            	// 设置 accessible
                 ReflectionUtils.makeAccessible(factoryMethod);
             }
 
+            // 获取 工厂函数
             Method priorInvokedFactoryMethod = currentlyInvokedFactoryMethod.get();
             try {
             	// 找到 factory method 调用执行
                 currentlyInvokedFactoryMethod.set(factoryMethod);
+                // 反射执行工厂函数
                 Object result = factoryMethod.invoke(factoryBean, args);
                 if (result == null) {
                     result = new NullBean();

@@ -38,6 +38,7 @@ public interface InstantiationStrategy {
 
 	/**
 	 * Return an instance of the bean with the given name in this factory.
+	 * 从 beanFactory 中返回 对应的 BeanName 实例对象
 	 * @param bd the bean definition
 	 * @param beanName the name of the bean when it is created in this context.
 	 * The name can be {@code null} if we are autowiring a bean which doesn't
@@ -52,6 +53,7 @@ public interface InstantiationStrategy {
 	/**
 	 * Return an instance of the bean with the given name in this factory,
 	 * creating it via the given constructor.
+	 * 从 beanFactory 中返回 对应的 BeanName 实例对象, <b>指定构造函数</b>
 	 * @param bd the bean definition
 	 * @param beanName the name of the bean when it is created in this context.
 	 * The name can be {@code null} if we are autowiring a bean which doesn't
@@ -68,6 +70,7 @@ public interface InstantiationStrategy {
 	/**
 	 * Return an instance of the bean with the given name in this factory,
 	 * creating it via the given factory method.
+	 * 从 beanFactory 中返回 对应的 BeanName 实例对象, <b>通过指定的FactoryMethod</b>
 	 * @param bd the bean definition
 	 * @param beanName the name of the bean when it is created in this context.
 	 * The name can be {@code null} if we are autowiring a bean which doesn't

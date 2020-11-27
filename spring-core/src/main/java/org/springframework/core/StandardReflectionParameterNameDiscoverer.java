@@ -36,15 +36,22 @@ public class StandardReflectionParameterNameDiscoverer implements ParameterNameD
 	@Override
 	@Nullable
 	public String[] getParameterNames(Method method) {
+		// 获取参数名称
 		return getParameterNames(method.getParameters());
 	}
 
 	@Override
 	@Nullable
 	public String[] getParameterNames(Constructor<?> ctor) {
+		// 获取参数名称
 		return getParameterNames(ctor.getParameters());
 	}
 
+	/**
+	 * 获取参数名称
+	 * @param parameters
+	 * @return
+	 */
 	@Nullable
 	private String[] getParameterNames(Parameter[] parameters) {
 		String[] parameterNames = new String[parameters.length];

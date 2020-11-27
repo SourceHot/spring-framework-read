@@ -41,6 +41,7 @@ public interface ParameterNameDiscoverer {
 	 * <p>Individual entries in the array may be {@code null} if parameter names are only
 	 * available for some parameters of the given method but not for others. However,
 	 * it is recommended to use stub parameter names instead wherever feasible.
+	 * 获取参数名称, 针对 Method 对象
 	 * @param method the method to find parameter names for
 	 * @return an array of parameter names if the names can be resolved,
 	 * or {@code null} if they cannot
@@ -53,6 +54,7 @@ public interface ParameterNameDiscoverer {
 	 * <p>Individual entries in the array may be {@code null} if parameter names are only
 	 * available for some parameters of the given constructor but not for others. However,
 	 * it is recommended to use stub parameter names instead wherever feasible.
+	 * 获取参数名称, 针对 Constructor 对象
 	 * @param ctor the constructor to find parameter names for
 	 * @return an array of parameter names if the names can be resolved,
 	 * or {@code null} if they cannot

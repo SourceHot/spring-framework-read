@@ -55,18 +55,21 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	/**
 	 * Index in the CGLIB callback array for passthrough behavior,
 	 * in which case the subclass won't override the original class.
+	 * 无
 	 */
 	private static final int PASSTHROUGH = 0;
 
 	/**
 	 * Index in the CGLIB callback array for a method that should
 	 * be overridden to provide <em>method lookup</em>.
+	 * 查询替代
 	 */
 	private static final int LOOKUP_OVERRIDE = 1;
 
 	/**
 	 * Index in the CGLIB callback array for a method that should
 	 * be overridden using generic <em>method replacer</em> functionality.
+	 * 查询替换
 	 */
 	private static final int METHOD_REPLACER = 2;
 
@@ -91,11 +94,20 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	 */
 	private static class CglibSubclassCreator {
 
+		/**
+		 * 回调类型
+		 */
 		private static final Class<?>[] CALLBACK_TYPES = new Class<?>[]
 				{ NoOp.class, LookupOverrideMethodInterceptor.class, ReplaceOverrideMethodInterceptor.class };
 
+		/**
+		 * beanDefinition
+		 */
 		private final RootBeanDefinition beanDefinition;
 
+		/**
+		 * bean Factory
+		 */
 		private final BeanFactory owner;
 
 		CglibSubclassCreator(RootBeanDefinition beanDefinition, BeanFactory owner) {
@@ -113,14 +125,18 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		 * @return new instance of the dynamically generated subclass
 		 */
 		public Object instantiate(@Nullable Constructor<?> ctor, Object... args) {
+			// 创造 CGLIB 对原有 BeanClass 的增强类
 			Class<?> subclass = createEnhancedSubclass(this.beanDefinition);
 			Object instance;
 			if (ctor == null) {
+				// 构造函数为空的情况下创建
 				instance = BeanUtils.instantiateClass(subclass);
 			}
 			else {
 				try {
+					// 从 subClass 中查询对应的 构造函数
 					Constructor<?> enhancedSubclassConstructor = subclass.getConstructor(ctor.getParameterTypes());
+					// 创建对象
 					instance = enhancedSubclassConstructor.newInstance(args);
 				}
 				catch (Exception ex) {
@@ -131,6 +147,8 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			// SPR-10785: set callbacks directly on the instance instead of in the
 			// enhanced class (via the Enhancer) in order to avoid memory leaks.
 			Factory factory = (Factory) instance;
+
+			// 设置 Factory 的回调
 			factory.setCallbacks(new Callback[] { NoOp.INSTANCE,
 					new LookupOverrideMethodInterceptor(this.beanDefinition, this.owner),
 					new ReplaceOverrideMethodInterceptor(this.beanDefinition, this.owner) });
@@ -140,6 +158,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		/**
 		 * Create an enhanced subclass of the bean class for the provided bean
 		 * definition, using CGLIB.
+		 * 创造出 CGLIB 对 BeanClass 的增强子类
 		 */
 		private Class<?> createEnhancedSubclass(RootBeanDefinition beanDefinition) {
 			Enhancer enhancer = new Enhancer();
