@@ -100,8 +100,14 @@ import org.springframework.util.StringUtils;
  */
 public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
+	/**
+	 * 返回值前缀
+	 */
 	private static final String RETURN_RESULT_SET_PREFIX = "#result-set-";
 
+	/**
+	 * 更新数量前缀
+	 */
 	private static final String RETURN_UPDATE_COUNT_PREFIX = "#update-count-";
 
 
