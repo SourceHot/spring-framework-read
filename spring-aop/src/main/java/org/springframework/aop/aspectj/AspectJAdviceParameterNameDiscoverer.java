@@ -113,6 +113,7 @@ import org.springframework.util.StringUtils;
  * property to {@code true}, descriptive exceptions will be thrown instead of
  * returning {@code null} in the case that the parameter names cannot be discovered.
  *
+ * 切面参数名称发现类
  * @author Adrian Colyer
  * @author Juergen Hoeller
  * @since 2.0
@@ -122,7 +123,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	private static final String THIS_JOIN_POINT = "thisJoinPoint";
 	private static final String THIS_JOIN_POINT_STATIC_PART = "thisJoinPointStaticPart";
 
-	// Steps in the binding algorithm...
+	// Steps in the binding algorithm... 处理步骤
 	private static final int STEP_JOIN_POINT_BINDING = 1;
 	private static final int STEP_THROWING_BINDING = 2;
 	private static final int STEP_ANNOTATION_BINDING = 3;
@@ -132,7 +133,14 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	private static final int STEP_REFERENCE_PCUT_BINDING = 7;
 	private static final int STEP_FINISHED = 8;
 
+	/**
+	 * 存储`Pointcut`表达式
+	 */
 	private static final Set<String> singleValuedAnnotationPcds = new HashSet<>();
+
+	/**
+	 * 逻辑运算符
+	 */
 	private static final Set<String> nonReferencePointcutTokens = new HashSet<>();
 
 
@@ -156,24 +164,44 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	}
 
 
-	/** The pointcut expression associated with the advice, as a simple String. */
+	/**
+	 * The pointcut expression associated with the advice, as a simple String.
+	 *
+	 * 切面表达式
+	 * */
 	@Nullable
 	private String pointcutExpression;
 
 	private boolean raiseExceptions;
 
-	/** If the advice is afterReturning, and binds the return value, this is the parameter name used. */
+	/**
+	 * If the advice is afterReturning, and binds the return value, this is the parameter name used.
+	 *
+	 * 返回值名称
+	 * */
 	@Nullable
 	private String returningName;
 
-	/** If the advice is afterThrowing, and binds the thrown value, this is the parameter name used. */
+	/**
+	 * If the advice is afterThrowing, and binds the thrown value, this is the parameter name used.
+	 * 异常名称
+	 * */
 	@Nullable
 	private String throwingName;
 
+	/**
+	 * 参数类型
+	 */
 	private Class<?>[] argumentTypes = new Class<?>[0];
 
+	/**
+	 * 参数名称
+	 */
 	private String[] parameterNameBindings = new String[0];
 
+	/**
+	 * 未处理的参数标记
+	 */
 	private int numberOfRemainingUnboundArguments;
 
 
@@ -224,8 +252,11 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	@Override
 	@Nullable
 	public String[] getParameterNames(Method method) {
+		// 参数类型
 		this.argumentTypes = method.getParameterTypes();
+		// 未处理的参数标记
 		this.numberOfRemainingUnboundArguments = this.argumentTypes.length;
+		// 参数名称
 		this.parameterNameBindings = new String[this.numberOfRemainingUnboundArguments];
 
 		int minimumNumberUnboundArgs = 0;
@@ -324,9 +355,12 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	/**
 	 * If the first parameter is of type JoinPoint or ProceedingJoinPoint,bind "thisJoinPoint" as
 	 * parameter name and return true, else return false.
+	 *
+	 * 判断是否是 JoinPoint 和 ProceedingJoinPoint 注解修饰参数
 	 */
 	private boolean maybeBindThisJoinPoint() {
 		if ((this.argumentTypes[0] == JoinPoint.class) || (this.argumentTypes[0] == ProceedingJoinPoint.class)) {
+			// 参数绑定
 			bindParameterName(0, THIS_JOIN_POINT);
 			return true;
 		}
@@ -335,6 +369,9 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		}
 	}
 
+	/**
+	 * 判断参数类型是否是`JoinPoint.StaticPart`
+	 */
 	private void maybeBindThisJoinPointStaticPart() {
 		if (this.argumentTypes[0] == JoinPoint.StaticPart.class) {
 			bindParameterName(0, THIS_JOIN_POINT_STATIC_PART);
@@ -344,6 +381,8 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	/**
 	 * If a throwing name was specified and there is exactly one choice remaining
 	 * (argument that is a subtype of Throwable) then bind it.
+	 *
+	 * 处理异常相关的参数绑定 {@link Throwable}
 	 */
 	private void maybeBindThrowingVariable() {
 		if (this.throwingName == null) {
@@ -410,28 +449,38 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 */
 	private void maybeBindAnnotationsFromPointcutExpression() {
 		List<String> varNames = new ArrayList<>();
+		// 切面表达式切分
 		String[] tokens = StringUtils.tokenizeToStringArray(this.pointcutExpression, " ");
 		for (int i = 0; i < tokens.length; i++) {
+			// 待匹配的表达式
 			String toMatch = tokens[i];
 			int firstParenIndex = toMatch.indexOf('(');
 			if (firstParenIndex != -1) {
 				toMatch = toMatch.substring(0, firstParenIndex);
 			}
+			// 是否是 @this @target @within @withincode @annotation 的内容
 			if (singleValuedAnnotationPcds.contains(toMatch)) {
+				// 获取表达式内容
 				PointcutBody body = getPointcutBody(tokens, i);
 				i += body.numTokensConsumed;
+				// 提取变量名
 				String varName = maybeExtractVariableName(body.text);
 				if (varName != null) {
 					varNames.add(varName);
 				}
 			}
+			// args 的参数处理
 			else if (tokens[i].startsWith("@args(") || tokens[i].equals("@args")) {
+				//
 				PointcutBody body = getPointcutBody(tokens, i);
 				i += body.numTokensConsumed;
+
+				// 从 arg 中提取变量名
 				maybeExtractVariableNamesFromArgs(body.text, varNames);
 			}
 		}
 
+		// 注解处理
 		bindAnnotationsFromVarNames(varNames);
 	}
 
@@ -467,6 +516,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 
 	/*
 	 * If the token starts meets Java identifier conventions, it's in.
+	 * 提取变量名
 	 */
 	@Nullable
 	private String maybeExtractVariableName(@Nullable String candidateToken) {

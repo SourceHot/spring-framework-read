@@ -42,11 +42,13 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 	@Override
 	@Nullable
 	public String[] getParameterNames(Method method) {
+		// 判断是不是 kotlin 类
 		if (!KotlinDetector.isKotlinType(method.getDeclaringClass())) {
 			return null;
 		}
 
 		try {
+			// kotlin 函数获取
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 			return (function != null ? getParameterNames(function.getParameters()) : null);
 		}
