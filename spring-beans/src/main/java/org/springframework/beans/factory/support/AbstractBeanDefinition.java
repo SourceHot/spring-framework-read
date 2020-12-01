@@ -264,6 +264,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private boolean enforceDestroyMethod = true;
 
+	/**
+	 * 是否是合成的bean 标记
+	 */
 	private boolean synthetic = false;
 
 	/**

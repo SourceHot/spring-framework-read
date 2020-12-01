@@ -266,10 +266,12 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			if (method.getParameterCount() == 0) {
 				return new String[0];
 			}
+			// 搜索 切面注解
 			AspectJAnnotation<?> annotation = findAspectJAnnotationOnMethod(method);
 			if (annotation == null) {
 				return null;
 			}
+			// 注解参数切割
 			StringTokenizer nameTokens = new StringTokenizer(annotation.getArgumentNames(), ",");
 			if (nameTokens.countTokens() > 0) {
 				String[] names = new String[nameTokens.countTokens()];

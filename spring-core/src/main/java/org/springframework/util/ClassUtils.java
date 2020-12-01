@@ -402,6 +402,7 @@ public abstract class ClassUtils {
 	public static boolean isCacheSafe(Class<?> clazz, @Nullable ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
 		try {
+			// 获取 classLoader
 			ClassLoader target = clazz.getClassLoader();
 			// Common cases
 			if (target == classLoader || target == null) {
@@ -791,6 +792,7 @@ public abstract class ClassUtils {
 
 	/**
 	 * Determine the common ancestor of the given classes, if any.
+	 * 公共父类获取
 	 * @param clazz1 the class to introspect
 	 * @param clazz2 the other class to introspect
 	 * @return the common ancestor (i.e. common superclass, one interface
