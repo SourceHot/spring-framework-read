@@ -1,48 +1,25 @@
-/*
- * Copyright 2002-2019 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+# Spring JdbcOperations
+- 类全路径: `org.springframework.jdbc.core.JdbcOperations`
 
-package org.springframework.jdbc.core;
+- 接口作用: `JdbcOperations`定义了一些关于 JDBC 操作相关的方法, 下面我们来对这些方法进行阅读, 暂时不需要了解子类实现
+   
+- 定义的方法主要有一下几种类型
+    1. 执行 `execute`
+        - 执行一段sql
+    2. 查询
+        - 通过sql查询结果, 有选择的是否映射成Java对象
+    3。 批量更新
+        
+        
+        
+- 在`JdbcOperations`中定义的内容如上所述。 下面是完整代码. 
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.lang.Nullable;
+<detail>
+<summary>JdbcOperations</summary>
 
-/**
- * Interface specifying a basic set of JDBC operations.
- * Implemented by {@link JdbcTemplate}. Not often used directly, but a useful
- * option to enhance testability, as it can easily be mocked or stubbed.
- *
- * <p>Alternatively, the standard JDBC infrastructure can be mocked.
- * However, mocking this interface constitutes significantly less work.
- * As an alternative to a mock objects approach to testing data access code,
- * consider the powerful integration testing support provided in the
- * {@code org.springframework.test} package, shipped in
- * {@code spring-test.jar}.
- *
- * jdbc 操作接口
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @see JdbcTemplate
- */
+
+```java
 public interface JdbcOperations {
 
 	//-------------------------------------------------------------------------
@@ -999,3 +976,7 @@ public interface JdbcOperations {
 			throws DataAccessException;
 
 }
+```
+
+
+</detail>

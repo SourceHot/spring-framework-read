@@ -42,6 +42,9 @@ public abstract class JdbcAccessor implements InitializingBean {
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 数据源
+	 */
 	@Nullable
 	private DataSource dataSource;
 
