@@ -785,9 +785,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	@Override
 	@Nullable
 	protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
+		// determineTargetType 进行推断
 		Class<?> targetType = determineTargetType(beanName, mbd, typesToMatch);
 		// Apply SmartInstantiationAwareBeanPostProcessors to predict the
 		// eventual type after a before-instantiation shortcut.
+		// 通过 SmartInstantiationAwareBeanPostProcessor 的  predictBeanType 得到类型
 		if (targetType != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			boolean matchingOnlyFactoryBean = typesToMatch.length == 1 && typesToMatch[0] == FactoryBean.class;
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
@@ -1000,29 +1002,40 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	@Override
 	protected ResolvableType getTypeForFactoryBean(String beanName, RootBeanDefinition mbd, boolean allowInit) {
+		// 第一部分
 		// Check if the bean definition itself has defined the type with an attribute
+		// 从 属性中获取
 		ResolvableType result = getTypeForFactoryBeanFromAttributes(mbd);
 		if (result != ResolvableType.NONE) {
 			return result;
 		}
 
+		// 第二部分
+		// bean class 转换成 ResolvableType
 		ResolvableType beanType =
 				(mbd.hasBeanClass() ? ResolvableType.forClass(mbd.getBeanClass()) : ResolvableType.NONE);
 
+		// bean 类型处理
 		// For instance supplied beans try the target type and bean class
 		if (mbd.getInstanceSupplier() != null) {
+			// bean 目标类型处理
 			result = getFactoryBeanGeneric(mbd.targetType);
 			if (result.resolve() != null) {
 				return result;
 			}
+			// bean 原始类型处理
 			result = getFactoryBeanGeneric(beanType);
 			if (result.resolve() != null) {
 				return result;
 			}
 		}
 
+		// 第三部分
+
 		// Consider factory methods
+		// 提取 factory Bean Name
 		String factoryBeanName = mbd.getFactoryBeanName();
+		// 提取 factory method
 		String factoryMethodName = mbd.getFactoryMethodName();
 
 		// Scan the factory bean methods
@@ -1030,17 +1043,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (factoryMethodName != null) {
 				// Try to obtain the FactoryBean's object type from its factory method
 				// declaration without instantiating the containing bean at all.
+				// 获取 bean Definition
 				BeanDefinition factoryBeanDefinition = getBeanDefinition(factoryBeanName);
 				Class<?> factoryBeanClass;
 				if (factoryBeanDefinition instanceof AbstractBeanDefinition &&
 						((AbstractBeanDefinition) factoryBeanDefinition).hasBeanClass()) {
+					// 从 bean definition 中获取bean类型
 					factoryBeanClass = ((AbstractBeanDefinition) factoryBeanDefinition).getBeanClass();
 				}
 				else {
+					// 获取合并的beanDefinition
 					RootBeanDefinition fbmbd = getMergedBeanDefinition(factoryBeanName, factoryBeanDefinition);
+					// bean 类型推测
 					factoryBeanClass = determineTargetType(factoryBeanName, fbmbd);
 				}
 				if (factoryBeanClass != null) {
+					// 从 工厂方法中获取类型描述 ResolvableType
 					result = getTypeForFactoryBeanFromMethod(factoryBeanClass, factoryMethodName);
 					if (result.resolve() != null) {
 						return result;
@@ -1050,37 +1068,50 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// If not resolvable above and the referenced factory bean doesn't exist yet,
 			// exit here - we don't want to force the creation of another bean just to
 			// obtain a FactoryBean's object type...
+			// 是否需要做元数据缓存
 			if (!isBeanEligibleForMetadataCaching(factoryBeanName)) {
 				return ResolvableType.NONE;
 			}
 		}
 
+		// 第四部分
 		// If we're allowed, we can create the factory bean and call getObjectType() early
 		if (allowInit) {
 			FactoryBean<?> factoryBean = (mbd.isSingleton() ?
+					// 单例 工厂bean验证
 					getSingletonFactoryBeanForTypeCheck(beanName, mbd) :
+					// 非 单例 工厂bean验证
 					getNonSingletonFactoryBeanForTypeCheck(beanName, mbd));
 			if (factoryBean != null) {
 				// Try to obtain the FactoryBean's object type from this early stage of the instance.
+				// factoryBean 中获取bean类型
 				Class<?> type = getTypeForFactoryBean(factoryBean);
 				if (type != null) {
+					// 转换成  ResolvableType对象
 					return ResolvableType.forClass(type);
 				}
 				// No type found for shortcut FactoryBean instance:
 				// fall back to full creation of the FactoryBean instance.
+				// 父类 通过 doGetBean 然后转换成 ResolvableType 对象
 				return super.getTypeForFactoryBean(beanName, mbd, true);
 			}
 		}
 
+		// 第五部分
 		if (factoryBeanName == null && mbd.hasBeanClass() && factoryMethodName != null) {
 			// No early bean instantiation possible: determine FactoryBean's type from
 			// static factory method signature or from class inheritance hierarchy...
+			// 从 工厂方法中获取类型描述 ResolvableType
 			return getTypeForFactoryBeanFromMethod(mbd.getBeanClass(), factoryMethodName);
 		}
+
+		// bean 原始类型处理
 		result = getFactoryBeanGeneric(beanType);
+		// 解析结果存在
 		if (result.resolve() != null) {
 			return result;
 		}
+		// 返回空
 		return ResolvableType.NONE;
 	}
 
@@ -1095,6 +1126,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Introspect the factory method signatures on the given bean class, trying to find a common
 	 * {@code FactoryBean} object type declared there.
 	 *
+	 * 从 工厂方法中获取类型描述 ResolvableType
 	 * @param beanClass         the bean class to find the factory method on
 	 * @param factoryMethodName the name of the factory method
 	 *
@@ -1102,9 +1134,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	private ResolvableType getTypeForFactoryBeanFromMethod(Class<?> beanClass, String factoryMethodName) {
 		// CGLIB subclass methods hide generic parameters; look at the original user class.
+		// 获取bean类型
 		Class<?> factoryBeanClass = ClassUtils.getUserClass(beanClass);
+		// 创建查询类
 		FactoryBeanMethodTypeFinder finder = new FactoryBeanMethodTypeFinder(factoryMethodName);
+		// 执行方法 `doWith`
 		ReflectionUtils.doWithMethods(factoryBeanClass, finder, ReflectionUtils.USER_DECLARED_METHODS);
+		// 获取结果
 		return finder.getResult();
 	}
 
@@ -1166,11 +1202,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	@Nullable
 	private FactoryBean<?> getSingletonFactoryBeanForTypeCheck(String beanName, RootBeanDefinition mbd) {
 		synchronized (getSingletonMutex()) {
+			// 获取 beanName 对应的 BeanWrapper
 			BeanWrapper bw = this.factoryBeanInstanceCache.get(beanName);
+
 			if (bw != null) {
+				// 直接返回 beanWrapper 的强制转换
 				return (FactoryBean<?>) bw.getWrappedInstance();
 			}
+			// 获取单例对象
 			Object beanInstance = getSingleton(beanName, false);
+			// 类型比较
 			if (beanInstance instanceof FactoryBean) {
 				return (FactoryBean<?>) beanInstance;
 			}
@@ -1182,11 +1223,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			Object instance;
 			try {
 				// Mark this bean as currently in creation, even if just partially.
+				// 创建前的验证
 				beforeSingletonCreation(beanName);
 				// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+				// 实例解析
 				instance = resolveBeforeInstantiation(beanName, mbd);
 				if (instance == null) {
+					// 创建 beanWrapper
 					bw = createBeanInstance(beanName, mbd, null);
+					// 获取实例
 					instance = bw.getWrappedInstance();
 				}
 			}
@@ -1204,11 +1249,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 			finally {
 				// Finished partial creation of this bean.
+				// 创建后的行为
 				afterSingletonCreation(beanName);
 			}
 
+			// 获取 factoryBean
+			// instance 强转 FactoryBean
 			FactoryBean<?> fb = getFactoryBean(beanName, instance);
 			if (bw != null) {
+				// 置入容器
 				this.factoryBeanInstanceCache.put(beanName, bw);
 			}
 			return fb;
@@ -1227,6 +1276,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	@Nullable
 	private FactoryBean<?> getNonSingletonFactoryBeanForTypeCheck(String beanName, RootBeanDefinition mbd) {
+		// 是否处于原型模式下正在创建
 		if (isPrototypeCurrentlyInCreation(beanName)) {
 			return null;
 		}
@@ -1234,10 +1284,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Object instance;
 		try {
 			// Mark this bean as currently in creation, even if just partially.
+			// 原型模式下创建的 前置函数
 			beforePrototypeCreation(beanName);
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+			// 实例解析
 			instance = resolveBeforeInstantiation(beanName, mbd);
 			if (instance == null) {
+				// 创建 bean 实例
 				BeanWrapper bw = createBeanInstance(beanName, mbd, null);
 				instance = bw.getWrappedInstance();
 			}
@@ -1256,6 +1309,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		finally {
 			// Finished partial creation of this bean.
+			// 原型模式下创建的 后置函数
 			afterPrototypeCreation(beanName);
 		}
 
@@ -1970,7 +2024,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// 第二部分
 		MutablePropertyValues mpvs = null;
-		// 没有解析的属性
+		// 原始属性列表
 		List<PropertyValue> original;
 		// 类型判断
 		if (pvs instanceof MutablePropertyValues) {
@@ -2019,11 +2073,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				String propertyName = pv.getName();
 				// 属性值,直接读取到的
 				Object originalValue = pv.getValue();
+				// 是不是 AutowiredPropertyMarker 对象
 				if (originalValue == AutowiredPropertyMarker.INSTANCE) {
+					// 获取写方法. (set) 方法
 					Method writeMethod = bw.getPropertyDescriptor(propertyName).getWriteMethod();
 					if (writeMethod == null) {
 						throw new IllegalArgumentException("Autowire marker for property without write method: " + pv);
 					}
+					// 装配描述对象
 					originalValue = new DependencyDescriptor(new MethodParameter(writeMethod, 0), true);
 				}
 				// 解析值
@@ -2063,11 +2120,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		// 第五部分
 		if (mpvs != null && !resolveNecessary) {
+			// 设置转换成功的标记
 			mpvs.setConverted();
 		}
 
 		// Set our (possibly massaged) deep copy.
 		try {
+			// 属性值设置
 			bw.setPropertyValues(new MutablePropertyValues(deepCopy));
 		}
 		catch (BeansException ex) {
@@ -2372,6 +2431,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	private static class FactoryBeanMethodTypeFinder implements MethodCallback {
 
+		/**
+		 * 工厂方法(函数)名称
+		 */
 		private final String factoryMethodName;
 
 		private ResolvableType result = ResolvableType.NONE;
@@ -2382,16 +2444,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		@Override
 		public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+			// 是否是 FactoryBean
 			if (isFactoryBeanMethod(method)) {
+				// 获取 返回值 解析类型对象
 				ResolvableType returnType = ResolvableType.forMethodReturnType(method);
 				ResolvableType candidate = returnType.as(FactoryBean.class).getGeneric();
 				if (this.result == ResolvableType.NONE) {
 					this.result = candidate;
 				}
 				else {
+					// result 解析得到类型
 					Class<?> resolvedResult = this.result.resolve();
+					// 获取 父类型
 					Class<?> commonAncestor = ClassUtils.determineCommonAncestor(candidate.resolve(), resolvedResult);
+					// 是否相同的验证
 					if (!ObjectUtils.nullSafeEquals(resolvedResult, commonAncestor)) {
+						// 解析结果
 						this.result = ResolvableType.forClass(commonAncestor);
 					}
 				}

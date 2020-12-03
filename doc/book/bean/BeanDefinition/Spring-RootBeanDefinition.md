@@ -109,7 +109,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	/**
 	 *  Package-visible field that indicates a before-instantiation post-processor having kicked in.
-	 * 是否已经生成代理
+	 * 是否需要在 bean 初始化之前做一些关于 beanPostProcessor 相关的行为
 	 * */
 	@Nullable
 	volatile Boolean beforeInstantiationResolved;

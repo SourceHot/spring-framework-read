@@ -405,7 +405,7 @@ if (mbd.isSingleton()) {
 
 
 
-这里暂时不具体展开, 详细可以查看: [AbstractAutowireCapableBeanFactory 分析文章](/doc/book/bean/factory/Spring-AbstractAutowireCapableBeanFactory-未完成.md)
+这里暂时不具体展开, 详细可以查看: [AbstractAutowireCapableBeanFactory 分析文章](/doc/book/bean/factory/Spring-AbstractAutowireCapableBeanFactory.md)
 
 
 
@@ -2831,3 +2831,49 @@ protected void registerCustomEditors(PropertyEditorRegistry registry) {
 	}
 
 ```
+
+
+
+### initBeanWrapper
+- 方法签名: `org.springframework.beans.factory.support.AbstractBeanFactory.initBeanWrapper`
+
+- 方法作用: 给 `BeanWrapper`设置数据
+  - 设置转换服务
+  - 注册属性编辑器
+
+
+
+```java
+protected void initBeanWrapper(BeanWrapper bw) {
+   // 设置转换服务
+   bw.setConversionService(getConversionService());
+   // 注册自定义属性编辑器
+   registerCustomEditors(bw);
+}j'a
+```
+
+
+
+
+
+### getTypeForFactoryBeanFromAttributes
+- 方法签名: `org.springframework.beans.factory.support.AbstractBeanFactory.getTypeForFactoryBeanFromAttributes`
+- 方法作用: 获取属性对象
+
+
+```java
+	ResolvableType getTypeForFactoryBeanFromAttributes(AttributeAccessor attributes) {
+		// 获取 factoryBeanObjectType 属性
+		Object attribute = attributes.getAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE);
+		if (attribute instanceof ResolvableType) {
+			return (ResolvableType) attribute;
+		}
+		if (attribute instanceof Class) {
+			return ResolvableType.forClass((Class<?>) attribute);
+		}
+		return ResolvableType.NONE;
+	}
+
+```
+
+- 这里采取的是通过`AttributeAccessor`来获取属性, 再获取属性后类型判断再继续你二次解析
