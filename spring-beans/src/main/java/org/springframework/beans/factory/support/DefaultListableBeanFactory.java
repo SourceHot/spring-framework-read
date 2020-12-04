@@ -123,32 +123,61 @@ import org.springframework.util.StringUtils;
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
 		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
 
-	/** Map from serialized id to factory instance. */
+	/**
+	 * Map from serialized id to factory instance.
+	 *
+	 * key: 序列化id
+	 *
+	 * value: DefaultListableBeanFactory
+	 *
+	 * */
 	private static final Map<String, Reference<DefaultListableBeanFactory>> serializableFactories =
 			new ConcurrentHashMap<>(8);
 
 	@Nullable
 	private static Class<?> javaxInjectProviderClass;
 
-	/** Map from dependency type to corresponding autowired value. */
+	/**
+	 * Map from dependency type to corresponding autowired value.
+	 *
+	 * key: 依赖类型
+	 * value: 依赖类型对应的值
+	 *
+	 * */
 	private final Map<Class<?>, Object> resolvableDependencies = new ConcurrentHashMap<>(16);
 
 	/**
 	 * Map of bean definition objects, keyed by bean name.
 	 *
+	 * bean定义容器
 	 * key: beanName
 	 * value: BeanDefinition
 	 *
 	 *  */
 	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
 
-	/** Map of singleton and non-singleton bean names, keyed by dependency type. */
+	/**
+	 *  Map of singleton and non-singleton bean names, keyed by dependency type.
+	 * 类型和别名的映射关系
+	 * key: 类型
+	 * value: 别名
+	 * */
 	private final Map<Class<?>, String[]> allBeanNamesByType = new ConcurrentHashMap<>(64);
 
-	/** Map of singleton-only bean names, keyed by dependency type. */
+	/**
+	 *  Map of singleton-only bean names, keyed by dependency type.
+	 *  单例bean的别名映射
+	 *
+	 *  key: 类型
+	 *  value: 别名
+	 *
+	 * */
 	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<>(64);
 
-	/** Optional id for this factory, for serialization purposes. */
+	/**
+	 *  Optional id for this factory, for serialization purposes.
+	 * 序列化 id (BeanFactory 的id)
+	 * */
 	@Nullable
 	private String serializationId;
 
@@ -158,14 +187,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * */
 	private boolean allowBeanDefinitionOverriding = true;
 
-	/** Whether to allow eager class loading even for lazy-init beans. */
+	/**
+	 *  Whether to allow eager class loading even for lazy-init beans.
+	 * 延迟加载的Bean是否立即加载
+	 * */
 	private boolean allowEagerClassLoading = true;
 
 	/** Optional OrderComparator for dependency Lists and arrays. */
 	@Nullable
 	private Comparator<Object> dependencyComparator;
 
-	/** Resolver to use for checking if a bean definition is an autowire candidate. */
+	/**
+	 *  Resolver to use for checking if a bean definition is an autowire candidate.
+	 *  用来进行 自动注入(自动装配)的解析类
+	 * */
 	private AutowireCandidateResolver autowireCandidateResolver = new SimpleAutowireCandidateResolver();
 
 	/**
@@ -189,7 +224,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Nullable
 	private volatile String[] frozenBeanDefinitionNames;
 
-	/** Whether bean definition metadata may be cached for all beans. */
+	/**
+	 *  Whether bean definition metadata may be cached for all beans.
+	 * 是否需要给bean元数据进行缓存
+	 * */
 	private volatile boolean configurationFrozen = false;
 
 	/**
