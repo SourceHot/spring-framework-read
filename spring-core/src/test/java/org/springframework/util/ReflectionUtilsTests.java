@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.omg.CORBA.PRIVATE_MEMBER;
 
 import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.tests.sample.objects.TestObject;

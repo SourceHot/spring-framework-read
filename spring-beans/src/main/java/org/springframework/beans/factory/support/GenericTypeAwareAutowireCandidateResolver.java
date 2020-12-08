@@ -69,10 +69,16 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 
 	/**
 	 * Match the given dependency type with its generic type information against the given
-	 * candidate bean definition.
+	 * candidate bean definition
+	 *
+	 * 验证类型是否匹配.
 	 */
 	protected boolean checkGenericTypeMatch(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
+		// 第一部分
+		// 类型描述的解析对象
+		// 依赖类型
 		ResolvableType dependencyType = descriptor.getResolvableType();
+		// 依赖类型 是否是 class
 		if (dependencyType.getType() instanceof Class) {
 			// No generic type -> we know it's a Class type-match, so no need to check again.
 			return true;
@@ -81,20 +87,26 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		ResolvableType targetType = null;
 		boolean cacheType = false;
 		RootBeanDefinition rbd = null;
+		// 从 bean定义持有对象中获取 bean定义
 		if (bdHolder.getBeanDefinition() instanceof RootBeanDefinition) {
 			rbd = (RootBeanDefinition) bdHolder.getBeanDefinition();
 		}
+
+		// 第二部分
 		if (rbd != null) {
 			targetType = rbd.targetType;
 			if (targetType == null) {
 				cacheType = true;
 				// First, check factory method return type, if applicable
+				// 工厂方法的返回值
 				targetType = getReturnTypeForFactoryMethod(rbd, descriptor);
 				if (targetType == null) {
+					// 解析 RootBeanDefinition
 					RootBeanDefinition dbd = getResolvedDecoratedDefinition(rbd);
 					if (dbd != null) {
 						targetType = dbd.targetType;
 						if (targetType == null) {
+							// 工厂方法的返回值
 							targetType = getReturnTypeForFactoryMethod(dbd, descriptor);
 						}
 					}
@@ -102,9 +114,12 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 			}
 		}
 
+		// 第三部分
 		if (targetType == null) {
 			// Regular case: straight bean instance, with BeanFactory available.
+			// 普通情况: bean 实例存在 且有 BeanFactory
 			if (this.beanFactory != null) {
+				// beanFactory 获取 beanName 对应的 类型
 				Class<?> beanType = this.beanFactory.getType(bdHolder.getBeanName());
 				if (beanType != null) {
 					targetType = ResolvableType.forClass(ClassUtils.getUserClass(beanType));
@@ -114,12 +129,14 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 			// -> best-effort match against the target class if applicable.
 			if (targetType == null && rbd != null && rbd.hasBeanClass() && rbd.getFactoryMethodName() == null) {
 				Class<?> beanClass = rbd.getBeanClass();
+				// beanClass 是否来自 FactoryBean
 				if (!FactoryBean.class.isAssignableFrom(beanClass)) {
 					targetType = ResolvableType.forClass(ClassUtils.getUserClass(beanClass));
 				}
 			}
 		}
 
+		// 第四部分
 		if (targetType == null) {
 			return true;
 		}
@@ -134,15 +151,18 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 			return true;
 		}
 		// Full check for complex generic type match...
+		// 是否来自依赖类型
 		return dependencyType.isAssignableFrom(targetType);
 	}
 
 	@Nullable
 	protected RootBeanDefinition getResolvedDecoratedDefinition(RootBeanDefinition rbd) {
+		// 获取 bean 定义持有对象(依赖的对象)
 		BeanDefinitionHolder decDef = rbd.getDecoratedDefinition();
 		if (decDef != null && this.beanFactory instanceof ConfigurableListableBeanFactory) {
 			ConfigurableListableBeanFactory clbf = (ConfigurableListableBeanFactory) this.beanFactory;
 			if (clbf.containsBeanDefinition(decDef.getBeanName())) {
+				// beanFactory + decDef 的合并
 				BeanDefinition dbd = clbf.getMergedBeanDefinition(decDef.getBeanName());
 				if (dbd instanceof RootBeanDefinition) {
 					return (RootBeanDefinition) dbd;
@@ -152,6 +172,12 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		return null;
 	}
 
+	/**
+	 * 将工厂方法的返回值类型 转换成 ResolvableType 对象
+	 * @param rbd
+	 * @param descriptor
+	 * @return
+	 */
 	@Nullable
 	protected ResolvableType getReturnTypeForFactoryMethod(RootBeanDefinition rbd, DependencyDescriptor descriptor) {
 		// Should typically be set for any kind of factory method, since the BeanFactory

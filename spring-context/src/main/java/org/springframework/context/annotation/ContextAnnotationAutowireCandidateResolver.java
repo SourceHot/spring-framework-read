@@ -49,45 +49,61 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 	@Override
 	@Nullable
 	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, @Nullable String beanName) {
+		// 判断是否懒加载
 		return (isLazy(descriptor) ? buildLazyResolutionProxy(descriptor, beanName) : null);
 	}
 
 	protected boolean isLazy(DependencyDescriptor descriptor) {
+		// 第一部分
+		// 获取注解循环
 		for (Annotation ann : descriptor.getAnnotations()) {
+			// 得到 lazy 注解
 			Lazy lazy = AnnotationUtils.getAnnotation(ann, Lazy.class);
+			// 判断 lazy 的注解值是否 true
 			if (lazy != null && lazy.value()) {
 				return true;
 			}
 		}
+
+		// 第二部分
+		// 获取方法参数对象
 		MethodParameter methodParam = descriptor.getMethodParameter();
 		if (methodParam != null) {
+			// 获取 method
 			Method method = methodParam.getMethod();
 			if (method == null || void.class == method.getReturnType()) {
+				// method 上寻找 lazy 注解
 				Lazy lazy = AnnotationUtils.getAnnotation(methodParam.getAnnotatedElement(), Lazy.class);
-				if (lazy != null && lazy.value()) {
-					return true;
-				}
+				return lazy != null && lazy.value();
 			}
 		}
 		return false;
 	}
 
+	/**
+	 * 创建延迟代理类
+	 */
 	protected Object buildLazyResolutionProxy(final DependencyDescriptor descriptor, final @Nullable String beanName) {
 		Assert.state(getBeanFactory() instanceof DefaultListableBeanFactory,
 				"BeanFactory needs to be a DefaultListableBeanFactory");
 		final DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) getBeanFactory();
+		// target source 接口 目标对象
 		TargetSource ts = new TargetSource() {
 			@Override
 			public Class<?> getTargetClass() {
 				return descriptor.getDependencyType();
 			}
+
 			@Override
 			public boolean isStatic() {
 				return false;
 			}
+
 			@Override
 			public Object getTarget() {
+				// DefaultListableBeanFactory 中 doResolveDependency 调用
 				Object target = beanFactory.doResolveDependency(descriptor, beanName, null, null);
+				// 为空的情况下根据类型返回空对象
 				if (target == null) {
 					Class<?> type = getTargetClass();
 					if (Map.class == type) {
@@ -104,16 +120,20 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 				}
 				return target;
 			}
+
 			@Override
 			public void releaseTarget(Object target) {
 			}
 		};
+		// 代理工厂
 		ProxyFactory pf = new ProxyFactory();
+		// 设置数据信息
 		pf.setTargetSource(ts);
 		Class<?> dependencyType = descriptor.getDependencyType();
 		if (dependencyType.isInterface()) {
 			pf.addInterface(dependencyType);
 		}
+		// 代理工厂创建对象
 		return pf.getProxy(beanFactory.getBeanClassLoader());
 	}
 

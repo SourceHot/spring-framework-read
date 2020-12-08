@@ -167,7 +167,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	private BeanDefinitionHolder decoratedDefinition;
 
 	/**
-	 * 注解元素
+	 * 注解元素 qualified 注解
 	 */
 	@Nullable
 	private AnnotatedElement qualifiedElement;

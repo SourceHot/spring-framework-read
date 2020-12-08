@@ -48,6 +48,8 @@ public abstract class ReflectionUtils {
 	/**
 	 * Pre-built MethodFilter that matches all non-bridge non-synthetic methods
 	 * which are not declared on {@code java.lang.Object}.
+	 *
+	 * method 过滤器
 	 * @since 3.0.5
 	 */
 	public static final MethodFilter USER_DECLARED_METHODS =
@@ -55,6 +57,8 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Pre-built FieldFilter that matches all non-static, non-final fields.
+	 *
+	 * 字段过滤器
 	 */
 	public static final FieldFilter COPYABLE_FIELDS =
 			(field -> !(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())));
@@ -62,6 +66,8 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Naming prefix for CGLIB-renamed methods.
+	 *
+	 * CGLIB 函数前缀
 	 * @see #isCglibRenamedMethod
 	 */
 	private static final String CGLIB_RENAMED_METHOD_PREFIX = "CGLIB$";
@@ -78,11 +84,17 @@ public abstract class ReflectionUtils {
 	/**
 	 * Cache for {@link Class#getDeclaredMethods()} plus equivalent default methods
 	 * from Java 8 based interfaces, allowing for fast iteration.
+	 *
+	 * 类的函数缓存
+	 *
+	 * class => method 列表
 	 */
 	private static final Map<Class<?>, Method[]> declaredMethodsCache = new ConcurrentReferenceHashMap<>(256);
 
 	/**
 	 * Cache for {@link Class#getDeclaredFields()}, allowing for fast iteration.
+	 * 类的字段缓存
+	 * class => field 列表
 	 */
 	private static final Map<Class<?>, Field[]> declaredFieldsCache = new ConcurrentReferenceHashMap<>(256);
 
@@ -97,6 +109,8 @@ public abstract class ReflectionUtils {
 	 * InvocationTargetException with such a root cause. Throws an
 	 * IllegalStateException with an appropriate message or
 	 * UndeclaredThrowableException otherwise.
+	 *
+	 * 处理反射异常
 	 * @param ex the reflection exception to handle
 	 */
 	public static void handleReflectionException(Exception ex) {
@@ -173,6 +187,8 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Obtain an accessible constructor for the given class and parameters.
+	 *
+	 * 根据给定的类 + 构造函数参数类型 找到 构造函数
 	 * @param clazz the clazz to check
 	 * @param parameterTypes the parameter types of the desired constructor
 	 * @return the constructor reference
@@ -183,6 +199,7 @@ public abstract class ReflectionUtils {
 			throws NoSuchMethodException {
 
 		Constructor<T> ctor = clazz.getDeclaredConstructor(parameterTypes);
+		// 设置可访问 setAccessible
 		makeAccessible(ctor);
 		return ctor;
 	}
@@ -210,6 +227,8 @@ public abstract class ReflectionUtils {
 	 * Attempt to find a {@link Method} on the supplied class with the supplied name
 	 * and no parameters. Searches all superclasses up to {@code Object}.
 	 * <p>Returns {@code null} if no {@link Method} can be found.
+	 *
+	 * 根据类+方法名查询对用的`method`
 	 * @param clazz the class to introspect
 	 * @param name the name of the method
 	 * @return the Method object, or {@code null} if none found
@@ -223,6 +242,8 @@ public abstract class ReflectionUtils {
 	 * Attempt to find a {@link Method} on the supplied class with the supplied name
 	 * and parameter types. Searches all superclasses up to {@code Object}.
 	 * <p>Returns {@code null} if no {@link Method} can be found.
+	 *
+	 * 根据类+方法名+参数类型查询对用的`method`
 	 * @param clazz the class to introspect
 	 * @param name the name of the method
 	 * @param paramTypes the parameter types of the method
@@ -235,18 +256,25 @@ public abstract class ReflectionUtils {
 		Assert.notNull(name, "Method name must not be null");
 		Class<?> searchType = clazz;
 		while (searchType != null) {
+			// 找出 searchType 的所有 method
 			Method[] methods = (searchType.isInterface() ? searchType.getMethods() :
 					getDeclaredMethods(searchType, false));
 			for (Method method : methods) {
+				// 1. method 名称相同
+				// 2. 参数类型相同
 				if (name.equals(method.getName()) && (paramTypes == null || hasSameParams(method, paramTypes))) {
 					return method;
 				}
 			}
+			// 查询父类 递归
 			searchType = searchType.getSuperclass();
 		}
 		return null;
 	}
 
+	/**
+	 * 判断 method 的参数类型和 该方法的参数是否相同
+	 */
 	private static boolean hasSameParams(Method method, Class<?>[] paramTypes) {
 		return (paramTypes.length == method.getParameterCount() &&
 				Arrays.equals(paramTypes, method.getParameterTypes()));
@@ -298,6 +326,7 @@ public abstract class ReflectionUtils {
 	 */
 	public static boolean declaresException(Method method, Class<?> exceptionType) {
 		Assert.notNull(method, "Method must not be null");
+		// 获取异常说明列表
 		Class<?>[] declaredExceptions = method.getExceptionTypes();
 		for (Class<?> declaredException : declaredExceptions) {
 			if (declaredException.isAssignableFrom(exceptionType)) {
@@ -318,6 +347,7 @@ public abstract class ReflectionUtils {
 	 * @see #doWithMethods
 	 */
 	public static void doWithLocalMethods(Class<?> clazz, MethodCallback mc) {
+		// 获取方法列表
 		Method[] methods = getDeclaredMethods(clazz, false);
 		for (Method method : methods) {
 			try {
@@ -457,10 +487,12 @@ public abstract class ReflectionUtils {
 
 	private static Method[] getDeclaredMethods(Class<?> clazz, boolean defensive) {
 		Assert.notNull(clazz, "Class must not be null");
+		// 从缓存中获取
 		Method[] result = declaredMethodsCache.get(clazz);
 		if (result == null) {
 			try {
 				Method[] declaredMethods = clazz.getDeclaredMethods();
+				// 查询接口的方法.
 				List<Method> defaultMethods = findConcreteMethodsOnInterfaces(clazz);
 				if (defaultMethods != null) {
 					result = new Method[declaredMethods.length + defaultMethods.size()];
@@ -484,11 +516,19 @@ public abstract class ReflectionUtils {
 		return (result.length == 0 || !defensive) ? result : result.clone();
 	}
 
+	/**
+	 * 查询接口的方法.
+	 * @param clazz
+	 * @return
+	 */
 	@Nullable
 	private static List<Method> findConcreteMethodsOnInterfaces(Class<?> clazz) {
 		List<Method> result = null;
+		// 接口类
 		for (Class<?> ifc : clazz.getInterfaces()) {
+			// 接口的函数列表
 			for (Method ifcMethod : ifc.getMethods()) {
+				// 非 abstract 方法
 				if (!Modifier.isAbstract(ifcMethod.getModifiers())) {
 					if (result == null) {
 						result = new ArrayList<>();
@@ -603,6 +643,8 @@ public abstract class ReflectionUtils {
 		while (Object.class != searchType && searchType != null) {
 			Field[] fields = getDeclaredFields(searchType);
 			for (Field field : fields) {
+				// 属性名称是否相同
+				// 属性类型是否相同
 				if ((name == null || name.equals(field.getName())) &&
 						(type == null || type.equals(field.getType()))) {
 					return field;
