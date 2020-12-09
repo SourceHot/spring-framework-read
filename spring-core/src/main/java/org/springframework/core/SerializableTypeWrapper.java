@@ -19,6 +19,7 @@ package org.springframework.core;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationHandler;
@@ -56,10 +57,16 @@ import org.springframework.util.ReflectionUtils;
  */
 final class SerializableTypeWrapper {
 
+	/**
+	 * 容器
+	 */
+	static final ConcurrentReferenceHashMap<Type, Type> cache = new ConcurrentReferenceHashMap<>(256);
+
+	/**
+	 * 可序列化的类型
+	 */
 	private static final Class<?>[] SUPPORTED_SERIALIZABLE_TYPES = {
 			GenericArrayType.class, ParameterizedType.class, TypeVariable.class, WildcardType.class};
-
-	static final ConcurrentReferenceHashMap<Type, Type> cache = new ConcurrentReferenceHashMap<>(256);
 
 
 	private SerializableTypeWrapper() {
@@ -104,7 +111,9 @@ final class SerializableTypeWrapper {
 	 */
 	@Nullable
 	static Type forTypeProvider(TypeProvider provider) {
+		// 提取 type
 		Type providedType = provider.getType();
+		// 非空和类型验证
 		if (providedType == null || providedType instanceof Serializable) {
 			// No serializable type wrapping necessary (e.g. for java.lang.Class)
 			return providedType;
@@ -116,15 +125,20 @@ final class SerializableTypeWrapper {
 		}
 
 		// Obtain a serializable type proxy for the given provider...
+		// 缓存中获取
 		Type cached = cache.get(providedType);
 		if (cached != null) {
 			return cached;
 		}
+		// 循环支持类型
 		for (Class<?> type : SUPPORTED_SERIALIZABLE_TYPES) {
 			if (type.isInstance(providedType)) {
 				ClassLoader classLoader = provider.getClass().getClassLoader();
+				// 创建 接口类列表
 				Class<?>[] interfaces = new Class<?>[] {type, SerializableTypeProxy.class, Serializable.class};
+				// TypeProxyInvocationHandler 的处理
 				InvocationHandler handler = new TypeProxyInvocationHandler(provider);
+				// 代理创建
 				cached = (Type) Proxy.newProxyInstance(classLoader, interfaces, handler);
 				cache.put(providedType, cached);
 				return cached;
@@ -148,6 +162,7 @@ final class SerializableTypeWrapper {
 
 	/**
 	 * A {@link Serializable} interface providing access to a {@link Type}.
+	 * 类型提供接口
 	 */
 	@SuppressWarnings("serial")
 	interface TypeProvider extends Serializable {
@@ -190,6 +205,7 @@ final class SerializableTypeWrapper {
 				Object other = args[0];
 				// Unwrap proxies for speed
 				if (other instanceof Type) {
+					// other 解开
 					other = unwrap((Type) other);
 				}
 				return ObjectUtils.nullSafeEquals(this.provider.getType(), other);
@@ -227,11 +243,19 @@ final class SerializableTypeWrapper {
 	 */
 	@SuppressWarnings("serial")
 	static class FieldTypeProvider implements TypeProvider {
-
+		/**
+		 * 字段名称(属性名称)
+		 */
 		private final String fieldName;
 
+		/**
+		 * 字段类型(属性类型)
+		 */
 		private final Class<?> declaringClass;
 
+		/**
+		 * 字段对象
+		 */
 		private transient Field field;
 
 		public FieldTypeProvider(Field field) {
@@ -267,12 +291,22 @@ final class SerializableTypeWrapper {
 	 */
 	@SuppressWarnings("serial")
 	static class MethodParameterTypeProvider implements TypeProvider {
-
+		/**
+		 * 方法名称
+		 */
 		@Nullable
 		private final String methodName;
 
+		/**
+		 * 方法的参数类型列表
+		 */
 		private final Class<?>[] parameterTypes;
 
+		/**
+		 * Executable 类型
+		 * 1. 构造函数 {@link Constructor}
+		 * 2. 函数 {@link Method}
+		 */
 		private final Class<?> declaringClass;
 
 		private final int parameterIndex;
@@ -322,14 +356,26 @@ final class SerializableTypeWrapper {
 	@SuppressWarnings("serial")
 	static class MethodInvokeTypeProvider implements TypeProvider {
 
+		/**
+		 *  {@link Type} 提供接口
+		 */
 		private final TypeProvider provider;
 
+		/**
+		 * 方法名称
+		 */
 		private final String methodName;
 
+		/**
+		 * method class
+		 */
 		private final Class<?> declaringClass;
 
 		private final int index;
 
+		/**
+		 * method
+		 */
 		private transient Method method;
 
 		@Nullable

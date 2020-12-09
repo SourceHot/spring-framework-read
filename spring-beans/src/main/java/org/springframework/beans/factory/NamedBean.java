@@ -30,6 +30,7 @@ public interface NamedBean {
 
 	/**
 	 * Return the name of this bean in a Spring bean factory, if known.
+	 * 返回beanName 如果在容器(BeanFactory)中存在
 	 */
 	String getBeanName();
 

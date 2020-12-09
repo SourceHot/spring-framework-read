@@ -28,9 +28,14 @@ import org.springframework.util.Assert;
  * @see AutowireCapableBeanFactory#resolveNamedBean(Class)
  */
 public class NamedBeanHolder<T> implements NamedBean {
-
+	/**
+	 * bean name
+	 */
 	private final String beanName;
 
+	/**
+	 * bean 实例
+	 */
 	private final T beanInstance;
 
 

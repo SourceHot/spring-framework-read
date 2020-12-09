@@ -97,6 +97,8 @@ public class ResolvableType implements Serializable {
 
 	/**
 	 * The underlying Java type being managed.
+	 *
+	 * type 接口
 	 */
 	private final Type type;
 
@@ -1402,6 +1404,7 @@ public class ResolvableType implements Serializable {
 	static ResolvableType forType(
 			@Nullable Type type, @Nullable TypeProvider typeProvider, @Nullable VariableResolver variableResolver) {
 
+		// 第一部分
 		if (type == null && typeProvider != null) {
 			type = SerializableTypeWrapper.forTypeProvider(typeProvider);
 		}
@@ -1411,6 +1414,7 @@ public class ResolvableType implements Serializable {
 
 		// For simple Class references, build the wrapper right away -
 		// no expensive resolution necessary, so not worth caching...
+		// 如果是 class 类型 直接 new 创建
 		if (type instanceof Class) {
 			return new ResolvableType(type, typeProvider, variableResolver, (ResolvableType) null);
 		}
@@ -1418,6 +1422,7 @@ public class ResolvableType implements Serializable {
 		// Purge empty entries on access since we don't have a clean-up thread or the like.
 		cache.purgeUnreferencedEntries();
 
+		// 第二部分
 		// Check the cache - we may have a ResolvableType which has been resolved before...
 		ResolvableType resultType = new ResolvableType(type, typeProvider, variableResolver);
 		ResolvableType cachedType = cache.get(resultType);
@@ -1446,11 +1451,14 @@ public class ResolvableType implements Serializable {
 
 		/**
 		 * Return the source of the resolver (used for hashCode and equals).
+		 * 源对象
 		 */
 		Object getSource();
 
 		/**
 		 * Resolve the specified variable.
+		 *
+		 * 解析 TypeVariable 接口
 		 * @param variable the variable to resolve
 		 * @return the resolved variable, or {@code null} if not found
 		 */
@@ -1499,6 +1507,7 @@ public class ResolvableType implements Serializable {
 			TypeVariable<?> variableToCompare = SerializableTypeWrapper.unwrap(variable);
 			for (int i = 0; i < this.variables.length; i++) {
 				TypeVariable<?> resolvedVariable = SerializableTypeWrapper.unwrap(this.variables[i]);
+				// 相同返回
 				if (ObjectUtils.nullSafeEquals(resolvedVariable, variableToCompare)) {
 					return this.generics[i];
 				}

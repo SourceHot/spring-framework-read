@@ -139,6 +139,7 @@ public abstract class ExposeBeanNameAdvisors {
 				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 			}
 			ProxyMethodInvocation pmi = (ProxyMethodInvocation) mi;
+			// 设置属性
 			pmi.setUserAttribute(BEAN_NAME_ATTRIBUTE, this.beanName);
 			return super.invoke(mi);
 		}
