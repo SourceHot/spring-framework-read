@@ -70,6 +70,9 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	/**
 	 * Return an instance (possibly shared or independent) of the object
 	 * managed by this factory.
+	 *
+	 * 获取实例对象, 没有返回null
+	 *
 	 * @param defaultSupplier a callback for supplying a default object
 	 * if none is present in the factory
 	 * @return an instance of the bean, or the supplied default object
@@ -79,7 +82,9 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * @see #getIfAvailable()
 	 */
 	default T getIfAvailable(Supplier<T> defaultSupplier) throws BeansException {
+		// 获取 bean 实例
 		T dependency = getIfAvailable();
+		// 从容器中获取 , 从入参调用 get 方法后获取
 		return (dependency != null ? dependency : defaultSupplier.get());
 	}
 
@@ -93,8 +98,10 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * @see #getIfAvailable()
 	 */
 	default void ifAvailable(Consumer<T> dependencyConsumer) throws BeansException {
+		// 获取bean实例
 		T dependency = getIfAvailable();
 		if (dependency != null) {
+			// 执行 accept 方法
 			dependencyConsumer.accept(dependency);
 		}
 	}
@@ -102,6 +109,8 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	/**
 	 * Return an instance (possibly shared or independent) of the object
 	 * managed by this factory.
+	 *
+	 * 获取实例
 	 * @return an instance of the bean, or {@code null} if not available or
 	 * not unique (i.e. multiple candidates found with none marked as primary)
 	 * @throws BeansException in case of creation errors
@@ -113,6 +122,8 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	/**
 	 * Return an instance (possibly shared or independent) of the object
 	 * managed by this factory.
+	 *
+	 * 获取实例
 	 * @param defaultSupplier a callback for supplying a default object
 	 * if no unique candidate is present in the factory
 	 * @return an instance of the bean, or the supplied default object
@@ -130,6 +141,8 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	/**
 	 * Consume an instance (possibly shared or independent) of the object
 	 * managed by this factory, if unique.
+	 *
+	 * 如果存在对象的话, 执行参数 accept 方法
 	 * @param dependencyConsumer a callback for processing the target object
 	 * if unique (not called otherwise)
 	 * @throws BeansException in case of creation errors
@@ -146,6 +159,8 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	/**
 	 * Return an {@link Iterator} over all matching object instances,
 	 * without specific ordering guarantees (but typically in registration order).
+	 *
+	 * 获取迭代器
 	 * @since 5.1
 	 * @see #stream()
 	 */

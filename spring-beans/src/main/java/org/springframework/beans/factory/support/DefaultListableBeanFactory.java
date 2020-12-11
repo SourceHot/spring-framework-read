@@ -470,11 +470,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			// 获取实例
 			return namedBean.getBeanInstance();
 		}
+		// 获取父工厂
 		BeanFactory parent = getParentBeanFactory();
 		if (parent instanceof DefaultListableBeanFactory) {
+			// 父工厂的解析
 			return ((DefaultListableBeanFactory) parent).resolveBean(requiredType, args, nonUniqueAsNull);
 		}
 		else if (parent != null) {
+			// 延迟加载的情况下获取对象
 			ObjectProvider<T> parentProvider = parent.getBeanProvider(requiredType);
 			if (args != null) {
 				return parentProvider.getObject(args);
@@ -1963,8 +1966,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	private class DependencyObjectProvider implements BeanObjectProvider<Object> {
 
+		/**
+		 * 依赖描述
+		 */
 		private final DependencyDescriptor descriptor;
 
+		/**
+		 * 是否是 Optional 类型
+		 */
 		private final boolean optional;
 
 		@Nullable
@@ -1978,10 +1987,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		@Override
 		public Object getObject() throws BeansException {
+			// 获取bean实例
+			// 是 optional 的情况下创建
 			if (this.optional) {
 				return createOptionalDependency(this.descriptor, this.beanName);
 			}
 			else {
+				// 解析依赖进行创建对象
 				Object result = doResolveDependency(this.descriptor, this.beanName, null, null);
 				if (result == null) {
 					throw new NoSuchBeanDefinitionException(this.descriptor.getResolvableType());
@@ -1992,16 +2004,21 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		@Override
 		public Object getObject(final Object... args) throws BeansException {
+			// 获取bean实例
+			// 是 optional 的情况下创建
 			if (this.optional) {
 				return createOptionalDependency(this.descriptor, this.beanName, args);
 			}
 			else {
+				// 创建 依赖描述对象， 重写方法 resolveCandidate , 从容器(BeanFactory)中获取
 				DependencyDescriptor descriptorToUse = new DependencyDescriptor(this.descriptor) {
 					@Override
 					public Object resolveCandidate(String beanName, Class<?> requiredType, BeanFactory beanFactory) {
 						return beanFactory.getBean(beanName, args);
 					}
 				};
+
+				// 解析依赖进行创建对象
 				Object result = doResolveDependency(descriptorToUse, this.beanName, null, null);
 				if (result == null) {
 					throw new NoSuchBeanDefinitionException(this.descriptor.getResolvableType());
