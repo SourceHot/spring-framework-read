@@ -441,6 +441,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 			@Override
 			public Stream<T> stream() {
+				// 1. 根据 ResolvableType 提取所有的 beanName
+				// 2. 获取bean
+				// 3. 过滤 nullBean
 				return Arrays.stream(getBeanNamesForTypedStream(requiredType))
 						.map(name -> (T) getBean(name))
 						.filter(bean -> !(bean instanceof NullBean));
@@ -448,7 +451,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 			@Override
 			public Stream<T> orderedStream() {
+				// 获取 beanName 列表
 				String[] beanNames = getBeanNamesForTypedStream(requiredType);
+				// key: beanName value: beanInstance
 				Map<String, T> matchingBeans = new LinkedHashMap<>(beanNames.length);
 				for (String beanName : beanNames) {
 					Object beanInstance = getBean(beanName);
@@ -457,6 +462,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					}
 				}
 				Stream<T> stream = matchingBeans.values().stream();
+				// 排序
 				return stream.sorted(adaptOrderComparator(matchingBeans));
 			}
 		};
@@ -464,12 +470,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Nullable
 	private <T> T resolveBean(ResolvableType requiredType, @Nullable Object[] args, boolean nonUniqueAsNull) {
+		// 第一部分
 		// 解析 beanName
 		NamedBeanHolder<T> namedBean = resolveNamedBean(requiredType, args, nonUniqueAsNull);
 		if (namedBean != null) {
 			// 获取实例
 			return namedBean.getBeanInstance();
 		}
+
+		// 第二部分
 		// 获取父工厂
 		BeanFactory parent = getParentBeanFactory();
 		if (parent instanceof DefaultListableBeanFactory) {
@@ -489,6 +498,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return null;
 	}
 
+	/**
+	 * 获取 beanName 列表
+	 */
 	private String[] getBeanNamesForTypedStream(ResolvableType requiredType) {
 		return BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType);
 	}
@@ -718,7 +730,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		// 根据类型获取所有的beanName
 		String[] beanNames = getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+		// 返回结果
 		Map<String, T> result = new LinkedHashMap<>(beanNames.length);
+		// 循环beanName
+		// 获取 bean 实例 放入返回结果.
 		for (String beanName : beanNames) {
 			try {
 				Object beanInstance = getBean(beanName);
@@ -750,14 +765,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public String[] getBeanNamesForAnnotation(Class<? extends Annotation> annotationType) {
+		// 返回结果
 		List<String> result = new ArrayList<>();
+		// bean 定义名称的列表
 		for (String beanName : this.beanDefinitionNames) {
+			// 获取 bean 定义
 			BeanDefinition beanDefinition = getBeanDefinition(beanName);
+			// 1. bean 定义的 abstract 判断
+			// 2. 寻找注解是否存在
 			if (!beanDefinition.isAbstract() && findAnnotationOnBean(beanName, annotationType) != null) {
 				result.add(beanName);
 			}
 		}
+		// 手动注入的 单例对象 beanName 的处理
 		for (String beanName : this.manualSingletonNames) {
+			// 1. result 中是否已包含 当前正在处理的 beanName
+			// 2. 寻找注解是否存在
 			if (!result.contains(beanName) && findAnnotationOnBean(beanName, annotationType) != null) {
 				result.add(beanName);
 			}
@@ -1588,7 +1611,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	private Comparator<Object> adaptOrderComparator(Map<String, ?> matchingBeans) {
+		// 获取依赖比较对象
 		Comparator<Object> dependencyComparator = getDependencyComparator();
+		// 转换 OrderComparator
 		OrderComparator comparator = (dependencyComparator instanceof OrderComparator ?
 				(OrderComparator) dependencyComparator : OrderComparator.INSTANCE);
 		return comparator.withSourceProvider(createFactoryAwareOrderSourceProvider(matchingBeans));
@@ -1761,6 +1786,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * <p>Based on {@code @javax.annotation.Priority}. As defined by the related
 	 * {@link org.springframework.core.Ordered} interface, the lowest value has
 	 * the highest priority.
+	 * 确定优先级最高的候选对象名称
 	 * @param candidates a Map of candidate names and candidate instances
 	 * (or candidate classes if not created yet) that match the required type
 	 * @param requiredType the target dependency type to match against
@@ -1770,12 +1796,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	@Nullable
 	protected String determineHighestPriorityCandidate(Map<String, Object> candidates, Class<?> requiredType) {
+		// 优先级最高的 beanName
 		String highestPriorityBeanName = null;
+		// 最大优先级
 		Integer highestPriority = null;
 		for (Map.Entry<String, Object> entry : candidates.entrySet()) {
+			// 容器中的BeanName
 			String candidateBeanName = entry.getKey();
+			// 容器中的 BeanInstance / BeanClass
 			Object beanInstance = entry.getValue();
 			if (beanInstance != null) {
+				// 优先级序号 当前对象的优先级
 				Integer candidatePriority = getPriority(beanInstance);
 				if (candidatePriority != null) {
 					if (highestPriorityBeanName != null) {
@@ -1784,6 +1815,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 									"Multiple beans found with the same priority ('" + highestPriority +
 											"') among candidates: " + candidates.keySet());
 						}
+						// 当前对象优先级 < 最高优先级 重新赋值
 						else if (candidatePriority < highestPriority) {
 							highestPriorityBeanName = candidateBeanName;
 							highestPriority = candidatePriority;
@@ -2195,6 +2227,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	private class FactoryAwareOrderSourceProvider implements OrderComparator.OrderSourceProvider {
 
+		/**
+		 * key: beanInstance
+		 * value: beanName
+		 */
 		private final Map<Object, String> instancesToBeanNames;
 
 		public FactoryAwareOrderSourceProvider(Map<Object, String> instancesToBeanNames) {
@@ -2205,15 +2241,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		@Nullable
 		public Object getOrderSource(Object obj) {
 			String beanName = this.instancesToBeanNames.get(obj);
+			// beanName 不为空
+			// 存在 beanName 对应的 bean 定义
 			if (beanName == null || !containsBeanDefinition(beanName)) {
 				return null;
 			}
+			// 获取 beanName 的合并定义
 			RootBeanDefinition beanDefinition = getMergedLocalBeanDefinition(beanName);
 			List<Object> sources = new ArrayList<>(2);
+			// 获取工厂函数
 			Method factoryMethod = beanDefinition.getResolvedFactoryMethod();
 			if (factoryMethod != null) {
 				sources.add(factoryMethod);
 			}
+			// 获取 bean class 加入 sources
 			Class<?> targetType = beanDefinition.getTargetType();
 			if (targetType != null && targetType != obj.getClass()) {
 				sources.add(targetType);
