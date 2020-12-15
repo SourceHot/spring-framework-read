@@ -266,7 +266,7 @@ protected void assertBeanFactoryActive() {
 
 ### doGetBean
 
-- `org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`
+- 方法签名: `org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`
 
   获取 bean 的核心
 
@@ -277,6 +277,7 @@ protected void assertBeanFactoryActive() {
 
 
 #### transformedBeanName
+- 方法签名:  `org.springframework.beans.factory.support.AbstractBeanFactory.transformedBeanName`
 
 ```java
 protected String transformedBeanName(String name) {

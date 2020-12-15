@@ -229,6 +229,6 @@ protected Object buildLazyResolutionProxy(final DependencyDescriptor descriptor,
 
 下面标出几个有关类
 
-1. `DefaultListableBeanFactory`: [分析文章](/doc/book/bean/factory/Spring-DefaultListableBeanFactory-未完成.md)
+1. `DefaultListableBeanFactory`: [分析文章](/doc/book/bean/factory/Spring-DefaultListableBeanFactory.md)
 2. `TargetSource`: [分析文章](/doc/book-aop/Spring-ProxyFactory-未完成.md)
 3. `ProxyFactory`: [分析文章](/doc/book-aop/Spring-TargetSource-未完成.md)

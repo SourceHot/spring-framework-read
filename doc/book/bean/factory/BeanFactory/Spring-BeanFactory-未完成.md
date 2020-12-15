@@ -114,7 +114,7 @@ public interface BeanFactory {
 - [HierarchicalBeanFactory](/doc/book/bean/factory/BeanFactory/Spring-HierarchicalBeanFactory.md)
     - [ConfigurableBeanFactory](/doc/book/bean/factory/BeanFactory/Spring-ConfigurableBeanFactory.md)
         - [AbstractBeanFactory](/doc/book/bean/factory/Spring-AbstractBeanFactory.md)
-            - AbstractAutowireCapableBeanFactory
+            - [AbstractAutowireCapableBeanFactory](/doc/book/bean/factory/Spring-AbstractAutowireCapableBeanFactory.md)
                 - DefaultListableBeanFactory
                     - XmlBeanFactory
         - ConfigurableListableBeanFactory
@@ -154,7 +154,7 @@ public interface BeanFactory {
     - ConfigurableListableBeanFactory
         - DefaultListableBeanFactory
             - XmlBeanFactory
-    - AbstractAutowireCapableBeanFactory
+    - [AbstractAutowireCapableBeanFactory](/doc/book/bean/factory/Spring-AbstractAutowireCapableBeanFactory.md)
         - DefaultListableBeanFactory
             - XmlBeanFactory
     - StubBeanFactory     
