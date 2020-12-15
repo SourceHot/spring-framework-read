@@ -128,13 +128,19 @@ abstract class AutowireUtils {
 	 * @return the resolved value
 	 */
 	public static Object resolveAutowiringValue(Object autowiringValue, Class<?> requiredType) {
+		// 1. 类型是否是ObjectFactory
+		// 2. 是否是实现类
 		if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue)) {
 			ObjectFactory<?> factory = (ObjectFactory<?>) autowiringValue;
+			// 是否是 Serializable
+			// 2. 是否是是接口
 			if (autowiringValue instanceof Serializable && requiredType.isInterface()) {
+				// JDK 动态代理创建类
 				autowiringValue = Proxy.newProxyInstance(requiredType.getClassLoader(),
-						new Class<?>[] { requiredType }, new ObjectFactoryDelegatingInvocationHandler(factory));
+						new Class<?>[] {requiredType}, new ObjectFactoryDelegatingInvocationHandler(factory));
 			}
 			else {
+				// 从 ObjectFactory 中获取对象
 				return factory.getObject();
 			}
 		}

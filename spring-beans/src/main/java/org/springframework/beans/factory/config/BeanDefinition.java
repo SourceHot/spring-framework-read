@@ -88,7 +88,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Return the name of the parent definition of this bean definition, if any.
-	 * 获取父类的名字
+	 * 获取父类的名字(父BeanDefinition)
 	 */
 	@Nullable
 	String getParentName();

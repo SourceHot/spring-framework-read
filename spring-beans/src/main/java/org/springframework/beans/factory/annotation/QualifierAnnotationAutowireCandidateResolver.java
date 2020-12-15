@@ -371,7 +371,9 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 */
 	@Override
 	public boolean hasQualifier(DependencyDescriptor descriptor) {
+		// 获取依赖描述的注解列表
 		for (Annotation ann : descriptor.getAnnotations()) {
+			// 判断是否存在注解
 			if (isQualifier(ann.annotationType())) {
 				return true;
 			}
