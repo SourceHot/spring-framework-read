@@ -28,6 +28,9 @@ import org.springframework.util.StringUtils;
 /**
  * Detects whether an XML stream is using DTD- or XSD-based validation.
  *
+ *
+ * xml 验证模式
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -37,22 +40,28 @@ public class XmlValidationModeDetector {
 
 	/**
 	 * Indicates that the validation should be disabled.
+	 *
+	 * 不验证
 	 */
 	public static final int VALIDATION_NONE = 0;
 
 	/**
 	 * Indicates that the validation mode should be auto-guessed, since we cannot find
 	 * a clear indication (probably choked on some special characters, or the like).
+	 *
+	 * 自动推测进行验证
 	 */
 	public static final int VALIDATION_AUTO = 1;
 
 	/**
 	 * Indicates that DTD validation should be used (we found a "DOCTYPE" declaration).
+	 * 使用 DTD验证
 	 */
 	public static final int VALIDATION_DTD = 2;
 
 	/**
 	 * Indicates that XSD validation should be used (found no "DOCTYPE" declaration).
+	 * 使用 XSD 验证
 	 */
 	public static final int VALIDATION_XSD = 3;
 

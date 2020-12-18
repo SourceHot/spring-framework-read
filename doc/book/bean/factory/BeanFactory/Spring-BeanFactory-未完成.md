@@ -115,8 +115,8 @@ public interface BeanFactory {
     - [ConfigurableBeanFactory](/doc/book/bean/factory/BeanFactory/Spring-ConfigurableBeanFactory.md)
         - [AbstractBeanFactory](/doc/book/bean/factory/Spring-AbstractBeanFactory.md)
             - [AbstractAutowireCapableBeanFactory](/doc/book/bean/factory/Spring-AbstractAutowireCapableBeanFactory.md)
-                - DefaultListableBeanFactory
-                    - XmlBeanFactory
+                - [DefaultListableBeanFactory](/doc/book/bean/factory/Spring-DefaultListableBeanFactory.md)
+                    - [XmlBeanFactory](/doc/book/bean/factory/Spring-XmlBeanFactory.md)
         - ConfigurableListableBeanFactory
             - DefaultListableBeanFactory
                 - XmlBeanFactory
@@ -152,7 +152,7 @@ public interface BeanFactory {
 - SimpleJndiBeanFactory
 - AutowireCapableBeanFactory
     - ConfigurableListableBeanFactory
-        - DefaultListableBeanFactory
+        - [DefaultListableBeanFactory](/doc/book/bean/factory/Spring-DefaultListableBeanFactory.md)
             - XmlBeanFactory
     - [AbstractAutowireCapableBeanFactory](/doc/book/bean/factory/Spring-AbstractAutowireCapableBeanFactory.md)
         - DefaultListableBeanFactory

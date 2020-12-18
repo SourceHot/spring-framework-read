@@ -56,6 +56,8 @@ public interface Resource extends InputStreamSource {
 	 * <p>This method performs a definitive existence check, whereas the
 	 * existence of a {@code Resource} handle only guarantees a valid
 	 * descriptor handle.
+	 *
+	 * 是否存在
 	 */
 	boolean exists();
 
@@ -67,6 +69,7 @@ public interface Resource extends InputStreamSource {
 	 * Note that actual content reading may still fail when attempted.
 	 * However, a value of {@code false} is a definitive indication
 	 * that the resource content cannot be read.
+	 * 是否可读
 	 * @see #getInputStream()
 	 * @see #exists()
 	 */
@@ -79,6 +82,8 @@ public interface Resource extends InputStreamSource {
 	 * If {@code true}, the InputStream cannot be read multiple times,
 	 * and must be read and closed to avoid resource leaks.
 	 * <p>Will be {@code false} for typical resource descriptors.
+	 *
+	 * 是否打开
 	 */
 	default boolean isOpen() {
 		return false;
@@ -89,6 +94,7 @@ public interface Resource extends InputStreamSource {
 	 * A value of {@code true} strongly suggests (but does not guarantee)
 	 * that a {@link #getFile()} call will succeed.
 	 * <p>This is conservatively {@code false} by default.
+	 * 是否是文件类型
 	 * @since 5.0
 	 * @see #getFile()
 	 */
@@ -98,6 +104,8 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Return a URL handle for this resource.
+	 *
+	 * 获取 URL 对象
 	 * @throws IOException if the resource cannot be resolved as URL,
 	 * i.e. if the resource is not available as descriptor
 	 */
@@ -105,6 +113,8 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Return a URI handle for this resource.
+	 *
+	 * 获取 URI 对象
 	 * @throws IOException if the resource cannot be resolved as URI,
 	 * i.e. if the resource is not available as descriptor
 	 * @since 2.5
@@ -113,6 +123,8 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Return a File handle for this resource.
+	 *
+	 * 获取文件
 	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as
 	 * absolute file path, i.e. if the resource is not available in a file system
 	 * @throws IOException in case of general resolution/reading failures
@@ -125,6 +137,8 @@ public interface Resource extends InputStreamSource {
 	 * <p>It is expected that each call creates a <i>fresh</i> channel.
 	 * <p>The default implementation returns {@link Channels#newChannel(InputStream)}
 	 * with the result of {@link #getInputStream()}.
+	 *
+	 * 可读字节通道
 	 * @return the byte channel for the underlying resource (must not be {@code null})
 	 * @throws java.io.FileNotFoundException if the underlying resource doesn't exist
 	 * @throws IOException if the content channel could not be opened
@@ -137,6 +151,8 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Determine the content length for this resource.
+	 *
+	 * 内容长度
 	 * @throws IOException if the resource cannot be resolved
 	 * (in the file system or as some other known physical resource type)
 	 */
@@ -144,6 +160,8 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Determine the last-modified timestamp for this resource.
+	 *
+	 * 最后修改实践
 	 * @throws IOException if the resource cannot be resolved
 	 * (in the file system or as some other known physical resource type)
 	 */
@@ -151,6 +169,8 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Create a resource relative to this resource.
+	 *
+	 * 创建资源
 	 * @param relativePath the relative path (relative to this resource)
 	 * @return the resource handle for the relative resource
 	 * @throws IOException if the relative resource cannot be determined
@@ -162,6 +182,8 @@ public interface Resource extends InputStreamSource {
 	 * part of the path: for example, "myfile.txt".
 	 * <p>Returns {@code null} if this type of resource does not
 	 * have a filename.
+	 *
+	 * 获取文件名称
 	 */
 	@Nullable
 	String getFilename();
@@ -171,6 +193,8 @@ public interface Resource extends InputStreamSource {
 	 * to be used for error output when working with the resource.
 	 * <p>Implementations are also encouraged to return this value
 	 * from their {@code toString} method.
+	 *
+	 * 获取资源描述
 	 * @see Object#toString()
 	 */
 	String getDescription();

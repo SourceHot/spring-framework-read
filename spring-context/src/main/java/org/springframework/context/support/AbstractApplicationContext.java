@@ -131,6 +131,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
     /**
      * Name of the MessageSource bean in the factory.
      * If none is supplied, message resolution is delegated to the parent.
+	 * MessageSource 的名字
      * @see MessageSource
      */
     public static final String MESSAGE_SOURCE_BEAN_NAME = "messageSource";
@@ -138,6 +139,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
     /**
      * Name of the LifecycleProcessor bean in the factory.
      * If none is supplied, a DefaultLifecycleProcessor is used.
+	 *
+	 * LifecycleProcessor 的名字
      * @see org.springframework.context.LifecycleProcessor
      * @see org.springframework.context.support.DefaultLifecycleProcessor
      */
@@ -146,6 +149,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
     /**
      * Name of the ApplicationEventMulticaster bean in the factory.
      * If none is supplied, a default SimpleApplicationEventMulticaster is used.
+	 *
+	 * ApplicationEventMulticaster 的名称
+	 * 事件传播器
      * @see org.springframework.context.event.ApplicationEventMulticaster
      * @see org.springframework.context.event.SimpleApplicationEventMulticaster
      */
@@ -161,62 +167,117 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
     /** Logger used by this class. Available to subclasses. */
     protected final Log logger = LogFactory.getLog(getClass());
 
-    /** BeanFactoryPostProcessors to apply on refresh. */
+    /**
+	 * BeanFactoryPostProcessors to apply on refresh.
+	 * bean 后置处理器列表
+	 * */
     private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 
-    /** Flag that indicates whether this context is currently active. */
+    /**
+	 * Flag that indicates whether this context is currently active.
+	 * 是否存活状态的标记
+	 * */
     private final AtomicBoolean active = new AtomicBoolean();
 
-    /** Flag that indicates whether this context has been closed already. */
+    /**
+	 * Flag that indicates whether this context has been closed already.
+	 * 是否关闭的标记
+	 * */
     private final AtomicBoolean closed = new AtomicBoolean();
 
-    /** Synchronization monitor for the "refresh" and "destroy". */
+    /**
+	 *  Synchronization monitor for the "refresh" and "destroy".
+	 *
+	 * refresh 方法和 destroy 方法的锁
+	 * */
     private final Object startupShutdownMonitor = new Object();
 
-    /** Statically specified listeners. */
+    /**
+	 *  Statically specified listeners.
+	 *
+	 *  应用监听器列表
+	 *  */
     private final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
 
-    /** Unique id for this context, if any. */
+    /**
+	 *  Unique id for this context, if any.
+	 * 上下文id
+	 * */
     private String id = ObjectUtils.identityToString(this);
 
-    /** Display name. */
+    /**
+	 *  Display name.
+	 * 上下文名称
+	 * */
     private String displayName = ObjectUtils.identityToString(this);
 
-    /** Parent context. */
+    /**
+	 *  Parent context.
+	 *  父上下文
+	 *  */
     @Nullable
     private ApplicationContext parent;
 
-    /** Environment used by this context. */
+    /**
+	 * Environment used by this context.
+	 * 环境配置
+	 * */
     @Nullable
     private ConfigurableEnvironment environment;
 
-    /** System time in milliseconds when this context started. */
+    /**
+	 * System time in milliseconds when this context started.
+	 *
+	 * 启动时间
+	 * */
     private long startupDate;
 
-    /** Reference to the JVM shutdown hook, if registered. */
+    /**
+	 * Reference to the JVM shutdown hook, if registered.
+	 * 关闭的钩子线程
+	 * */
     @Nullable
     private Thread shutdownHook;
 
-    /** ResourcePatternResolver used by this context. */
+    /**
+	 *  ResourcePatternResolver used by this context.
+	 *  资源解析器
+	 *  */
     private final ResourcePatternResolver resourcePatternResolver;
 
-    /** LifecycleProcessor for managing the lifecycle of beans within this context. */
+    /**
+	 * LifecycleProcessor for managing the lifecycle of beans within this context.
+	 *
+	 * 生命周期处理器
+	 * */
     @Nullable
     private LifecycleProcessor lifecycleProcessor;
 
-    /** MessageSource we delegate our implementation of this interface to. */
+    /**
+	 *  MessageSource we delegate our implementation of this interface to.
+	 * 消息源 主要用于国际化
+	 * */
     @Nullable
     private MessageSource messageSource;
 
-    /** Helper class used in event publishing. */
+    /**
+	 * Helper class used in event publishing.
+	 * 事件传播器
+	 * */
     @Nullable
     private ApplicationEventMulticaster applicationEventMulticaster;
 
-    /** Local listeners registered before refresh. */
+    /**
+	 * Local listeners registered before refresh.
+	 * 应用监听器列表
+	 * */
     @Nullable
     private Set<ApplicationListener<?>> earlyApplicationListeners;
 
-    /** ApplicationEvents published before the multicaster setup. */
+    /**
+	 *  ApplicationEvents published before the multicaster setup.
+	 * 需要提前发布的应用事件
+	 * */
     @Nullable
     private Set<ApplicationEvent> earlyApplicationEvents;
 

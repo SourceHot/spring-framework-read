@@ -43,6 +43,8 @@ public interface BeanDefinitionReader {
 	 * Return the bean factory to register the bean definitions with.
 	 * <p>The factory is exposed through the BeanDefinitionRegistry interface,
 	 * encapsulating the methods that are relevant for bean definition handling.
+	 *
+	 * 获取 bean 定义注册器
 	 */
 	BeanDefinitionRegistry getRegistry();
 
@@ -60,6 +62,8 @@ public interface BeanDefinitionReader {
 	 * <p>There is also a {@code loadBeanDefinitions(String)} method available,
 	 * for loading bean definitions from a resource location (or location pattern).
 	 * This is a convenience to avoid explicit ResourceLoader handling.
+	 *
+	 * 获取资源加载器
 	 * @see #loadBeanDefinitions(String)
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 */
@@ -71,6 +75,8 @@ public interface BeanDefinitionReader {
 	 * <p>{@code null} suggests to not load bean classes eagerly
 	 * but rather to just register bean definitions with class names,
 	 * with the corresponding Classes to be resolved later (or never).
+	 *
+	 * 获取类加载器
 	 */
 	@Nullable
 	ClassLoader getBeanClassLoader();
@@ -78,12 +84,16 @@ public interface BeanDefinitionReader {
 	/**
 	 * Return the BeanNameGenerator to use for anonymous beans
 	 * (without explicit bean name specified).
+	 *
+	 * 获取 bean 名称乘乘其
 	 */
 	BeanNameGenerator getBeanNameGenerator();
 
 
 	/**
 	 * Load bean definitions from the specified resource.
+	 *
+	 * 获取资源中定义的的bean数量
 	 * @param resource the resource descriptor
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
@@ -92,6 +102,8 @@ public interface BeanDefinitionReader {
 
 	/**
 	 * Load bean definitions from the specified resources.
+	 *
+	 * 获取资源中定义的的bean数量
 	 * @param resources the resource descriptors
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
@@ -102,6 +114,8 @@ public interface BeanDefinitionReader {
 	 * Load bean definitions from the specified resource location.
 	 * <p>The location can also be a location pattern, provided that the
 	 * ResourceLoader of this bean definition reader is a ResourcePatternResolver.
+	 *
+	 * 获取资源中定义的的bean数量
 	 * @param location the resource location, to be loaded with the ResourceLoader
 	 * (or ResourcePatternResolver) of this bean definition reader
 	 * @return the number of bean definitions found
@@ -114,6 +128,8 @@ public interface BeanDefinitionReader {
 
 	/**
 	 * Load bean definitions from the specified resource locations.
+	 * 获取资源中定义的的bean数量
+	 *
 	 * @param locations the resource locations, to be loaded with the ResourceLoader
 	 * (or ResourcePatternResolver) of this bean definition reader
 	 * @return the number of bean definitions found

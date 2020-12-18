@@ -522,6 +522,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		// 切掉root地址留下真实地址
 		String subPattern = locationPattern.substring(rootDirPath.length());
 
+		// 第二部分
 		// 获取 root 下的资源
 		Resource[] rootDirResources = getResources(rootDirPath);
 		Set<Resource> result = new LinkedHashSet<>(16);
@@ -808,7 +809,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @throws IOException if directory contents could not be retrieved
 	 */
 	protected Set<File> retrieveMatchingFiles(File rootDir, String pattern) throws IOException {
-		// 目录不能存在
+		// 目录不存在
 		if (!rootDir.exists()) {
 			// Silently skip non-existing directories.
 			if (logger.isDebugEnabled()) {

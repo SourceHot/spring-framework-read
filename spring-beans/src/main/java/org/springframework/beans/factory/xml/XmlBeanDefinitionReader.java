@@ -80,54 +80,99 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Indicates that the validation should be disabled.
+	 * 不验证
 	 */
 	public static final int VALIDATION_NONE = XmlValidationModeDetector.VALIDATION_NONE;
 
 	/**
 	 * Indicates that the validation mode should be detected automatically.
+	 * 自动推测进行验证
 	 */
 	public static final int VALIDATION_AUTO = XmlValidationModeDetector.VALIDATION_AUTO;
 
 	/**
 	 * Indicates that DTD validation should be used.
+	 * DTD验证
 	 */
 	public static final int VALIDATION_DTD = XmlValidationModeDetector.VALIDATION_DTD;
 
 	/**
 	 * Indicates that XSD validation should be used.
+	 * XSD验证
 	 */
 	public static final int VALIDATION_XSD = XmlValidationModeDetector.VALIDATION_XSD;
 
 
-	/** Constants instance for this class. */
+	/**
+	 *  Constants instance for this class.
+	 *
+	 * Constants
+	 * */
 	private static final Constants constants = new Constants(XmlBeanDefinitionReader.class);
 
+	/**
+	 * xml 验证器
+	 */
 	private final XmlValidationModeDetector validationModeDetector = new XmlValidationModeDetector();
 
+	/**
+	 * 资源编码接口列表
+	 */
 	private final ThreadLocal<Set<EncodedResource>> resourcesCurrentlyBeingLoaded =
 			new NamedThreadLocal<>("XML bean definition resources currently being loaded");
 
+	/**
+	 * xml 验证模式: 自动模式(自适应 xsd dtd )
+	 */
 	private int validationMode = VALIDATION_AUTO;
 
+	/**
+	 *
+	 */
 	private boolean namespaceAware = false;
 
+	/**
+	 * bean定义文档读取器
+	 */
 	private Class<? extends BeanDefinitionDocumentReader> documentReaderClass =
 			DefaultBeanDefinitionDocumentReader.class;
 
+	/**
+	 * 问题记录者
+	 */
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
+	/**
+	 * Bean定义读取过程中的事件监听器
+	 */
 	private ReaderEventListener eventListener = new EmptyReaderEventListener();
 
+	/**
+	 *元数据的提取
+	 */
 	private SourceExtractor sourceExtractor = new NullSourceExtractor();
 
+	/**
+	 * 命名空间解析器
+	 */
 	@Nullable
 	private NamespaceHandlerResolver namespaceHandlerResolver;
 
+	/**
+	 * 文档加载器
+	 */
 	private DocumentLoader documentLoader = new DefaultDocumentLoader();
 
+	/**
+	 * 实体解析器
+	 */
 	@Nullable
 	private EntityResolver entityResolver;
 
+	/**
+	 * 异常处理器
+	 * spring 中 SimpleSaxErrorHandler 就是一个日志输出
+	 */
 	private ErrorHandler errorHandler = new SimpleSaxErrorHandler(logger);
 
 

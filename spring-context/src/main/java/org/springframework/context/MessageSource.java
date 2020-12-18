@@ -32,6 +32,7 @@ import org.springframework.lang.Nullable;
  * highly configurable, in particular with respect to reloading message definitions.
  * </ul>
  *
+ * 消息源 主要用于国际化
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.context.support.ResourceBundleMessageSource

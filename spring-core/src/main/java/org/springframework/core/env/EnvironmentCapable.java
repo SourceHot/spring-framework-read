@@ -42,6 +42,8 @@ public interface EnvironmentCapable {
 
 	/**
 	 * Return the {@link Environment} associated with this component.
+	 *
+	 * 获取 环境接口
 	 */
 	Environment getEnvironment();
 

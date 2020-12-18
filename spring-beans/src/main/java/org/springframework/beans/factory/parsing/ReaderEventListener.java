@@ -22,6 +22,8 @@ import java.util.EventListener;
  * Interface that receives callbacks for component, alias and import registrations during a bean
  * definition reading process.
  *
+ * Bean定义读取过程中的事件监听器
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @see ReaderContext

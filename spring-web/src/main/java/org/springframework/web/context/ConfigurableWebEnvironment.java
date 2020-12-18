@@ -39,6 +39,8 @@ public interface ConfigurableWebEnvironment extends ConfigurableEnvironment {
 	 * org.springframework.core.env.PropertySource.StubPropertySource stub property source}
 	 * instances acting as placeholders with real servlet context/config property sources
 	 * using the given parameters.
+	 *
+	 * 初始化属性
 	 * @param servletContext the {@link ServletContext} (may not be {@code null})
 	 * @param servletConfig the {@link ServletConfig} ({@code null} if not available)
 	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initServletPropertySources(
