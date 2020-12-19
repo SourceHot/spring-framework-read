@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
  * position in the parse phase. This representation is intended for use in
  * error messages.
  *
+ * 解析状态
  * @author Rob Harrop
  * @since 2.0
  */
@@ -36,11 +37,15 @@ public final class ParseState {
 
 	/**
 	 * Tab character used when rendering the tree-style representation.
+	 *
+	 * tab 键
 	 */
 	private static final char TAB = '\t';
 
 	/**
 	 * Internal {@link LinkedList} storage.
+	 *
+	 *
 	 */
 	private final LinkedList<Entry> state;
 

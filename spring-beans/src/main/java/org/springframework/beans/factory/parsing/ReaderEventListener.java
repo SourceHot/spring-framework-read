@@ -54,6 +54,7 @@ public interface ReaderEventListener extends EventListener {
 	 * Notification that the given alias has been registered.
 	 *
 	 * 别名事件触发
+	 * 别名的注册事件
 	 *
 	 * @param aliasDefinition a descriptor for the new alias
 	 */

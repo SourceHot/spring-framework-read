@@ -30,11 +30,15 @@ import org.springframework.util.Assert;
  * be the actual DOM Element from a parsed XML {@link org.w3c.dom.Document};
  * or the source object might simply be {@code null}.
  *
+ * 位置对象
  * @author Rob Harrop
  * @since 2.0
  */
 public class Location {
 
+	/**
+	 * 资源对象
+	 */
 	private final Resource resource;
 
 	@Nullable

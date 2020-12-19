@@ -41,6 +41,8 @@ import org.springframework.util.CollectionUtils;
  * {@code META-INF/spring.handlers}, but this can be changed using the
  * {@link #DefaultNamespaceHandlerResolver(ClassLoader, String)} constructor.
  *
+ * 命名空间解析器,默认实现
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
@@ -51,6 +53,8 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 
 	/**
 	 * The location to look for the mapping files. Can be present in multiple JAR files.
+	 *
+	 * 默认处理程序映射位置
 	 */
 	public static final String DEFAULT_HANDLER_MAPPINGS_LOCATION = "META-INF/spring.handlers";
 
@@ -58,7 +62,11 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** ClassLoader to use for NamespaceHandler classes. */
+	/**
+	 *  ClassLoader to use for NamespaceHandler classes.
+	 *
+	 * 类加载器
+	 * */
 	@Nullable
 	private final ClassLoader classLoader;
 

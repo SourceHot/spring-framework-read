@@ -37,6 +37,8 @@ public class PassThroughSourceExtractor implements SourceExtractor {
 
 	/**
 	 * Simply returns the supplied {@code sourceCandidate} as-is.
+	 *
+	 * 直接返回源数据
 	 * @param sourceCandidate the source metadata
 	 * @return the supplied {@code sourceCandidate}
 	 */

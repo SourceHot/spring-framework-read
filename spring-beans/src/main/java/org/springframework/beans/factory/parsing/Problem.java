@@ -25,6 +25,8 @@ import org.springframework.util.Assert;
  *
  * <p>May indicate a potentially fatal problem (an error) or just a warning.
  *
+ * 问题对象
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
@@ -32,13 +34,25 @@ import org.springframework.util.Assert;
  */
 public class Problem {
 
+	/**
+	 * 问题消息
+	 */
 	private final String message;
 
+	/**
+	 * 出现问题的位置
+	 */
 	private final Location location;
 
+	/**
+	 * 解析状态
+	 */
 	@Nullable
 	private final ParseState parseState;
 
+	/**
+	 * 异常堆栈
+	 */
 	@Nullable
 	private final Throwable rootCause;
 

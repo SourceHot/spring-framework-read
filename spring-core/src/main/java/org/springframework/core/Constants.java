@@ -46,10 +46,18 @@ import org.springframework.util.ReflectionUtils;
  */
 public class Constants {
 
-	/** The name of the introspected class. */
+	/**
+	 * The name of the introspected class.
+	 *
+	 * 类名
+	 * */
 	private final String className;
 
-	/** Map from String field name to object value. */
+	/**
+	 * Map from String field name to object value.
+	 * key: 字段名称
+	 * value: 字段值
+	 * */
 	private final Map<String, Object> fieldCache = new HashMap<>();
 
 
@@ -61,16 +69,21 @@ public class Constants {
 	 */
 	public Constants(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
+		// 将 class 解析成 map
+		//
 		this.className = clazz.getName();
 		Field[] fields = clazz.getFields();
 		for (Field field : fields) {
+			// 是否 public  static final 修饰
 			if (ReflectionUtils.isPublicStaticFinal(field)) {
+				// 字段名称
 				String name = field.getName();
 				try {
+					// 字段值
 					Object value = field.get(null);
+					// 放入容器
 					this.fieldCache.put(name, value);
-				}
-				catch (IllegalAccessException ex) {
+				} catch (IllegalAccessException ex) {
 					// just leave this field and continue
 				}
 			}
@@ -133,6 +146,8 @@ public class Constants {
 	 * Parse the given String (upper or lower case accepted) and return
 	 * the appropriate value if it's the name of a constant field in the
 	 * class that we're analysing.
+	 *
+	 * 从容器中获取 code 对应的数据值
 	 * @param code the name of the field (never {@code null})
 	 * @return the Object value
 	 * @throws ConstantException if there's no such field
@@ -155,6 +170,8 @@ public class Constants {
 	 * values (i.e. all uppercase). The supplied {@code namePrefix}
 	 * will be uppercased (in a locale-insensitive fashion) prior to
 	 * the main logic of this method kicking in.
+	 *
+	 * 根据前缀获取 名称列表
 	 * @param namePrefix prefix of the constant names to search (may be {@code null})
 	 * @return the set of constant names
 	 */

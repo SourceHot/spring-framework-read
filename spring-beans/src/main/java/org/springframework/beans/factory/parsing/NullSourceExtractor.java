@@ -26,6 +26,7 @@ import org.springframework.lang.Nullable;
  * <p>This is the default implementation and prevents too much metadata from being
  * held in memory during normal (non-tooled) runtime usage.
  *
+ * 空的 源提取器
  * @author Rob Harrop
  * @since 2.0
  */

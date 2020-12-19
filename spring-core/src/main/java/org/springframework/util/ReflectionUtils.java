@@ -805,6 +805,7 @@ public abstract class ReflectionUtils {
 	 */
 	public static boolean isPublicStaticFinal(Field field) {
 		int modifiers = field.getModifiers();
+		// public static final 修饰吗
 		return (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers));
 	}
 
