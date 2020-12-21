@@ -32,13 +32,25 @@ import org.springframework.util.Assert;
  */
 public class Problem {
 
+	/**
+	 * 问题信息
+	 */
 	private final String message;
 
+	/**
+	 * 问题发生的地方
+	 */
 	private final Location location;
 
+	/**
+	 * 状态, 存储堆栈信息. 
+	 */
 	@Nullable
 	private final ParseState parseState;
 
+	/**
+	 * 异常
+	 */
 	@Nullable
 	private final Throwable rootCause;
 

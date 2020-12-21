@@ -23,18 +23,32 @@ import org.springframework.lang.Nullable;
  * Context that gets passed along a bean definition reading process, encapsulating all relevant
  * configuration as well as state.
  *
+ * bean 定义读取的上下文
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
  */
 public class ReaderContext {
 
+	/**
+	 * 资源对象
+	 */
 	private final Resource resource;
 
+	/**
+	 * 问题报告接口
+	 */
 	private final ProblemReporter problemReporter;
 
+	/**
+	 * 读取的事件监听器
+	 */
 	private final ReaderEventListener eventListener;
 
+	/**
+	 * 元数据提取接口
+	 */
 	private final SourceExtractor sourceExtractor;
 
 

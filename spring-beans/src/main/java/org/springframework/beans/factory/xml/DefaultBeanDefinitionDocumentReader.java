@@ -81,6 +81,9 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	@Nullable
 	private XmlReaderContext readerContext;
 
+	/**
+	 * bean 定义解析委托对象
+	 */
 	@Nullable
 	private BeanDefinitionParserDelegate delegate;
 

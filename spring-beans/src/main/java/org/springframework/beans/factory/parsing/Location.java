@@ -34,9 +34,14 @@ import org.springframework.util.Assert;
  * @since 2.0
  */
 public class Location {
-
+	/**
+	 * 资源对象
+	 */
 	private final Resource resource;
 
+	/**
+	 * 源数据
+	 */
 	@Nullable
 	private final Object source;
 

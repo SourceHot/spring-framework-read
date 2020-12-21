@@ -41,6 +41,7 @@ public final class ParseState {
 
 	/**
 	 * Internal {@link LinkedList} storage.
+	 * 存储每个阶段的 Entry 对象
 	 */
 	private final LinkedList<Entry> state;
 
@@ -96,6 +97,8 @@ public final class ParseState {
 
 	/**
 	 * Returns a tree-style representation of the current {@code ParseState}.
+	 *
+	 * 输出堆栈信息
 	 */
 	@Override
 	public String toString() {
