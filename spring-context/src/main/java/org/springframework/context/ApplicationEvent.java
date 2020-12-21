@@ -38,6 +38,7 @@ public abstract class ApplicationEvent extends EventObject {
 
 	/**
 	 * System time when the event happened.
+	 * 事件发生时间
 	 */
 	private final long timestamp;
 
