@@ -59,8 +59,12 @@ import org.springframework.util.StringUtils;
  */
 public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 
+
 	private static final String REF_SUFFIX = "-ref";
 
+	/**
+	 * 分隔符
+	 */
 	private static final String DELIMITER_PREFIX = "_";
 
 
@@ -78,11 +82,15 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 
 	@Override
 	public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
+		// 是否是  Attr 类型
 		if (node instanceof Attr) {
 			Attr attr = (Attr) node;
+			// 参数名称
 			String argName = StringUtils.trimWhitespace(parserContext.getDelegate().getLocalName(attr));
+			// 参数值
 			String argValue = StringUtils.trimWhitespace(attr.getValue());
 
+			// 构造函数的参数指
 			ConstructorArgumentValues cvs = definition.getBeanDefinition().getConstructorArgumentValues();
 			boolean ref = false;
 
@@ -92,21 +100,27 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 				argName = argName.substring(0, argName.length() - REF_SUFFIX.length());
 			}
 
+			// 属性值持有对象
 			ValueHolder valueHolder = new ValueHolder(ref ? new RuntimeBeanReference(argValue) : argValue);
+			// 设置源数据
 			valueHolder.setSource(parserContext.getReaderContext().extractSource(attr));
 
+			// 是否是 - 开头
 			// handle "escaped"/"_" arguments
 			if (argName.startsWith(DELIMITER_PREFIX)) {
+				// 去掉 - 留下真实字符串
 				String arg = argName.substring(1).trim();
 
 				// fast default check
 				if (!StringUtils.hasText(arg)) {
+					// 设置构造函数的数据值
 					cvs.addGenericArgumentValue(valueHolder);
 				}
 				// assume an index otherwise
 				else {
 					int index = -1;
 					try {
+						// 解析 index 数据
 						index = Integer.parseInt(arg);
 					}
 					catch (NumberFormatException ex) {
@@ -124,6 +138,7 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 										" Only one approach may be used per argument.", attr);
 					}
 
+					// 设置到容器map中
 					cvs.addIndexedArgumentValue(index, valueHolder);
 				}
 			}
@@ -135,6 +150,7 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 							"Constructor argument '" + argName + "' already defined using <constructor-arg>." +
 									" Only one approach may be used per argument.", attr);
 				}
+				// 设置属性值持有者的名称
 				valueHolder.setName(Conventions.attributeNameToPropertyName(argName));
 				cvs.addGenericArgumentValue(valueHolder);
 			}

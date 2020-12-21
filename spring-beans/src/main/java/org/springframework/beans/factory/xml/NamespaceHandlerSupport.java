@@ -47,18 +47,29 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	/**
 	 * Stores the {@link BeanDefinitionParser} implementations keyed by the
 	 * local name of the {@link Element Elements} they handle.
+	 *
+	 * key: xml elementName
+	 * value: BeanDefinitionParser
 	 */
 	private final Map<String, BeanDefinitionParser> parsers = new HashMap<>();
 
 	/**
 	 * Stores the {@link BeanDefinitionDecorator} implementations keyed by the
 	 * local name of the {@link Element Elements} they handle.
+	 *
+	 * key: xml elementName
+	 * value: BeanDefinitionDecorator
 	 */
 	private final Map<String, BeanDefinitionDecorator> decorators = new HashMap<>();
 
 	/**
 	 * Stores the {@link BeanDefinitionDecorator} implementations keyed by the local
 	 * name of the {@link Attr Attrs} they handle.
+	 *
+	 * 存储有关 {@link Attr} 的 BeanDefinitionDecorator 容器
+	 *
+	 * key: attr
+	 * value: BeanDefinitionDecorator
 	 */
 	private final Map<String, BeanDefinitionDecorator> attributeDecorators = new HashMap<>();
 
@@ -70,7 +81,9 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	@Override
 	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		// 搜索 element 对应的  BeanDefinitionParser
 		BeanDefinitionParser parser = findParserForElement(element, parserContext);
+		// 解析
 		return (parser != null ? parser.parse(element, parserContext) : null);
 	}
 
@@ -80,7 +93,9 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 */
 	@Nullable
 	private BeanDefinitionParser findParserForElement(Element element, ParserContext parserContext) {
+		// 获取 element 的名称
 		String localName = parserContext.getDelegate().getLocalName(element);
+		// 从容器中获取
 		BeanDefinitionParser parser = this.parsers.get(localName);
 		if (parser == null) {
 			parserContext.getReaderContext().fatal(
@@ -97,8 +112,9 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	@Nullable
 	public BeanDefinitionHolder decorate(
 			Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
-
+		// 根据 node 获取 BeanDefinitionDecorator
 		BeanDefinitionDecorator decorator = findDecoratorForNode(node, parserContext);
+		// 解析
 		return (decorator != null ? decorator.decorate(node, definition, parserContext) : null);
 	}
 

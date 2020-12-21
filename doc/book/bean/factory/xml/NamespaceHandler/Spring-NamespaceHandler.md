@@ -1,51 +1,19 @@
-/*
- * Copyright 2002-2012 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+# Spring NamespaceHandler
+- 类全路径: `org.springframework.beans.factory.xml.NamespaceHandler`
+- 类作用: 命名空间处理器
+- 类图
+  ![namespaceHandler](./images/NamespaceHandler.png)
 
-package org.springframework.beans.factory.xml;
+- `NamespaceHandler` 提供了下面3种方法.
+    1. `init` 方法, 通常在构造函数执行之后执行.  
+    2. `parse` 方法, 将 Element 解析成 BeanDefinition 对象
+    3. `decorate` 方法, 将 node 解析成 BeanDefinitionHolder 对象
 
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.lang.Nullable;
+描述含义可能存在误差, 各位有心可以阅读下面的完整代码
 
-/**
- * Base interface used by the {@link DefaultBeanDefinitionDocumentReader}
- * for handling custom namespaces in a Spring XML configuration file.
- *
- * <p>Implementations are expected to return implementations of the
- * {@link BeanDefinitionParser} interface for custom top-level tags and
- * implementations of the {@link BeanDefinitionDecorator} interface for
- * custom nested tags.
- *
- * <p>The parser will call {@link #parse} when it encounters a custom tag
- * directly under the {@code <beans>} tags and {@link #decorate} when
- * it encounters a custom tag directly under a {@code <bean>} tag.
- *
- * <p>Developers writing their own custom element extensions typically will
- * not implement this interface directly, but rather make use of the provided
- * {@link NamespaceHandlerSupport} class.
- *
- * @author Rob Harrop
- * @author Erik Wiersma
- * @since 2.0
- * @see DefaultBeanDefinitionDocumentReader
- * @see NamespaceHandlerResolver
- */
+
+```java
 public interface NamespaceHandler {
 
 	/**
@@ -67,8 +35,8 @@ public interface NamespaceHandler {
 	 * inside (for example) a {@code <property>} tag.
 	 * <p>Implementations may return {@code null} if they will
 	 * <strong>not</strong> be used in a nested scenario.
-	 *
-	 *
+	 * 
+	 * 
 	 * 解析 beanDefinition
 	 *
 	 * @param element the element that is to be parsed into one or more {@code BeanDefinitions}
@@ -89,7 +57,7 @@ public interface NamespaceHandler {
 	 * {@link org.springframework.beans.factory.BeanFactory}.
 	 * <p>The supplied {@link ParserContext} can be used to register any
 	 * additional beans needed to support the main definition.
-	 *
+	 * 
 	 * 将 node 解析成 BeanDefinitionHolder
 	 * @param source the source element or attribute that is to be parsed
 	 * @param definition the current bean definition
@@ -103,3 +71,28 @@ public interface NamespaceHandler {
 	BeanDefinitionHolder decorate(Node source, BeanDefinitionHolder definition, ParserContext parserContext);
 
 }
+```
+
+
+
+
+
+## 实现类分析
+
+
+- SimplePropertyNamespaceHandler
+- SimpleConstructorNamespaceHandler
+- NamespaceHandlerSupport
+    - JeeNamespaceHandler
+    - AopNamespaceHandler
+    - OxmNamespaceHandler
+    - LangNamespaceHandler
+    - JdbcNamespaceHandler
+    - TxNamespaceHandler
+    - JmsNamespaceHandler
+    - ContextNamespaceHandler
+    - UtilNamespaceHandler
+    - MvcNamespaceHandler
+    - WebSocketNamespaceHandler
+    - TaskNamespaceHandler
+    - CacheNamespaceHandler 
