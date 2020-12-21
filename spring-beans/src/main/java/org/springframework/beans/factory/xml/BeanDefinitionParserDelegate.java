@@ -231,6 +231,9 @@ public class BeanDefinitionParserDelegate {
 
 	private final DocumentDefaultsDefinition defaults = new DocumentDefaultsDefinition();
 
+	/**
+	 * 阶段容器
+	 */
 	private final ParseState parseState = new ParseState();
 
 	/**
@@ -303,6 +306,8 @@ public class BeanDefinitionParserDelegate {
 	 * init-method, destroy-method and merge settings. Support nested 'beans'
 	 * element use cases by falling back to the given parent in case the
 	 * defaults are not explicitly set locally.
+	 *
+	 * 设置默认值数据
 	 * @see #populateDefaults(DocumentDefaultsDefinition, DocumentDefaultsDefinition, org.w3c.dom.Element)
 	 * @see #getDefaults()
 	 */
@@ -1577,6 +1582,8 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Parse a custom element (outside of the default namespace).
+	 *
+	 * 处理自定义标签
 	 * @param ele the element to parse
 	 * @return the resulting bean definition
 	 */

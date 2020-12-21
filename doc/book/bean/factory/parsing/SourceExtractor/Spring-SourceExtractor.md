@@ -1,6 +1,6 @@
 # Spring SourceExtractor
 - 类全路径: `org.springframework.beans.factory.parsing.SourceExtractor`
-- 作用: 元数据提取
+- 作用: 元数据提取, 主要用于提取 xml 中 element 的数据
 
 
 ```java

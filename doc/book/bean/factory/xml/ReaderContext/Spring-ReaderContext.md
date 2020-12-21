@@ -17,7 +17,8 @@
 
 
 
-
+<details>
+<summary>完整代码</summary>
 
 ```java
 public class ReaderContext {
@@ -231,3 +232,7 @@ public class ReaderContext {
 
 }
 ```
+
+</details>
+
+- 对于 `ReaderContext` 的分析就到这里结束了, 在 Spring 中有 `XmlReaderContext` 子类继承 `ReaderContext` 提供了更多的方法. 有关分析请查看[这篇文章](Spring-XmlReaderContext.md)

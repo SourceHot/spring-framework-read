@@ -47,7 +47,7 @@ public class ReaderContext {
 	private final ReaderEventListener eventListener;
 
 	/**
-	 * 元数据提取接口
+	 * 元数据提取接口, 主要用来提取 element 中的数据
 	 */
 	private final SourceExtractor sourceExtractor;
 

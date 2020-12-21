@@ -28,4 +28,7 @@ public interface BeanDefinitionDocumentReader {
 - 在方法中我们看到有两个参数
     1. Document
     2. XmlReaderContext
-    其中 Document 属于 xml 标准接口, 本系列不会对其进行介绍, XmlReaderContext 是 Spring 开发的类, 在本系列中有介绍, 详细内容请看[这篇文章]（
+    其中 Document 属于 xml 标准接口, 本系列不会对其进行介绍, XmlReaderContext 是 Spring 开发的类, 在本系列中有介绍, 详细内容请看[这篇文章](/doc/book/bean/factory/xml/ReaderContext/Spring-XmlReaderContext.md)
+       
+
+- 实现类分析: [DefaultBeanDefinitionDocumentReader](Spring-DefaultBeanDefinitionDocumentReader.md)

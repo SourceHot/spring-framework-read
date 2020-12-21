@@ -57,27 +57,40 @@ import org.springframework.util.StringUtils;
  * @author Erik Wiersma
  * @since 18.12.2003
  */
-public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocumentReader {
+public class DefaultBeanDefinitionDocumentReader  implements BeanDefinitionDocumentReader {
 
+	/**
+	 * bean 元素标签
+	 */
 	public static final String BEAN_ELEMENT = BeanDefinitionParserDelegate.BEAN_ELEMENT;
+
 
 	public static final String NESTED_BEANS_ELEMENT = "beans";
 
+
 	public static final String ALIAS_ELEMENT = "alias";
+
 
 	public static final String NAME_ATTRIBUTE = "name";
 
+
 	public static final String ALIAS_ATTRIBUTE = "alias";
+
 
 	public static final String IMPORT_ELEMENT = "import";
 
+
 	public static final String RESOURCE_ATTRIBUTE = "resource";
+
 
 	public static final String PROFILE_ATTRIBUTE = "profile";
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * xml读取器的上下文
+	 */
 	@Nullable
 	private XmlReaderContext readerContext;
 
@@ -132,12 +145,17 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		// the new (child) delegate with a reference to the parent for fallback purposes,
 		// then ultimately reset this.delegate back to its original (parent) reference.
 		// this behavior emulates a stack of delegates without actually necessitating one.
+
+
+		// 父 BeanDefinitionParserDelegate 一开始为null
 		BeanDefinitionParserDelegate parent = this.delegate;
 		// 创建 BeanDefinitionParserDelegate
 		this.delegate = createDelegate(getReaderContext(), root, parent);
 
+		// 判断命名空间是否为默认的命名空间
+		// 默认命名空间: http://www.springframework.org/schema/beans
 		if (this.delegate.isDefaultNamespace(root)) {
-			// profile 属性获取
+			// 获取 profile 属性
 			String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
 			// 是否存在 profile
 			if (StringUtils.hasText(profileSpec)) {
@@ -169,7 +187,9 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	protected BeanDefinitionParserDelegate createDelegate(
 			XmlReaderContext readerContext, Element root, @Nullable BeanDefinitionParserDelegate parentDelegate) {
 
+		// 创建对象 BeanDefinitionParserDelegate
 		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext);
+		// 设置默认值数据
 		delegate.initDefaults(root, parentDelegate);
 		return delegate;
 	}
@@ -180,6 +200,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * @param root the DOM root element of the document
 	 */
 	protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate) {
+		// 是否是默认的命名空间
 		if (delegate.isDefaultNamespace(root)) {
 			// 子节点列表
 			NodeList nl = root.getChildNodes();
@@ -187,6 +208,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 				Node node = nl.item(i);
 				if (node instanceof Element) {
 					Element ele = (Element) node;
+					// 是否是默认的命名空间
 					if (delegate.isDefaultNamespace(ele)) {
 						// 处理标签的方法
 						parseDefaultElement(ele, delegate);
@@ -237,8 +259,10 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * 解析 import 标签
 	 */
 	protected void importBeanDefinitionResource(Element ele) {
+		// 第一部分
 		// 获取 resource 属性
 		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
+		// 是否存在地址
 		if (!StringUtils.hasText(location)) {
 			getReaderContext().error("Resource location must not be empty", ele);
 			return;
@@ -264,10 +288,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			// unless it is the well-known Spring prefix "classpath*:"
 		}
 
+		// 第二部分
 		// Absolute or relative?
+		// 是不是绝对地址
 		if (absoluteLocation) {
 			try {
-				// 获取 import 的数量
+				// 获取 import 的数量(bean定义的数量)
 				int importCount = getReaderContext().getReader().loadBeanDefinitions(location, actualResources);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Imported " + importCount + " bean definitions from URL location [" + location + "]");
@@ -278,6 +304,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 						"Failed to import bean definitions from URL location [" + location + "]", ele, ex);
 			}
 		}
+		// 第三部分
 		else {
 			// No URL -> considering resource location as relative to the current file.
 			try {
@@ -312,6 +339,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 						"Failed to import bean definitions from relative location [" + location + "]", ele, ex);
 			}
 		}
+		// 第四部分
 		Resource[] actResArray = actualResources.toArray(new Resource[0]);
 		// 唤醒 import 处理事件
 		getReaderContext().fireImportProcessed(location, actResArray, extractSource(ele));
