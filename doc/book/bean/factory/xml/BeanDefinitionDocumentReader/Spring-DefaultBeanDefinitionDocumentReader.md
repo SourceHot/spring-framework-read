@@ -94,7 +94,7 @@ public class DefaultBeanDefinitionDocumentReader  implements BeanDefinitionDocum
 
 2. BeanDefinitionParserDelegate：bean定义解析委托对象
 
-   [分析文章](/doc/book/bean/factory/xml/Spring-BeanDefinitionParserDelegate-未完成.md)
+   [分析文章](/doc/book/bean/factory/xml/Spring-BeanDefinitionParserDelegate.md)
 
 
 
@@ -266,7 +266,7 @@ protected BeanDefinitionParserDelegate createDelegate(
 
 
 
-详细分析查看[BeanDefinitionParserDelegate](/doc/book/bean/factory/xml/Spring-BeanDefinitionParserDelegate-未完成.md)
+详细分析查看[BeanDefinitionParserDelegate](/doc/book/bean/factory/xml/Spring-BeanDefinitionParserDelegate.md)
 
 
 
@@ -916,7 +916,7 @@ protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate d
 
 
 
-第一步和第二步的行为请查看[这篇文章](/doc/book/bean/factory/xml/Spring-BeanDefinitionParserDelegate-未完成.md)
+第一步和第二步的行为请查看[这篇文章](/doc/book/bean/factory/xml/Spring-BeanDefinitionParserDelegate.md)
 
 
 

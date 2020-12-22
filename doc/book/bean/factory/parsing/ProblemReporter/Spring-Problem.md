@@ -52,6 +52,7 @@ public class Problem {
 
 
 ## ParseState
+- 类全路径: `org.springframework.beans.factory.parsing.ParseState`
 
 
 

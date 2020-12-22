@@ -168,6 +168,7 @@ public class ReaderContext {
 
 	/**
 	 * Fire a defaults-registered event.
+	 * 默认值注册事件
 	 */
 	public void fireDefaultsRegistered(DefaultsDefinition defaultsDefinition) {
 		this.eventListener.defaultsRegistered(defaultsDefinition);
@@ -175,6 +176,8 @@ public class ReaderContext {
 
 	/**
 	 * Fire a component-registered event.
+	 *
+	 * 组件注册事件
 	 */
 	public void fireComponentRegistered(ComponentDefinition componentDefinition) {
 		this.eventListener.componentRegistered(componentDefinition);
