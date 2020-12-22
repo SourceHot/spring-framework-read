@@ -276,6 +276,8 @@ public abstract class ObjectUtils {
 	 * object array (if necessary of primitive wrapper objects).
 	 * <p>A {@code null} source value will be converted to an
 	 * empty Object array.
+	 *
+	 * 转换成 array
 	 * @param source the (potentially primitive) array
 	 * @return the corresponding object array (never {@code null})
 	 * @throws IllegalArgumentException if the parameter is not an array
