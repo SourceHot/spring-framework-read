@@ -38,24 +38,28 @@ public interface ApplicationEventMulticaster {
 
 	/**
 	 * Add a listener to be notified of all events.
+	 * 添加应用监听器
 	 * @param listener the listener to add
 	 */
 	void addApplicationListener(ApplicationListener<?> listener);
 
 	/**
 	 * Add a listener bean to be notified of all events.
+	 * 添加应用监听器的名称
 	 * @param listenerBeanName the name of the listener bean to add
 	 */
 	void addApplicationListenerBean(String listenerBeanName);
 
 	/**
 	 * Remove a listener from the notification list.
+	 * 移除一个应用监听器
 	 * @param listener the listener to remove
 	 */
 	void removeApplicationListener(ApplicationListener<?> listener);
 
 	/**
 	 * Remove a listener bean from the notification list.
+	 * 移除一个应用监听器的名称
 	 * @param listenerBeanName the name of the listener bean to remove
 	 */
 	void removeApplicationListenerBean(String listenerBeanName);
@@ -64,6 +68,8 @@ public interface ApplicationEventMulticaster {
 	 * Remove all listeners registered with this multicaster.
 	 * <p>After a remove call, the multicaster will perform no action
 	 * on event notification until new listeners are registered.
+	 *
+	 * 移除所有的应用监听器
 	 */
 	void removeAllListeners();
 
@@ -71,6 +77,8 @@ public interface ApplicationEventMulticaster {
 	 * Multicast the given application event to appropriate listeners.
 	 * <p>Consider using {@link #multicastEvent(ApplicationEvent, ResolvableType)}
 	 * if possible as it provides better support for generics-based events.
+	 *
+	 * 广播事件
 	 * @param event the event to multicast
 	 */
 	void multicastEvent(ApplicationEvent event);
@@ -79,6 +87,8 @@ public interface ApplicationEventMulticaster {
 	 * Multicast the given application event to appropriate listeners.
 	 * <p>If the {@code eventType} is {@code null}, a default type is built
 	 * based on the {@code event} instance.
+	 *
+	 * 广播事件
 	 * @param event the event to multicast
 	 * @param eventType the type of event (can be {@code null})
 	 * @since 4.2

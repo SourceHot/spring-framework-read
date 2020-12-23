@@ -454,6 +454,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
     /**
      * Publish the given event to all listeners.
+	 *
+	 * 推送事件
      * @param event the event to publish (may be an {@link ApplicationEvent}
      * or a payload object to be turned into a {@link PayloadApplicationEvent})
      * @param eventType the resolved event type, if known
@@ -463,31 +465,39 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
         Assert.notNull(event, "Event must not be null");
 
         // Decorate event as an ApplicationEvent if necessary
+		// 应用事件对象
         ApplicationEvent applicationEvent;
         if (event instanceof ApplicationEvent) {
             applicationEvent = (ApplicationEvent) event;
         }
         else {
+        	// 应用实践对象的封装
             applicationEvent = new PayloadApplicationEvent<>(this, event);
             if (eventType == null) {
+            	// 事件类型
                 eventType = ((PayloadApplicationEvent<?>) applicationEvent).getResolvableType();
             }
         }
 
         // Multicast right now if possible - or lazily once the multicaster is initialized
         if (this.earlyApplicationEvents != null) {
+        	// 需要传播的事件列表中加入数据
             this.earlyApplicationEvents.add(applicationEvent);
         }
         else {
+        	// 传播器传播事件
             getApplicationEventMulticaster().multicastEvent(applicationEvent, eventType);
         }
 
+        // 父上下存在的情况下依靠父上下文进行事件推送
         // Publish event via parent context as well...
         if (this.parent != null) {
             if (this.parent instanceof AbstractApplicationContext) {
+            	// 发布事件
                 ((AbstractApplicationContext) this.parent).publishEvent(event, eventType);
             }
             else {
+				// 发布事件
                 this.parent.publishEvent(event);
             }
         }
@@ -579,25 +589,32 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
             // 准备刷新此上下文。
             prepareRefresh();
 
+			// 创建出 beanFactory
             // Tell the subclass to refresh the internal bean factory.
             ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
             // Prepare the bean factory for use in this context.
+			// 准备 beanFactory , 对 beanFactory 进行设置数据等
             prepareBeanFactory(beanFactory);
 
             try {
+				// beanFactory 在子类中进行后置处理
                 // Allows post-processing of the bean factory in context subclasses.
                 postProcessBeanFactory(beanFactory);
 
+                // BeanFactoryPostProcessor 方法调用
                 // Invoke factory processors registered as beans in the context.
                 invokeBeanFactoryPostProcessors(beanFactory);
 
+                // 注册 beanPostProcessor
                 // Register bean processors that intercept bean creation.
                 registerBeanPostProcessors(beanFactory);
 
+                // 实例化 message source 相关信息
                 // Initialize message source for this context.
                 initMessageSource();
 
+                // 实例化 应用事件传播器
                 // Initialize event multicaster for this context.
                 initApplicationEventMulticaster();
 
@@ -605,12 +622,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
                 onRefresh();
 
                 // Check for listener beans and register them.
+				// 注册监听器
                 registerListeners();
 
                 // Instantiate all remaining (non-lazy-init) singletons.
+				// 完成 beanFactory 的实例化
                 finishBeanFactoryInitialization(beanFactory);
 
                 // Last step: publish corresponding event.
+				// 完成刷新
                 finishRefresh();
             }
 
@@ -621,9 +641,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
                 }
 
                 // Destroy already created singletons to avoid dangling resources.
+				// 摧毁bean
                 destroyBeans();
 
                 // Reset 'active' flag.
+				// 取消刷新
                 cancelRefresh(ex);
 
                 // Propagate exception to caller.
@@ -633,6 +655,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
             finally {
                 // Reset common introspection caches in Spring's core, since we
                 // might not ever need metadata for singleton beans anymore...
+				// 重置通用缓存
                 resetCommonCaches();
             }
         }
@@ -641,6 +664,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
     /**
      * Prepare this context for refreshing, setting its startup date and
      * active flag as well as performing any initialization of property sources.
+	 *
+	 * 准备刷新此上下文
      */
     protected void prepareRefresh() {
         // Switch to active.

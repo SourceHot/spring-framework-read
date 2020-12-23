@@ -42,6 +42,8 @@ public interface ApplicationEventPublisher {
 	 * or even immediate execution at all. Event listeners are encouraged
 	 * to be as efficient as possible, individually using asynchronous
 	 * execution for longer-running and potentially blocking operations.
+	 *
+	 * 推送事件
 	 * @param event the event to publish
 	 * @see #publishEvent(Object)
 	 * @see org.springframework.context.event.ContextRefreshedEvent
@@ -61,6 +63,8 @@ public interface ApplicationEventPublisher {
 	 * or even immediate execution at all. Event listeners are encouraged
 	 * to be as efficient as possible, individually using asynchronous
 	 * execution for longer-running and potentially blocking operations.
+	 *
+	 * 推送事件
 	 * @param event the event to publish
 	 * @since 4.2
 	 * @see #publishEvent(ApplicationEvent)
