@@ -916,8 +916,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
      * @see org.springframework.context.support.DefaultLifecycleProcessor
      */
     protected void initLifecycleProcessor() {
+        // 获取 beanFactory
         ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+        // 判断 lifecycleProcessor beanName 是否有对应的 bean 实例
         if (beanFactory.containsLocalBean(LIFECYCLE_PROCESSOR_BEAN_NAME)) {
+            // 设置 lifecycleProcessor
             this.lifecycleProcessor =
                     beanFactory.getBean(LIFECYCLE_PROCESSOR_BEAN_NAME, LifecycleProcessor.class);
             if (logger.isTraceEnabled()) {
@@ -925,9 +928,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
             }
         }
         else {
+            // 创建默认的 生命周期处理接口的实现都西昂
             DefaultLifecycleProcessor defaultProcessor = new DefaultLifecycleProcessor();
+            // 设置 beanFactory
             defaultProcessor.setBeanFactory(beanFactory);
+            // 设置成员变量
             this.lifecycleProcessor = defaultProcessor;
+            // 注册
             beanFactory.registerSingleton(LIFECYCLE_PROCESSOR_BEAN_NAME, this.lifecycleProcessor);
             if (logger.isTraceEnabled()) {
                 logger.trace("No '" + LIFECYCLE_PROCESSOR_BEAN_NAME + "' bean, using " +
@@ -1072,8 +1079,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
      * @see CachedIntrospectionResults#clearClassLoader(ClassLoader)
      */
     protected void resetCommonCaches() {
+        // 反射缓存
         ReflectionUtils.clearCache();
+        // 注解缓存
         AnnotationUtils.clearCache();
+        // 类型解析器缓存
         ResolvableType.clearCache();
         CachedIntrospectionResults.clearClassLoader(getClassLoader());
     }
@@ -1097,10 +1107,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
                 @Override
                 public void run() {
                     synchronized (startupShutdownMonitor) {
+                        // 真正的关闭方法
                         doClose();
                     }
                 }
             };
+            // jdk 提供的关闭应用时触发的钩子线程
             Runtime.getRuntime().addShutdownHook(this.shutdownHook);
         }
     }
@@ -1127,11 +1139,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
     @Override
     public void close() {
         synchronized (this.startupShutdownMonitor) {
+            // 执行关闭
             doClose();
             // If we registered a JVM shutdown hook, we don't need it anymore now:
             // We've already explicitly closed the context.
             if (this.shutdownHook != null) {
                 try {
+                    // 移除 关闭线程
                     Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
                 }
                 catch (IllegalStateException ex) {
@@ -1157,9 +1171,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
                 logger.debug("Closing " + this);
             }
 
+            // 在容器中移除当前上下文
             LiveBeansView.unregisterApplicationContext(this);
 
             try {
+                // 发布关闭上下文事件
                 // Publish shutdown event.
                 publishEvent(new ContextClosedEvent(this));
             }
@@ -1170,6 +1186,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
             // Stop all Lifecycle beans, to avoid delays during individual destruction.
             if (this.lifecycleProcessor != null) {
                 try {
+                    // 生命周期处理器执行关闭函数
                     this.lifecycleProcessor.onClose();
                 }
                 catch (Throwable ex) {
@@ -1177,13 +1194,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
                 }
             }
 
+            // 摧毁bean
             // Destroy all cached singletons in the context's BeanFactory.
             destroyBeans();
 
+            // 关闭 beanFactory
             // Close the state of this context itself.
             closeBeanFactory();
 
             // Let subclasses do some final clean-up if they wish...
+            // 子类拓展关闭相关方法
             onClose();
 
             // Reset local application listeners to pre-refresh state.
@@ -1192,6 +1212,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
                 this.applicationListeners.addAll(this.earlyApplicationListeners);
             }
 
+            // 设置激活状态为 false
             // Switch to inactive.
             this.active.set(false);
         }

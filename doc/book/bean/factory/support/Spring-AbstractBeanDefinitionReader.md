@@ -183,3 +183,11 @@ public int loadBeanDefinitions(String location, @Nullable Set<Resource> actualRe
 
 
 - 方法对于`resourceLoader`的一种特殊类型做了额外处理`ResourcePatternResolver`
+
+
+
+
+
+
+
+有关于`AbstractBeanDefinitionReader` 中 `loadBeanDefinitions` 的更多细节方法在子类上有所体现, 请查看[XmlBeanDefinitionReader](/doc/book/bean/factory/xml/Spring-XmlBeanDefinitionReader.md)类的分析来进行了解

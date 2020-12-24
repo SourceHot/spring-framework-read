@@ -21,4 +21,4 @@ public interface LifecycleProcessor extends Lifecycle {
 ```
 
 
-- 在 Spring 中 `LifecycleProcessor` 仅有 `DefaultLifecycleProcessor` 实现
+- 在 Spring 中 `LifecycleProcessor` 仅有 [`DefaultLifecycleProcessor`](./Spring-DefaultLifecycleProcessor.md) 实现
