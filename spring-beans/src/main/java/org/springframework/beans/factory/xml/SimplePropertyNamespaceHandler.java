@@ -60,6 +60,7 @@ public class SimplePropertyNamespaceHandler implements NamespaceHandler {
 	@Override
 	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		// 记录异常
 		parserContext.getReaderContext().error(
 				"Class [" + getClass().getName() + "] does not support custom elements.", element);
 		return null;
@@ -67,20 +68,34 @@ public class SimplePropertyNamespaceHandler implements NamespaceHandler {
 
 	@Override
 	public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
+		// node 是否是  attr
 		if (node instanceof Attr) {
+			// 将 attr 转换成 属性名称 属性值
 			Attr attr = (Attr) node;
+			// 属性名称
 			String propertyName = parserContext.getDelegate().getLocalName(attr);
+			// 属性值
 			String propertyValue = attr.getValue();
+			// bean 定义中的属性映射表
 			MutablePropertyValues pvs = definition.getBeanDefinition().getPropertyValues();
+			// 如果属性映射吧已经存在当前的 属性名称 抛出异常
 			if (pvs.contains(propertyName)) {
 				parserContext.getReaderContext().error("Property '" + propertyName + "' is already defined using " +
 						"both <property> and inline syntax. Only one approach may be used per property.", attr);
 			}
+			// 如果属性名称 结尾是-ref
 			if (propertyName.endsWith(REF_SUFFIX)) {
+				// 切分字符串得到 -ref 之前的内容
 				propertyName = propertyName.substring(0, propertyName.length() - REF_SUFFIX.length());
+				// 设置属性映射表中
+				// key: 属性名称
+				// value: RuntimeBeanReference
 				pvs.add(Conventions.attributeNameToPropertyName(propertyName), new RuntimeBeanReference(propertyValue));
 			}
 			else {
+				// 直接设置
+				// key: 属性名称
+				// value: 属性值
 				pvs.add(Conventions.attributeNameToPropertyName(propertyName), propertyValue);
 			}
 		}

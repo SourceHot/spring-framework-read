@@ -240,6 +240,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 				// 将 local 解析成 resource 列表
 				Resource[] resources = ((ResourcePatternResolver) resourceLoader).getResources(location);
 
+				// bean 定义的数量
 				int count = loadBeanDefinitions(resources);
 				if (actualResources != null) {
 					Collections.addAll(actualResources, resources);

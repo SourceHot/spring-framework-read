@@ -75,7 +75,7 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 
 	/**
 	 * Return a friendly name for this context.
-	 * 应用名称
+	 * 显示名称
 	 * @return a display name for this context (never {@code null})
 	 */
 	String getDisplayName();

@@ -21,7 +21,7 @@ import org.springframework.util.Assert;
 /**
  * {@link ParseState} entry representing a (possibly indexed)
  * constructor argument.
- *
+ * 构造函数处理阶段
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0

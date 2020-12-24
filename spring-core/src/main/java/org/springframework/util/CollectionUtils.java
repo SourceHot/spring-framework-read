@@ -47,6 +47,7 @@ public abstract class CollectionUtils {
 	/**
 	 * Return {@code true} if the supplied Collection is {@code null} or empty.
 	 * Otherwise, return {@code false}.
+	 * 判断 collection 是否为空
 	 * @param collection the Collection to check
 	 * @return whether the given Collection is empty
 	 */
@@ -57,6 +58,8 @@ public abstract class CollectionUtils {
 	/**
 	 * Return {@code true} if the supplied Map is {@code null} or empty.
 	 * Otherwise, return {@code false}.
+	 *
+	 * 判断 map 是否为空
 	 * @param map the Map to check
 	 * @return whether the given Map is empty
 	 */
@@ -71,6 +74,8 @@ public abstract class CollectionUtils {
 	 * This {@code arrayToList} method is just meant to deal with an incoming Object
 	 * value that might be an {@code Object[]} or a primitive array at runtime.
 	 * <p>A {@code null} source value will be converted to an empty List.
+	 *
+	 * array 转换成 list
 	 * @param source the (potentially primitive) array
 	 * @return the converted List result
 	 * @see ObjectUtils#toObjectArray(Object)
@@ -78,11 +83,13 @@ public abstract class CollectionUtils {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static List arrayToList(@Nullable Object source) {
+		// source 转换成 array
 		return Arrays.asList(ObjectUtils.toObjectArray(source));
 	}
 
 	/**
 	 * Merge the given array into the given Collection.
+	 * 将数据从 array 拷贝到 collection
 	 * @param array the array to merge (may be {@code null})
 	 * @param collection the target Collection to merge the array into
 	 */
@@ -100,7 +107,7 @@ public abstract class CollectionUtils {
 	 * <p>Uses {@code Properties.propertyNames()} to even catch
 	 * default properties linked into the original Properties instance.
 	 *
-	 * pros 属性合并到 map 中
+	 * 将 props 拷贝到 map
 	 * @param props the Properties instance to merge (may be {@code null})
 	 * @param map the target Map to merge the properties into
 	 */
@@ -122,6 +129,7 @@ public abstract class CollectionUtils {
 
 	/**
 	 * Check whether the given Iterator contains the given element.
+	 * 判断iterator是否包含element
 	 * @param iterator the Iterator to check
 	 * @param element the element to look for
 	 * @return {@code true} if found, {@code false} otherwise
@@ -140,6 +148,7 @@ public abstract class CollectionUtils {
 
 	/**
 	 * Check whether the given Enumeration contains the given element.
+	 * 判断是否包含
 	 * @param enumeration the Enumeration to check
 	 * @param element the element to look for
 	 * @return {@code true} if found, {@code false} otherwise
@@ -159,6 +168,7 @@ public abstract class CollectionUtils {
 	/**
 	 * Check whether the given Collection contains the given element instance.
 	 * <p>Enforces the given instance to be present, rather than returning
+	 * 判断是否包含
 	 * {@code true} for an equal element as well.
 	 * @param collection the Collection to check
 	 * @param element the element to look for
@@ -178,6 +188,8 @@ public abstract class CollectionUtils {
 	/**
 	 * Return {@code true} if any element in '{@code candidates}' is
 	 * contained in '{@code source}'; otherwise returns {@code false}.
+	 *
+	 * 判断是否包含
 	 * @param source the source Collection
 	 * @param candidates the candidates to search for
 	 * @return whether any of the candidates has been found
@@ -199,6 +211,8 @@ public abstract class CollectionUtils {
 	 * '{@code source}'. If no element in '{@code candidates}' is present in
 	 * '{@code source}' returns {@code null}. Iteration order is
 	 * {@link Collection} implementation specific.
+	 *
+	 * 找到第一个匹配对象
 	 * @param source the source Collection
 	 * @param candidates the candidates to search for
 	 * @return the first present object, or {@code null} if not found
@@ -219,6 +233,8 @@ public abstract class CollectionUtils {
 
 	/**
 	 * Find a single value of the given type in the given Collection.
+	 *
+	 * 找到类型匹配的对象
 	 * @param collection the Collection to search
 	 * @param type the type to look for
 	 * @return a value of the given type found if there is a clear match,
@@ -232,6 +248,7 @@ public abstract class CollectionUtils {
 		}
 		T value = null;
 		for (Object element : collection) {
+			// 类型不为空 || 是实现类
 			if (type == null || type.isInstance(element)) {
 				if (value != null) {
 					// More than one value found... no clear single value.
@@ -247,6 +264,8 @@ public abstract class CollectionUtils {
 	 * Find a single value of one of the given types in the given Collection:
 	 * searching the Collection for a value of the first type, then
 	 * searching for a value of the second type, etc.
+	 *
+	 * 找到类型匹配的对象
 	 * @param collection the collection to search
 	 * @param types the types to look for, in prioritized order
 	 * @return a value of one of the given types found if there is a clear match,
@@ -268,6 +287,7 @@ public abstract class CollectionUtils {
 
 	/**
 	 * Determine whether the given Collection only contains a single unique object.
+	 * 容器中是否唯一
 	 * @param collection the Collection to check
 	 * @return {@code true} if the collection contains a single reference or
 	 * multiple references to the same instance, {@code false} otherwise
@@ -292,6 +312,8 @@ public abstract class CollectionUtils {
 
 	/**
 	 * Find the common element type of the given Collection, if any.
+	 *
+	 * 找到公共的父类
 	 * @param collection the Collection to check
 	 * @return the common element type, or {@code null} if no clear
 	 * common type has been found (or the collection was empty)
@@ -318,6 +340,7 @@ public abstract class CollectionUtils {
 	/**
 	 * Retrieve the first element of the given Set, using {@link SortedSet#first()}
 	 * or otherwise using the iterator.
+	 * 找到第一个元素
 	 * @param set the Set to check (may be {@code null} or empty)
 	 * @return the first element, or {@code null} if none
 	 * @since 5.2.3
@@ -344,6 +367,7 @@ public abstract class CollectionUtils {
 
 	/**
 	 * Retrieve the first element of the given List, accessing the zero index.
+	 * 找到第一个元素
 	 * @param list the List to check (may be {@code null} or empty)
 	 * @return the first element, or {@code null} if none
 	 * @since 5.2.3
@@ -359,6 +383,7 @@ public abstract class CollectionUtils {
 	/**
 	 * Retrieve the last element of the given Set, using {@link SortedSet#last()}
 	 * or otherwise iterating over all elements (assuming a linked set).
+	 * 找到最后一个元素
 	 * @param set the Set to check (may be {@code null} or empty)
 	 * @return the last element, or {@code null} if none
 	 * @since 5.0.3
@@ -386,6 +411,7 @@ public abstract class CollectionUtils {
 
 	/**
 	 * Retrieve the last element of the given List, accessing the highest index.
+	 * 找到最后一个元素
 	 * @param list the List to check (may be {@code null} or empty)
 	 * @return the last element, or {@code null} if none
 	 * @since 5.0.3
@@ -402,6 +428,8 @@ public abstract class CollectionUtils {
 	 * Marshal the elements from the given enumeration into an array of the given type.
 	 * Enumeration elements must be assignable to the type of the given array. The array
 	 * returned will be a different instance than the array given.
+	 *
+	 * 转换成 array
 	 */
 	public static <A, E extends A> A[] toArray(Enumeration<E> enumeration, A[] array) {
 		ArrayList<A> elements = new ArrayList<>();
@@ -415,6 +443,7 @@ public abstract class CollectionUtils {
 	 * Adapt an {@link Enumeration} to an {@link Iterator}.
 	 * @param enumeration the original {@code Enumeration}
 	 * @return the adapted {@code Iterator}
+	 * 转换成迭代器
 	 */
 	public static <E> Iterator<E> toIterator(@Nullable Enumeration<E> enumeration) {
 		return (enumeration != null ? new EnumerationIterator<>(enumeration) : Collections.emptyIterator());
@@ -422,6 +451,8 @@ public abstract class CollectionUtils {
 
 	/**
 	 * Adapt a {@code Map<K, List<V>>} to an {@code MultiValueMap<K, V>}.
+	 *
+	 * map 转 MultiValueMap
 	 * @param map the original map
 	 * @return the multi-value map
 	 * @since 3.1

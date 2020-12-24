@@ -4,7 +4,7 @@
 
 
 - [BeanDefinitionReader](/doc/book/bean/factory/support/BeanDefinitionReader/Spring-BeanDefinitionReader.md)
-    - [AbstractBeanDefinitionReader](/doc/book/bean/factory/support/Spring-AbstractBeanDefinitionReader-未完成.md)
+    - [AbstractBeanDefinitionReader](/doc/book/bean/factory/support/Spring-AbstractBeanDefinitionReader.md)
         - PropertiesBeanDefinitionReader
         - GroovyBeanDefinitionReader
         - XmlBeanDefinitionReader

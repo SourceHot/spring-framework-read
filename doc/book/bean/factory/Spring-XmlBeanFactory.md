@@ -40,4 +40,4 @@ public class XmlBeanFactory extends DefaultListableBeanFactory {
 ```
 
 
-- 有关 XmlBeanDefinitionReader 分析请查看[这篇文章](/doc/book/bean/factory/xml/Spring-XmlBeanDefinitionReader-未完成.md)
+- 有关 XmlBeanDefinitionReader 分析请查看[这篇文章](/doc/book/bean/factory/xml/Spring-XmlBeanDefinitionReader.md)

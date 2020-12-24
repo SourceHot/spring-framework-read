@@ -22,7 +22,7 @@ import org.springframework.lang.Nullable;
  * Used by the {@link org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader} to
  * locate a {@link NamespaceHandler} implementation for a particular namespace URI.
  *
- * 命名空间解析器
+ * 命名空间处理器解析
  * @author Rob Harrop
  * @since 2.0
  * @see NamespaceHandler
@@ -35,7 +35,7 @@ public interface NamespaceHandlerResolver {
 	 * Resolve the namespace URI and return the located {@link NamespaceHandler}
 	 * implementation.
 	 *
-	 * 解析 命名空间 url  返回对应的 命名空间处理器
+	 * 解析命名空间的 url 获得 命名空间处理器
 	 * @param namespaceUri the relevant namespace URI
 	 * @return the located {@link NamespaceHandler} (may be {@code null})
 	 */

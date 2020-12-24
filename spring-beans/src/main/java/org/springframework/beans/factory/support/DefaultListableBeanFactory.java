@@ -219,7 +219,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 *
 	 * Cached array of bean definition names in case of frozen configuration.
-	 * bean definition 的名称列表
+	 * 冻结的 bean definition 的名称列表
 	 * */
 	@Nullable
 	private volatile String[] frozenBeanDefinitionNames;
@@ -1267,8 +1267,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public void destroySingletons() {
+		// 父类的摧毁方法
 		super.destroySingletons();
+		// 更新单例bean容器
 		updateManualSingletonNames(Set::clear, set -> !set.isEmpty());
+		// 清理类型缓存
 		clearByTypeCache();
 	}
 

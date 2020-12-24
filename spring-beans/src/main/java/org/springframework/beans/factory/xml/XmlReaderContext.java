@@ -43,9 +43,14 @@ import org.springframework.lang.Nullable;
  * @since 2.0
  */
 public class XmlReaderContext extends ReaderContext {
-
+	/**
+	 * xml bean 定义读取器
+	 */
 	private final XmlBeanDefinitionReader reader;
 
+	/**
+	 * 命名空间处理器解析类
+	 */
 	private final NamespaceHandlerResolver namespaceHandlerResolver;
 
 

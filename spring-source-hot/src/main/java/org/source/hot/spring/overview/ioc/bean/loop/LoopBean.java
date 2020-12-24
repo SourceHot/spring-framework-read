@@ -15,10 +15,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class LoopBean {
 	public static void main(String[] args) {
-//		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(LoopBean.class);
-//		B bean = ctx.getBean(B.class);
-//		System.out.println();
-		traverseFolder("D:\\desktop\\git_repo\\spring-ebk\\spring-framework-read\\doc\\book");
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(LoopBean.class);
+		B bean = ctx.getBean(B.class);
+		System.out.println();
+//		traverseFolder("D:\\desktop\\git_repo\\spring-ebk\\spring-framework-read\\doc\\book");
 	}
 
 

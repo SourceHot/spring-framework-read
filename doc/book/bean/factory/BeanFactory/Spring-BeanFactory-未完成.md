@@ -117,12 +117,12 @@ public interface BeanFactory {
             - [AbstractAutowireCapableBeanFactory](/doc/book/bean/factory/Spring-AbstractAutowireCapableBeanFactory.md)
                 - [DefaultListableBeanFactory](/doc/book/bean/factory/Spring-DefaultListableBeanFactory.md)
                     - [XmlBeanFactory](/doc/book/bean/factory/Spring-XmlBeanFactory.md)
-        - ConfigurableListableBeanFactory
-            - DefaultListableBeanFactory
-                - XmlBeanFactory
-    - ApplicationContext
-        - ConfigurableApplicationContext
-            - AbstractApplicationContext
+        - [ConfigurableListableBeanFactory](./Spring-ConfigurableListableBeanFactory.md)
+            - [DefaultListableBeanFactory](/doc/book/bean/factory/Spring-DefaultListableBeanFactory.md)
+                - [XmlBeanFactory](/doc/book/bean/factory/Spring-XmlBeanFactory.md)
+    - [ApplicationContext](/doc/book/context/ApplicationContext/Spring-ApplicationContext.md)
+        - [ConfigurableApplicationContext](/doc/book/context/ApplicationContext/Spring-ConfigurableApplicationContext.md)
+            - [AbstractApplicationContext](/doc/book/context/ApplicationContext/Spring-AbstractApplicationContext.md)
                 - AbstractRefreshableApplicationContext
                     - AbstractRefreshableConfigApplicationContext
                         - AbstractXmlApplicationContext
@@ -153,10 +153,10 @@ public interface BeanFactory {
 - AutowireCapableBeanFactory
     - ConfigurableListableBeanFactory
         - [DefaultListableBeanFactory](/doc/book/bean/factory/Spring-DefaultListableBeanFactory.md)
-            - XmlBeanFactory
+            - [XmlBeanFactory](/doc/book/bean/factory/Spring-XmlBeanFactory.md)
     - [AbstractAutowireCapableBeanFactory](/doc/book/bean/factory/Spring-AbstractAutowireCapableBeanFactory.md)
-        - DefaultListableBeanFactory
-            - XmlBeanFactory
+        - [DefaultListableBeanFactory](/doc/book/bean/factory/Spring-DefaultListableBeanFactory.md)
+            - [XmlBeanFactory](/doc/book/bean/factory/Spring-XmlBeanFactory.md)
     - StubBeanFactory     
 - ListableBeanFactory
     - ApplicationContext
