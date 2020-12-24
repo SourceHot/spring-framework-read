@@ -219,7 +219,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 *
 	 * Cached array of bean definition names in case of frozen configuration.
-	 * bean definition 的名称列表
+	 * 冻结的 bean definition 的名称列表
 	 * */
 	@Nullable
 	private volatile String[] frozenBeanDefinitionNames;
