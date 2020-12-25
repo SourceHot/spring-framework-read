@@ -779,7 +779,7 @@ protected void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFa
 
 
 
-- 在 `invokeBeanFactoryPostProcessors` 方法和`registerBeanPostProcessors` 方法中都出现了`PostProcessorRegistrationDelegate`(后置处理器委托对象)，[分析文章](/doc/book/core/Spring-PostProcessorRegistrationDelegate-未完成.md)
+- 在 `invokeBeanFactoryPostProcessors` 方法和`registerBeanPostProcessors` 方法中都出现了`PostProcessorRegistrationDelegate`(后置处理器委托对象)，[分析文章](/doc/book/core/context/Spring-PostProcessorRegistrationDelegate.md)
 
 
 

@@ -492,7 +492,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// 类型和需要的类型是否匹配
 		if (requiredType != null && !requiredType.isInstance(bean)) {
 			try {
-				// 获取类型转换器 , 通过类型转换器机械能转换
+				// 获取类型转换器 , 通过类型转换器进行能转换
 				T convertedBean = getTypeConverter().convertIfNecessary(bean, requiredType);
 				if (convertedBean == null) {
 					throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());

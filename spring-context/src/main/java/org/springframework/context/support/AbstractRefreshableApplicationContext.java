@@ -64,18 +64,31 @@ import org.springframework.lang.Nullable;
  */
 public abstract class AbstractRefreshableApplicationContext extends AbstractApplicationContext {
 
+	/**
+	 *  Synchronization monitor for the internal BeanFactory.
+	 *
+	 * beanFactory 锁
+	 * */
+	private final Object beanFactoryMonitor = new Object();
+
+	/**
+	 * 是否允许 bean定义覆盖
+	 */
 	@Nullable
 	private Boolean allowBeanDefinitionOverriding;
 
+	/**
+	 * 是否允许循环引用
+	 */
 	@Nullable
 	private Boolean allowCircularReferences;
 
-	/** Bean factory for this context. */
+	/**
+	 *  Bean factory for this context.
+	 *  BeanFactory
+	 * */
 	@Nullable
 	private DefaultListableBeanFactory beanFactory;
-
-	/** Synchronization monitor for the internal BeanFactory. */
-	private final Object beanFactoryMonitor = new Object();
 
 
 	/**
@@ -122,15 +135,27 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 */
 	@Override
 	protected final void refreshBeanFactory() throws BeansException {
+		// 是否存在 beanFactory
 		if (hasBeanFactory()) {
+			// 如果存在 beanFactory 则清空 bean 相关信息
+			// 摧毁bean
 			destroyBeans();
+			// 清空 beanFactory
 			closeBeanFactory();
 		}
 		try {
+			// 创建 BeanFactory
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
+			// 设置序列化id
 			beanFactory.setSerializationId(getId());
+			// 定制工厂的处理
+			// 设置两个属性值
+			// 	1. allowBeanDefinitionOverriding
+			//  2. allowCircularReferences
 			customizeBeanFactory(beanFactory);
+			// 加载 bean定义
 			loadBeanDefinitions(beanFactory);
+			// 上锁设置 beanFactory
 			synchronized (this.beanFactoryMonitor) {
 				this.beanFactory = beanFactory;
 			}
@@ -222,9 +247,11 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * @see DefaultListableBeanFactory#setAllowEagerClassLoading
 	 */
 	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
+		// 设置是否允许 bean定义覆盖
 		if (this.allowBeanDefinitionOverriding != null) {
 			beanFactory.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
 		}
+		// 设置是否允许循环引用
 		if (this.allowCircularReferences != null) {
 			beanFactory.setAllowCircularReferences(this.allowCircularReferences);
 		}

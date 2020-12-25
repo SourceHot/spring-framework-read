@@ -123,11 +123,11 @@ public interface BeanFactory {
     - [ApplicationContext](/doc/book/context/ApplicationContext/Spring-ApplicationContext.md)
         - [ConfigurableApplicationContext](/doc/book/context/ApplicationContext/Spring-ConfigurableApplicationContext.md)
             - [AbstractApplicationContext](/doc/book/context/ApplicationContext/Spring-AbstractApplicationContext.md)
-                - AbstractRefreshableApplicationContext
-                    - AbstractRefreshableConfigApplicationContext
-                        - AbstractXmlApplicationContext
-                            - FileSystemXmlApplicationContext
-                            - ClassPathXmlApplicationContext
+                - [AbstractRefreshableApplicationContext](/doc/book/context/support/Spring-AbstractRefreshableApplicationContext.md)
+                    - [AbstractRefreshableConfigApplicationContext](/doc/book/context/support/Spring-AbstractRefreshableConfigApplicationContext.md)
+                        - [AbstractXmlApplicationContext](/doc/book/context/support/Spring-AbstractXmlApplicationContext.md)
+                            - [FileSystemXmlApplicationContext](/doc/book/context/support/Spring-FileSystemXmlApplicationContext.md)
+                            - [ClassPathXmlApplicationContext](/doc/book/context/support/Spring-ClassPathXmlApplicationContext.md)
                         - AbstractRefreshableWebApplicationContext
                             - XmlWebApplicationContext
                             - GroovyWebApplicationContext
@@ -162,12 +162,12 @@ public interface BeanFactory {
     - ApplicationContext
     - StaticListableBeanFactory
     - ConfigurableListableBeanFactory
-        - AbstractApplicationContext
-            - AbstractRefreshableApplicationContext
-                - AbstractRefreshableConfigApplicationContext
-                    - AbstractXmlApplicationContext
-                        - FileSystemXmlApplicationContext
-                        - ClassPathXmlApplicationContext
+        - [AbstractApplicationContext](/doc/book/context/ApplicationContext/Spring-AbstractApplicationContext.md)
+            - [AbstractRefreshableApplicationContext](/doc/book/context/support/Spring-AbstractRefreshableApplicationContext.md)
+                - [AbstractRefreshableConfigApplicationContext](/doc/book/context/support/Spring-AbstractRefreshableConfigApplicationContext.md)
+                    - [AbstractXmlApplicationContext](/doc/book/context/support/Spring-AbstractXmlApplicationContext.md)
+                        - [FileSystemXmlApplicationContext](/doc/book/context/support/Spring-FileSystemXmlApplicationContext.md)
+                        - [ClassPathXmlApplicationContext](/doc/book/context/support/Spring-ClassPathXmlApplicationContext.md)
                     - AbstractRefreshableWebApplicationContext
                         - XmlWebApplicationContext
                         - GroovyWebApplicationContext
