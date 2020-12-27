@@ -74,9 +74,13 @@ public abstract class BeanUtils {
 	private static final Set<Class<?>> unknownEditorTypes =
 			Collections.newSetFromMap(new ConcurrentReferenceHashMap<>(64));
 
+	/**
+	 * 类型的默认值
+	 */
 	private static final Map<Class<?>, Object> DEFAULT_TYPE_VALUES;
 
 	static {
+		// 设置类型默认值
 		Map<Class<?>, Object> values = new HashMap<>();
 		values.put(boolean.class, false);
 		values.put(byte.class, (byte) 0);
@@ -89,6 +93,8 @@ public abstract class BeanUtils {
 	/**
 	 * Convenience method to instantiate a class using its no-arg constructor. 反射创建实体.
 	 *
+	 *
+	 * 将 class 转换成实例对象
 	 * @param clazz class to instantiate
 	 *
 	 * @return the new instance
@@ -105,6 +111,7 @@ public abstract class BeanUtils {
 			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
 		try {
+			// 反射创建Object
 			return clazz.newInstance();
 		}
 		catch (InstantiationException ex) {

@@ -158,6 +158,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/**
 	 * Flag that indicates whether we're currently within destroySingletons.
 	 *
+	 * 是否处于清理单例对象的状态
 	 * */
 	private boolean singletonsCurrentlyInDestruction = false;
 
