@@ -38,6 +38,9 @@ import org.springframework.lang.Nullable;
  */
 public abstract class TemplateAwareExpressionParser implements ExpressionParser {
 
+	/**
+	 * 字符串解析成 Expression 对象
+	 */
 	@Override
 	public Expression parseExpression(String expressionString) throws ParseException {
 		return parseExpression(expressionString, null);
@@ -45,10 +48,13 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 
 	@Override
 	public Expression parseExpression(String expressionString, @Nullable ParserContext context) throws ParseException {
+		// 两种处理方式
+		// 1. 解析上下文是模板的情况下
 		if (context != null && context.isTemplate()) {
-			// 是否使用 template 解析
+			// 使用 模板上下文进行解析
 			return parseTemplate(expressionString, context);
 		}
+		// 2. 解析上下文不是模板的情况下
 		else {
 			// 自定义的解析规则
 			return doParseExpression(expressionString, context);
@@ -94,7 +100,9 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 */
 	private Expression[] parseExpressions(String expressionString, ParserContext context) throws ParseException {
 		List<Expression> expressions = new ArrayList<>();
+		// 获取前缀
 		String prefix = context.getExpressionPrefix();
+		// 获取后缀
 		String suffix = context.getExpressionSuffix();
 		int startIdx = 0;
 

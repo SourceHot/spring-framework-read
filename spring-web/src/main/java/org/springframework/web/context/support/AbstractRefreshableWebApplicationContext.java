@@ -81,19 +81,34 @@ import org.springframework.web.context.ServletContextAware;
 public abstract class AbstractRefreshableWebApplicationContext extends AbstractRefreshableConfigApplicationContext
 		implements ConfigurableWebApplicationContext, ThemeSource {
 
-	/** Servlet context that this context runs in. */
+	/**
+	 *  Servlet context that this context runs in.
+	 *
+	 * servlet 上下文
+	 * */
 	@Nullable
 	private ServletContext servletContext;
 
-	/** Servlet config that this context runs in, if any. */
+	/**
+	 * Servlet config that this context runs in, if any.
+	 *
+	 * servlet 配置
+	 * */
 	@Nullable
 	private ServletConfig servletConfig;
 
-	/** Namespace of this context, or {@code null} if root. */
+	/**
+	 * Namespace of this context, or {@code null} if root.
+	 *
+	 * 命名空间
+	 * */
 	@Nullable
 	private String namespace;
 
-	/** the ThemeSource for this ApplicationContext. */
+	/**
+	 *  the ThemeSource for this ApplicationContext.
+	 * 主题来源
+	 * */
 	@Nullable
 	private ThemeSource themeSource;
 
@@ -166,11 +181,16 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	 */
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+
+		// 添加 ServletContextAwareProcessor 处理器
 		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, this.servletConfig));
+		// 设置需要忽略的依赖
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 		beanFactory.ignoreDependencyInterface(ServletConfigAware.class);
 
+		// 注册作用域
 		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory, this.servletContext);
+		// 注册环境信息
 		WebApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.servletContext, this.servletConfig);
 	}
 
