@@ -81,3 +81,43 @@ public String getProperty(String key) {
 - 执行路线
   - `org.springframework.core.env.PropertySourcesPropertyResolver#getProperty(java.lang.String)`
     - `org.springframework.core.env.PropertySourcesPropertyResolver#getProperty(java.lang.String, java.lang.Class<T>, boolean)`
+
+
+
+
+
+
+
+## 方法分析
+
+### validateRequiredProperties
+
+- 方法签名： `org.springframework.core.env.AbstractPropertyResolver#validateRequiredProperties`
+
+- 方法作用: 数据必填验证
+
+- 核心流程
+
+  循环必填属性key，获取value是否存在, 一旦不存在记录异常
+
+
+
+```java
+@Override
+public void validateRequiredProperties() {
+   // 异常信息
+   MissingRequiredPropertiesException ex = new MissingRequiredPropertiesException();
+   for (String key : this.requiredProperties) {
+      // 判断 key 的属性是否存在 如果不存在添加异常
+      if (this.getProperty(key) == null) {
+         ex.addMissingRequiredProperty(key);
+      }
+   }
+   if (!ex.getMissingRequiredProperties().isEmpty()) {
+      throw ex;
+   }
+}
+```
+
+
+

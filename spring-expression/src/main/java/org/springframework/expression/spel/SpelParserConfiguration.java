@@ -22,6 +22,8 @@ import org.springframework.lang.Nullable;
 /**
  * Configuration object for the SpEL expression parser.
  *
+ * el 解析配置
+ *
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @author Andy Clement

@@ -23,6 +23,7 @@ import org.springframework.lang.Nullable;
 /**
  * Represents a node in the AST for a parsed expression.
  *
+ * el 表达式节点
  * @author Andy Clement
  * @since 3.0
  */

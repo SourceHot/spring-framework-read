@@ -33,12 +33,16 @@ public interface Expression {
 
 	/**
 	 * Return the original string used to create this expression (unmodified).
+	 *
+	 * 获取表达式字符串
 	 * @return the original expression string
 	 */
 	String getExpressionString();
 
 	/**
 	 * Evaluate this expression in the default standard context.
+	 *
+	 * 获取表达式的数据值
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
@@ -49,6 +53,7 @@ public interface Expression {
 	 * Evaluate the expression in the default context. If the result
 	 * of the evaluation does not match (and cannot be converted to)
 	 * the expected result type then an exception will be returned.
+	 *
 	 * @param desiredResultType the class the caller would like the result to be
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation

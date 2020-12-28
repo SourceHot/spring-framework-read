@@ -34,6 +34,8 @@ public interface ParserContext {
 	 *     Hello #{name.firstName}!
 	 *     #{3 + 4}
 	 * </pre>
+	 *
+	 * 是否是模板表达式
 	 * @return true if the expression is a template, false otherwise
 	 */
 	boolean isTemplate();
@@ -41,6 +43,8 @@ public interface ParserContext {
 	/**
 	 * For template expressions, returns the prefix that identifies the start of an
 	 * expression block within a string. For example: "${"
+	 *
+	 * 获取表达式前缀
 	 * @return the prefix that identifies the start of an expression
 	 */
 	String getExpressionPrefix();
@@ -48,6 +52,8 @@ public interface ParserContext {
 	/**
 	 * For template expressions, return the prefix that identifies the end of an
 	 * expression block within a string. For example: "}"
+	 *
+	 * 获取表达式后缀
 	 * @return the suffix that identifies the end of an expression
 	 */
 	String getExpressionSuffix();
@@ -56,6 +62,8 @@ public interface ParserContext {
 	/**
 	 * The default ParserContext implementation that enables template expression
 	 * parsing mode. The expression prefix is "#{" and the expression suffix is "}".
+	 *
+	 * 解析上下文模板类
 	 * @see #isTemplate()
 	 */
 	ParserContext TEMPLATE_EXPRESSION = new ParserContext() {

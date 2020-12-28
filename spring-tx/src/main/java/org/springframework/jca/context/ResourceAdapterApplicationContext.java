@@ -54,8 +54,11 @@ public class ResourceAdapterApplicationContext extends GenericApplicationContext
 
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+		// 添加 BeanPostProcessor
 		beanFactory.addBeanPostProcessor(new BootstrapContextAwareProcessor(this.bootstrapContext));
+		// 设置需要忽略的依赖
 		beanFactory.ignoreDependencyInterface(BootstrapContextAware.class);
+		// 注册依赖
 		beanFactory.registerResolvableDependency(BootstrapContext.class, this.bootstrapContext);
 
 		// JCA WorkManager resolved lazily - may not be available.

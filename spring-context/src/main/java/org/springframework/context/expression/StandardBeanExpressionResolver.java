@@ -49,23 +49,49 @@ import org.springframework.util.StringUtils;
  */
 public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
-	/** Default expression prefix: "#{". */
+	/**
+	 *  Default expression prefix: "#{".
+	 *
+	 * 默认的表达式前缀
+	 * */
 	public static final String DEFAULT_EXPRESSION_PREFIX = "#{";
 
-	/** Default expression suffix: "}". */
+	/**
+	 * Default expression suffix: "}".
+	 *
+	 * 默认的表达式后缀
+	 * */
 	public static final String DEFAULT_EXPRESSION_SUFFIX = "}";
 
-
+	/**
+	 * 表达式前缀
+	 */
 	private String expressionPrefix = DEFAULT_EXPRESSION_PREFIX;
 
+	/**
+	 * 表达式后缀
+	 */
 	private String expressionSuffix = DEFAULT_EXPRESSION_SUFFIX;
 
+	/**
+	 * 表达式解析器
+	 */
 	private ExpressionParser expressionParser;
 
+	/**
+	 * 表达式缓存
+	 */
 	private final Map<String, Expression> expressionCache = new ConcurrentHashMap<>(256);
 
+	/**
+	 * key: bean 解析上下文
+	 * value: StandardEvaluationContext
+	 */
 	private final Map<BeanExpressionContext, StandardEvaluationContext> evaluationCache = new ConcurrentHashMap<>(8);
 
+	/**
+	 * 解析上下文
+	 */
 	private final ParserContext beanExpressionParserContext = new ParserContext() {
 		@Override
 		public boolean isTemplate() {

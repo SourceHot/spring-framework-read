@@ -90,21 +90,46 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	private static final Pattern VALID_QUALIFIED_ID_PATTERN = Pattern.compile("[\\p{L}\\p{N}_$]+");
 
 
+	/**
+	 * el解析配置
+	 */
 	private final SpelParserConfiguration configuration;
 
+
 	// For rules that build nodes, they are stacked here for return
+
+	/**
+	 * el 表达式节点
+	 */
 	private final Deque<SpelNodeImpl> constructedNodes = new ArrayDeque<>();
 
 	// The expression being parsed
+
+	/**
+	 * 需要解析的字符串
+	 */
 	private String expressionString = "";
 
 	// The token stream constructed from that expression string
+
+	/**
+	 * 符号列表
+	 *
+	 */
 	private List<Token> tokenStream = Collections.emptyList();
 
 	// length of a populated token stream
+
+	/**
+	 * 符号流长度
+	 */
 	private int tokenStreamLength;
 
 	// Current location in the token stream when processing tokens
+
+	/**
+	 * 当前符号所在位置
+	 */
 	private int tokenStreamPointer;
 
 
@@ -123,11 +148,14 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 
 		try {
 			this.expressionString = expressionString;
+			// 分词器, 根据预设的表达式进行分词
 			Tokenizer tokenizer = new Tokenizer(expressionString);
+			// 将符号全部放到容器中
 			this.tokenStream = tokenizer.process();
 			this.tokenStreamLength = this.tokenStream.size();
 			this.tokenStreamPointer = 0;
 			this.constructedNodes.clear();
+			// 解析el表达式
 			SpelNodeImpl ast = eatExpression();
 			Assert.state(ast != null, "No node");
 			Token t = peekToken();

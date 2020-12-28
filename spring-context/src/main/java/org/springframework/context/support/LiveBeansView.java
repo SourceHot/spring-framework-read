@@ -63,6 +63,9 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 	 */
 	public static final String MBEAN_APPLICATION_KEY = "application";
 
+	/**
+	 * 应用上下文列表
+	 */
 	private static final Set<ConfigurableApplicationContext> applicationContexts = new LinkedHashSet<>();
 
 	@Nullable

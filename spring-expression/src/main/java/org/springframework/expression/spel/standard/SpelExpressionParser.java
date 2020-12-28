@@ -31,7 +31,9 @@ import org.springframework.util.Assert;
  * @since 3.0
  */
 public class SpelExpressionParser extends TemplateAwareExpressionParser {
-
+	/**
+	 * el 表达式解析的配置
+	 */
 	private final SpelParserConfiguration configuration;
 
 
@@ -58,6 +60,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 
 	@Override
 	protected SpelExpression doParseExpression(String expressionString, @Nullable ParserContext context) throws ParseException {
+		// 交给 InternalSpelExpressionParser 进行解析
 		return new InternalSpelExpressionParser(this.configuration).doParseExpression(expressionString, context);
 	}
 

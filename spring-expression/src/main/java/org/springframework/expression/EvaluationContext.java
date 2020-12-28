@@ -28,6 +28,8 @@ import org.springframework.lang.Nullable;
  * {@link org.springframework.expression.spel.support.StandardEvaluationContext}
  * which can be extended, rather than having to implement everything manually.
  *
+ *
+ * 解析上下文
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -38,6 +40,8 @@ public interface EvaluationContext {
 	 * Return the default root context object against which unqualified
 	 * properties/methods/etc should be resolved. This can be overridden
 	 * when evaluating an expression.
+	 *
+	 * 获取类型描述
 	 */
 	TypedValue getRootObject();
 
