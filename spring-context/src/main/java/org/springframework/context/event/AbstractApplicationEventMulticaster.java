@@ -326,6 +326,8 @@ public abstract class AbstractApplicationEventMulticaster
 	 * <p>If this method returns {@code true} for a given listener as a first pass,
 	 * the listener instance will get retrieved and fully evaluated through a
 	 * {@link #supportsEvent(ApplicationListener, ResolvableType, Class)} call afterwards.
+	 *
+	 * 判断是否支持当前事件
 	 * @param beanFactory the BeanFactory that contains the listener beans
 	 * @param listenerBeanName the name of the bean in the BeanFactory
 	 * @param eventType the event type to check
@@ -339,16 +341,24 @@ public abstract class AbstractApplicationEventMulticaster
 
 		// 从容器中获取类型
 		Class<?> listenerType = beanFactory.getType(listenerBeanName);
+		// 1. 判空
+		// 2. 监听器是否是 GenericApplicationListener
+		// 3. 监听器是否是 SmartApplicationListener
 		if (listenerType == null || GenericApplicationListener.class.isAssignableFrom(listenerType) ||
 				SmartApplicationListener.class.isAssignableFrom(listenerType)) {
 			return true;
 		}
+
+		// 监听器是否支持事件
 		if (!supportsEvent(listenerType, eventType)) {
 			return false;
 		}
 		try {
 			BeanDefinition bd = beanFactory.getMergedBeanDefinition(listenerBeanName);
 			ResolvableType genericEventType = bd.getResolvableType().as(ApplicationListener.class).getGeneric();
+
+			// genericEventType 是否 none
+			// beanDefinition 是否是 eventType
 			return (genericEventType == ResolvableType.NONE || genericEventType.isAssignableFrom(eventType));
 		}
 		catch (NoSuchBeanDefinitionException ex) {
@@ -363,13 +373,17 @@ public abstract class AbstractApplicationEventMulticaster
 	 * <p>If this method returns {@code true} for a given listener as a first pass,
 	 * the listener instance will get retrieved and fully evaluated through a
 	 * {@link #supportsEvent(ApplicationListener, ResolvableType, Class)} call afterwards.
+	 *
+	 * 监听器是否支持事件
 	 * @param listenerType the listener's type as determined by the BeanFactory
 	 * @param eventType the event type to check
 	 * @return whether the given listener should be included in the candidates
 	 * for the given event type
 	 */
 	protected boolean supportsEvent(Class<?> listenerType, ResolvableType eventType) {
+		// 监听器中获取事件类型
 		ResolvableType declaredEventType = GenericApplicationListenerAdapter.resolveDeclaredEventType(listenerType);
+		// 事件类型判断是否同源
 		return (declaredEventType == null || declaredEventType.isAssignableFrom(eventType));
 	}
 

@@ -38,9 +38,16 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  */
 public class GenericApplicationListenerAdapter implements GenericApplicationListener, SmartApplicationListener {
 
+	/**
+	 * key: 监听器类型
+	 * value: 监听器的事件描述符
+	 */
 	private static final Map<Class<?>, ResolvableType> eventTypeCache = new ConcurrentReferenceHashMap<>();
 
 
+	/**
+	 * 监听器列表
+	 */
 	private final ApplicationListener<ApplicationEvent> delegate;
 
 	@Nullable

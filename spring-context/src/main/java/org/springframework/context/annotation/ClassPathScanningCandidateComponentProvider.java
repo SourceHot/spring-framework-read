@@ -92,24 +92,52 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 资源匹配符号
+	 */
 	private String resourcePattern = DEFAULT_RESOURCE_PATTERN;
 
+	/**
+	 * 需要的类型过滤器
+	 *
+	 * 通过 registerDefaultFilters 方法加入两个类型过滤器
+	 * javax.annotation.ManagedBean
+	 * javax.inject.Named
+	 */
 	private final List<TypeFilter> includeFilters = new LinkedList<>();
 
+	/**
+	 * 排除的类型过滤器
+	 */
 	private final List<TypeFilter> excludeFilters = new LinkedList<>();
 
+	/**
+	 * 环境配置
+	 */
 	@Nullable
 	private Environment environment;
 
+	/**
+	 * 条件表达式解析器
+	 */
 	@Nullable
 	private ConditionEvaluator conditionEvaluator;
 
+	/**
+	 * 资源匹配器, 用来匹配对应的资源返回 Resource 对象
+	 */
 	@Nullable
 	private ResourcePatternResolver resourcePatternResolver;
 
+	/**
+	 * 元数据读取工厂
+	 */
 	@Nullable
 	private MetadataReaderFactory metadataReaderFactory;
 
+	/**
+	 * 候选组件索引表
+	 */
 	@Nullable
 	private CandidateComponentsIndex componentsIndex;
 
@@ -144,9 +172,12 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	public ClassPathScanningCandidateComponentProvider(boolean useDefaultFilters, Environment environment) {
 		if (useDefaultFilters) {
+			// 设置默认的 类型过滤器
 			registerDefaultFilters();
 		}
+		// 设置环境
 		setEnvironment(environment);
+		// 设置资源加载器
 		setResourceLoader(null);
 	}
 
@@ -413,29 +444,46 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		return candidates;
 	}
 
+	/**
+	 * 候选组件扫描, 参数 {@link ComponentScan }
+	 * @param basePackage
+	 * @return
+	 */
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
+		// 候选组件列表 BeanDefinition 列表
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
+			// classpath*: + replace(basePackage,'.','/') + / + **/*.class
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + '/' + this.resourcePattern;
+			// 转换成资源对象
+			// 这里会转换成 FileSystemResource
 			Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
+			// 日志级别
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
+			// 资源处理
 			for (Resource resource : resources) {
 				if (traceEnabled) {
 					logger.trace("Scanning " + resource);
 				}
 				if (resource.isReadable()) {
 					try {
+						// 元数据读取器
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
 						if (isCandidateComponent(metadataReader)) {
+							// bean定义扫描
 							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
+							// 设置资源对象
 							sbd.setResource(resource);
+							// 设置源对象
 							sbd.setSource(resource);
+							// 判断是否是候选值
 							if (isCandidateComponent(sbd)) {
 								if (debugEnabled) {
 									logger.debug("Identified candidate component class: " + resource);
 								}
+								// 加入容器
 								candidates.add(sbd);
 							}
 							else {
@@ -474,6 +522,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * the package search path.
 	 * <p>The default implementation resolves placeholders against system properties,
 	 * and converts a "."-based package path to a "/"-based resource path.
+	 *
+	 * 把 . 转换成 /
 	 * @param basePackage the base package as specified by the user
 	 * @return the pattern specification to be used for package searching
 	 */
@@ -524,7 +574,12 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @return whether the bean definition qualifies as a candidate component
 	 */
 	protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+		// 从 注解的bean定义中获取注解元信息
 		AnnotationMetadata metadata = beanDefinition.getMetadata();
+		// 1. 是否独立
+		// 2. 是否可以创建
+		// 3. 是否 abstract 修饰
+		// 4. 是否有 Lookup 注解
 		return (metadata.isIndependent() && (metadata.isConcrete() ||
 				(metadata.isAbstract() && metadata.hasAnnotatedMethods(Lookup.class.getName()))));
 	}

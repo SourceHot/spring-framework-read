@@ -61,18 +61,35 @@ import org.springframework.util.PatternMatchUtils;
  * @see org.springframework.stereotype.Controller
  */
 public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateComponentProvider {
-
+	/**
+	 * bean定义注册器
+	 */
 	private final BeanDefinitionRegistry registry;
 
+	/**
+	 * bean 定义的默认值
+	 */
 	private BeanDefinitionDefaults beanDefinitionDefaults = new BeanDefinitionDefaults();
 
+	/**
+	 * 候选对象名称列表(名称匹配模式)
+	 */
 	@Nullable
 	private String[] autowireCandidatePatterns;
 
+	/**
+	 * BeanName 生成器
+	 */
 	private BeanNameGenerator beanNameGenerator = AnnotationBeanNameGenerator.INSTANCE;
 
+	/**
+	 * 作用域解析器(解析作用域元数据)
+	 */
 	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
 
+	/**
+	 * 是否包含注解的配置信息
+	 */
 	private boolean includeAnnotationConfig = true;
 
 

@@ -109,6 +109,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		try {
+			// 解析beanName生成器
 			parseBeanNameGenerator(element, scanner);
 		}
 		catch (Exception ex) {
@@ -160,9 +161,11 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 
 	protected void parseBeanNameGenerator(Element element, ClassPathBeanDefinitionScanner scanner) {
 		if (element.hasAttribute(NAME_GENERATOR_ATTRIBUTE)) {
+			// beanName 生成器的处理
 			BeanNameGenerator beanNameGenerator = (BeanNameGenerator) instantiateUserDefinedStrategy(
 					element.getAttribute(NAME_GENERATOR_ATTRIBUTE), BeanNameGenerator.class,
 					scanner.getResourceLoader().getClassLoader());
+			// 设置 beanName生成器对象
 			scanner.setBeanNameGenerator(beanNameGenerator);
 		}
 	}

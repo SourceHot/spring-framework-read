@@ -8,9 +8,11 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
 @Component
+@ComponentScan(basePackages = {"org.source.hot"})
 public class BeanDefinitionDemo implements BeanFactoryAware {
 
 	private BeanFactory beanFactory;

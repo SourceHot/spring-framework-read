@@ -76,6 +76,8 @@ public interface ClassMetadata {
      * can be constructed independently from an enclosing class.
      *
      * 是否独立
+     * 1. 不是内部类
+     * 2. 不是继承类
      */
     boolean isIndependent();
 
