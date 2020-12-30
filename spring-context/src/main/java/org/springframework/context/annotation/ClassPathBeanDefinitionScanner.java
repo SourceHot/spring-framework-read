@@ -262,19 +262,25 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 	/**
 	 * Perform a scan within the specified base packages.
+	 * 进行包扫描得到当前扫描后加入的bean定义数量
 	 * @param basePackages the packages to check for annotated classes
 	 * @return number of beans registered
 	 */
 	public int scan(String... basePackages) {
+		// 在执行扫描方法前beanDefinition的数量
 		int beanCountAtScanStart = this.registry.getBeanDefinitionCount();
 
+		// 真正的扫描方法
 		doScan(basePackages);
 
+		// 是否需要注册 注解的配置处理器
 		// Register annotation config processors, if necessary.
 		if (this.includeAnnotationConfig) {
+			// 注册注解后置处理器
 			AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 		}
 
+		//  当前 BeanDefinition 数量 - 历史 B
 		return (this.registry.getBeanDefinitionCount() - beanCountAtScanStart);
 	}
 
@@ -288,24 +294,38 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 */
 	protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
+		// bean 定义持有器列表
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
+		// 循环包路径进行扫描
 		for (String basePackage : basePackages) {
+			// 搜索可能的组件. 得到 组件的BeanDefinition
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
+			// 循环候选bean定义
 			for (BeanDefinition candidate : candidates) {
+				// 获取 作用域元数据
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+				// 设置作用域
 				candidate.setScope(scopeMetadata.getScopeName());
+				// beanName 生成
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+				// 类型判断 AbstractBeanDefinition
 				if (candidate instanceof AbstractBeanDefinition) {
+					// bean 定义的后置处理
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
+				// 类型判断 AnnotatedBeanDefinition
 				if (candidate instanceof AnnotatedBeanDefinition) {
+					// 通用注解的处理
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
+				// 候选检测
 				if (checkCandidate(beanName, candidate)) {
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+					// 作用于属性应用
 					definitionHolder =
 							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 					beanDefinitions.add(definitionHolder);
+					// 注册 bean定义
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
 			}
@@ -320,8 +340,11 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @param beanName the generated bean name for the given bean
 	 */
 	protected void postProcessBeanDefinition(AbstractBeanDefinition beanDefinition, String beanName) {
+		// 应用默认值
 		beanDefinition.applyDefaults(this.beanDefinitionDefaults);
 		if (this.autowireCandidatePatterns != null) {
+			// 设置 autowireCandidate 模式
+			// AUTOWIRE_BY_TYPE 或者 AUTOWIRE_BY_NAME
 			beanDefinition.setAutowireCandidate(PatternMatchUtils.simpleMatch(this.autowireCandidatePatterns, beanName));
 		}
 	}
@@ -350,14 +373,17 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * bean definition has been found for the specified name
 	 */
 	protected boolean checkCandidate(String beanName, BeanDefinition beanDefinition) throws IllegalStateException {
+		// 当前注册器中是否包含 beanName
 		if (!this.registry.containsBeanDefinition(beanName)) {
 			return true;
 		}
+		// 注册器中的 beanName 的 beanInstance
 		BeanDefinition existingDef = this.registry.getBeanDefinition(beanName);
 		BeanDefinition originatingDef = existingDef.getOriginatingBeanDefinition();
 		if (originatingDef != null) {
 			existingDef = originatingDef;
 		}
+		// 两个对象是否兼容
 		if (isCompatible(beanDefinition, existingDef)) {
 			return false;
 		}
@@ -378,6 +404,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * new definition to be skipped in favor of the existing definition
 	 */
 	protected boolean isCompatible(BeanDefinition newDefinition, BeanDefinition existingDefinition) {
+		// 1. 是否是 ScannedGenericBeanDefinition 类型
+		// 2. source 是否相同
+		// 3. 参数是否相同
 		return (!(existingDefinition instanceof ScannedGenericBeanDefinition) ||  // explicitly registered overriding bean
 				(newDefinition.getSource() != null && newDefinition.getSource().equals(existingDefinition.getSource())) ||  // scanned same file twice
 				newDefinition.equals(existingDefinition));  // scanned equivalent class twice
