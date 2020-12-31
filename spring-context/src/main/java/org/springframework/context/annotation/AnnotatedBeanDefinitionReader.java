@@ -263,7 +263,7 @@ public class AnnotatedBeanDefinitionReader {
 			@Nullable Class<? extends Annotation>[] qualifiers, @Nullable Supplier<T> supplier,
 			@Nullable BeanDefinitionCustomizer[] customizers) {
 
-		// 泛型bean定义
+		// 带有注解的泛型bean定义
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(beanClass);
 		// 和条件注解相关的函数
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
@@ -294,6 +294,7 @@ public class AnnotatedBeanDefinitionReader {
 				}
 			}
 		}
+		// 自定义的beanDefinition处理
 		if (customizers != null) {
 			for (BeanDefinitionCustomizer customizer : customizers) {
 				customizer.customize(abd);

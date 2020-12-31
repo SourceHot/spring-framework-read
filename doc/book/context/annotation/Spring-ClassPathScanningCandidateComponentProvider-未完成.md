@@ -1,0 +1,2 @@
+# Spring ClassPathScanningCandidateComponentProvider
+- 类全路径: `org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider`
