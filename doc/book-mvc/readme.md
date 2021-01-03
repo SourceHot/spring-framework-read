@@ -1,4 +1,4 @@
-# Spring mvc
+# Spring MVC 源码阅读指南
 
 ## Spring MVC 中核心对象
 - 首先笔者先列出一些 SpringMVC 中的一些核心类(类、接口、注解)各位读者可以根据自己的需求进行阅读. 
@@ -168,3 +168,51 @@
 
 
 在这个 xml 文件中我们看到了在 SpringIoC 以外的一些标签, 这些标签可是说属于 SpringMVC 的特有标签 `<mvc: */>` 关于这部分标签的处理涉及到的核心接口是 **`NamespaceHandler`**
+
+在这里我们需要阅读的源码类应该是 **`MvcNamespaceHandler`** 实现类
+
+
+
+<details>
+    <summary>MvcNamespaceHandler 详细代码</summary>
+
+
+
+
+
+```java
+public class MvcNamespaceHandler extends NamespaceHandlerSupport {
+
+   @Override
+   public void init() {
+      registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
+      registerBeanDefinitionParser("default-servlet-handler", new DefaultServletHandlerBeanDefinitionParser());
+      registerBeanDefinitionParser("interceptors", new InterceptorsBeanDefinitionParser());
+      registerBeanDefinitionParser("resources", new ResourcesBeanDefinitionParser());
+      registerBeanDefinitionParser("view-controller", new ViewControllerBeanDefinitionParser());
+      registerBeanDefinitionParser("redirect-view-controller", new ViewControllerBeanDefinitionParser());
+      registerBeanDefinitionParser("status-controller", new ViewControllerBeanDefinitionParser());
+      registerBeanDefinitionParser("view-resolvers", new ViewResolversBeanDefinitionParser());
+      registerBeanDefinitionParser("tiles-configurer", new TilesConfigurerBeanDefinitionParser());
+      registerBeanDefinitionParser("freemarker-configurer", new FreeMarkerConfigurerBeanDefinitionParser());
+      registerBeanDefinitionParser("groovy-configurer", new GroovyMarkupConfigurerBeanDefinitionParser());
+      registerBeanDefinitionParser("script-template-configurer", new ScriptTemplateConfigurerBeanDefinitionParser());
+      registerBeanDefinitionParser("cors", new CorsBeanDefinitionParser());
+   }
+
+}
+```
+
+
+
+</details>
+
+
+
+通过这段代码各位读者可以进行阅读各个 `<mvc: * />` 的解析逻辑(从 xml 转换成 JAVA 对象的过程) 。
+
+
+
+
+
+在了解完成容器的初始化流程后我们就可以来关注请求的处理了，即 `DispatcherServlet` 的分析核心方法是 `doDispatch` . 
