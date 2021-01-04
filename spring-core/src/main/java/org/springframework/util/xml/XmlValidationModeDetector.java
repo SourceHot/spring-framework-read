@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
  * Detects whether an XML stream is using DTD- or XSD-based validation.
  *
  *
- * xml 验证模式
+ * 推测 xml 验证模式
  *
  * @author Rob Harrop
  * @author Juergen Hoeller

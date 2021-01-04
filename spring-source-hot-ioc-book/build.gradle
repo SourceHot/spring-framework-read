@@ -1,0 +1,20 @@
+plugins {
+    id 'java'
+}
+
+group 'org.springframework'
+version '5.2.3.RELEASE'
+
+repositories {
+    mavenCentral()
+}
+dependencies {
+    compile(project(":spring-context"))
+    compile(project(":spring-core"))
+    testCompile("org.junit.jupiter:junit-jupiter-api")
+    testCompile("org.junit.jupiter:junit-jupiter-params")
+}
+
+test {
+    useJUnitPlatform()
+}

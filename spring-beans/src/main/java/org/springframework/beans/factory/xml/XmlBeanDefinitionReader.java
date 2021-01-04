@@ -484,6 +484,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see #detectValidationMode
 	 */
 	protected int getValidationModeForResource(Resource resource) {
+		// 获取 xml 验证方式
 		int validationModeToUse = getValidationMode();
 		if (validationModeToUse != VALIDATION_AUTO) {
 			return validationModeToUse;
@@ -548,10 +549,11 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see BeanDefinitionDocumentReader#registerBeanDefinitions
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
+		// 获取 基于 Document 的Bean定义读取器
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
 		// 历史已有的bean定义数量
 		int countBefore = getRegistry().getBeanDefinitionCount();
-		// 注册
+		// 注册bean定义
 		documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
 		// 注册后的数量-历史数量
 		return getRegistry().getBeanDefinitionCount() - countBefore;
