@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:myname="http://www.huifer.com/schema/user"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.huifer.com/schema/user http://www.huifer.com/schema/user.xsd
+">
+
+    <myname:user_xsd id="testUserBean" name="huifer" idCard="123"/>
+
+</beans>

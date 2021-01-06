@@ -60,9 +60,11 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	@Override
 	@Nullable
 	public final BeanDefinition parse(Element element, ParserContext parserContext) {
+		// 解析 Element 得到 BeanDefinition 对象
 		AbstractBeanDefinition definition = parseInternal(element, parserContext);
 		if (definition != null && !parserContext.isNested()) {
 			try {
+				// 解析标签的 id
 				String id = resolveId(element, definition, parserContext);
 				if (!StringUtils.hasText(id)) {
 					parserContext.getReaderContext().error(
@@ -71,14 +73,20 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 				}
 				String[] aliases = null;
 				if (shouldParseNameAsAliases()) {
+					// 标签的 name 属性
 					String name = element.getAttribute(NAME_ATTRIBUTE);
 					if (StringUtils.hasLength(name)) {
+						// 别名处理, 字符串切割逗号
 						aliases = StringUtils.trimArrayElements(StringUtils.commaDelimitedListToStringArray(name));
 					}
 				}
+				// 创建 BeanDefinitionHolder
 				BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id, aliases);
+				// 注册 BeanDefinition
 				registerBeanDefinition(holder, parserContext.getRegistry());
+				// 是否需要出发事件
 				if (shouldFireEvents()) {
+					// 组件注册事件
 					BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
 					postProcessComponentDefinition(componentDefinition);
 					parserContext.registerComponent(componentDefinition);

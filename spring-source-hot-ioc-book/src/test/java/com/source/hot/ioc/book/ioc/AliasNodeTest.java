@@ -11,9 +11,8 @@ class AliasNodeTest {
         ClassPathXmlApplicationContext context
                 = new ClassPathXmlApplicationContext("META-INF/alias-node.xml");
 
-        Object people = context.getBean("people");
         Object p1 = context.getBean("p1");
-
+        Object people = context.getBean("people");
         assert people.equals(p1);
     }
 }
