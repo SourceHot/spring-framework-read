@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns="http://www.springframework.org/schema/beans"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<bean id="apple" class="com.source.hot.ioc.book.pojo.lookup.Apple">
+		<meta key="meta-key" value="meta-value"/>
+	</bean>
+
+	<bean id="shop" class="com.source.hot.ioc.book.pojo.lookup.Shop">
+		<lookup-method name="getFruits" bean="apple"/>
+	</bean>
+
+
+</beans>

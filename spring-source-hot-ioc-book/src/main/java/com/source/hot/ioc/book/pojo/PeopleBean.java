@@ -10,4 +10,11 @@ public class PeopleBean {
     public void setName(String name) {
         this.name = name;
     }
+
+    public PeopleBean() {
+    }
+
+    public PeopleBean(String name) {
+        this.name = name;
+    }
 }
