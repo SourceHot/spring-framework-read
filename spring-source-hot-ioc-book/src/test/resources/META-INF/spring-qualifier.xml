@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+
+    <bean id="p2" class="com.source.hot.ioc.book.pojo.PeopleBeanTwo">
+
+    </bean>
+
+    <bean id="peopleBean" class="com.source.hot.ioc.book.pojo.PeopleBean">
+        <property name="name" value="zhangsan"/>
+        <qualifier value="p1"/>
+    </bean>
+</beans>

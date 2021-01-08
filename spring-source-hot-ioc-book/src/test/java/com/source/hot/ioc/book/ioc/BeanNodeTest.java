@@ -1,6 +1,7 @@
 package com.source.hot.ioc.book.ioc;
 
 import com.source.hot.ioc.book.pojo.PeopleBean;
+import com.source.hot.ioc.book.pojo.PeopleBeanTwo;
 import com.source.hot.ioc.book.pojo.lookup.Apple;
 import com.source.hot.ioc.book.pojo.lookup.Shop;
 import org.junit.jupiter.api.Test;
@@ -48,9 +49,16 @@ class BeanNodeTest {
     }
 
     @Test
-    void testProperty(){
+    void testProperty() {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("META-INF/spring-property.xml");
         PeopleBean people = context.getBean("people", PeopleBean.class);
         assert people.getName().equals("zhangsan");
+    }
+
+    @Test
+    void testQualifier() {
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("META-INF/spring-qualifier.xml");
+        PeopleBeanTwo peopleTwo = context.getBean("p2", PeopleBeanTwo.class);
+        assert peopleTwo.getPeopleBean().equals(context.getBean("peopleBean", PeopleBean.class));
     }
 }

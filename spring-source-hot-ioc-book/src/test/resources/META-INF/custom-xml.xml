@@ -6,6 +6,9 @@
    http://www.huifer.com/schema/user http://www.huifer.com/schema/user.xsd
 ">
 
-    <myname:user_xsd id="testUserBean" name="huifer" idCard="123"/>
+<!--    <myname:user_xsd id="testUserBean" name="huifer" idCard="123"/>-->
 
+    <bean id="p1" class="com.source.hot.ioc.book.pojo.PeopleBean">
+        <myname:user_xsd id="testUserBean" name="huifer" idCard="123"/>
+    </bean>
 </beans>

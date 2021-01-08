@@ -5,6 +5,20 @@
 
     <bean id="people" class="com.source.hot.ioc.book.pojo.PeopleBean">
         <property name="name" value="zhangsan"/>
+        <property name="list">
+            <list value-type="java.lang.String" merge="default">
+                <value>a</value>
+                <value>b</value>
+            </list>
+
+        </property>
+
+        <property name="map">
+            <map key-type="java.lang.String" value-type="java.lang.String">
+                <entry key="a" value="1"/>
+            </map>
+        </property>
     </bean>
+
 
 </beans>
