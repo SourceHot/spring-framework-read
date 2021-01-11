@@ -17,7 +17,7 @@
         <!--    </bean>-->
 
 
-        <bean id="people" class="com.source.hot.ioc.book.pojo.PeopleBean">
+        <bean id="people" class="com.source.hot.ioc.book.pojo.PeopleBean" scope="singleton">
                 <description>this is a bean description</description>
                 <meta key="key" value="value"/>
         </bean>
