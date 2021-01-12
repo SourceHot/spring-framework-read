@@ -10,6 +10,13 @@ public class PeopleBean {
 
     private Map<String, String> map;
 
+    private PeopleBean pb;
+
+    public PeopleBean(String name, PeopleBean pb) {
+        this.name = name;
+        this.pb = pb;
+    }
+
     public List<String> getList() {
         return list;
     }

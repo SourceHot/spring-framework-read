@@ -50,6 +50,9 @@ public class ConstructorArgumentValues {
 	 */
 	private final Map<Integer, ValueHolder> indexedArgumentValues = new LinkedHashMap<>();
 
+	/**
+	 * name 模式的存储信息
+	 */
 	private final List<ValueHolder> genericArgumentValues = new ArrayList<>();
 
 

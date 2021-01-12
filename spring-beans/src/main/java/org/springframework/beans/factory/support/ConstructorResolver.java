@@ -138,8 +138,11 @@ class ConstructorResolver {
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
+		// 需要被使用的构造函数
 		Constructor<?> constructorToUse = null;
+		// 参数持有者
 		ArgumentsHolder argsHolderToUse = null;
+		// 需要被使用的构造函数的参数列表
 		Object[] argsToUse = null;
 
 		if (explicitArgs != null) {
@@ -158,12 +161,14 @@ class ConstructorResolver {
 				}
 			}
 			if (argsToResolve != null) {
+				// 解析 ConstructorArgumentValues 对象获得参数列表
 				argsToUse = resolvePreparedArguments(beanName, mbd, bw, constructorToUse, argsToResolve, true);
 			}
 		}
 
 		if (constructorToUse == null || argsToUse == null) {
 			// Take specified constructors, if any.
+			// 候选的构造函数列表
 			Constructor<?>[] candidates = chosenCtors;
 			if (candidates == null) {
 				Class<?> beanClass = mbd.getBeanClass();
@@ -196,6 +201,7 @@ class ConstructorResolver {
 					mbd.getResolvedAutowireMode() == AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR);
 			ConstructorArgumentValues resolvedValues = null;
 
+			// 构造函数的最小参数长度
 			int minNrOfArgs;
 			if (explicitArgs != null) {
 				minNrOfArgs = explicitArgs.length;
@@ -203,6 +209,7 @@ class ConstructorResolver {
 			else {
 				ConstructorArgumentValues cargs = mbd.getConstructorArgumentValues();
 				resolvedValues = new ConstructorArgumentValues();
+				// 解析获得构造函数的最小参数长度
 				minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
 			}
 
@@ -213,6 +220,7 @@ class ConstructorResolver {
 
 			for (Constructor<?> candidate : candidates) {
 
+				// 构造函数的参数长度
 				int parameterCount = candidate.getParameterCount();
 
 				if (constructorToUse != null && argsToUse != null && argsToUse.length > parameterCount) {
@@ -220,11 +228,13 @@ class ConstructorResolver {
 					// do not look any further, there are only less greedy constructors left.
 					break;
 				}
+				// 当前构造函数的参数长度 小于 最小构造函数的参数长度不进行处理
 				if (parameterCount < minNrOfArgs) {
 					continue;
 				}
 
 				ArgumentsHolder argsHolder;
+				// 构造函数中关于类型和参数名称的处理
 				Class<?>[] paramTypes = candidate.getParameterTypes();
 				if (resolvedValues != null) {
 					try {
@@ -260,6 +270,8 @@ class ConstructorResolver {
 
 				int typeDiffWeight = (mbd.isLenientConstructorResolution() ?
 						argsHolder.getTypeDifferenceWeight(paramTypes) : argsHolder.getAssignabilityWeight(paramTypes));
+
+				// 确认使用的参数列表
 				// Choose this constructor if it represents the closest match.
 				if (typeDiffWeight < minTypeDiffWeight) {
 					constructorToUse = candidate;
