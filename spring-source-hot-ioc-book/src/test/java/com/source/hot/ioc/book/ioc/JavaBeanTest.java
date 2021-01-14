@@ -2,11 +2,13 @@ package com.source.hot.ioc.book.ioc;
 
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 
 import com.source.hot.ioc.book.live.LiveBean;
 import com.source.hot.ioc.book.pojo.PeopleBean;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.CachedIntrospectionResults;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class JavaBeanTest {
@@ -42,4 +44,19 @@ public class JavaBeanTest {
             System.out.println(o1.getAddress());
         }
     }
+
+    @Test
+    void setField() throws Exception {
+        LiveBean liveBean = new LiveBean();
+        Field address = liveBean.getClass().getDeclaredField("address");
+        address.setAccessible(true);
+        address.set(liveBean, "shangHai");
+        System.out.println(liveBean.getAddress());
+    }
+
+//    @Test
+//    void testCachedIntrospectionResults(){
+//        CachedIntrospectionResults results = CachedIntrospectionResults.forClass(LiveBean.class);
+//        System.out.println();
+//    }
 }
