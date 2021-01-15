@@ -339,7 +339,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		else {
 			// Fail if we're already creating this bean instance:
 			// We're assumably within a circular reference.
-			// 循环依赖的问题
+			// 原型模式下的依赖检查
 			if (isPrototypeCurrentlyInCreation(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName);
 			}
@@ -2105,6 +2105,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected Object getObjectForBeanInstance(
 			Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition mbd) {
 
+		// 第一部分
 		// Don't let calling code try to dereference the factory if the bean isn't a factory.
 		// 判断 beanName 是不是 bean 工厂
 		if (BeanFactoryUtils.isFactoryDereference(name)) {

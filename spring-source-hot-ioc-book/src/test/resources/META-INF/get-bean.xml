@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns="http://www.springframework.org/schema/beans"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+	<bean id="beanSource" class="com.source.hot.ioc.book.getbean.BeanSource">
+		<property name="type" value="xml"/>
+	</bean>
+
+<!--	<bean id="beanSourceFactory" class="com.source.hot.ioc.book.getbean.BeanSourceFactory"/>-->
+<!--	<bean id="beanSourceFromNoStatic" factory-bean="beanSourceFactory" factory-method="noStaticFactory"></bean>-->
+
+<!--	<bean id="beanSourceFromStatic" class="com.source.hot.ioc.book.getbean.BeanSourceFactory"-->
+<!--		  factory-method="staticFactory"></bean>-->
+
+<!--	<bean id="beanSourceFromFactoryBean" class="com.source.hot.ioc.book.getbean.BeanSourceFactoryBean"></bean>-->
+</beans>
