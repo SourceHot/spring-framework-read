@@ -4,7 +4,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean class="com.source.hot.ioc.book.live.MyBeanPostProcessor"/>
-    <bean id="liveBean" class="com.source.hot.ioc.book.live.LiveBean" init-method="myPostConstruct" destroy-method="myPreDestroy">
+    <bean id="liveBean" class="com.source.hot.ioc.book.live.LiveBean"
+		  init-method="myPostConstruct"
+		  destroy-method="myPreDestroy"
+	>
         <property name="address" value="shangHai"/>
     </bean>
 </beans>

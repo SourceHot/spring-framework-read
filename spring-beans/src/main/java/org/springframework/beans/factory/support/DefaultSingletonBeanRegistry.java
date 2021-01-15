@@ -589,6 +589,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		}
 	}
 
+	/**
+	 * org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#destroySingletons()
+	 */
 	public void destroySingletons() {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Destroying singletons in " + this);
@@ -690,7 +693,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			containedBeans = this.containedBeanMap.remove(beanName);
 		}
 		if (containedBeans != null) {
-			// 删除 别名列表中的beanName
+			// 删除 包含列表中的beanName
 			for (String containedBeanName : containedBeans) {
 				destroySingleton(containedBeanName);
 			}
