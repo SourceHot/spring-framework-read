@@ -561,6 +561,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Object createBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
 			throws BeanCreationException {
 
+		// 第一部分: 准备 BeanDefinition
 		if (logger.isTraceEnabled()) {
 			logger.trace("Creating instance of bean '" + beanName + "'");
 		}
@@ -583,6 +584,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			mbdToUse.setBeanClass(resolvedClass);
 		}
 
+
+		// 第二部分：BeanDefition 中处理重写方法
 		// Prepare method overrides.
 		try {
 			// 方法重写
@@ -594,6 +597,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			);
 		}
 
+		// 第三部分：bean 创建之前的处理
 		try {
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
 			// 创建bean之前的行为
@@ -608,6 +612,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			);
 		}
 
+		// 第四部分
 		try {
 			// 创建bean
 			Object beanInstance = doCreateBean(beanName, mbdToUse, args);
@@ -648,7 +653,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Object doCreateBean(final String beanName, final RootBeanDefinition mbd, final @Nullable Object[] args)
 			throws BeanCreationException {
 
-		// 第一部分
+		// 第一部分: 获取实例
 		// Instantiate the bean.
 		BeanWrapper instanceWrapper = null;
 		// 是否单例
@@ -663,7 +668,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 
-		// 第二部分
+		// 第二部分 后置方法调用
 		// 获取 实例
 		final Object bean = instanceWrapper.getWrappedInstance();
 		// beanWrapper中存储的实例.class
@@ -1446,7 +1451,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Shortcut when re-creating the same bean...
 		// 是否已经处理完成的标记
 		boolean resolved = false;
-		// 是否需要啊自动注入的标记
+		// 是否需要自动注入的标记
 		boolean autowireNecessary = false;
 		if (args == null) {
 			synchronized (mbd.constructorArgumentLock) {

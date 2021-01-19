@@ -211,7 +211,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			if (!this.singletonObjects.containsKey(beanName)) {
 				// 添加单例对象工厂
 				this.singletonFactories.put(beanName, singletonFactory);
-				// 删除单例BeanName
+				// 删除提前暴露的 BeanName
 				this.earlySingletonObjects.remove(beanName);
 				// 注册单例beanName
 				this.registeredSingletons.add(beanName);

@@ -145,6 +145,7 @@ class ConstructorResolver {
 		// 需要被使用的构造函数的参数列表
 		Object[] argsToUse = null;
 
+		// 将 explicitArgs 转换成构造函数中需要的构造参数列表
 		if (explicitArgs != null) {
 			argsToUse = explicitArgs;
 		}
@@ -166,10 +167,12 @@ class ConstructorResolver {
 			}
 		}
 
+		// 推论得到一个需要执行的构造函数对象
 		if (constructorToUse == null || argsToUse == null) {
 			// Take specified constructors, if any.
 			// 候选的构造函数列表
 			Constructor<?>[] candidates = chosenCtors;
+			// 如果构造函数集合为空，直接获取BeanClass 中的构造函数列表作为可选列表
 			if (candidates == null) {
 				Class<?> beanClass = mbd.getBeanClass();
 				try {
@@ -182,6 +185,7 @@ class ConstructorResolver {
 									"] from ClassLoader [" + beanClass.getClassLoader() + "] failed", ex);
 				}
 			}
+
 
 			if (candidates.length == 1 && explicitArgs == null && !mbd.hasConstructorArgumentValues()) {
 				Constructor<?> uniqueCandidate = candidates[0];

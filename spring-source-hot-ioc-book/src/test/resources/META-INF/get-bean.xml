@@ -8,8 +8,8 @@
 		<property name="type" value="xml"/>
 	</bean>
 
-<!--	<bean id="beanSourceFactory" class="com.source.hot.ioc.book.getbean.BeanSourceFactory"/>-->
-<!--	<bean id="beanSourceFromNoStatic" factory-bean="beanSourceFactory" factory-method="noStaticFactory"></bean>-->
+	<bean id="beanSourceFactory" class="com.source.hot.ioc.book.getbean.BeanSourceFactory"/>
+	<bean id="beanSourceFromNoStatic" factory-bean="beanSourceFactory" factory-method="noStaticFactory"></bean>
 
 <!--	<bean id="beanSourceFromStatic" class="com.source.hot.ioc.book.getbean.BeanSourceFactory"-->
 <!--		  factory-method="staticFactory"></bean>-->
