@@ -53,6 +53,9 @@ public class ConversionServiceFactoryBean implements FactoryBean<ConversionServi
 	@Nullable
 	private Set<?> converters;
 
+	/**
+	 * 转换服务
+	 */
 	@Nullable
 	private GenericConversionService conversionService;
 
