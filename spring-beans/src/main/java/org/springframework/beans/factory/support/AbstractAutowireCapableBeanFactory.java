@@ -189,7 +189,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Whether to resort to injecting a raw bean instance in case of circular reference, even if the
 	 * injected bean eventually got wrapped.
-	 * 原始注解
+	 *  是否允许当前 Bean 的原始类型注入到别的 Bean 中
 	 */
 	private boolean allowRawInjectionDespiteWrapping = false;
 

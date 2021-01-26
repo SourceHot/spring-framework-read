@@ -32,6 +32,7 @@ class FirstIoCDemoTest {
 
         String name = people.getName();
         assumeTrue(name.equals("zhangsan"));
+		context.close();
     }
 
     @Test

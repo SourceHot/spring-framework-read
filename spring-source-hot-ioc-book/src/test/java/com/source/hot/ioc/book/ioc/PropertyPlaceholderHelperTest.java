@@ -7,12 +7,25 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Properties;
 
+import com.source.hot.ioc.book.pojo.PeopleBean;
+import com.source.hot.ioc.book.pojo.PropertyBean;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.PropertyPlaceholderHelper;
 
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 public class PropertyPlaceholderHelperTest {
+    @Test
+    void testPropertyPlaceholder() {
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("META-INF/PropertyResolution.xml");
+        PropertyBean  bean = context.getBean(PropertyBean .class);
+        assumeTrue(bean.getName().equals("zhangsan"));
+    }
+
+
     @Test
     void test() throws Exception {
         String a = "{a}{b}{c}";

@@ -22,6 +22,7 @@ import java.util.Set;
 /**
  * Exception thrown when required properties are not found.
  *
+ * 缺少必填属性的异常
  * @author Chris Beams
  * @since 3.1
  * @see ConfigurablePropertyResolver#setRequiredProperties(String...)
