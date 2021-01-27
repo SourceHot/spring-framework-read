@@ -52,13 +52,13 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	private volatile ConfigurableConversionService conversionService;
 
 	/**
-	 * 占位符解析工具
+	 * 占位符解析工具,忽略无法解析的占位符
 	 */
 	@Nullable
 	private PropertyPlaceholderHelper nonStrictHelper;
 
 	/**
-	 * 占位符解析工具
+	 * 占位符解析工具,不忽略无法解析的占位符
 	 */
 	@Nullable
 	private PropertyPlaceholderHelper strictHelper;
