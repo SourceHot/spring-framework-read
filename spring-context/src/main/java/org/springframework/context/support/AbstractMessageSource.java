@@ -196,19 +196,25 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 */
 	@Nullable
 	protected String getMessageInternal(@Nullable String code, @Nullable Object[] args, @Nullable Locale locale) {
+		// code 不存在，返回空
 		if (code == null) {
 			return null;
 		}
+		// Locale 不存在，设置默认
 		if (locale == null) {
 			locale = Locale.getDefault();
 		}
+		// 需要替换的真实数据
 		Object[] argsToUse = args;
 
+		// 是否需要进行消息解析，真实数据是否存在
 		if (!isAlwaysUseMessageFormat() && ObjectUtils.isEmpty(args)) {
 			// Optimized resolution: no arguments to apply,
 			// therefore no MessageFormat needs to be involved.
 			// Note that the default implementation still uses MessageFormat;
 			// this can be overridden in specific subclasses.
+
+			// 解析消息
 			String message = resolveCodeWithoutArguments(code, locale);
 			if (message != null) {
 				return message;
@@ -365,9 +371,11 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 */
 	@Nullable
 	protected String resolveCodeWithoutArguments(String code, Locale locale) {
+		// 子类实现
 		MessageFormat messageFormat = resolveCode(code, locale);
 		if (messageFormat != null) {
 			synchronized (messageFormat) {
+				// 是否进行 format
 				return messageFormat.format(new Object[0]);
 			}
 		}

@@ -46,6 +46,9 @@ public abstract class MessageSourceSupport {
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 是否需要进行占位符解析
+	 */
 	private boolean alwaysUseMessageFormat = false;
 
 	/**
