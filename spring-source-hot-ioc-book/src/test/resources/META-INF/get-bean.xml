@@ -11,8 +11,8 @@
 	<bean id="beanSourceFactory" class="com.source.hot.ioc.book.getbean.BeanSourceFactory"/>
 	<bean id="beanSourceFromNoStatic" factory-bean="beanSourceFactory" factory-method="noStaticFactory"></bean>
 
-<!--	<bean id="beanSourceFromStatic" class="com.source.hot.ioc.book.getbean.BeanSourceFactory"-->
-<!--		  factory-method="staticFactory"></bean>-->
+	<bean id="beanSourceFromStatic" class="com.source.hot.ioc.book.getbean.BeanSourceFactory"
+		  factory-method="staticFactory"></bean>
 
-<!--	<bean id="beanSourceFromFactoryBean" class="com.source.hot.ioc.book.getbean.BeanSourceFactoryBean"></bean>-->
+	<bean id="beanSourceFromFactoryBean" class="com.source.hot.ioc.book.getbean.BeanSourceFactoryBean"></bean>
 </beans>
