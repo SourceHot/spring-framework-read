@@ -56,10 +56,14 @@ public abstract class ScopedProxyUtils {
 	public static BeanDefinitionHolder createScopedProxy(BeanDefinitionHolder definition,
 			BeanDefinitionRegistry registry, boolean proxyTargetClass) {
 
+		// 提取原始的 Bean Name
 		String originalBeanName = definition.getBeanName();
+		// 从 Bean Definition Holder 中获取 Bean Defintion
 		BeanDefinition targetDefinition = definition.getBeanDefinition();
+		// 计算 BeanName
 		String targetBeanName = getTargetBeanName(originalBeanName);
 
+		// 创建代理的 Bean Definition 对象，数据会从原始的 Bean Definition 中迁移部分
 		// Create a scoped proxy definition for the original bean name,
 		// "hiding" the target bean in an internal target definition.
 		RootBeanDefinition proxyDefinition = new RootBeanDefinition(ScopedProxyFactoryBean.class);
@@ -68,6 +72,7 @@ public abstract class ScopedProxyUtils {
 		proxyDefinition.setSource(definition.getSource());
 		proxyDefinition.setRole(targetDefinition.getRole());
 
+		// 添加属性：targetBeanName
 		proxyDefinition.getPropertyValues().add("targetBeanName", targetBeanName);
 		if (proxyTargetClass) {
 			targetDefinition.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);
@@ -88,11 +93,13 @@ public abstract class ScopedProxyUtils {
 		targetDefinition.setAutowireCandidate(false);
 		targetDefinition.setPrimary(false);
 
+		// 将当前代理的对象注册到容器中
 		// Register the target bean as separate bean in the factory.
 		registry.registerBeanDefinition(targetBeanName, targetDefinition);
 
 		// Return the scoped proxy definition as primary bean definition
 		// (potentially an inner bean).
+		// 创建返回对象
 		return new BeanDefinitionHolder(proxyDefinition, originalBeanName, definition.getAliases());
 	}
 
