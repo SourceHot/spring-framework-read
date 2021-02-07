@@ -98,6 +98,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	protected String determineBeanNameFromAnnotation(AnnotatedBeanDefinition annotatedDef) {
 		// 获取注解信息
 		AnnotationMetadata amd = annotatedDef.getMetadata();
+		// 所有注解
 		Set<String> types = amd.getAnnotationTypes();
 		String beanName = null;
 		for (String type : types) {

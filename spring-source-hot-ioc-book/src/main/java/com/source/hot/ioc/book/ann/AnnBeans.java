@@ -1,6 +1,7 @@
 package com.source.hot.ioc.book.ann;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
