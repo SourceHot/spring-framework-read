@@ -545,31 +545,45 @@ class ConfigurationClassParser {
 	private void processImports(ConfigurationClass configClass, SourceClass currentSourceClass,
 			Collection<SourceClass> importCandidates, boolean checkForCircularImports) {
 
+		// 判断是否存在需要处理的 ImportSelector 集合, 如果不需要则不处理直接返回
 		if (importCandidates.isEmpty()) {
 			return;
 		}
 
+		// 判断是否需要进行import循环检查
+		// 判断但钱配置类是否在 importStack 中
 		if (checkForCircularImports && isChainedImportOnStack(configClass)) {
 			this.problemReporter.error(new CircularImportProblem(configClass, this.importStack));
 		}
 		else {
+			// 向 importStack 中加入当前正在处理的配置类
 			this.importStack.push(configClass);
 			try {
+				// 循环处理参数传递过来的 importSelector
 				for (SourceClass candidate : importCandidates) {
+
+					// 判断
 					if (candidate.isAssignable(ImportSelector.class)) {
 						// Candidate class is an ImportSelector -> delegate to it to determine imports
 						Class<?> candidateClass = candidate.loadClass();
+						// 将 class 转换成对象
 						ImportSelector selector = ParserStrategyUtils.instantiateClass(candidateClass, ImportSelector.class,
 								this.environment, this.resourceLoader, this.registry);
+						// 如果类型是 DeferredImportSelector
 						if (selector instanceof DeferredImportSelector) {
 							this.deferredImportSelectorHandler.handle(configClass, (DeferredImportSelector) selector);
 						}
 						else {
+							// 获取需要导入的类
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
+							// 将需要导入的类从字符串转换成 SourceClass
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames);
+							// 递归处理需要导入的类
 							processImports(configClass, currentSourceClass, importSourceClasses, false);
 						}
 					}
+
+					// 处理类型是 ImportBeanDefinitionRegistrar 的情况
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
 						// Candidate class is an ImportBeanDefinitionRegistrar ->
 						// delegate to it to register additional bean definitions
@@ -579,6 +593,7 @@ class ConfigurationClassParser {
 										this.environment, this.resourceLoader, this.registry);
 						configClass.addImportBeanDefinitionRegistrar(registrar, currentSourceClass.getMetadata());
 					}
+					// 其他情况
 					else {
 						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
 						// process it as an @Configuration class
@@ -597,6 +612,7 @@ class ConfigurationClassParser {
 						configClass.getMetadata().getClassName() + "]", ex);
 			}
 			finally {
+				// 从 importStack 删除配置类
 				this.importStack.pop();
 			}
 		}
