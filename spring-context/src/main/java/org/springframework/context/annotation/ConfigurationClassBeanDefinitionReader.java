@@ -377,20 +377,26 @@ class ConfigurationClassBeanDefinitionReader {
 
 		Map<Class<?>, BeanDefinitionReader> readerInstanceCache = new HashMap<>();
 
+		// 循环处理 importedResources
 		importedResources.forEach((resource, readerClass) -> {
 			// Default reader selection necessary?
+			// 判断 Bean Defintion Reader 是否是 BeanDefinitionReader
 			if (BeanDefinitionReader.class == readerClass) {
+				// 判断文件地址是否是 .groovy 结尾
 				if (StringUtils.endsWithIgnoreCase(resource, ".groovy")) {
 					// When clearly asking for Groovy, that's what they'll get...
 					readerClass = GroovyBeanDefinitionReader.class;
 				}
+				// 其他情况都当作 xml 处理
 				else {
 					// Primarily ".xml" files but for any other extension as well
 					readerClass = XmlBeanDefinitionReader.class;
 				}
 			}
 
+			// 尝试从缓存中获取 BeanDefinitionReader
 			BeanDefinitionReader reader = readerInstanceCache.get(readerClass);
+			// 如果不存在则创建一个新的 BeanDefinitionReader
 			if (reader == null) {
 				try {
 					// Instantiate the specified BeanDefinitionReader
@@ -410,8 +416,10 @@ class ConfigurationClassBeanDefinitionReader {
 			}
 
 			// TODO SPR-6310: qualify relative path locations as done in AbstractContextLoader.modifyLocations
+			// Bean Defintion Reader 进行解析
 			reader.loadBeanDefinitions(resource);
 		});
+
 	}
 
 	private void loadBeanDefinitionsFromRegistrars(Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> registrars) {
