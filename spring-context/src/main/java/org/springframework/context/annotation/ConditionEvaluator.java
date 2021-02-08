@@ -73,53 +73,64 @@ class ConditionEvaluator {
         return shouldSkip(metadata, null);
     }
 
-    /**
-     * Determine if an item should be skipped based on {@code @Conditional} annotations.
-     * @param metadata the meta data
-     * @param phase the phase of the call
-     * @return if the item should be skipped
-     * 是否需要跳过当前类的初始化
-     */
-    public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable ConfigurationPhase phase) {
-        if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
-            return false;
-        }
+	/**
+	 * Determine if an item should be skipped based on {@code @Conditional} annotations.
+	 * @param metadata the meta data
+	 * @param phase the phase of the call
+	 * @return if the item should be skipped
+	 * 是否需要跳过当前类的初始化
+	 */
+	public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable ConfigurationPhase phase) {
+		// 注解元数据不存在或者注解元数据中不包含Conditional注解
+		if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
+			return false;
+		}
 
-        if (phase == null) {
-            if (metadata instanceof AnnotationMetadata &&
-                    ConfigurationClassUtils.isConfigurationCandidate((AnnotationMetadata) metadata)) {
-                return shouldSkip(metadata, ConfigurationPhase.PARSE_CONFIGURATION);
-            }
-            return shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN);
-        }
+		// 配置解析阶段处理
+		if (phase == null) {
+			// 注解元数据据类型是 AnnotationMetadata
+			// 注解元数据中存在 Bean Component ComponentScan Import ImportResource
+			if (metadata instanceof AnnotationMetadata &&
+					ConfigurationClassUtils.isConfigurationCandidate((AnnotationMetadata) metadata)) {
+				// 配置解析阶段
+				return shouldSkip(metadata, ConfigurationPhase.PARSE_CONFIGURATION);
+			}
+			// 注册 Bean 阶段
+			return shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN);
+		}
 
-        List<Condition> conditions = new ArrayList<>();
-        // 获取注解 Conditional 的属性值
-        for (String[] conditionClasses : getConditionClasses(metadata)) {
-            for (String conditionClass : conditionClasses) {
-                // 序列化成注解
-                Condition condition = getCondition(conditionClass, this.context.getClassLoader());
-                // 插入注解列表
-                conditions.add(condition);
-            }
-        }
+		// 需要处理的 Condition , 数据从注解 Conditional 中来
+		List<Condition> conditions = new ArrayList<>();
+		// 获取注解 Conditional 的属性值
+		for (String[] conditionClasses : getConditionClasses(metadata)) {
+			for (String conditionClass : conditionClasses) {
+				// 将注解中的数据转换成 Condition 接口
+				// 从 class 转换成实例
+				Condition condition = getCondition(conditionClass, this.context.getClassLoader());
+				// 插入注解列表
+				conditions.add(condition);
+			}
+		}
 
-        AnnotationAwareOrderComparator.sort(conditions);
+		// 对 Condition 进行排序
+		AnnotationAwareOrderComparator.sort(conditions);
 
-        for (Condition condition : conditions) {
-            ConfigurationPhase requiredPhase = null;
-            if (condition instanceof ConfigurationCondition) {
-                requiredPhase = ((ConfigurationCondition) condition).getConfigurationPhase();
-            }
+		// 执行 Condition 得到验证结果
+		for (Condition condition : conditions) {
+			ConfigurationPhase requiredPhase = null;
+			// 如果类型是 ConfigurationCondition
+			if (condition instanceof ConfigurationCondition) {
+				requiredPhase = ((ConfigurationCondition) condition).getConfigurationPhase();
+			}
 
-            // matches 进行验证
-            if ((requiredPhase == null || requiredPhase == phase) && !condition.matches(this.context, metadata)) {
-                return true;
-            }
-        }
+			// matches 进行验证
+			if ((requiredPhase == null || requiredPhase == phase) && !condition.matches(this.context, metadata)) {
+				return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
     @SuppressWarnings("unchecked")
     private List<String[]> getConditionClasses(AnnotatedTypeMetadata metadata) {

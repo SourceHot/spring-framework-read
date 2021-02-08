@@ -1,8 +1,5 @@
 package com.source.hot.ioc.book.ioc;
 
-import java.util.Arrays;
-import java.util.function.Predicate;
-
 import com.source.hot.ioc.book.conditional.ConditionBeans;
 import com.source.hot.ioc.book.conditional.InterFunc;
 import org.junit.jupiter.api.Test;
@@ -14,9 +11,6 @@ public class ConditionTest {
 	void testCondition() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConditionBeans.class);
 		InterFunc bean = context.getBean(InterFunc.class);
-		System.out.println(bean.data());
-		String[] beanDefinitionNames = context.getBeanDefinitionNames();
-
-		System.out.println();
+		assert bean.data().equals("windows");
 	}
 }
