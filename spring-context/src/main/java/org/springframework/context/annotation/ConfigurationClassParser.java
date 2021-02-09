@@ -132,8 +132,15 @@ class ConfigurationClassParser {
 
 	private final Map<ConfigurationClass, ConfigurationClass> configurationClasses = new LinkedHashMap<>();
 
+	/**
+	 * key: 父类名称
+	 * value：配置类
+	 */
 	private final Map<String, ConfigurationClass> knownSuperclasses = new HashMap<>();
 
+	/**
+	 * 配置名称列表
+	 */
 	private final List<String> propertySourceNames = new ArrayList<>();
 
 	private final ImportStack importStack = new ImportStack();
@@ -218,14 +225,20 @@ class ConfigurationClassParser {
 
 
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
+		// 条件注解解析，阶段为配置解析阶段
 		if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
 			return;
 		}
 
+		// 尝试从配置类缓存中获取配置类
 		ConfigurationClass existingClass = this.configurationClasses.get(configClass);
+		// 缓存中的配置类存在
 		if (existingClass != null) {
+			// 判断 配置类是否是导入的
 			if (configClass.isImported()) {
+				// 判断缓存中的配置类是否是导入的
 				if (existingClass.isImported()) {
+					// 合并配置信息
 					existingClass.mergeImportedBy(configClass);
 				}
 				// Otherwise ignore new imported config class; existing non-imported class overrides it.
@@ -234,18 +247,23 @@ class ConfigurationClassParser {
 			else {
 				// Explicit bean definition found, probably replacing an import.
 				// Let's remove the old one and go with the new one.
+				// 从配置类缓存中移除当前配置类
 				this.configurationClasses.remove(configClass);
+				// 从已知的配置类中移除当前的配置类
 				this.knownSuperclasses.values().removeIf(configClass::equals);
 			}
 		}
 
 		// Recursively process the configuration class and its superclass hierarchy.
+		// 将配置类转换成 SourceClass
 		SourceClass sourceClass = asSourceClass(configClass);
 		do {
+			// 解析配置类
 			sourceClass = doProcessConfigurationClass(configClass, sourceClass);
 		}
 		while (sourceClass != null);
 
+		// 放入配置类缓存
 		this.configurationClasses.put(configClass, configClass);
 	}
 
@@ -261,11 +279,13 @@ class ConfigurationClassParser {
 	protected final SourceClass doProcessConfigurationClass(ConfigurationClass configClass, SourceClass sourceClass)
 			throws IOException {
 
+		// 配置类是否存在 Component 注解
 		if (configClass.getMetadata().isAnnotated(Component.class.getName())) {
 			// Recursively process any member (nested) classes first
 			processMemberClasses(configClass, sourceClass);
 		}
 
+		// 处理 PropertySource 和 PropertySource 注解
 		// Process any @PropertySource annotations
 		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), PropertySources.class,
@@ -279,6 +299,7 @@ class ConfigurationClassParser {
 			}
 		}
 
+		// 处理 ComponentScans ComponentScan 注解
 		// Process any @ComponentScan annotations
 		Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
@@ -301,9 +322,11 @@ class ConfigurationClassParser {
 			}
 		}
 
+		// 处理 Import 注解
 		// Process any @Import annotations
 		processImports(configClass, sourceClass, getImports(sourceClass), true);
 
+		// 处理 ImportResource 注解
 		// Process any @ImportResource annotations
 		AnnotationAttributes importResource =
 				AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
@@ -316,15 +339,18 @@ class ConfigurationClassParser {
 			}
 		}
 
+		// 处理 Bean 注解
 		// Process individual @Bean methods
 		Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(sourceClass);
 		for (MethodMetadata methodMetadata : beanMethods) {
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 		}
 
+		// 处理 Bean Method
 		// Process default methods on interfaces
 		processInterfaces(configClass, sourceClass);
 
+		// 父类配置处理
 		// Process superclass, if any
 		if (sourceClass.getMetadata().hasSuperClass()) {
 			String superclass = sourceClass.getMetadata().getSuperClassName();
@@ -344,23 +370,31 @@ class ConfigurationClassParser {
 	 * Register member (nested) classes that happen to be configuration classes themselves.
 	 */
 	private void processMemberClasses(ConfigurationClass configClass, SourceClass sourceClass) throws IOException {
+		// 找到当前配置类中存在的成员类
 		Collection<SourceClass> memberClasses = sourceClass.getMemberClasses();
+		// 成员类列表不为空
 		if (!memberClasses.isEmpty()) {
 			List<SourceClass> candidates = new ArrayList<>(memberClasses.size());
 			for (SourceClass memberClass : memberClasses) {
+				// 成员类是否符合配置类候选标准 Component ComponentScan Import ImportResource 注解是否存在
+				// 成员类是否和配置类同名
 				if (ConfigurationClassUtils.isConfigurationCandidate(memberClass.getMetadata()) &&
 						!memberClass.getMetadata().getClassName().equals(configClass.getMetadata().getClassName())) {
+
 					candidates.add(memberClass);
 				}
 			}
+			// 排序候选类
 			OrderComparator.sort(candidates);
 			for (SourceClass candidate : candidates) {
+				// 判断 importStack 中是否存在当前配置类
 				if (this.importStack.contains(configClass)) {
 					this.problemReporter.error(new CircularImportProblem(configClass, this.importStack));
 				}
 				else {
 					this.importStack.push(configClass);
 					try {
+						// 解析成员类
 						processConfigurationClass(candidate.asConfigClass(configClass));
 					}
 					finally {
@@ -375,7 +409,9 @@ class ConfigurationClassParser {
 	 * Register default methods on interfaces implemented by the configuration class.
 	 */
 	private void processInterfaces(ConfigurationClass configClass, SourceClass sourceClass) throws IOException {
+		// 获取接口
 		for (SourceClass ifc : sourceClass.getInterfaces()) {
+			// 接口上获取方法元数据
 			Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(ifc);
 			for (MethodMetadata methodMetadata : beanMethods) {
 				if (!methodMetadata.isAbstract()) {
@@ -432,26 +468,36 @@ class ConfigurationClassParser {
 	 * @throws IOException if loading a property source failed
 	 */
 	private void processPropertySource(AnnotationAttributes propertySource) throws IOException {
+		// 提取注解属性中的 name 属性
 		String name = propertySource.getString("name");
 		if (!StringUtils.hasLength(name)) {
 			name = null;
 		}
+		// 提取注解属性中的 encoding 属性
 		String encoding = propertySource.getString("encoding");
 		if (!StringUtils.hasLength(encoding)) {
 			encoding = null;
 		}
+		// 提取注解属性中的 value 属性
 		String[] locations = propertySource.getStringArray("value");
 		Assert.isTrue(locations.length > 0, "At least one @PropertySource(value) location is required");
+
+		// 提取注解属性中的 ignoreResourceNotFound 属性
 		boolean ignoreResourceNotFound = propertySource.getBoolean("ignoreResourceNotFound");
 
+		// 提取注解属性中的 factory 属性
 		Class<? extends PropertySourceFactory> factoryClass = propertySource.getClass("factory");
 		PropertySourceFactory factory = (factoryClass == PropertySourceFactory.class ?
 				DEFAULT_PROPERTY_SOURCE_FACTORY : BeanUtils.instantiateClass(factoryClass));
 
+		// 循环处理每个配置文件
 		for (String location : locations) {
 			try {
+				// 解析配置文件地址
 				String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
+				// 资源加载其加载资源
 				Resource resource = this.resourceLoader.getResource(resolvedLocation);
+				// 加入配置
 				addPropertySource(factory.createPropertySource(name, new EncodedResource(resource, encoding)));
 			}
 			catch (IllegalArgumentException | FileNotFoundException | UnknownHostException ex) {
@@ -469,11 +515,15 @@ class ConfigurationClassParser {
 	}
 
 	private void addPropertySource(PropertySource<?> propertySource) {
+		// 获取配置名称
 		String name = propertySource.getName();
+		// 提取环境对象这种的 MutablePropertySources 对象
 		MutablePropertySources propertySources = ((ConfigurableEnvironment) this.environment).getPropertySources();
 
+		// 当前处理的配置名称是否在 propertySourceNames 存在
 		if (this.propertySourceNames.contains(name)) {
 			// We've already added a version, we need to extend it
+			// 从 propertySources 中获取当前配置名称对应的 PropertySource
 			PropertySource<?> existing = propertySources.get(name);
 			if (existing != null) {
 				PropertySource<?> newSource = (propertySource instanceof ResourcePropertySource ?
@@ -494,6 +544,7 @@ class ConfigurationClassParser {
 			}
 		}
 
+		// 如果 propertySourceNames 为空
 		if (this.propertySourceNames.isEmpty()) {
 			propertySources.addLast(propertySource);
 		}
