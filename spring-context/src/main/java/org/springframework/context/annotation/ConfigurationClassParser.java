@@ -303,8 +303,10 @@ class ConfigurationClassParser {
 		// Process any @ComponentScan annotations
 		Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
+		// 如果 ComponentScan 数据解析结果不为空 并且通过条件解析，条件解析的阶段是注册阶段
 		if (!componentScans.isEmpty() &&
 				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
+			// 处理单个 componentScan 数据
 			for (AnnotationAttributes componentScan : componentScans) {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
@@ -427,18 +429,26 @@ class ConfigurationClassParser {
 	 * Retrieve the metadata for all <code>@Bean</code> methods.
 	 */
 	private Set<MethodMetadata> retrieveBeanMethodMetadata(SourceClass sourceClass) {
+		// 提取元数据
 		AnnotationMetadata original = sourceClass.getMetadata();
+		// 提取带有 Bean 标签的数据
 		Set<MethodMetadata> beanMethods = original.getAnnotatedMethods(Bean.class.getName());
+
 		if (beanMethods.size() > 1 && original instanceof StandardAnnotationMetadata) {
 			// Try reading the class file via ASM for deterministic declaration order...
 			// Unfortunately, the JVM's standard reflection returns methods in arbitrary
 			// order, even between different runs of the same application on the same JVM.
 			try {
+				// 类的注解元数据
 				AnnotationMetadata asm =
 						this.metadataReaderFactory.getMetadataReader(original.getClassName()).getAnnotationMetadata();
+				// 提取带有 Bean 注解的方法元数据
 				Set<MethodMetadata> asmMethods = asm.getAnnotatedMethods(Bean.class.getName());
 				if (asmMethods.size() >= beanMethods.size()) {
+
+					// 选中的方法元数据
 					Set<MethodMetadata> selectedMethods = new LinkedHashSet<>(asmMethods.size());
+					// 循环两个方法元数据进行 methodName 比较如果相同会被加入到选中集合中
 					for (MethodMetadata asmMethod : asmMethods) {
 						for (MethodMetadata beanMethod : beanMethods) {
 							if (beanMethod.getMethodName().equals(asmMethod.getMethodName())) {
