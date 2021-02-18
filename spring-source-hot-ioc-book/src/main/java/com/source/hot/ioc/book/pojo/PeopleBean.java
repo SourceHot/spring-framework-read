@@ -42,6 +42,7 @@ public class PeopleBean {
     }
 
     public PeopleBean() {
+		System.out.println();
     }
 
     public PeopleBean(String name) {
