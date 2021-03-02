@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.InitializingBean;
 
 public class BeanInfoTest {
+	// 首字母大写
 	public static String captureName(String name) {
 		char[] cs = name.toCharArray();
 		cs[0] -= 32;
