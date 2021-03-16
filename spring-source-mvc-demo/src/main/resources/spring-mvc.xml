@@ -1,22 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xmlns:context="http://www.springframework.org/schema/context"
 	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+	   xmlns="http://www.springframework.org/schema/beans"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd">
-
-
-
-	<!-- 配置扫描的Controller -->
-	<context:component-scan base-package="com.source.hot" />
-	<!-- 静态资源访问，例如图片、js文件、css文件等 -->
-	<mvc:default-servlet-handler />
-	<!-- 开启注解 -->
-	<mvc:annotation-driven />
-	<!-- jspViewResolver jsp视图解析器 -->
+	<context:component-scan base-package="com.source.hot"/>
+	<mvc:default-servlet-handler/>
+	<mvc:annotation-driven/>
 	<bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
-		<property name="prefix" value="/page/"/><!-- 后台默认返回视图寻找视图文件的路径 -->
-		<property name="suffix" value=".jsp"/><!-- 后台返回视图默认添加的后缀 -->
+		<property name="prefix" value="/page/"/>
+		<property name="suffix" value=".jsp"/>
 	</bean>
 </beans>
