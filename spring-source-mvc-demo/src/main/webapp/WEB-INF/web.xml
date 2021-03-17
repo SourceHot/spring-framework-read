@@ -10,9 +10,20 @@
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>classpath:spring-mvc.xml</param-value>
+			<param-value>/WEB-INF/applicationContext.xml</param-value>
 		</init-param>
 	</servlet>
+	<context-param>
+		<param-name>globalInitializerClasses</param-name>
+		<param-value>com.source.hot.mvc.applicationContextInitializer.GlobalApplicationContextInitializer</param-value>
+	</context-param>
+	<context-param>
+		<param-name>contextInitializerClasses</param-name>
+		<param-value>com.source.hot.mvc.applicationContextInitializer.ContextApplicationContextInitializer</param-value>
+	</context-param>
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
 	<servlet-mapping>
 		<servlet-name>sp</servlet-name>
 		<url-pattern>/</url-pattern>

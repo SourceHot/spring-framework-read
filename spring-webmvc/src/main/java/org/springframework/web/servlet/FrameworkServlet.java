@@ -661,22 +661,29 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
 	protected WebApplicationContext createWebApplicationContext(@Nullable ApplicationContext parent) {
+		// 获取上下文类
 		Class<?> contextClass = getContextClass();
+		// 如果类型不是ConfigurableWebApplicationContext会抛出异常
 		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
 			throw new ApplicationContextException(
 					"Fatal initialization error in servlet with name '" + getServletName() +
 							"': custom WebApplicationContext class [" + contextClass.getName() +
 							"] is not of type ConfigurableWebApplicationContext");
 		}
+		// 反射创建web应用上下文
 		ConfigurableWebApplicationContext wac =
 				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 
+		// 设置环境变量
 		wac.setEnvironment(getEnvironment());
+		// 设置父上下文
 		wac.setParent(parent);
+		// 获取配置文件
 		String configLocation = getContextConfigLocation();
 		if (configLocation != null) {
 			wac.setConfigLocation(configLocation);
 		}
+		// 配置并刷新应用上下文
 		configureAndRefreshWebApplicationContext(wac);
 
 		return wac;
