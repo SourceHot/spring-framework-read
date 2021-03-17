@@ -163,7 +163,6 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 				initBeanWrapper(bw);
 				// BeanWrapper 设置属性
 				bw.setPropertyValues(pvs, true);
-				System.out.println();
 			}
 			catch (BeansException ex) {
 				if (logger.isErrorEnabled()) {
