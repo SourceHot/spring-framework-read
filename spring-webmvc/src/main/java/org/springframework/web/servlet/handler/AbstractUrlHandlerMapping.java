@@ -61,6 +61,10 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 	private boolean lazyInitHandlers = false;
 
+	/**
+	 * key: url
+	 * value: handler object
+	 */
 	private final Map<String, Object> handlerMap = new LinkedHashMap<>();
 
 
@@ -337,10 +341,12 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			String handlerName = (String) handler;
 			ApplicationContext applicationContext = obtainApplicationContext();
 			if (applicationContext.isSingleton(handlerName)) {
+				// 从容器中获取 handler 对象
 				resolvedHandler = applicationContext.getBean(handlerName);
 			}
 		}
 
+		// 尝试从handlerMap中获取对象
 		Object mappedHandler = this.handlerMap.get(urlPath);
 		if (mappedHandler != null) {
 			if (mappedHandler != resolvedHandler) {
@@ -349,6 +355,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 						"]: There is already " + getHandlerDescription(mappedHandler) + " mapped.");
 			}
 		}
+		// 容器中不存在的处理情况
 		else {
 			if (urlPath.equals("/")) {
 				if (logger.isTraceEnabled()) {

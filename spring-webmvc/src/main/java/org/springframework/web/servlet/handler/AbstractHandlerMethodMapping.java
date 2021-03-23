@@ -384,9 +384,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	@Nullable
 	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
 		List<Match> matches = new ArrayList<>();
-		// 从 MultiValueMap 获取
+		// 从 路由映射表 获取
 		List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath);
-		// 如果不为空
+		// 如果url对应的数据不为空
 		if (directPathMatches != null) {
 			// 添加匹配映射
 			addMatchingMappings(directPathMatches, matches, request);
@@ -418,7 +418,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				// 如果比较结果相同
 				if (comparator.compare(bestMatch, secondBestMatch) == 0) {
 					// 第二个元素和第一个元素的比较过程
-					// 拿出 handlerMethod 进行比较
 					Method m1 = bestMatch.handlerMethod.getMethod();
 					Method m2 = secondBestMatch.handlerMethod.getMethod();
 					String uri = request.getRequestURI();

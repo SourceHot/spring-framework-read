@@ -75,10 +75,12 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	 */
 	@Override
 	protected void initApplicationContext(ApplicationContext context) {
+		// 处理父类的 initApplicationContext 方法
 		super.initApplicationContext(context);
 		if (this.servletContext == null && context instanceof WebApplicationContext) {
 			this.servletContext = ((WebApplicationContext) context).getServletContext();
 			if (this.servletContext != null) {
+				// 初始化ServletContext
 				initServletContext(this.servletContext);
 			}
 		}
