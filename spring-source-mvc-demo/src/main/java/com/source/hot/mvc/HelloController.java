@@ -28,8 +28,5 @@ public class HelloController {
 		return "title";
 	}
 
-	@RequestMapping("/do")
-	public String do2(){
-		return "hello";
-	}
+
 }
