@@ -422,10 +422,16 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 
 		// 跨域处理
+		// 对handler的跨域判断
+		// 对请求的跨域判断
 		if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
+			// 从请求中获取跨域配置
 			CorsConfiguration config = (this.corsConfigurationSource != null ? this.corsConfigurationSource.getCorsConfiguration(request) : null);
+			// 从 handler中获取跨域配置
 			CorsConfiguration handlerConfig = getCorsConfiguration(handler, request);
+			// 确定最终的跨域配置
 			config = (config != null ? config.combine(handlerConfig) : handlerConfig);
+			// executionChain 对象添加跨域配置
 			executionChain = getCorsHandlerExecutionChain(request, executionChain, config);
 		}
 
@@ -472,13 +478,17 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see #getAdaptedInterceptors()
 	 */
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
+		// 判断 handler 对象的类型是否是 HandlerExecutionChain, 如果不是会进行对象创建,如果是会进行强制转换
 		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?
 				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
 
+		// 提取请求的地址
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request, LOOKUP_PATH);
+		// 拦截器处理
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
 			if (interceptor instanceof MappedInterceptor) {
 				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
+				// 验证url地址是否是需要进行拦截,如果需要就加入
 				if (mappedInterceptor.matches(lookupPath, this.pathMatcher)) {
 					chain.addInterceptor(mappedInterceptor.getInterceptor());
 				}

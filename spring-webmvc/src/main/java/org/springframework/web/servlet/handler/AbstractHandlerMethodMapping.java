@@ -437,6 +437,12 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 	}
 
+	/**
+	 * 添加匹配数据对象
+	 * @param mappings requestMappingInfo
+	 * @param matches 匹配表
+	 * @param request 请求
+	 */
 	private void addMatchingMappings(Collection<T> mappings, List<Match> matches, HttpServletRequest request) {
 		for (T mapping : mappings) {
 			// 抽象方法
