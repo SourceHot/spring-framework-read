@@ -14,12 +14,25 @@
 	</bean>
 	<mvc:interceptors>
 		<mvc:interceptor>
-			<mvc:mapping path="/**" />
+			<mvc:mapping path="/**"/>
 			<bean id="AllHandlerInterceptor" class="com.source.hot.mvc.handlerInterceptor.AllHandlerInterceptor"/>
 		</mvc:interceptor>
 	</mvc:interceptors>
 	<mvc:cors>
 		<mvc:mapping path="/**"/>
 	</mvc:cors>
+
+	<bean id="controllerImpl" class="com.source.hot.mvc.ctr.ControllerImpl"/>
+
+
+
+	<bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="order" value="1"/>
+		<property name="mappings">
+			<value>
+				/hello=controllerImpl
+			</value>
+		</property>
+	</bean>
 
 </beans>

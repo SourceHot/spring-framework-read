@@ -124,26 +124,37 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	@Override
 	@Nullable
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
+		// 提取请求地址
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+		// 设置请求地址
 		request.setAttribute(LOOKUP_PATH, lookupPath);
+		// 查询 handler 对象
 		Object handler = lookupHandler(lookupPath, request);
 		if (handler == null) {
 			// We need to care for the default handler directly, since we need to
 			// expose the PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE for it as well.
 			Object rawHandler = null;
+			// 对于访问路径是 / 的处理
 			if ("/".equals(lookupPath)) {
+				// 获取根Handler对象
 				rawHandler = getRootHandler();
 			}
+			// handler 还是空
 			if (rawHandler == null) {
+				// 获取默认的Handler对象
 				rawHandler = getDefaultHandler();
 			}
+			// rawHandler 不为空
 			if (rawHandler != null) {
 				// Bean name or resolved handler?
+				// 类型是String从容器中获取
 				if (rawHandler instanceof String) {
 					String handlerName = (String) rawHandler;
 					rawHandler = obtainApplicationContext().getBean(handlerName);
 				}
+				// 验证 handler
 				validateHandler(rawHandler, request);
+				// 构建 handler 对象
 				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
 			}
 		}
