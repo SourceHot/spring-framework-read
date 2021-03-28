@@ -8,6 +8,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 
 @PropertySource(value = "classpath:data.properties")
+@PropertySources(value = @PropertySource("classpath:data.properties"))
 @Configuration
 public class PropertySourceTest {
 	@Test

@@ -176,20 +176,28 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 */
 	@Nullable
 	protected Object lookupHandler(String urlPath, HttpServletRequest request) throws Exception {
+		// 第一部分
 		// Direct match?
+		// 从 handler map 集合中找到url对应的handler对象
 		Object handler = this.handlerMap.get(urlPath);
+		// 不为空的处理情况
 		if (handler != null) {
 			// Bean name or resolved handler?
 			if (handler instanceof String) {
 				String handlerName = (String) handler;
 				handler = obtainApplicationContext().getBean(handlerName);
 			}
+			// 验证handler对象
 			validateHandler(handler, request);
+			// 创建 handler 对象
 			return buildPathExposingHandler(handler, urlPath, urlPath, null);
 		}
 
+		// 第二部分
 		// Pattern match?
+		// url 正则匹配集合
 		List<String> matchingPatterns = new ArrayList<>();
+		// 循环处理handlerMap的key列表，将符合正则表达式的数据放入到容器中
 		for (String registeredPattern : this.handlerMap.keySet()) {
 			if (getPathMatcher().match(registeredPattern, urlPath)) {
 				matchingPatterns.add(registeredPattern);
@@ -201,7 +209,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			}
 		}
 
+		// 第三部分
 		String bestMatch = null;
+		// 创建url比较器
 		Comparator<String> patternComparator = getPathMatcher().getPatternComparator(urlPath);
 		if (!matchingPatterns.isEmpty()) {
 			matchingPatterns.sort(patternComparator);
@@ -210,6 +220,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			}
 			bestMatch = matchingPatterns.get(0);
 		}
+		// 需要进行匹配的对象存在的情况
 		if (bestMatch != null) {
 			handler = this.handlerMap.get(bestMatch);
 			if (handler == null) {
