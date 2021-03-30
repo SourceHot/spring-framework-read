@@ -211,6 +211,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 		// 第三部分
 		String bestMatch = null;
+		// 第一步 容器排序
 		// 创建url比较器
 		Comparator<String> patternComparator = getPathMatcher().getPatternComparator(urlPath);
 		if (!matchingPatterns.isEmpty()) {
@@ -222,6 +223,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		}
 		// 需要进行匹配的对象存在的情况
 		if (bestMatch != null) {
+			// 第二步: 通过最佳匹配的url获取对应的handler对象
 			handler = this.handlerMap.get(bestMatch);
 			if (handler == null) {
 				if (bestMatch.endsWith("/")) {
@@ -242,6 +244,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 			// There might be multiple 'best patterns', let's make sure we have the correct URI template variables
 			// for all of them
+			// 第三步: matchingPatterns 数量超过1个的情况处理
 			Map<String, String> uriTemplateVariables = new LinkedHashMap<>();
 			for (String matchingPattern : matchingPatterns) {
 				if (patternComparator.compare(bestMatch, matchingPattern) == 0) {
@@ -285,9 +288,12 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	protected Object buildPathExposingHandler(Object rawHandler, String bestMatchingPattern,
 			String pathWithinMapping, @Nullable Map<String, String> uriTemplateVariables) {
 
+		// 通过 handler对象创建 HandlerExecutionChain
 		HandlerExecutionChain chain = new HandlerExecutionChain(rawHandler);
+		// 添加 PathExposingHandlerInterceptor 拦截器
 		chain.addInterceptor(new PathExposingHandlerInterceptor(bestMatchingPattern, pathWithinMapping));
 		if (!CollectionUtils.isEmpty(uriTemplateVariables)) {
+			// 添加 UriTemplateVariablesHandlerInterceptor 拦截器
 			chain.addInterceptor(new UriTemplateVariablesHandlerInterceptor(uriTemplateVariables));
 		}
 		return chain;

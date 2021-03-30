@@ -35,4 +35,5 @@
 		</property>
 	</bean>
 
+	<bean name="/hrh" class="com.source.hot.mvc.httpRequestHandler.HttpRequestHandlerFirst" />
 </beans>
