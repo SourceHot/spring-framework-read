@@ -139,10 +139,12 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 						applicationContext.getBeansOfType(RouterFunction.class));
 
 
+		// 待处理的返回值
 		List<RouterFunction> routerFunctions = new ArrayList<>(beans.values());
 		if (!CollectionUtils.isEmpty(routerFunctions) && logger.isInfoEnabled()) {
 			routerFunctions.forEach(routerFunction -> logger.info("Mapped " + routerFunction));
 		}
+		// routerFunctions 数据处理
 		this.routerFunction = routerFunctions.stream()
 				.reduce(RouterFunction::andOther)
 				.orElse(null);
