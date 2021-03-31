@@ -359,11 +359,14 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	private void updateConsumesCondition(RequestMappingInfo info, Method method) {
+		// 提取 ConsumesRequestCondition 数据
 		ConsumesRequestCondition condition = info.getConsumesCondition();
 		if (!condition.isEmpty()) {
 			for (Parameter parameter : method.getParameters()) {
+				// 提取参数的RequestBody注解
 				MergedAnnotation<RequestBody> annot = MergedAnnotations.from(parameter).get(RequestBody.class);
 				if (annot.isPresent()) {
+					// 设置是否必填
 					condition.setBodyRequired(annot.getBoolean("required"));
 					break;
 				}
