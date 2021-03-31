@@ -1,15 +1,26 @@
 package com.source.hot.webflux;
 
-import com.source.hot.webflux.handler.GreetingWebClient;
+import static org.springframework.web.servlet.function.RouterFunctions.route;
+import static org.springframework.web.servlet.function.ServerResponse.ok;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.servlet.function.RouterFunction;
+import org.springframework.web.servlet.function.ServerResponse;
 
 @SpringBootApplication
 public class App {
+
 	public static void main(String[] args) {
 		SpringApplication.run(App.class, args);
-
-		GreetingWebClient gwc = new GreetingWebClient();
-		System.out.println(gwc.getResult());
 	}
+
+
+	@Bean
+	public RouterFunction<ServerResponse> productListing() {
+		return route().GET("/product", req -> ok().body("hello"))
+				.build();
+	}
+
 }

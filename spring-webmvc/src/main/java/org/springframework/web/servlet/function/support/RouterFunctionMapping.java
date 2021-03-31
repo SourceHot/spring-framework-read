@@ -116,9 +116,11 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.routerFunction == null) {
+			// 初始化 routerFunction 对象
 			initRouterFunction();
 		}
 		if (CollectionUtils.isEmpty(this.messageConverters)) {
+			// 初始化 messageConverters 对象
 			initMessageConverters();
 		}
 	}
@@ -130,10 +132,12 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void initRouterFunction() {
 		ApplicationContext applicationContext = obtainApplicationContext();
+		// 获取容器中RouterFunction对象
 		Map<String, RouterFunction> beans =
 				(this.detectHandlerFunctionsInAncestorContexts ?
 						BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, RouterFunction.class) :
 						applicationContext.getBeansOfType(RouterFunction.class));
+
 
 		List<RouterFunction> routerFunctions = new ArrayList<>(beans.values());
 		if (!CollectionUtils.isEmpty(routerFunctions) && logger.isInfoEnabled()) {
