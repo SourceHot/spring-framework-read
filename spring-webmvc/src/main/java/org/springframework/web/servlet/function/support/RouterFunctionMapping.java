@@ -172,14 +172,17 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	@Nullable
 	@Override
 	protected Object getHandlerInternal(HttpServletRequest servletRequest) throws Exception {
+		// 获取请求地址
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(servletRequest);
+		// 设置属性
 		servletRequest.setAttribute(LOOKUP_PATH, lookupPath);
 		if (this.routerFunction != null) {
+			// 创建 ServerRequest 对象
 			ServerRequest request = ServerRequest.create(servletRequest, this.messageConverters);
 			servletRequest.setAttribute(RouterFunctions.REQUEST_ATTRIBUTE, request);
+			// 从 routerFunction 中找到对应的数据
 			return this.routerFunction.route(request).orElse(null);
-		}
-		else {
+		} else {
 			return null;
 		}
 	}

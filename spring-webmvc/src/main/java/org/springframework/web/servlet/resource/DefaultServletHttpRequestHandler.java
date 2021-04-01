@@ -120,11 +120,13 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 			throws ServletException, IOException {
 
 		Assert.state(this.servletContext != null, "No ServletContext set");
+		// 从 servlet上下文中根据ServletName获取RequestDispatcher对象
 		RequestDispatcher rd = this.servletContext.getNamedDispatcher(this.defaultServletName);
 		if (rd == null) {
 			throw new IllegalStateException("A RequestDispatcher could not be located for the default servlet '" +
 					this.defaultServletName + "'");
 		}
+		// RequestDispatcher 进行处理请求
 		rd.forward(request, response);
 	}
 

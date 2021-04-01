@@ -1051,11 +1051,13 @@ public class DispatcherServlet extends FrameworkServlet {
 					}
 				}
 
+				// 处理HandlerInterceptor
 				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 					return;
 				}
 
 				// Actually invoke the handler.
+				// 执行 HandlerAdapter的handle方法
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 				if (asyncManager.isConcurrentHandlingStarted()) {

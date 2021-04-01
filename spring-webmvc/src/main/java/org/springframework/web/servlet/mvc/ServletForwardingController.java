@@ -122,13 +122,16 @@ public class ServletForwardingController extends AbstractController implements B
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
+		// 获取 servlet 上下文
 		ServletContext servletContext = getServletContext();
 		Assert.state(servletContext != null, "No ServletContext");
+		// 获取 RequestDispatcher 对象
 		RequestDispatcher rd = servletContext.getNamedDispatcher(this.servletName);
 		if (rd == null) {
 			throw new ServletException("No servlet with name '" + this.servletName + "' defined in web.xml");
 		}
 
+		// 进行请求处理
 		// If already included, include again, else forward.
 		if (useInclude(request, response)) {
 			rd.include(request, response);

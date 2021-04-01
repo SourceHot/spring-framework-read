@@ -152,8 +152,10 @@ public class ParameterizableViewController extends AbstractController {
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
+		// 获取视图名称
 		String viewName = getViewName();
 
+		// 状态相关处理
 		if (getStatusCode() != null) {
 			if (getStatusCode().is3xxRedirection()) {
 				request.setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, getStatusCode());
@@ -170,6 +172,7 @@ public class ParameterizableViewController extends AbstractController {
 			return null;
 		}
 
+		// 组装 ModelAndView 对象
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.addAllObjects(RequestContextUtils.getInputFlashMap(request));
 		if (viewName != null) {
