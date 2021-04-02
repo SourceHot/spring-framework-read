@@ -67,6 +67,28 @@
 	<!--End ParameterizableViewController Testing-->
 
 
+	<!--Start ServletWrappingController Testing-->
+	<servlet>
+		<servlet-name>servlet-wrapping-dispatcher</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>servlet-wrapping-dispatcher</servlet-name>
+		<url-pattern>/servlet-wrapping/*</url-pattern>
+	</servlet-mapping>
+	<!--End ServletWrappingController Testing-->
 
+	<!--Start UrlFilenameViewController Testing-->
+	<servlet>
+		<servlet-name>url-filename-view-dispatcher</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>url-filename-view-dispatcher</servlet-name>
+		<url-pattern>/url-filename-view/*</url-pattern>
+	</servlet-mapping>
+	<!--End UrlFilenameViewController Testing-->
 
 </web-app>

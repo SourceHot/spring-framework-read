@@ -90,15 +90,17 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 
 
 	/**
-	 * Returns view name based on the URL filename,
-	 * with prefix/suffix applied when appropriate.
+	 * Returns view name based on the URL filename, with prefix/suffix applied when appropriate.
+	 *
 	 * @see #extractViewNameFromUrlPath
 	 * @see #setPrefix
 	 * @see #setSuffix
 	 */
 	@Override
 	protected String getViewNameForRequest(HttpServletRequest request) {
+		// 获取 uri
 		String uri = extractOperableUrl(request);
+		// 获取视图名称
 		return getViewNameForUrlPath(uri);
 	}
 
@@ -109,8 +111,10 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	 * @return the URL to use for view name extraction
 	 */
 	protected String extractOperableUrl(HttpServletRequest request) {
+		// 提取 HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE 对应的数据信息
 		String urlPath = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
 		if (!StringUtils.hasText(urlPath)) {
+			// 解析正真的url地址
 			urlPath = getUrlPathHelper().getLookupPathForRequest(request, HandlerMapping.LOOKUP_PATH);
 		}
 		return urlPath;
@@ -125,9 +129,12 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	 * @see #postProcessViewName
 	 */
 	protected String getViewNameForUrlPath(String uri) {
+		// 视图缓存中获取
 		String viewName = this.viewNameCache.get(uri);
 		if (viewName == null) {
+			// 从url中提取文件名称
 			viewName = extractViewNameFromUrlPath(uri);
+			// 处理文件名,处理方式: 前缀+viewName+后缀
 			viewName = postProcessViewName(viewName);
 			this.viewNameCache.put(uri, viewName);
 		}

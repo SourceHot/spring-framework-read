@@ -94,16 +94,18 @@ public abstract class AbstractUrlViewController extends AbstractController {
 
 
 	/**
-	 * Retrieves the URL path to use for lookup and delegates to
-	 * {@link #getViewNameForRequest}. Also adds the content of
-	 * {@link RequestContextUtils#getInputFlashMap} to the model.
+	 * Retrieves the URL path to use for lookup and delegates to {@link #getViewNameForRequest}.
+	 * Also adds the content of {@link RequestContextUtils#getInputFlashMap} to the model.
 	 */
 	@Override
-	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
+	protected ModelAndView handleRequestInternal(HttpServletRequest request,
+			HttpServletResponse response) {
+		// 从请求中获取视图名称
 		String viewName = getViewNameForRequest(request);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Returning view name '" + viewName + "'");
 		}
+		// 创建 ModelAndView
 		return new ModelAndView(viewName, RequestContextUtils.getInputFlashMap(request));
 	}
 
