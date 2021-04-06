@@ -285,6 +285,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				Context context) throws ServletException, IOException {
 
 			try {
+				// 设置状态、头信息和cookie信息
 				writeStatusAndHeaders(response);
 
 				long lastModified = headers().getLastModified();
@@ -295,10 +296,12 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 					return null;
 				}
 				else {
+					// 写出
 					return writeToInternal(request, response, context);
 				}
 			}
 			catch (Throwable throwable) {
+				// 异常处理
 				return handleError(throwable, request, response, context);
 			}
 		}
