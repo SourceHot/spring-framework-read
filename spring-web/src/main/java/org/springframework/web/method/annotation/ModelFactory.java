@@ -102,16 +102,21 @@ public final class ModelFactory {
 	public void initModel(NativeWebRequest request, ModelAndViewContainer container, HandlerMethod handlerMethod)
 			throws Exception {
 
+		// 获取session属性表
 		Map<String, ?> sessionAttributes = this.sessionAttributesHandler.retrieveAttributes(request);
+		// 数据上下文中的数据和session属性表进行合并
 		container.mergeAttributes(sessionAttributes);
+		// ModelAttribute注解处理
 		invokeModelAttributeMethods(request, container);
 
+		// 处理 ModelAttribute 和 session 属性表中同时存在的数据
 		for (String name : findSessionAttributeArguments(handlerMethod)) {
 			if (!container.containsAttribute(name)) {
 				Object value = this.sessionAttributesHandler.retrieveAttribute(request, name);
 				if (value == null) {
 					throw new HttpSessionRequiredException("Expected session attribute '" + name + "'", name);
 				}
+				// 向数据上下文添加属性
 				container.addAttribute(name, value);
 			}
 		}

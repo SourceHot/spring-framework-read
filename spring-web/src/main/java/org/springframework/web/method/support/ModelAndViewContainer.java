@@ -89,7 +89,7 @@ public class ModelAndViewContainer {
 	private final Set<String> noBinding = new HashSet<>(4);
 
 	/**
-	 * 存储ModelAttribute注解的数据
+	 * 不进行绑定的数据
 	 */
 	private final Set<String> bindingDisabled = new HashSet<>(4);
 

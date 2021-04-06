@@ -85,6 +85,9 @@ public class HandlerMethod {
 	 */
 	private final Method method;
 
+	/**
+	 * 桥接的处理方法
+	 */
 	private final Method bridgedMethod;
 
 	/**
@@ -92,9 +95,15 @@ public class HandlerMethod {
 	 */
 	private final MethodParameter[] parameters;
 
+	/**
+	 * HTTP状态
+	 */
 	@Nullable
 	private HttpStatus responseStatus;
 
+	/**
+	 * 注解 ResponseStatus#reason数据
+	 */
 	@Nullable
 	private String responseStatusReason;
 
@@ -427,6 +436,7 @@ public class HandlerMethod {
 	protected static Object findProvidedArgument(MethodParameter parameter, @Nullable Object... providedArgs) {
 		if (!ObjectUtils.isEmpty(providedArgs)) {
 			for (Object providedArg : providedArgs) {
+				// 获取参数类型, 当前数据值是否是该类型
 				if (parameter.getParameterType().isInstance(providedArg)) {
 					return providedArg;
 				}

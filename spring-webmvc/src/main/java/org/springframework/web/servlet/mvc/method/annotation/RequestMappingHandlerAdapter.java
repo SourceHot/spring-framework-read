@@ -1007,6 +1007,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			return getModelAndView(mavContainer, modelFactory, webRequest);
 		}
 		finally {
+			// 发出请求处理完成通知
 			webRequest.requestCompleted();
 		}
 	}
