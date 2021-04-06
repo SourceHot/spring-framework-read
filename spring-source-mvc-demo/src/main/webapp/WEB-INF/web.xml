@@ -91,4 +91,14 @@
 	</servlet-mapping>
 	<!--End UrlFilenameViewController Testing-->
 
+
+	<servlet>
+		<servlet-name>servlet-annotation-dispatcher</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>servlet-annotation-dispatcher</servlet-name>
+		<url-pattern>/servlet-annotation/*</url-pattern>
+	</servlet-mapping>
 </web-app>

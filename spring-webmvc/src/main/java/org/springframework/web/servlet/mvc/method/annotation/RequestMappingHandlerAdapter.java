@@ -934,51 +934,76 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	protected ModelAndView invokeHandlerMethod(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
+		// 创建 ServletWebRequest
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		try {
+			// 数据绑定工厂
 			WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
+			// 获取模型工厂
 			ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
 
+			// 请求处理器
 			ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
+			// 设置参数解析类
 			if (this.argumentResolvers != null) {
 				invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 			}
+			// 设置返回值解析类
 			if (this.returnValueHandlers != null) {
 				invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
 			}
+			// 设置数据绑定工厂
 			invocableMethod.setDataBinderFactory(binderFactory);
+			// 设置参数名称发现器
 			invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
 
+			// 数据传递对象,数据上下文
 			ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+			// 添加属性表
 			mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
+			// 初始化模型对象
 			modelFactory.initModel(webRequest, mavContainer, invocableMethod);
+			// 设置重定向时是否需要忽略原有默认数据模型
 			mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
 
+			// 创建异步请求对象
 			AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
+			// 设置超时时间
 			asyncWebRequest.setTimeout(this.asyncRequestTimeout);
 
+			// 管理异步的网络请求
 			WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+			// 设置执行器
 			asyncManager.setTaskExecutor(this.taskExecutor);
+			// 设置异步请求
 			asyncManager.setAsyncWebRequest(asyncWebRequest);
+			// 设置可调用拦截器列表
 			asyncManager.registerCallableInterceptors(this.callableInterceptors);
+			// 注册延迟结果处理拦截器列表
 			asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
 
 			if (asyncManager.hasConcurrentResult()) {
+				// 获取处理结果
 				Object result = asyncManager.getConcurrentResult();
+				// 获取处理的数据上下文
 				mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
+				// 清空数据
 				asyncManager.clearConcurrentResult();
 				LogFormatUtils.traceDebug(logger, traceOn -> {
 					String formatted = LogFormatUtils.formatValue(result, !traceOn);
 					return "Resume with async result [" + formatted + "]";
 				});
+				// 包装返回对象
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}
 
+			// 执行处理器方法
 			invocableMethod.invokeAndHandle(webRequest, mavContainer);
 			if (asyncManager.isConcurrentHandlingStarted()) {
 				return null;
 			}
 
+			// 获取视图对象
 			return getModelAndView(mavContainer, modelFactory, webRequest);
 		}
 		finally {

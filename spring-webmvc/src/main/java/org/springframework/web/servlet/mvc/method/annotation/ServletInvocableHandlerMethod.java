@@ -57,6 +57,7 @@ import org.springframework.web.util.NestedServletException;
  * (see {@link ServletWebRequest#checkNotModified(long)}), or
  * a method argument that provides access to the response stream.
  *
+ * 请求处理器
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 3.1

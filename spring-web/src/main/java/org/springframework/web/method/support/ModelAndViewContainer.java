@@ -43,33 +43,64 @@ import org.springframework.web.bind.support.SimpleSessionStatus;
  * to {@code true} signalling a redirect scenario, the {@link #getModel()}
  * returns the redirect model instead of the default model.
  *
+ * 数据传递对象
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 3.1
  */
 public class ModelAndViewContainer {
 
+	/**
+	 * 重定向时是否需要忽略原有默认数据模型
+	 */
 	private boolean ignoreDefaultModelOnRedirect = false;
 
+	/**
+	 * 视图对象
+	 */
 	@Nullable
 	private Object view;
 
+	/**
+	 * 默认数据模型
+	 */
 	private final ModelMap defaultModel = new BindingAwareModelMap();
 
+	/**
+	 * 重定向时需要使用的模型
+	 */
 	@Nullable
 	private ModelMap redirectModel;
 
+	/**
+	 * 标记是否返回重定向模型
+	 */
 	private boolean redirectModelScenario = false;
 
+	/**
+	 * http 状态标记
+	 */
 	@Nullable
 	private HttpStatus status;
 
+	/**
+	 * 存储{@code @ModelAttribute(binding=true/false)} 的数据
+	 */
 	private final Set<String> noBinding = new HashSet<>(4);
 
+	/**
+	 * 存储ModelAttribute注解的数据
+	 */
 	private final Set<String> bindingDisabled = new HashSet<>(4);
 
+	/**
+	 * 该对象用来发出会话处理完毕的信号
+	 */
 	private final SessionStatus sessionStatus = new SimpleSessionStatus();
 
+	/**
+	 * 是否完成处理
+	 */
 	private boolean requestHandled = false;
 
 
