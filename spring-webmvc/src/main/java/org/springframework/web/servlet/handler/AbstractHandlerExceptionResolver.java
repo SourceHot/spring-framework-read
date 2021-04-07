@@ -136,14 +136,18 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	public ModelAndView resolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
+		// 是否可以支持异常处理
 		if (shouldApplyTo(request, handler)) {
+			// 准备返回对象
 			prepareResponse(ex, response);
+			// 进行异常解析
 			ModelAndView result = doResolveException(request, response, handler, ex);
 			if (result != null) {
 				// Print debug message when warn logger is not enabled.
 				if (logger.isDebugEnabled() && (this.warnLogger == null || !this.warnLogger.isWarnEnabled())) {
 					logger.debug("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
 				}
+				// 日志输出
 				// Explicitly configured warn logger in logException method.
 				logException(ex, request);
 			}
@@ -169,10 +173,13 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 */
 	protected boolean shouldApplyTo(HttpServletRequest request, @Nullable Object handler) {
 		if (handler != null) {
+			// mappedHandlers中存在handler数据
 			if (this.mappedHandlers != null && this.mappedHandlers.contains(handler)) {
 				return true;
 			}
+
 			if (this.mappedHandlerClasses != null) {
+				// mappedHandlerClasses中有handler的父接口
 				for (Class<?> handlerClass : this.mappedHandlerClasses) {
 					if (handlerClass.isInstance(handler)) {
 						return true;

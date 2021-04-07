@@ -186,14 +186,18 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
 		// Expose ModelAndView for chosen error view.
+		// 确认视图名称
 		String viewName = determineViewName(ex, request);
 		if (viewName != null) {
 			// Apply HTTP status code for error views, if specified.
 			// Only apply it if we're processing a top-level request.
+			// 确认状态码
 			Integer statusCode = determineStatusCode(request, viewName);
 			if (statusCode != null) {
+				// 应用状态码
 				applyStatusCodeIfPossible(request, response, statusCode);
 			}
+			// 获取模型和视图对象
 			return getModelAndView(viewName, ex, request);
 		}
 		else {
