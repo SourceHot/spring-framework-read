@@ -60,8 +60,11 @@ public class ExceptionHandlerMethodResolver {
 	 * @param handlerType the type to introspect
 	 */
 	public ExceptionHandlerMethodResolver(Class<?> handlerType) {
+		// 通过方法过滤器寻找具有 ExceptionHandler 注解的方法
 		for (Method method : MethodIntrospector.selectMethods(handlerType, EXCEPTION_HANDLER_METHODS)) {
+			// 获取ExceptionHandler中的异常
 			for (Class<? extends Throwable> exceptionType : detectExceptionMappings(method)) {
+				// 向 mappedMethods 容器更新缓存
 				addExceptionMapping(exceptionType, method);
 			}
 		}
@@ -71,6 +74,8 @@ public class ExceptionHandlerMethodResolver {
 	/**
 	 * Extract exception mappings from the {@code @ExceptionHandler} annotation first,
 	 * and then as a fallback from the method signature itself.
+	 *
+	 * 推论方法上的异常列表,具体从ExceptionHandler注解中进行数据获取
 	 */
 	@SuppressWarnings("unchecked")
 	private List<Class<? extends Throwable>> detectExceptionMappings(Method method) {
