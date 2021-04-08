@@ -142,15 +142,19 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws ServletException {
 
+		// 获取请求中的paramName对应的数据
 		String newLocale = request.getParameter(getParamName());
 		if (newLocale != null) {
+			// 检查请求方式
 			if (checkHttpMethod(request.getMethod())) {
+				// 请求上下文工具类中获取 LocaleResolver
 				LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
 				if (localeResolver == null) {
 					throw new IllegalStateException(
 							"No LocaleResolver found: not in a DispatcherServlet request?");
 				}
 				try {
+					// 设置 Locale 对象
 					localeResolver.setLocale(request, response, parseLocaleValue(newLocale));
 				}
 				catch (IllegalArgumentException ex) {

@@ -211,8 +211,11 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	}
 
 	private void parseLocaleCookieIfNecessary(HttpServletRequest request) {
+		// 获取 LOCALE_REQUEST_ATTRIBUTE_NAME 属性,只有空才处理
 		if (request.getAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME) == null) {
+			// 地区语言
 			Locale locale = null;
+			// 时区
 			TimeZone timeZone = null;
 
 			// Retrieve and parse cookie value.
