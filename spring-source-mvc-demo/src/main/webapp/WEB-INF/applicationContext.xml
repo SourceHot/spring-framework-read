@@ -17,6 +17,14 @@
 			<mvc:mapping path="/**"/>
 			<bean id="AllHandlerInterceptor" class="com.source.hot.mvc.handlerInterceptor.AllHandlerInterceptor"/>
 		</mvc:interceptor>
+
+		<mvc:interceptor>
+			<mvc:mapping path="/init" />
+			<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+				<property name="paramName" value="lang"></property>
+			</bean>
+		</mvc:interceptor>
+
 	</mvc:interceptors>
 	<mvc:cors>
 		<mvc:mapping path="/**"/>
@@ -36,4 +44,13 @@
 	</bean>
 
 	<bean name="/hrh" class="com.source.hot.mvc.httpRequestHandler.HttpRequestHandlerFirst" />
+
+
+	<bean id="messageSource"
+		  class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename" value="/WEB-INF/welcome" />
+	</bean>
+	<bean id="localeResolver"
+		  class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+	</bean>
 </beans>
