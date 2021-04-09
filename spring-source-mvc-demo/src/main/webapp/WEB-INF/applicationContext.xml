@@ -24,6 +24,12 @@
 				<property name="paramName" value="lang"></property>
 			</bean>
 		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/theme"/>
+			<bean id="themeChangeInterceptor" class="org.springframework.web.servlet.theme.ThemeChangeInterceptor">
+				<property name="paramName" value="theme"/>
+			</bean>
+		</mvc:interceptor>
 
 	</mvc:interceptors>
 	<mvc:cors>
@@ -31,7 +37,6 @@
 	</mvc:cors>
 
 	<bean id="controllerImpl" class="com.source.hot.mvc.ctr.ControllerImpl"/>
-
 
 
 	<bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
@@ -53,4 +58,16 @@
 	<bean id="localeResolver"
 		  class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
 	</bean>
+
+
+	<bean id="themeSource" class="org.springframework.ui.context.support.ResourceBundleThemeSource">
+		<property name="defaultEncoding" value="UTF-8"/>
+		<property name="basenamePrefix" value="themes."/>
+	</bean>
+	<mvc:resources mapping="/themes/**" location="/themes/"/>
+	<bean id="themeResolver" class="org.springframework.web.servlet.theme.CookieThemeResolver">
+		<property name="defaultThemeName" value="bright"/>
+		<property name="cookieName" value="my-theme-cookie"/>
+	</bean>
+
 </beans>
