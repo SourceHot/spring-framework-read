@@ -88,14 +88,17 @@ public class CookieThemeResolver extends CookieGenerator implements ThemeResolve
 	@Override
 	public String resolveThemeName(HttpServletRequest request) {
 		// Check request for preparsed or preset theme.
+		// 从请求的属性表中获取 THEME_REQUEST_ATTRIBUTE_NAME 对应的数据
 		String themeName = (String) request.getAttribute(THEME_REQUEST_ATTRIBUTE_NAME);
 		if (themeName != null) {
 			return themeName;
 		}
 
 		// Retrieve cookie value from request.
+		// 获取 cookie 名称
 		String cookieName = getCookieName();
 		if (cookieName != null) {
+			// 提取 cookie 将cookie对应的value作为主题名称
 			Cookie cookie = WebUtils.getCookie(request, cookieName);
 			if (cookie != null) {
 				String value = cookie.getValue();
@@ -107,8 +110,10 @@ public class CookieThemeResolver extends CookieGenerator implements ThemeResolve
 
 		// Fall back to default theme.
 		if (themeName == null) {
+			// 获取默认的主题名称
 			themeName = getDefaultThemeName();
 		}
+		// 设置请求属性表中的数据
 		request.setAttribute(THEME_REQUEST_ATTRIBUTE_NAME, themeName);
 		return themeName;
 	}
