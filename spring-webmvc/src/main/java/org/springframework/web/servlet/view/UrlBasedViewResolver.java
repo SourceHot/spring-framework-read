@@ -474,13 +474,18 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 
 		// Check for special "redirect:" prefix.
 		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
+			// 切除 redirect:数据
 			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
+			// 创建 RedirectView 对象
 			RedirectView view = new RedirectView(redirectUrl,
 					isRedirectContextRelative(), isRedirectHttp10Compatible());
+			// 获取路由地址
 			String[] hosts = getRedirectHosts();
 			if (hosts != null) {
+				// 设置路由
 				view.setHosts(hosts);
 			}
+			// 创建view对象
 			return applyLifecycleMethods(REDIRECT_URL_PREFIX, view);
 		}
 

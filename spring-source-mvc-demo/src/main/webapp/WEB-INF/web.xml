@@ -103,4 +103,14 @@
 	</servlet-mapping>
 	<!--End Return Json Servlet -->
 
+	<servlet>
+		<servlet-name>xmlViewResolver</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>xmlViewResolver</servlet-name>
+		<url-pattern>/xmlViewResolver/*</url-pattern>
+	</servlet-mapping>
+
 </web-app>

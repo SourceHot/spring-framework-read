@@ -1445,7 +1445,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		if (this.viewResolvers != null) {
 			for (ViewResolver viewResolver : this.viewResolvers) {
 				View view = viewResolver.resolveViewName(viewName, locale);
-				if (view != null) {
+				if (view 	!= null) {
 					return view;
 				}
 			}
