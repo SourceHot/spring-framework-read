@@ -103,6 +103,7 @@
 	</servlet-mapping>
 	<!--End Return Json Servlet -->
 
+	<!--Start xmlViewResolver Servlet -->
 	<servlet>
 		<servlet-name>xmlViewResolver</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -112,5 +113,19 @@
 		<servlet-name>xmlViewResolver</servlet-name>
 		<url-pattern>/xmlViewResolver/*</url-pattern>
 	</servlet-mapping>
+	<!--End xmlViewResolver Servlet -->
+
+	<!--Start beanNameViewResolver Servlet -->
+	<servlet>
+		<servlet-name>beanNameViewResolver</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>beanNameViewResolver</servlet-name>
+		<url-pattern>/beanNameViewResolver/*</url-pattern>
+	</servlet-mapping>
+	<!--End beanNameViewResolver Servlet -->
+
 
 </web-app>

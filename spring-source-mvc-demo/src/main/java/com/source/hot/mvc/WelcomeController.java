@@ -15,4 +15,9 @@ public class WelcomeController {
 	public String xmlConfig() {
 		return "xmlConfig";
 	}
+
+	@GetMapping("/beanNameView")
+	public String beanNameView() {
+		return "customerView";
+	}
 }
