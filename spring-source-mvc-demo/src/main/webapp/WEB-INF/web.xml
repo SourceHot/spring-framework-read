@@ -127,5 +127,13 @@
 	</servlet-mapping>
 	<!--End beanNameViewResolver Servlet -->
 
-
+	<servlet>
+		<servlet-name>xslt</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>xslt</servlet-name>
+		<url-pattern>/xslt/*</url-pattern>
+	</servlet-mapping>
 </web-app>

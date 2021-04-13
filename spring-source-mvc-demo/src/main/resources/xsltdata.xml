@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<employees>
+	<employee>
+		<id>1</id>
+		<name>zhangsan</name>
+		<dept>JavaDev</dept>
+	</employee>
+	<employee>
+		<id>2</id>
+		<name>lisi</name>
+		<dept>PythonDev</dept>
+	</employee>
+</employees>
