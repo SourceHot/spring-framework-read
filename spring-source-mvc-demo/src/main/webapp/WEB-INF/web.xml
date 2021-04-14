@@ -127,6 +127,7 @@
 	</servlet-mapping>
 	<!--End beanNameViewResolver Servlet -->
 
+	<!--Start xslt Servlet -->
 	<servlet>
 		<servlet-name>xslt</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -136,4 +137,6 @@
 		<servlet-name>xslt</servlet-name>
 		<url-pattern>/xslt/*</url-pattern>
 	</servlet-mapping>
+	<!--End xslt Servlet -->
+
 </web-app>

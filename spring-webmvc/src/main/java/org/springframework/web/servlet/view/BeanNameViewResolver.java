@@ -75,11 +75,14 @@ public class BeanNameViewResolver extends WebApplicationObjectSupport implements
 	@Override
 	@Nullable
 	public View resolveViewName(String viewName, Locale locale) throws BeansException {
+		// 确认应用上下文
 		ApplicationContext context = obtainApplicationContext();
+		// 应用上下文不包含当前视图名称对应的Bean实例
 		if (!context.containsBean(viewName)) {
 			// Allow for ViewResolver chaining...
 			return null;
 		}
+		// 应用上下文中视图名称的类型不是View类型
 		if (!context.isTypeMatch(viewName, View.class)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found bean named '" + viewName + "' but it does not implement View");
@@ -88,6 +91,7 @@ public class BeanNameViewResolver extends WebApplicationObjectSupport implements
 			// let's accept this as a non-match and allow for chaining as well...
 			return null;
 		}
+		// 从应用上下文中根据视图名称+类型获取
 		return context.getBean(viewName, View.class);
 	}
 

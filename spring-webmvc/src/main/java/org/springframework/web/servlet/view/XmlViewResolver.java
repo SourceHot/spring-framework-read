@@ -133,31 +133,44 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 	 * @throws BeansException in case of initialization errors
 	 */
 	protected synchronized BeanFactory initFactory() throws BeansException {
+		// 判断缓存工厂是否存在
 		if (this.cachedFactory != null) {
 			return this.cachedFactory;
 		}
 
+		// 确定应用上下文
 		ApplicationContext applicationContext = obtainApplicationContext();
 
+		// 资源对象赋值
 		Resource actualLocation = this.location;
+		// 如果不存在则获取默认的资源地址
 		if (actualLocation == null) {
 			actualLocation = applicationContext.getResource(DEFAULT_LOCATION);
 		}
 
+		// 创建通用的Web应用上下文
 		// Create child ApplicationContext for views.
 		GenericWebApplicationContext factory = new GenericWebApplicationContext();
+		// 设置父上下文
 		factory.setParent(applicationContext);
+		// 设置servlet上下文
 		factory.setServletContext(getServletContext());
 
+		// 创建 XmlBeanDefinitionReader 解析器
 		// Load XML resource with context-aware entity resolver.
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+		// 设置环境
 		reader.setEnvironment(applicationContext.getEnvironment());
+		// 设置实体解析对象
 		reader.setEntityResolver(new ResourceEntityResolver(applicationContext));
+		// 解析bean
 		reader.loadBeanDefinitions(actualLocation);
 
+		// 刷新
 		factory.refresh();
 
 		if (isCache()) {
+			// 缓存
 			this.cachedFactory = factory;
 		}
 		return factory;
