@@ -76,6 +76,10 @@
 		<property name="maxUploadSize" value="10485760000"></property>
 		<property name="maxInMemorySize" value="40960"></property>
 	</bean>
+	<bean id="viewNameTranslator" class="org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator">
+		<property name="prefix" value="app-"/>
+		<property name="suffix" value="-data"/>
+	</bean>
 
 
 </beans>
