@@ -80,6 +80,7 @@
 		<property name="prefix" value="app-"/>
 		<property name="suffix" value="-data"/>
 	</bean>
-
+	<bean id="flashMapManager" class="org.springframework.web.servlet.support.SessionFlashMapManager"/>
+	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
 
 </beans>

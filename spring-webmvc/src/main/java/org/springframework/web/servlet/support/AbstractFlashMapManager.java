@@ -92,14 +92,20 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	@Override
 	@Nullable
 	public final FlashMap retrieveAndUpdate(HttpServletRequest request, HttpServletResponse response) {
+		// 获取 FlashMap 集合
 		List<FlashMap> allFlashMaps = retrieveFlashMaps(request);
 		if (CollectionUtils.isEmpty(allFlashMaps)) {
 			return null;
 		}
 
+		// 获取过期的 FlashMap 集合
 		List<FlashMap> mapsToRemove = getExpiredFlashMaps(allFlashMaps);
+		// 获取匹配的 FlashMap 对象
+		// 重定向地址要和当前请求地址相同
+		// 参数相同
 		FlashMap match = getMatchingFlashMap(allFlashMaps, request);
 		if (match != null) {
+			// 需要移除的对象中添加匹配值
 			mapsToRemove.add(match);
 		}
 

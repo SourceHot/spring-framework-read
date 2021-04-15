@@ -1066,6 +1066,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					return;
 				}
 
+				// RequestToViewNameTranslator 处理
 				applyDefaultViewName(processedRequest, mv);
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}

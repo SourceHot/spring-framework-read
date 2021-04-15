@@ -173,10 +173,14 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
 			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
 
+		// 设置是否处理
 		mavContainer.setRequestHandled(true);
+		// 获取输入对象
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
+		// 获取输出对象
 		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
 
+		// 写出
 		// Try even with null return value. ResponseBodyAdvice could get involved.
 		writeWithMessageConverters(returnValue, returnType, inputMessage, outputMessage);
 	}
