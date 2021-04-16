@@ -21,9 +21,9 @@ public class DataController {
 	}
 
 
-	@RequestMapping("/asfasfasf")
+	@RequestMapping("/data/bind")
 	@ResponseBody
-	private String hello(Date date, Date date2){
+	private String hello(Date date){
 		System.out.println(date);
 		return "hello";
 	}

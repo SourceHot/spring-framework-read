@@ -136,7 +136,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			catch (TypeMismatchException ex) {
 				throw new MethodArgumentTypeMismatchException(arg, ex.getRequiredType(),
 						namedValueInfo.name, parameter, ex.getCause());
-			}
+				}
 		}
 
 		// 数据值解析后的处理
