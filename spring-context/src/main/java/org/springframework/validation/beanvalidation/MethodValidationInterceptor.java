@@ -89,19 +89,25 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Object invoke(MethodInvocation invocation) throws Throwable {
+		// 跳过对 FactoryBean.getObjectType/isSingleton 的处理
 		// Avoid Validator invocation on FactoryBean.getObjectType/isSingleton
 		if (isFactoryBeanMetadataMethod(invocation.getMethod())) {
 			return invocation.proceed();
 		}
 
+		// 确定组别
 		Class<?>[] groups = determineValidationGroups(invocation);
 
 		// Standard Bean Validation 1.1 API
+		// 提取验证执行器
 		ExecutableValidator execVal = this.validator.forExecutables();
+		// 需要执行的方法
 		Method methodToValidate = invocation.getMethod();
+		// 处理结果
 		Set<ConstraintViolation<Object>> result;
 
 		try {
+			// 参数验证
 			result = execVal.validateParameters(
 					invocation.getThis(), methodToValidate, invocation.getArguments(), groups);
 		}
@@ -117,8 +123,10 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 			throw new ConstraintViolationException(result);
 		}
 
+		// 执行方法
 		Object returnValue = invocation.proceed();
 
+		// 方法返回值验证
 		result = execVal.validateReturnValue(invocation.getThis(), methodToValidate, returnValue, groups);
 		if (!result.isEmpty()) {
 			throw new ConstraintViolationException(result);
