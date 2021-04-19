@@ -73,8 +73,11 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	protected final Object createAttribute(String attributeName, MethodParameter parameter,
 			WebDataBinderFactory binderFactory, NativeWebRequest request) throws Exception {
 
+		// 从请求中获取attributeName对应的数据值
 		String value = getRequestValueForAttribute(attributeName, request);
+		// 数据值不为空
 		if (value != null) {
+			// 创建属性对象
 			Object attribute = createAttributeFromRequestValue(
 					value, attributeName, parameter, binderFactory, request);
 			if (attribute != null) {
@@ -133,12 +136,15 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 			MethodParameter parameter, WebDataBinderFactory binderFactory, NativeWebRequest request)
 			throws Exception {
 
+		// 创建数据绑定器
 		DataBinder binder = binderFactory.createBinder(request, null, attributeName);
+		// 提取转换服务
 		ConversionService conversionService = binder.getConversionService();
 		if (conversionService != null) {
 			TypeDescriptor source = TypeDescriptor.valueOf(String.class);
 			TypeDescriptor target = new TypeDescriptor(parameter);
 			if (conversionService.canConvert(source, target)) {
+				// 数据转换
 				return binder.convertIfNecessary(sourceValue, parameter.getParameterType(), parameter);
 			}
 		}

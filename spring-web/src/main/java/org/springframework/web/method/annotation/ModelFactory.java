@@ -130,7 +130,9 @@ public final class ModelFactory {
 			throws Exception {
 
 		while (!this.modelMethods.isEmpty()) {
+			// 获取处理方法
 			InvocableHandlerMethod modelMethod = getNextModelMethod(container).getHandlerMethod();
+			// 获取注解
 			ModelAttribute ann = modelMethod.getMethodAnnotation(ModelAttribute.class);
 			Assert.state(ann != null, "No ModelAttribute annotation");
 			if (container.containsAttribute(ann.name())) {
@@ -140,6 +142,7 @@ public final class ModelFactory {
 				continue;
 			}
 
+			// 函数进行执行
 			Object returnValue = modelMethod.invokeForRequest(request, container);
 			if (!modelMethod.isVoid()){
 				String returnValueName = getNameForReturnValue(returnValue, modelMethod.getReturnType());

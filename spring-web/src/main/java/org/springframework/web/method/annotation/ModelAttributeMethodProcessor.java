@@ -97,9 +97,12 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * Returns {@code true} if the parameter is annotated with
 	 * {@link ModelAttribute} or, if in default resolution mode, for any
 	 * method parameter that is not a simple type.
+	 * 判断是否是受支持的处理
 	 */
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
+		// 1. 参数具备ModelAttribute注解
+		// 2. 是否不属于基本类型并且 annotationNotRequired 为true
 		return (parameter.hasParameterAnnotation(ModelAttribute.class) ||
 				(this.annotationNotRequired && !BeanUtils.isSimpleProperty(parameter.getParameterType())));
 	}
@@ -121,8 +124,11 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		Assert.state(mavContainer != null, "ModelAttributeMethodProcessor requires ModelAndViewContainer");
 		Assert.state(binderFactory != null, "ModelAttributeMethodProcessor requires WebDataBinderFactory");
 
+		// 获取注解的value数据
 		String name = ModelFactory.getNameForParameter(parameter);
+		// 提取注解
 		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
+		// 注解不为空进行数据绑定操作
 		if (ann != null) {
 			mavContainer.setBinding(name, ann.binding());
 		}
@@ -130,12 +136,15 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		Object attribute = null;
 		BindingResult bindingResult = null;
 
+		// 数据持有器中是否存有, 如果存有将name对应的数据值提取
 		if (mavContainer.containsAttribute(name)) {
 			attribute = mavContainer.getModel().get(name);
 		}
+		// 如果不存在
 		else {
 			// Create attribute instance
 			try {
+				// 创建对象
 				attribute = createAttribute(name, parameter, binderFactory, webRequest);
 			}
 			catch (BindException ex) {
@@ -151,20 +160,26 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			}
 		}
 
+		// 绑定结果为空进行处理
 		if (bindingResult == null) {
 			// Bean property binding and validation;
 			// skipped in case of binding failure on construction.
+			// 创建Web数据绑定器
 			WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name);
 			if (binder.getTarget() != null) {
+				// 绑定request请求数据
 				if (!mavContainer.isBindingDisabled(name)) {
 					bindRequestParameters(binder, webRequest);
 				}
+				// 进行验证
 				validateIfApplicable(binder, parameter);
+				// binder中如果出现异常将抛出
 				if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
 					throw new BindException(binder.getBindingResult());
 				}
 			}
 			// Value type adaptation, also covering java.util.Optional
+			// 类型转换
 			if (!parameter.getParameterType().isInstance(attribute)) {
 				attribute = binder.convertIfNecessary(binder.getTarget(), parameter.getParameterType(), parameter);
 			}
@@ -172,6 +187,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		}
 
 		// Add resolved attribute and BindingResult at the end of the model
+		// 移除历史数据并添加新的数据
 		Map<String, Object> bindingResultModel = bindingResult.getModel();
 		mavContainer.removeAttributes(bindingResultModel);
 		mavContainer.addAllAttributes(bindingResultModel);
@@ -202,10 +218,14 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	protected Object createAttribute(String attributeName, MethodParameter parameter,
 			WebDataBinderFactory binderFactory, NativeWebRequest webRequest) throws Exception {
 
+		// 提取方法参数
 		MethodParameter nestedParameter = parameter.nestedIfOptional();
+		// 提取参数类型
 		Class<?> clazz = nestedParameter.getNestedParameterType();
 
+		// 提取构造函数
 		Constructor<?> ctor = BeanUtils.findPrimaryConstructor(clazz);
+		// 构造函数为空的情况下再次进行提取
 		if (ctor == null) {
 			Constructor<?>[] ctors = clazz.getConstructors();
 			if (ctors.length == 1) {
@@ -221,6 +241,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			}
 		}
 
+		// 创建对象并进行属性设置
 		Object attribute = constructAttribute(ctor, attributeName, parameter, binderFactory, webRequest);
 		if (parameter != nestedParameter) {
 			attribute = Optional.of(attribute);
@@ -246,17 +267,20 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	protected Object constructAttribute(Constructor<?> ctor, String attributeName, MethodParameter parameter,
 			WebDataBinderFactory binderFactory, NativeWebRequest webRequest) throws Exception {
 
+		// 目前是空方法
 		Object constructed = constructAttribute(ctor, attributeName, binderFactory, webRequest);
 		if (constructed != null) {
 			return constructed;
 		}
 
+		// 构造函数的参数列表为空
 		if (ctor.getParameterCount() == 0) {
 			// A single default constructor -> clearly a standard JavaBeans arrangement.
 			return BeanUtils.instantiateClass(ctor);
 		}
 
 		// A single data class constructor -> resolve constructor arguments from request parameters.
+
 		ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
 		String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
 		Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
@@ -271,29 +295,37 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		boolean bindingFailure = false;
 		Set<String> failedParams = new HashSet<>(4);
 
+		// 循环参数名称进行参数值确认,最终数据会放入到args中,在最后通过构造函数+参数列表进行创建
 		for (int i = 0; i < paramNames.length; i++) {
 			String paramName = paramNames[i];
 			Class<?> paramType = paramTypes[i];
+			// 从请求中提取参数名称对应的数据
 			Object value = webRequest.getParameterValues(paramName);
 			if (value == null) {
 				if (fieldDefaultPrefix != null) {
+					// 尝试前缀获取
 					value = webRequest.getParameter(fieldDefaultPrefix + paramName);
 				}
 				if (value == null && fieldMarkerPrefix != null) {
+					// 尝试标记位前缀获取
 					if (webRequest.getParameter(fieldMarkerPrefix + paramName) != null) {
 						value = binder.getEmptyValue(paramType);
 					}
 				}
 			}
 			try {
+				// 创建方法参数对象
 				MethodParameter methodParam = new FieldAwareConstructorParameter(ctor, i, paramName);
+				// 进行方法参数是否是Optional类型的处理
 				if (value == null && methodParam.isOptional()) {
 					args[i] = (methodParam.getParameterType() == Optional.class ? Optional.empty() : null);
 				}
+				// 做一次类型转换
 				else {
 					args[i] = binder.convertIfNecessary(value, paramType, methodParam);
 				}
 			}
+			// 异常:类型不匹配
 			catch (TypeMismatchException ex) {
 				ex.initPropertyName(paramName);
 				args[i] = value;
@@ -304,13 +336,16 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			}
 		}
 
+		// 是否绑定失败
 		if (bindingFailure) {
+			// 提取绑定结果
 			BindingResult result = binder.getBindingResult();
 			for (int i = 0; i < paramNames.length; i++) {
 				String paramName = paramNames[i];
 				if (!failedParams.contains(paramName)) {
 					Object value = args[i];
 					result.recordFieldValue(paramName, paramTypes[i], value);
+					// 验证
 					validateValueIfApplicable(binder, parameter, ctor.getDeclaringClass(), paramName, value);
 				}
 			}
