@@ -157,7 +157,9 @@ public abstract class AbstractJackson2View extends AbstractView {
 	protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 
+		// byte 输出流
 		ByteArrayOutputStream temporaryStream = null;
+		// 输出流
 		OutputStream stream;
 
 		if (this.updateContentLength) {
@@ -168,10 +170,13 @@ public abstract class AbstractJackson2View extends AbstractView {
 			stream = response.getOutputStream();
 		}
 
+		// 过滤对象和包装对象
 		Object value = filterAndWrapModel(model, request);
+		// 写出上下文
 		writeContent(stream, value);
 
 		if (temporaryStream != null) {
+			// 写出到response
 			writeToResponse(response, temporaryStream);
 		}
 	}
@@ -183,8 +188,11 @@ public abstract class AbstractJackson2View extends AbstractView {
 	 * @return the wrapped or unwrapped value to be rendered
 	 */
 	protected Object filterAndWrapModel(Map<String, Object> model, HttpServletRequest request) {
+		// 过滤数据
 		Object value = filterModel(model);
+		// 获取序列化视图
 		Class<?> serializationView = (Class<?>) model.get(JsonView.class.getName());
+		// 获取过滤器
 		FilterProvider filters = (FilterProvider) model.get(FilterProvider.class.getName());
 		if (serializationView != null || filters != null) {
 			MappingJacksonValue container = new MappingJacksonValue(value);
