@@ -12,6 +12,17 @@
 		<property name="prefix" value="/page/"/>
 		<property name="suffix" value=".jsp"/>
 	</bean>
+	<mvc:resources mapping="/**" location="/**">
+		<mvc:resource-chain resource-cache="true" >
+			<mvc:resolvers>
+				<mvc:version-resolver>
+					<!-- 实际上这内部也支持用户自定义 -->
+					<mvc:content-version-strategy patterns="/**"/>
+					<mvc:fixed-version-strategy version="1.0" patterns="/**/**"/>
+				</mvc:version-resolver>
+			</mvc:resolvers>
+		</mvc:resource-chain>
+	</mvc:resources>
 	<mvc:interceptors>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>

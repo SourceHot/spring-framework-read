@@ -69,16 +69,22 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	public Resource transform(HttpServletRequest request, Resource resource, ResourceTransformerChain transformerChain)
 			throws IOException {
 
+		// 转换链进行转换得到资源对象
 		resource = transformerChain.transform(request, resource);
 
+		// 获取资源对象名称
 		String filename = resource.getFilename();
+		// 判断拓展名是否不是css
+		// 判断类型是否是EncodedResource 或者 GzippedResource
 		if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
 				resource instanceof EncodedResourceResolver.EncodedResource ||
 				resource instanceof GzipResourceResolver.GzippedResource) {
 			return resource;
 		}
 
+		// 将resource对象转换为byte数组
 		byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
+		// 创建resource对应的字符串
 		String content = new String(bytes, DEFAULT_CHARSET);
 
 		SortedSet<ContentChunkInfo> links = new TreeSet<>();
@@ -91,6 +97,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		}
 
 		int index = 0;
+		// 准备写出
 		StringWriter writer = new StringWriter();
 		for (ContentChunkInfo linkContentChunkInfo : links) {
 			writer.write(content.substring(index, linkContentChunkInfo.getStart()));

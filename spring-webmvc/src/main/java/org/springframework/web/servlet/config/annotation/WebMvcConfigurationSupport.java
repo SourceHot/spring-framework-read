@@ -282,33 +282,42 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
 		mapping.setOrder(0);
+		// 拦截器列表
 		mapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
+		// 媒体类型管理器
 		mapping.setContentNegotiationManager(contentNegotiationManager);
+		// 跨域配置
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
 
+		// 是否启用后缀匹配
 		Boolean useSuffixPatternMatch = configurer.isUseSuffixPatternMatch();
 		if (useSuffixPatternMatch != null) {
 			mapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
 		}
+		// 是否使用注册的后缀匹配模式
 		Boolean useRegisteredSuffixPatternMatch = configurer.isUseRegisteredSuffixPatternMatch();
 		if (useRegisteredSuffixPatternMatch != null) {
 			mapping.setUseRegisteredSuffixPatternMatch(useRegisteredSuffixPatternMatch);
 		}
+		// 是否启用尾部斜杠匹配
 		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
 		if (useTrailingSlashMatch != null) {
 			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 		}
 
+		// 设置Url地址解析器
 		UrlPathHelper pathHelper = configurer.getUrlPathHelper();
 		if (pathHelper != null) {
 			mapping.setUrlPathHelper(pathHelper);
 		}
+		// 设置匹配器
 		PathMatcher pathMatcher = configurer.getPathMatcher();
 		if (pathMatcher != null) {
 			mapping.setPathMatcher(pathMatcher);
 		}
+		// 设置路径前缀
 		Map<String, Predicate<Class<?>>> pathPrefixes = configurer.getPathPrefixes();
 		if (pathPrefixes != null) {
 			mapping.setPathPrefixes(pathPrefixes);

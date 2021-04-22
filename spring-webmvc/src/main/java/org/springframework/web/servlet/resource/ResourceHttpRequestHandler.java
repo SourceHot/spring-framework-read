@@ -104,40 +104,54 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	private static final String URL_RESOURCE_CHARSET_PREFIX = "[charset=";
 
 
+	// 本地资源位置
 	private final List<String> locationValues = new ArrayList<>(4);
 
+	// 资源对象
 	private final List<Resource> locations = new ArrayList<>(4);
 
+	// 资源对象和编码的关系表
 	private final Map<Resource, Charset> locationCharsets = new HashMap<>(4);
 
+	// 资源解析器列表
 	private final List<ResourceResolver> resourceResolvers = new ArrayList<>(4);
 
+	// 资源转换器列表
 	private final List<ResourceTransformer> resourceTransformers = new ArrayList<>(4);
 
+	// 资源解析器责任链
 	@Nullable
 	private ResourceResolverChain resolverChain;
 
+	// 资源转换器责任链
 	@Nullable
 	private ResourceTransformerChain transformerChain;
 
+	// 资源转换器 作用于Resource对象
 	@Nullable
 	private ResourceHttpMessageConverter resourceHttpMessageConverter;
 
+	// 资源转换器 作用于ResourceRegion对象
 	@Nullable
 	private ResourceRegionHttpMessageConverter resourceRegionHttpMessageConverter;
 
+	// 媒体类型管理器
 	@Nullable
 	private ContentNegotiationManager contentNegotiationManager;
 
+	//
 	@Nullable
 	private PathExtensionContentNegotiationStrategy contentNegotiationStrategy;
 
+	// 跨域配置
 	@Nullable
 	private CorsConfiguration corsConfiguration;
 
+	// url路径解析器
 	@Nullable
 	private UrlPathHelper urlPathHelper;
 
+	// 字符串解析器
 	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
@@ -320,6 +334,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
+		// 解析本地资源
 		resolveResourceLocations();
 
 		if (logger.isWarnEnabled() && CollectionUtils.isEmpty(this.locations)) {
@@ -331,8 +346,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			this.resourceResolvers.add(new PathResourceResolver());
 		}
 
+
+		// 在已配置的资源解析器中查找PathResourceResolver ，并设置其allowedLocations属性（如果为空）以匹配在此类上配置的locations 。
 		initAllowedLocations();
 
+		// 创建责任链对象
 		// Initialize immutable resolver and transformer chains
 		this.resolverChain = new DefaultResourceResolverChain(this.resourceResolvers);
 		this.transformerChain = new DefaultResourceTransformerChain(this.resolverChain, this.resourceTransformers);
@@ -348,17 +366,21 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	private void resolveResourceLocations() {
+		// 本地资源位置为空不做处理
 		if (CollectionUtils.isEmpty(this.locationValues)) {
 			return;
 		}
+		// 资源对象不为空抛出异常
 		else if (!CollectionUtils.isEmpty(this.locations)) {
 			throw new IllegalArgumentException("Please set either Resource-based \"locations\" or " +
 					"String-based \"locationValues\", but not both.");
 		}
 
+		// 确认应用上下文
 		ApplicationContext applicationContext = obtainApplicationContext();
 		for (String location : this.locationValues) {
 			if (this.embeddedValueResolver != null) {
+				// 通过字符串解析类将资源进行解析
 				String resolvedLocation = this.embeddedValueResolver.resolveStringValue(location);
 				if (resolvedLocation == null) {
 					throw new IllegalArgumentException("Location resolved to null: " + location);
@@ -376,12 +398,15 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				charset = Charset.forName(value);
 				location = location.substring(endIndex + 1);
 			}
+			// 通过应用上下文获取资源
 			Resource resource = applicationContext.getResource(location);
+			// 将资源对象放入已加载的资源集合中
 			this.locations.add(resource);
 			if (charset != null) {
 				if (!(resource instanceof UrlResource)) {
 					throw new IllegalArgumentException("Unexpected charset for non-UrlResource: " + resource);
 				}
+				// 处理资源和编码映射
 				this.locationCharsets.put(resource, charset);
 			}
 		}
@@ -449,39 +474,48 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			throws ServletException, IOException {
 
 		// For very general mappings (e.g. "/") we need to check 404 first
+		// 通过request获取对应的资源对象
 		Resource resource = getResource(request);
+		// 如果资源对象为空抛出404异常
 		if (resource == null) {
 			logger.debug("Resource not found");
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 
+		// 类型是否匹配位operation , 如果匹配直接结束
 		if (HttpMethod.OPTIONS.matches(request.getMethod())) {
 			response.setHeader("Allow", getAllowHeader());
 			return;
 		}
 
 		// Supported methods and required session
+		// 请求检查
 		checkRequest(request);
 
 		// Header phase
+		// 时间戳验证
 		if (new ServletWebRequest(request, response).checkNotModified(resource.lastModified())) {
 			logger.trace("Resource not modified");
 			return;
 		}
 
 		// Apply cache settings, if any
+		// 应用缓存并设置头信息
 		prepareResponse(response);
 
 		// Check the media type for the resource
+		// 获取请求和资源对应的媒体类型
 		MediaType mediaType = getMediaType(request, resource);
 
 		// Content phase
+		// 设置头信息
 		if (METHOD_HEAD.equals(request.getMethod())) {
 			setHeaders(response, resource, mediaType);
 			return;
 		}
 
+		// 最后写出处理
 		ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 		if (request.getHeader(HttpHeaders.RANGE) == null) {
 			Assert.state(this.resourceHttpMessageConverter != null, "Not initialized");
@@ -507,12 +541,14 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	@Nullable
 	protected Resource getResource(HttpServletRequest request) throws IOException {
+		// 提取HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE对应的地址
 		String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
 		if (path == null) {
 			throw new IllegalStateException("Required request attribute '" +
 					HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE + "' is not set");
 		}
 
+		// 解析地址
 		path = processPath(path);
 		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
 			return null;

@@ -39,8 +39,14 @@ public class ViewControllerRegistry {
 	@Nullable
 	private ApplicationContext applicationContext;
 
+	/**
+	 * 非重定向视图
+	 */
 	private final List<ViewControllerRegistration> registrations = new ArrayList<>(4);
 
+	/**
+	 * 重定向视图
+	 */
 	private final List<RedirectViewControllerRegistration> redirectRegistrations = new ArrayList<>(10);
 
 	private int order = 1;
