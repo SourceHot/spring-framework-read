@@ -44,11 +44,13 @@ public interface HttpMessageReader<T> {
 
 	/**
 	 * Return the {@link MediaType}'s that this reader supports.
+	 * 获取支持的媒体类型
 	 */
 	List<MediaType> getReadableMediaTypes();
 
 	/**
 	 * Whether the given object type is supported by this reader.
+	 * 判断是否可读
 	 * @param elementType the type of object to check
 	 * @param mediaType the media type for the read (possibly {@code null})
 	 * @return {@code true} if readable, {@code false} otherwise

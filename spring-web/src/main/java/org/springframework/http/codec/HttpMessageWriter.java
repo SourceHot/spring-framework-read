@@ -44,11 +44,13 @@ public interface HttpMessageWriter<T> {
 
 	/**
 	 * Return the {@link MediaType}'s that this writer supports.
+	 * 获取支持的媒体类型
 	 */
 	List<MediaType> getWritableMediaTypes();
 
 	/**
 	 * Whether the given object type is supported by this writer.
+	 * 判断是否可写
 	 * @param elementType the type of object to check
 	 * @param mediaType the media type for the write (possibly {@code null})
 	 * @return {@code true} if writable, {@code false} otherwise
