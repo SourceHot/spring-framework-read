@@ -48,5 +48,5 @@ include 'spring-source-hot'
 include 'spring-source-mvc-demo'
 include 'spring-source-hot-ioc-book'
 include 'spring-source-hot-ws-demo'
-include 'spring-source-db-book'
+include 'spring-source-hot-data-book'
 
