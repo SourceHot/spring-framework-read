@@ -10,7 +10,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-public class JdbcTemplateDemo {
+public class JdbcTemplateWithAnnotationDemo {
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringJdbcConfig.class);
 		JdbcTemplate bean = context.getBean(JdbcTemplate.class);
@@ -26,6 +26,5 @@ public class JdbcTemplateDemo {
 			}
 		});
 		System.out.println();
-
 	}
 }

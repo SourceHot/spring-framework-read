@@ -24,9 +24,6 @@ public class TUserEntity {
 		return id;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	@Basic
 	@Column(name = "name", nullable = true, length = 255)
@@ -36,6 +33,9 @@ public class TUserEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	@Override

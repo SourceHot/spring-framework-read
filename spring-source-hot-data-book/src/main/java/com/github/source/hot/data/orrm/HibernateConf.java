@@ -30,7 +30,6 @@ public class HibernateConf {
 
 	@Bean
 	public DataSource dataSource() {
-		System.out.println("=======");
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
 		dataSource.setUrl("jdbc:mysql://10.10.0.124:3306/shands_uc_3_back?useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false");
