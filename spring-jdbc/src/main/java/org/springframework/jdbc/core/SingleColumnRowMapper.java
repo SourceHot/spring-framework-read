@@ -104,6 +104,7 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	@Nullable
 	public T mapRow(ResultSet rs, int rowNum) throws SQLException {
 		// Validate column count.
+		// 获取 ResultSet的元数据
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int nrOfColumns = rsmd.getColumnCount();
 		if (nrOfColumns != 1) {

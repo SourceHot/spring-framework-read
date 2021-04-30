@@ -13,8 +13,8 @@ import org.springframework.jdbc.core.RowMapper;
 public class JdbcTemplateWithAnnotationDemo {
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringJdbcConfig.class);
-		JdbcTemplate bean = context.getBean(JdbcTemplate.class);
-		List<TUserEntity> query = bean.query("select * from t_user", new RowMapper<TUserEntity>() {
+		JdbcTemplate jdbcTemplate = context.getBean(JdbcTemplate.class);
+		List<TUserEntity> query = jdbcTemplate.query("select * from t_user", new RowMapper<TUserEntity>() {
 			@Override
 			public TUserEntity mapRow(ResultSet rs, int rowNum) throws SQLException {
 				long id = rs.getLong("id");
@@ -25,6 +25,7 @@ public class JdbcTemplateWithAnnotationDemo {
 				return tUserEntity;
 			}
 		});
+		jdbcTemplate.execute("select * from t_user");
 		System.out.println();
 	}
 }

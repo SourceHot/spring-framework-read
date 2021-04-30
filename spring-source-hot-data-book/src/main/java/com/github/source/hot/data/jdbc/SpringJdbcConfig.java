@@ -18,7 +18,6 @@ public class SpringJdbcConfig {
 		dataSource.setUrl("jdbc:mysql://10.10.0.124:3306/shands_uc_3_back?useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false");
 		dataSource.setUsername("root");
 		dataSource.setPassword("1314dafa9900");
-
 		return dataSource;
 	}
 
@@ -28,6 +27,7 @@ public class SpringJdbcConfig {
 	) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate();
 		jdbcTemplate.setDataSource(mysqlDataSource);
+		jdbcTemplate.setLazyInit(false);
 		return jdbcTemplate;
 	}
 

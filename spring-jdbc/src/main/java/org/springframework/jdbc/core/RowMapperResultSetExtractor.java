@@ -88,6 +88,7 @@ public class RowMapperResultSetExtractor<T> implements ResultSetExtractor<List<T
 
 	@Override
 	public List<T> extractData(ResultSet rs) throws SQLException {
+		// 创建存储容器
 		List<T> results = (this.rowsExpected > 0 ? new ArrayList<>(this.rowsExpected) : new ArrayList<>());
 		int rowNum = 0;
 		while (rs.next()) {

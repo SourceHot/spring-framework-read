@@ -101,8 +101,10 @@ public abstract class DataSourceUtils {
 	public static Connection doGetConnection(DataSource dataSource) throws SQLException {
 		Assert.notNull(dataSource, "No DataSource specified");
 
+		// 事务同步管理器中获取链接持有器对象
 		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager
 				.getResource(dataSource);
+		// 从连接持有器中获取连接对象
 		if (conHolder != null && (conHolder.hasConnection() || conHolder
 				.isSynchronizedWithTransaction())) {
 			conHolder.requested();
@@ -115,27 +117,37 @@ public abstract class DataSourceUtils {
 		// Else we either got no holder or an empty thread-bound holder here.
 
 		logger.debug("Fetching JDBC Connection from DataSource");
+		// 从数据源中获取连接对象
 		Connection con = fetchConnection(dataSource);
 
+		// 判断是否处于同步状态
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			try {
 				// Use same Connection for further JDBC actions within the transaction.
 				// Thread-bound object will get removed by synchronization at transaction completion.
 				ConnectionHolder holderToUse = conHolder;
+				// 如果 holderToUse 对象为空将进行初始化操作
 				if (holderToUse == null) {
 					holderToUse = new ConnectionHolder(con);
-				} else {
+				}
+				// 不为空将其进行连接对象设置
+				else {
 					holderToUse.setConnection(con);
 				}
+				// 请求数量+1
 				holderToUse.requested();
+				// 注册 ConnectionSynchronization 对象
 				TransactionSynchronizationManager.registerSynchronization(
 						new ConnectionSynchronization(holderToUse, dataSource));
+				// 设置事务同步标记为true
 				holderToUse.setSynchronizedWithTransaction(true);
 				if (holderToUse != conHolder) {
+					// 资源绑定
 					TransactionSynchronizationManager.bindResource(dataSource, holderToUse);
 				}
 			} catch (RuntimeException ex) {
 				// Unexpected exception from external delegation call -> close Connection and rethrow.
+				// 释放连接
 				releaseConnection(con, dataSource);
 				throw ex;
 			}

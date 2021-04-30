@@ -110,6 +110,8 @@ public abstract class JdbcAccessor implements InitializingBean {
 	 * <p>Creates a default {@link SQLErrorCodeSQLExceptionTranslator}
 	 * for the specified DataSource if none set, or a
 	 * {@link SQLStateSQLExceptionTranslator} in case of no DataSource.
+	 *
+	 * 进行成员变量exceptionTranslator的初始化操作
 	 * @see #getDataSource()
 	 */
 	public SQLExceptionTranslator getExceptionTranslator() {
@@ -159,9 +161,11 @@ public abstract class JdbcAccessor implements InitializingBean {
 	 */
 	@Override
 	public void afterPropertiesSet() {
+		// 判断 数据源是否为空
 		if (getDataSource() == null) {
 			throw new IllegalArgumentException("Property 'dataSource' is required");
 		}
+		// 判断是佛懒加载
 		if (!isLazyInit()) {
 			getExceptionTranslator();
 		}

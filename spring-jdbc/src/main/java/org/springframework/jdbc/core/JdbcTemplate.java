@@ -374,27 +374,37 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	public <T> T execute(StatementCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
+		// 获取连接对象
 		Connection con = DataSourceUtils.getConnection(obtainDataSource());
 		Statement stmt = null;
 		try {
 			stmt = con.createStatement();
+			// 应用 Statement 配置
 			applyStatementSettings(stmt);
+			// 执行
 			T result = action.doInStatement(stmt);
+			// 处理警告信息
 			handleWarnings(stmt);
 			return result;
 		}
 		catch (SQLException ex) {
 			// Release Connection early, to avoid potential connection pool deadlock
 			// in the case when the exception translator hasn't been initialized yet.
+			// 获取sql
 			String sql = getSql(action);
+			// 关闭 Statement 对象
 			JdbcUtils.closeStatement(stmt);
 			stmt = null;
+			// 释放连接
 			DataSourceUtils.releaseConnection(con, getDataSource());
 			con = null;
+			// 抛出异常
 			throw translateException("StatementCallback", sql, ex);
 		}
 		finally {
+			// 关闭 Statement 对象
 			JdbcUtils.closeStatement(stmt);
+			// 释放连接
 			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
 	}
@@ -1409,9 +1419,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @see org.springframework.jdbc.SQLWarningException
 	 */
 	protected void handleWarnings(Statement stmt) throws SQLException {
+		// 是否需要忽略警告信息
 		if (isIgnoreWarnings()) {
 			if (logger.isDebugEnabled()) {
 				SQLWarning warningToLog = stmt.getWarnings();
+				// 通过日志将经过信息输出
 				while (warningToLog != null) {
 					logger.debug("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() + "', error code '" +
 							warningToLog.getErrorCode() + "', message [" + warningToLog.getMessage() + "]");
@@ -1420,6 +1432,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			}
 		}
 		else {
+			// 抛出异常
 			handleWarnings(stmt.getWarnings());
 		}
 	}
