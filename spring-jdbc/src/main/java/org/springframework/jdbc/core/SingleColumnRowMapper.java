@@ -106,12 +106,15 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 		// Validate column count.
 		// 获取 ResultSet的元数据
 		ResultSetMetaData rsmd = rs.getMetaData();
+		// 获取总列数
 		int nrOfColumns = rsmd.getColumnCount();
+		// 如果列数不等于1就抛出异常
 		if (nrOfColumns != 1) {
 			throw new IncorrectResultSetColumnCountException(1, nrOfColumns);
 		}
 
 		// Extract column value from JDBC ResultSet.
+		// 将rs中的数据进行转换，转换目标是requiredType类型
 		Object result = getColumnValue(rs, 1, this.requiredType);
 		if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
 			// Extracted value does not match already: try to convert it.
