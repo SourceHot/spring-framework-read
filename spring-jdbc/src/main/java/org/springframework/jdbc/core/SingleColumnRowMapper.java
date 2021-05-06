@@ -150,6 +150,7 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	@Nullable
 	protected Object getColumnValue(ResultSet rs, int index, @Nullable Class<?> requiredType) throws SQLException {
 		if (requiredType != null) {
+			// 根据ResultSet对象、索引和类型
 			return JdbcUtils.getResultSetValue(rs, index, requiredType);
 		}
 		else {
@@ -195,9 +196,11 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	@SuppressWarnings("unchecked")
 	@Nullable
 	protected Object convertValueToRequiredType(Object value, Class<?> requiredType) {
+		// 如果是字符串类型的转换
 		if (String.class == requiredType) {
 			return value.toString();
 		}
+		// 如果是Number类型的转换
 		else if (Number.class.isAssignableFrom(requiredType)) {
 			if (value instanceof Number) {
 				// Convert original Number to target Number class.
@@ -205,16 +208,17 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 			}
 			else {
 				// Convert stringified value to target Number class.
-				return NumberUtils.parseNumber(value.toString(),(Class<Number>) requiredType);
+				return NumberUtils.parseNumber(value.toString(), (Class<Number>) requiredType);
 			}
 		}
+		// 通过转换服务判断是否能够进行转换
 		else if (this.conversionService != null && this.conversionService.canConvert(value.getClass(), requiredType)) {
 			return this.conversionService.convert(value, requiredType);
 		}
 		else {
 			throw new IllegalArgumentException(
 					"Value [" + value + "] is of type [" + value.getClass().getName() +
-					"] and cannot be converted to required type [" + requiredType.getName() + "]");
+							"] and cannot be converted to required type [" + requiredType.getName() + "]");
 		}
 	}
 

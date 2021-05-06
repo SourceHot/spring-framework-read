@@ -282,26 +282,36 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	@Override
 	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		Assert.state(this.mappedClass != null, "Mapped class was not specified");
+		// 通过BeanUtils将mappedClass类型实例化
 		T mappedObject = BeanUtils.instantiateClass(this.mappedClass);
+		// 将 mappedObject 用 BeanWrapper 进行包装
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
+		// 初始化 BeanWrapper
 		initBeanWrapper(bw);
 
+		// 获取 ResultSet元数据
 		ResultSetMetaData rsmd = rs.getMetaData();
+		// 获取总列数
 		int columnCount = rsmd.getColumnCount();
 		Set<String> populatedProperties = (isCheckFullyPopulated() ? new HashSet<>() : null);
 
 		for (int index = 1; index <= columnCount; index++) {
+			// 列名
 			String column = JdbcUtils.lookupColumnName(rsmd, index);
+			// 字段名
 			String field = lowerCaseName(StringUtils.delete(column, " "));
+			// 属性描述对象
 			PropertyDescriptor pd = (this.mappedFields != null ? this.mappedFields.get(field) : null);
 			if (pd != null) {
 				try {
+					// 获取数据值
 					Object value = getColumnValue(rs, index, pd);
 					if (rowNumber == 0 && logger.isDebugEnabled()) {
 						logger.debug("Mapping column '" + column + "' to property '" + pd.getName() +
 								"' of type '" + ClassUtils.getQualifiedName(pd.getPropertyType()) + "'");
 					}
 					try {
+						// BeanWrapper设置属性值
 						bw.setPropertyValue(pd.getName(), value);
 					}
 					catch (TypeMismatchException ex) {
@@ -319,6 +329,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 						}
 					}
 					if (populatedProperties != null) {
+						// 属性值名称列表添加数据
 						populatedProperties.add(pd.getName());
 					}
 				}

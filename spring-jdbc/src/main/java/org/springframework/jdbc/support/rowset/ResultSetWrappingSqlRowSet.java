@@ -98,6 +98,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			if (rsmd != null) {
 				int columnCount = rsmd.getColumnCount();
 				this.columnLabelMap = new HashMap<>(columnCount);
+				// 循环总列数,将列名和索引进行绑定
 				for (int i = 1; i <= columnCount; i++) {
 					String key = rsmd.getColumnLabel(i);
 					// Make sure to preserve first matching column for any given name,

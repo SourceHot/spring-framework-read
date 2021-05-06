@@ -625,13 +625,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			logger.debug("Executing prepared SQL statement" + (sql != null ? " [" + sql + "]" : ""));
 		}
 
+		// 获取数据库连接对象
 		Connection con = DataSourceUtils.getConnection(obtainDataSource());
 		PreparedStatement ps = null;
 		try {
+			// 创建 PreparedStatement 对象
 			ps = psc.createPreparedStatement(con);
+			// 应用 PreparedStatement 属性
 			applyStatementSettings(ps);
+			// 通过 PreparedStatementCallback 执行sql
 			T result = action.doInPreparedStatement(ps);
+			// 处理警告
 			handleWarnings(ps);
+			// 返回值处理
 			return result;
 		}
 		catch (SQLException ex) {
