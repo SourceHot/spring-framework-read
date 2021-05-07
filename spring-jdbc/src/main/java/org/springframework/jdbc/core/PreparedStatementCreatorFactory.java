@@ -240,6 +240,7 @@ public class PreparedStatementCreatorFactory {
 				ps = con.prepareStatement(this.actualSql, resultSetType,
 					updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
 			}
+			// 设置数据值
 			setValues(ps);
 			return ps;
 		}
@@ -251,6 +252,7 @@ public class PreparedStatementCreatorFactory {
 			for (int i = 0; i < this.parameters.size(); i++) {
 				Object in = this.parameters.get(i);
 				SqlParameter declaredParameter;
+				// 推论 declaredParameter 对象
 				// SqlParameterValue overrides declared parameter meta-data, in particular for
 				// independence from the declared parameter position in case of named parameters.
 				if (in instanceof SqlParameterValue) {
@@ -267,6 +269,7 @@ public class PreparedStatementCreatorFactory {
 					}
 					declaredParameter = declaredParameters.get(i);
 				}
+				// 进行 PreparedStatement 对象赋值
 				if (in instanceof Iterable && declaredParameter.getSqlType() != Types.ARRAY) {
 					Iterable<?> entries = (Iterable<?>) in;
 					for (Object entry : entries) {

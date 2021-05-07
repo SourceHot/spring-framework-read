@@ -360,7 +360,9 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 			return new int[0];
 		}
 
+		// sql解析
 		ParsedSql parsedSql = getParsedSql(sql);
+		// 通过解析后的sql + 参数表创建 PreparedStatementCreatorFactory 对象
 		PreparedStatementCreatorFactory pscf = getPreparedStatementCreatorFactory(parsedSql, batchArgs[0]);
 
 		return getJdbcOperations().batchUpdate(
@@ -410,11 +412,14 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	protected PreparedStatementCreator getPreparedStatementCreator(String sql, SqlParameterSource paramSource,
 			@Nullable Consumer<PreparedStatementCreatorFactory> customizer) {
 
+		// sql 解析
 		ParsedSql parsedSql = getParsedSql(sql);
+		// 通过解析后的sql + 参数表创建 PreparedStatementCreatorFactory 对象
 		PreparedStatementCreatorFactory pscf = getPreparedStatementCreatorFactory(parsedSql, paramSource);
 		if (customizer != null) {
 			customizer.accept(pscf);
 		}
+		// 参数值处理
 		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
 		return pscf.newPreparedStatementCreator(params);
 	}
@@ -441,6 +446,8 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	/**
 	 * Build a {@link PreparedStatementCreatorFactory} based on the given SQL and named parameters.
+	 *
+	 * 通过解析后的sql + 参数表创建 PreparedStatementCreatorFactory 对象
 	 * @param parsedSql parsed representation of the given SQL statement
 	 * @param paramSource container of arguments to bind
 	 * @return the corresponding {@link PreparedStatementCreatorFactory}
@@ -451,8 +458,11 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	protected PreparedStatementCreatorFactory getPreparedStatementCreatorFactory(
 			ParsedSql parsedSql, SqlParameterSource paramSource) {
 
+		// 将带有参数名称的sql进行替换,
 		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+		// 提取参数名称
 		List<SqlParameter> declaredParameters = NamedParameterUtils.buildSqlParameterList(parsedSql, paramSource);
+		// 创建PreparedStatementCreatorFactory对象
 		return new PreparedStatementCreatorFactory(sqlToUse, declaredParameters);
 	}
 

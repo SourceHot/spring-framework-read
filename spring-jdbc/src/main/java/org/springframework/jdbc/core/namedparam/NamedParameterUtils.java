@@ -265,19 +265,24 @@ public abstract class NamedParameterUtils {
 	 * @see #parseSqlStatement
 	 */
 	public static String substituteNamedParameters(ParsedSql parsedSql, @Nullable SqlParameterSource paramSource) {
+		// 提取带有参数名称的sql
 		String originalSql = parsedSql.getOriginalSql();
+		// 提取参数名称
 		List<String> paramNames = parsedSql.getParameterNames();
 		if (paramNames.isEmpty()) {
 			return originalSql;
 		}
 		StringBuilder actualSql = new StringBuilder(originalSql.length());
 		int lastIndex = 0;
+		// 循环参数名称列表
 		for (int i = 0; i < paramNames.size(); i++) {
 			String paramName = paramNames.get(i);
+			// 提取索引区间
 			int[] indexes = parsedSql.getParameterIndexes(i);
 			int startIndex = indexes[0];
 			int endIndex = indexes[1];
 			actualSql.append(originalSql, lastIndex, startIndex);
+			// 进行索引区间字符串的替换操作
 			if (paramSource != null && paramSource.hasValue(paramName)) {
 				Object value = paramSource.getValue(paramName);
 				if (value instanceof SqlParameterValue) {
@@ -333,7 +338,9 @@ public abstract class NamedParameterUtils {
 	public static Object[] buildValueArray(
 			ParsedSql parsedSql, SqlParameterSource paramSource, @Nullable List<SqlParameter> declaredParams) {
 
+		// 创建参数值存储容器
 		Object[] paramArray = new Object[parsedSql.getTotalParameterCount()];
+		// 异常处理
 		if (parsedSql.getNamedParameterCount() > 0 && parsedSql.getUnnamedParameterCount() > 0) {
 			throw new InvalidDataAccessApiUsageException(
 					"Not allowed to mix named and traditional ? placeholders. You have " +
@@ -341,12 +348,16 @@ public abstract class NamedParameterUtils {
 					parsedSql.getUnnamedParameterCount() + " traditional placeholder(s) in statement: " +
 					parsedSql.getOriginalSql());
 		}
+		// 参数名称列表
 		List<String> paramNames = parsedSql.getParameterNames();
 		for (int i = 0; i < paramNames.size(); i++) {
 			String paramName = paramNames.get(i);
 			try {
+				// 从参数表中获取数据
 				Object value = paramSource.getValue(paramName);
+				// 确认具体的sql参数
 				SqlParameter param = findParameter(declaredParams, paramName, i);
+				// 将参数列表中的元素进行赋值
 				paramArray[i] = (param != null ? new SqlParameterValue(param, value) : value);
 			}
 			catch (IllegalArgumentException ex) {
@@ -370,6 +381,7 @@ public abstract class NamedParameterUtils {
 
 		if (declaredParams != null) {
 			// First pass: Look for named parameter match.
+			// 判断名称是否相同如果名称相同则获取
 			for (SqlParameter declaredParam : declaredParams) {
 				if (paramName.equals(declaredParam.getName())) {
 					return declaredParam;
@@ -377,6 +389,7 @@ public abstract class NamedParameterUtils {
 			}
 			// Second pass: Look for parameter index match.
 			if (paramIndex < declaredParams.size()) {
+				// 通过索引为获取,并且参数名称不存在才可作为返回值
 				SqlParameter declaredParam = declaredParams.get(paramIndex);
 				// Only accept unnamed parameters for index matches.
 				if (declaredParam.getName() == null) {
@@ -422,8 +435,11 @@ public abstract class NamedParameterUtils {
 	 * @param paramSource the source for named parameters
 	 */
 	public static List<SqlParameter> buildSqlParameterList(ParsedSql parsedSql, SqlParameterSource paramSource) {
+		// 提取参数名称列表
 		List<String> paramNames = parsedSql.getParameterNames();
+		// 创建sql参数列表
 		List<SqlParameter> params = new ArrayList<>(paramNames.size());
+		// 循环处理参数名称列表创建sql参数列表
 		for (String paramName : paramNames) {
 			params.add(new SqlParameter(
 					paramName, paramSource.getSqlType(paramName), paramSource.getTypeName(paramName)));

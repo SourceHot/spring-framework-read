@@ -327,21 +327,28 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	public <T> T execute(ConnectionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
+		// 获取数据库连接对象
 		Connection con = DataSourceUtils.getConnection(obtainDataSource());
 		try {
 			// Create close-suppressing Connection proxy, also preparing returned Statements.
+			// 创建代理连接对象
 			Connection conToUse = createConnectionProxy(con);
+			// 通过action对象将数据进行处理
 			return action.doInConnection(conToUse);
 		}
 		catch (SQLException ex) {
 			// Release Connection early, to avoid potential connection pool deadlock
 			// in the case when the exception translator hasn't been initialized yet.
+			// 获取sql
 			String sql = getSql(action);
+			// 释放数据库连接对象
 			DataSourceUtils.releaseConnection(con, getDataSource());
 			con = null;
+			// 抛出异常
 			throw translateException("ConnectionCallback", sql, ex);
 		}
 		finally {
+			// 释放数据库连接对象
 			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
 	}
@@ -558,11 +565,15 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			public int[] doInStatement(Statement stmt) throws SQLException, DataAccessException {
 				int[] rowsAffected = new int[sql.length];
 				if (JdbcUtils.supportsBatchUpdates(stmt.getConnection())) {
+					// 循环需要处理的sql列表
 					for (String sqlStmt : sql) {
+						// 进行sql组合
 						this.currSql = appendSql(this.currSql, sqlStmt);
+						// 添加需要批量执行的sql
 						stmt.addBatch(sqlStmt);
 					}
 					try {
+						// 执行sql
 						rowsAffected = stmt.executeBatch();
 					}
 					catch (BatchUpdateException ex) {
@@ -581,6 +592,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				else {
 					for (int i = 0; i < sql.length; i++) {
 						this.currSql = sql[i];
+						// 单条sql执行
 						if (!stmt.execute(sql[i])) {
 							rowsAffected[i] = stmt.getUpdateCount();
 						}
@@ -646,19 +658,26 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			if (psc instanceof ParameterDisposer) {
 				((ParameterDisposer) psc).cleanupParameters();
 			}
+			// 获取sql
 			String sql = getSql(psc);
 			psc = null;
+			// 关闭 Statement
 			JdbcUtils.closeStatement(ps);
 			ps = null;
+			// 是否数据库连接
 			DataSourceUtils.releaseConnection(con, getDataSource());
 			con = null;
+			// 抛出异常
 			throw translateException("PreparedStatementCallback", sql, ex);
 		}
 		finally {
 			if (psc instanceof ParameterDisposer) {
+				// 清理参数
 				((ParameterDisposer) psc).cleanupParameters();
 			}
+			// 关闭 Statement
 			JdbcUtils.closeStatement(ps);
+			// 释放连接
 			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
 	}

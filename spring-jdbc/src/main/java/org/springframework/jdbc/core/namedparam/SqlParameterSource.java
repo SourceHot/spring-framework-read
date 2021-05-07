@@ -59,6 +59,8 @@ public interface SqlParameterSource {
 
 	/**
 	 * Return the parameter value for the requested named parameter.
+	 *
+	 * 用于获取参数名称对应的具体参数值
 	 * @param paramName the name of the parameter
 	 * @return the value of the specified parameter
 	 * @throws IllegalArgumentException if there is no value for the requested parameter

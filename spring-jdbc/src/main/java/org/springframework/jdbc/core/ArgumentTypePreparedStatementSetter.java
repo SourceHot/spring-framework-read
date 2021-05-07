@@ -33,9 +33,15 @@ import org.springframework.lang.Nullable;
  */
 public class ArgumentTypePreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
 
+	/**
+	 * 参数值列表
+	 */
 	@Nullable
 	private final Object[] args;
 
+	/**
+	 * 参数类型列表
+	 */
 	@Nullable
 	private final int[] argTypes;
 
@@ -58,9 +64,11 @@ public class ArgumentTypePreparedStatementSetter implements PreparedStatementSet
 	@Override
 	public void setValues(PreparedStatement ps) throws SQLException {
 		int parameterPosition = 1;
+		// 判断数据值列表是否为空,判断参数列表是否为空
 		if (this.args != null && this.argTypes != null) {
 			for (int i = 0; i < this.args.length; i++) {
 				Object arg = this.args[i];
+				// 判断单个元素是否是集合
 				if (arg instanceof Collection && this.argTypes[i] != Types.ARRAY) {
 					Collection<?> entries = (Collection<?>) arg;
 					for (Object entry : entries) {
