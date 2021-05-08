@@ -103,13 +103,17 @@ public class SQLErrorCodesFactory {
 		Map<String, SQLErrorCodes> errorCodes;
 
 		try {
+			// 创建BeanFactory
 			DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+			// 设置类加载器
 			lbf.setBeanClassLoader(getClass().getClassLoader());
 			XmlBeanDefinitionReader bdr = new XmlBeanDefinitionReader(lbf);
 
 			// Load default SQL error codes.
+			// 读取资源文件
 			Resource resource = loadResource(SQL_ERROR_CODE_DEFAULT_PATH);
 			if (resource != null && resource.exists()) {
+				// 加载资源文件中的bean定义
 				bdr.loadBeanDefinitions(resource);
 			}
 			else {
@@ -117,13 +121,16 @@ public class SQLErrorCodesFactory {
 			}
 
 			// Load custom SQL error codes, overriding defaults.
+			// 加载自定义的sql异常状态码
 			resource = loadResource(SQL_ERROR_CODE_OVERRIDE_PATH);
 			if (resource != null && resource.exists()) {
+				// 加载自定义资源文件中的异常
 				bdr.loadBeanDefinitions(resource);
 				logger.debug("Found custom sql-error-codes.xml file at the root of the classpath");
 			}
 
 			// Check all beans of type SQLErrorCodes.
+			// 从容器中提取类型是SQLErrorCodes的数据将其赋值给成员变量进行存储
 			errorCodes = lbf.getBeansOfType(SQLErrorCodes.class, true, false);
 			if (logger.isTraceEnabled()) {
 				logger.trace("SQLErrorCodes loaded: " + errorCodes.keySet());

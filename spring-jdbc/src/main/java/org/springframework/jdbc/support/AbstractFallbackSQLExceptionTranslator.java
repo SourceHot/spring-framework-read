@@ -69,6 +69,7 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 	public DataAccessException translate(String task, @Nullable String sql, SQLException ex) {
 		Assert.notNull(ex, "Cannot translate a null SQLException");
 
+		// 进行转换
 		DataAccessException dae = doTranslate(task, sql, ex);
 		if (dae != null) {
 			// Specific exception match found.
@@ -76,6 +77,7 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 		}
 
 		// Looking for a fallback...
+		// 通过 fallBack SQLExceptionTranslator 进行转换
 		SQLExceptionTranslator fallback = getFallbackTranslator();
 		if (fallback != null) {
 			dae = fallback.translate(task, sql, ex);

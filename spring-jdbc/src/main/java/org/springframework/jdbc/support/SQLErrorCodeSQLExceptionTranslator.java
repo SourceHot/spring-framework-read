@@ -172,6 +172,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	@Nullable
 	protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {
 		SQLException sqlEx = ex;
+		// 进行sql异常的推论,判断是否需要设置为下一个异常
 		if (sqlEx instanceof BatchUpdateException && sqlEx.getNextException() != null) {
 			SQLException nestedSqlEx = sqlEx.getNextException();
 			if (nestedSqlEx.getErrorCode() > 0 || nestedSqlEx.getSQLState() != null) {
@@ -181,12 +182,14 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 		}
 
 		// First, try custom translation from overridden method.
+		// 自定义转换方法的处理
 		DataAccessException dae = customTranslate(task, sql, sqlEx);
 		if (dae != null) {
 			return dae;
 		}
 
 		// Next, try the custom SQLException translator, if available.
+		// 自定义SQLExceptionTranslator接口的处理
 		if (this.sqlErrorCodes != null) {
 			SQLExceptionTranslator customTranslator = this.sqlErrorCodes.getCustomSqlExceptionTranslator();
 			if (customTranslator != null) {
@@ -198,8 +201,10 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 		}
 
 		// Check SQLErrorCodes with corresponding error code, if available.
+		// 异常状态码检查
 		if (this.sqlErrorCodes != null) {
 			String errorCode;
+			// 进行异常状态码的推论
 			if (this.sqlErrorCodes.isUseSqlStateForTranslation()) {
 				errorCode = sqlEx.getSQLState();
 			}
@@ -213,6 +218,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 				errorCode = Integer.toString(current.getErrorCode());
 			}
 
+			// 异常状态码不为空的处理
 			if (errorCode != null) {
 				// Look for defined custom translations first.
 				CustomSQLErrorCodesTranslation[] customTranslations = this.sqlErrorCodes.getCustomTranslations();
