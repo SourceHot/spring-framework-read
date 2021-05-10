@@ -21,8 +21,8 @@ public class SimpleJdbcInsertDemo {
 	public static void main(String[] args) {
 		SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(mysqlDataSource()).withTableName("t_user");
 		Map<String, Object> parameters = new HashMap<String, Object>();
-		parameters.put("id", "11");
 		parameters.put("name", "小明");
+		parameters.put("id", "11");
 		simpleJdbcInsert.execute(parameters);
 
 	}

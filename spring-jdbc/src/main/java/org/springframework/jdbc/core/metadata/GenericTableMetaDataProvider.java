@@ -146,6 +146,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	@Override
 	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 		try {
+			// 是否可以检索自动生成的键
 			if (databaseMetaData.supportsGetGeneratedKeys()) {
 				logger.debug("GetGeneratedKeys is supported");
 				setGetGeneratedKeysSupported(true);
@@ -161,7 +162,9 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			}
 		}
 		try {
+			// 获取数据库产品名称
 			String databaseProductName = databaseMetaData.getDatabaseProductName();
+			// 数据库产品不支持生成的键列名数组
 			if (this.productsNotSupportingGeneratedKeysColumnNameArray.contains(databaseProductName)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("GeneratedKeysColumnNameArray is not supported for " + databaseProductName);
@@ -187,6 +190,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 
 		try {
+			// 数据库版本号
 			this.databaseVersion = databaseMetaData.getDatabaseProductVersion();
 		}
 		catch (SQLException ex) {
@@ -196,6 +200,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 
 		try {
+			// 是否区分大小写,以大写形式存储
 			setStoresUpperCaseIdentifiers(databaseMetaData.storesUpperCaseIdentifiers());
 		}
 		catch (SQLException ex) {
@@ -205,6 +210,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 
 		try {
+			// 是否区分大小写,以小写形式存储
 			setStoresLowerCaseIdentifiers(databaseMetaData.storesLowerCaseIdentifiers());
 		}
 		catch (SQLException ex) {
@@ -310,11 +316,15 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	private void locateTableAndProcessMetaData(DatabaseMetaData databaseMetaData,
 			@Nullable String catalogName, @Nullable String schemaName, @Nullable String tableName) {
 
+		// 存储表元数据的容器
 		Map<String, TableMetaData> tableMeta = new HashMap<>();
 		ResultSet tables = null;
 		try {
+			// 获取数据库中的表信息
 			tables = databaseMetaData.getTables(
 					catalogNameToUse(catalogName), schemaNameToUse(schemaName), tableNameToUse(tableName), null);
+
+			// 处理tables中多个数据的情况,将数据进行修正补充
 			while (tables != null && tables.next()) {
 				TableMetaData tmd = new TableMetaData();
 				tmd.setCatalogName(tables.getString("TABLE_CAT"));
@@ -343,6 +353,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			}
 		}
 		else {
+			// 处理数据表中的列信息
 			processTableColumns(databaseMetaData, findTableMetaData(schemaName, tableName, tableMeta));
 		}
 	}
@@ -385,19 +396,27 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	 */
 	private void processTableColumns(DatabaseMetaData databaseMetaData, TableMetaData tmd) {
 		ResultSet tableColumns = null;
+		// 获取 CatalogName
 		String metaDataCatalogName = metaDataCatalogNameToUse(tmd.getCatalogName());
+		// 获取 SchemaName
 		String metaDataSchemaName = metaDataSchemaNameToUse(tmd.getSchemaName());
+		// 获取 TableName
 		String metaDataTableName = tableNameToUse(tmd.getTableName());
 		if (logger.isDebugEnabled()) {
 			logger.debug("Retrieving meta-data for " + metaDataCatalogName + '/' +
 					metaDataSchemaName + '/' + metaDataTableName);
 		}
 		try {
+			// 获取列数据信息
 			tableColumns = databaseMetaData.getColumns(
 					metaDataCatalogName, metaDataSchemaName, metaDataTableName, null);
+			// 循环处理每一列
 			while (tableColumns.next()) {
+				// 提取列名
 				String columnName = tableColumns.getString("COLUMN_NAME");
+				// 获取数据类型
 				int dataType = tableColumns.getInt("DATA_TYPE");
+				// 类型是DECIMAL的处理
 				if (dataType == Types.DECIMAL) {
 					String typeName = tableColumns.getString("TYPE_NAME");
 					int decimalDigits = tableColumns.getInt("DECIMAL_DIGITS");
@@ -411,8 +430,11 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 						}
 					}
 				}
+				// 是否允许为空
 				boolean nullable = tableColumns.getBoolean("NULLABLE");
+				// 创建 TableParameterMetaData
 				TableParameterMetaData meta = new TableParameterMetaData(columnName, dataType, nullable);
+				// 放入存储容器
 				this.tableParameterMetaData.add(meta);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Retrieved meta-data: " + meta.getParameterName() + " " +

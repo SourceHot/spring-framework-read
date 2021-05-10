@@ -119,14 +119,6 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Set the name of the table for this insert.
-	 */
-	public void setTableName(@Nullable String tableName) {
-		checkIfConfigurationModificationIsAllowed();
-		this.tableMetaDataContext.setTableName(tableName);
-	}
-
-	/**
 	 * Get the name of the table for this insert.
 	 */
 	@Nullable
@@ -135,11 +127,11 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Set the name of the schema for this insert.
+	 * Set the name of the table for this insert.
 	 */
-	public void setSchemaName(@Nullable String schemaName) {
+	public void setTableName(@Nullable String tableName) {
 		checkIfConfigurationModificationIsAllowed();
-		this.tableMetaDataContext.setSchemaName(schemaName);
+		this.tableMetaDataContext.setTableName(tableName);
 	}
 
 	/**
@@ -151,11 +143,11 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Set the name of the catalog for this insert.
+	 * Set the name of the schema for this insert.
 	 */
-	public void setCatalogName(@Nullable String catalogName) {
+	public void setSchemaName(@Nullable String schemaName) {
 		checkIfConfigurationModificationIsAllowed();
-		this.tableMetaDataContext.setCatalogName(catalogName);
+		this.tableMetaDataContext.setSchemaName(schemaName);
 	}
 
 	/**
@@ -164,6 +156,21 @@ public abstract class AbstractJdbcInsert {
 	@Nullable
 	public String getCatalogName() {
 		return this.tableMetaDataContext.getCatalogName();
+	}
+
+	/**
+	 * Set the name of the catalog for this insert.
+	 */
+	public void setCatalogName(@Nullable String catalogName) {
+		checkIfConfigurationModificationIsAllowed();
+		this.tableMetaDataContext.setCatalogName(catalogName);
+	}
+
+	/**
+	 * Get the names of the columns used.
+	 */
+	public List<String> getColumnNames() {
+		return Collections.unmodifiableList(this.declaredColumns);
 	}
 
 	/**
@@ -176,13 +183,6 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Get the names of the columns used.
-	 */
-	public List<String> getColumnNames() {
-		return Collections.unmodifiableList(this.declaredColumns);
-	}
-
-	/**
 	 * Specify the name of a single generated key column.
 	 */
 	public void setGeneratedKeyName(String generatedKeyName) {
@@ -191,18 +191,18 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
+	 * Get the names of any generated keys.
+	 */
+	public String[] getGeneratedKeyNames() {
+		return this.generatedKeyNames;
+	}
+
+	/**
 	 * Set the names of any generated keys.
 	 */
 	public void setGeneratedKeyNames(String... generatedKeyNames) {
 		checkIfConfigurationModificationIsAllowed();
 		this.generatedKeyNames = generatedKeyNames;
-	}
-
-	/**
-	 * Get the names of any generated keys.
-	 */
-	public String[] getGeneratedKeyNames() {
-		return this.generatedKeyNames;
 	}
 
 	/**
@@ -272,10 +272,14 @@ public abstract class AbstractJdbcInsert {
 	 * Invoked after this base class's compilation is complete.
 	 */
 	protected void compileInternal() {
+		// 获取数据源
 		DataSource dataSource = getJdbcTemplate().getDataSource();
 		Assert.state(dataSource != null, "No DataSource set");
+		// 解析表元数据
 		this.tableMetaDataContext.processMetaData(dataSource, getColumnNames(), getGeneratedKeyNames());
+		// 创建插入sql语句
 		this.insertString = this.tableMetaDataContext.createInsertString(getGeneratedKeyNames());
+		// 创建插入sql的数据类型
 		this.insertTypes = this.tableMetaDataContext.createInsertTypes();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Compiled insert object: insert string is [" + this.insertString + "]");
@@ -332,8 +336,11 @@ public abstract class AbstractJdbcInsert {
 	 * @return the number of rows affected
 	 */
 	protected int doExecute(Map<String, ?> args) {
+		// 检查编译
 		checkCompiled();
+		// 提取需要插入的数据
 		List<Object> values = matchInParameterValuesWithInsertColumns(args);
+		// 执行插入操作
 		return executeInsertInternal(values);
 	}
 
@@ -451,7 +458,7 @@ public abstract class AbstractJdbcInsert {
 			if (getGeneratedKeyNames().length > 1) {
 				throw new InvalidDataAccessApiUsageException(
 						"Current database only supports retrieving the key for a single column. There are " +
-						getGeneratedKeyNames().length  + " columns specified: " + Arrays.asList(getGeneratedKeyNames()));
+								getGeneratedKeyNames().length + " columns specified: " + Arrays.asList(getGeneratedKeyNames()));
 			}
 
 			Assert.state(getTableName() != null, "No table name set");
@@ -575,6 +582,7 @@ public abstract class AbstractJdbcInsert {
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						setParameterValues(ps, batchValues.get(i), getInsertTypes());
 					}
+
 					@Override
 					public int getBatchSize() {
 						return batchValues.size();

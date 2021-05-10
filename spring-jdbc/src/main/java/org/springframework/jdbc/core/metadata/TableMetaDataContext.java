@@ -246,10 +246,14 @@ public class TableMetaDataContext {
 	 * @param inParameters the parameter names and values
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(Map<String, ?> inParameters) {
+		// 结果集
 		List<Object> values = new ArrayList<>(inParameters.size());
+		// 循环表的列数据
 		for (String column : this.tableColumns) {
+			// 从参数表中获取列数据对应的值
 			Object value = inParameters.get(column);
 			if (value == null) {
+				// 忽略大小写获取
 				value = inParameters.get(column.toLowerCase());
 				if (value == null) {
 					for (Map.Entry<String, ?> entry : inParameters.entrySet()) {
@@ -278,12 +282,15 @@ public class TableMetaDataContext {
 		StringBuilder insertStatement = new StringBuilder();
 		insertStatement.append("INSERT INTO ");
 		if (getSchemaName() != null) {
+			// 数据库 名称
 			insertStatement.append(getSchemaName());
 			insertStatement.append(".");
 		}
+		// 表名称
 		insertStatement.append(getTableName());
 		insertStatement.append(" (");
 		int columnCount = 0;
+		// 列名称
 		for (String columnName : getTableColumns()) {
 			if (!keys.contains(columnName.toUpperCase())) {
 				columnCount++;
@@ -306,6 +313,7 @@ public class TableMetaDataContext {
 						getTableName() + "' so an insert statement can't be generated");
 			}
 		}
+		// 补充问号
 		String params = String.join(", ", Collections.nCopies(columnCount, "?"));
 		insertStatement.append(params);
 		insertStatement.append(")");
