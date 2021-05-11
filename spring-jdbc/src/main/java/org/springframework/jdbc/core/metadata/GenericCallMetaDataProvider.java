@@ -73,6 +73,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	@Override
 	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 		try {
+			// 在过程调用中设置是否支持目录
 			setSupportsCatalogsInProcedureCalls(databaseMetaData.supportsCatalogsInProcedureCalls());
 		}
 		catch (SQLException ex) {
@@ -81,6 +82,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 			}
 		}
 		try {
+			// 指定数据库是否在过程调用中支持使用数据库名称
 			setSupportsSchemasInProcedureCalls(databaseMetaData.supportsSchemasInProcedureCalls());
 		}
 		catch (SQLException ex) {
@@ -89,6 +91,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 			}
 		}
 		try {
+			// 指定数据库是否将大写字母用作标识符。
 			setStoresUpperCaseIdentifiers(databaseMetaData.storesUpperCaseIdentifiers());
 		}
 		catch (SQLException ex) {
@@ -97,6 +100,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 			}
 		}
 		try {
+			// 指定数据库是否将小写字母用作标识符。
 			setStoresLowerCaseIdentifiers(databaseMetaData.storesLowerCaseIdentifiers());
 		}
 		catch (SQLException ex) {
@@ -320,8 +324,11 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	private void processProcedureColumns(DatabaseMetaData databaseMetaData,
 			@Nullable String catalogName, @Nullable String schemaName, @Nullable String procedureName) {
 
+		// 提取 CatalogName
 		String metaDataCatalogName = metaDataCatalogNameToUse(catalogName);
+		// 提取 SchemaName
 		String metaDataSchemaName = metaDataSchemaNameToUse(schemaName);
+		// 偷取 ProcedureName
 		String metaDataProcedureName = procedureNameToUse(procedureName);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Retrieving meta-data for " + metaDataCatalogName + '/' +
@@ -330,6 +337,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 
 		ResultSet procs = null;
 		try {
+			// 提取 metaDataProcedureName 对应的数据值
 			procs = databaseMetaData.getProcedures(metaDataCatalogName, metaDataSchemaName, metaDataProcedureName);
 			List<String> found = new ArrayList<>();
 			while (procs.next()) {
@@ -365,25 +373,32 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 				}
 			}
 
+			// 处理metaDataProcedureName对应的列数据
 			procs = databaseMetaData.getProcedureColumns(
 					metaDataCatalogName, metaDataSchemaName, metaDataProcedureName, null);
+
+			// 循环处理procs中的单个数据
 			while (procs.next()) {
+				// 提取列名
 				String columnName = procs.getString("COLUMN_NAME");
+				// 提取列类型
 				int columnType = procs.getInt("COLUMN_TYPE");
 				if (columnName == null && (
-						columnType == DatabaseMetaData.procedureColumnIn  ||
-						columnType == DatabaseMetaData.procedureColumnInOut ||
-						columnType == DatabaseMetaData.procedureColumnOut)) {
+						columnType == DatabaseMetaData.procedureColumnIn ||
+								columnType == DatabaseMetaData.procedureColumnInOut ||
+								columnType == DatabaseMetaData.procedureColumnOut)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Skipping meta-data for: " + columnType + " " + procs.getInt("DATA_TYPE") +
-							" " + procs.getString("TYPE_NAME") + " " + procs.getInt("NULLABLE") +
-							" (probably a member of a collection)");
+								" " + procs.getString("TYPE_NAME") + " " + procs.getInt("NULLABLE") +
+								" (probably a member of a collection)");
 					}
 				}
 				else {
+					// 创建CallParameterMetaData对象
 					CallParameterMetaData meta = new CallParameterMetaData(columnName, columnType,
 							procs.getInt("DATA_TYPE"), procs.getString("TYPE_NAME"),
 							procs.getInt("NULLABLE") == DatabaseMetaData.procedureNullable);
+					// 加入数据容器
 					this.callParameterMetaData.add(meta);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Retrieved meta-data: " + meta.getParameterName() + " " +

@@ -320,15 +320,21 @@ public class CallMetaDataContext {
 	 * Reconcile the provided parameters with available meta-data and add new ones where appropriate.
 	 */
 	protected List<SqlParameter> reconcileParameters(List<SqlParameter> parameters) {
+		// 提取调用元数据
 		CallMetaDataProvider provider = obtainMetaDataProvider();
 
+		// 创建用于存储返回值参数的容器。
 		final List<SqlParameter> declaredReturnParams = new ArrayList<>();
+		// 创建用于存储提交参数的容器。
 		final Map<String, SqlParameter> declaredParams = new LinkedHashMap<>();
 		boolean returnDeclared = false;
+		// 输出参数
 		List<String> outParamNames = new ArrayList<>();
+		// 参数名称
 		List<String> metaDataParamNames = new ArrayList<>();
 
 		// Get the names of the meta-data parameters
+		// 提取调用参数名称
 		for (CallParameterMetaData meta : provider.getCallParameterMetaData()) {
 			if (!meta.isReturnParameter()) {
 				metaDataParamNames.add(lowerCase(meta.getParameterName()));
@@ -337,6 +343,7 @@ public class CallMetaDataContext {
 
 		// Separate implicit return parameters from explicit parameters...
 		for (SqlParameter param : parameters) {
+//			返回此参数是否为CallableStatement.getMoreResults/getUpdateCount的结果处理期间使用的隐式返回参数
 			if (param.isResultsParameter()) {
 				declaredReturnParams.add(param);
 			}
@@ -363,17 +370,22 @@ public class CallMetaDataContext {
 		}
 		setOutParameterNames(outParamNames);
 
+		// 需要执行的参数列表
 		List<SqlParameter> workParams = new ArrayList<>(declaredReturnParams);
+		// 是否需要使用元数据
 		if (!provider.isProcedureColumnMetaDataUsed()) {
 			workParams.addAll(declaredParams.values());
 			return workParams;
 		}
 
+
+		// 参数映射
 		Map<String, String> limitedInParamNamesMap = new HashMap<>(this.limitedInParameterNames.size());
 		for (String limitedParamName : this.limitedInParameterNames) {
 			limitedInParamNamesMap.put(lowerCase(provider.parameterNameToUse(limitedParamName)), limitedParamName);
 		}
 
+		// 执行参数元数据处理
 		for (CallParameterMetaData meta : provider.getCallParameterMetaData()) {
 			String paramName = meta.getParameterName();
 			String paramNameToCheck = null;
@@ -391,7 +403,7 @@ public class CallMetaDataContext {
 					if (param == null) {
 						throw new InvalidDataAccessApiUsageException(
 								"Unable to locate declared parameter for function return value - " +
-								" add an SqlOutParameter with name '" + getFunctionReturnName() + "'");
+										" add an SqlOutParameter with name '" + getFunctionReturnName() + "'");
 					}
 					else if (paramName != null) {
 						setFunctionReturnName(paramName);

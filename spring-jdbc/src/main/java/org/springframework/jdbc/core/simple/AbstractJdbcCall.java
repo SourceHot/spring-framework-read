@@ -312,17 +312,22 @@ public abstract class AbstractJdbcCall {
 	protected void compileInternal() {
 		DataSource dataSource = getJdbcTemplate().getDataSource();
 		Assert.state(dataSource != null, "No DataSource set");
+		// 进行调用元数据上下文的初始化
 		this.callMetaDataContext.initializeMetaData(dataSource);
 
 		// Iterate over the declared RowMappers and register the corresponding SqlParameter
+		// 初始化declaredParameters数据信息
 		this.declaredRowMappers.forEach((key, value) -> this.declaredParameters.add(this.callMetaDataContext.createReturnResultSetParameter(key, value)));
+		// 处理参数列表
 		this.callMetaDataContext.processParameters(this.declaredParameters);
 
+		// 创建执行语句
 		this.callString = this.callMetaDataContext.createCallString();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Compiled stored procedure. Call string is [" + this.callString + "]");
 		}
 
+		// 创建CallableStatementCreatorFactory
 		this.callableStatementFactory = new CallableStatementCreatorFactory(
 				this.callString, this.callMetaDataContext.getCallParameters());
 
