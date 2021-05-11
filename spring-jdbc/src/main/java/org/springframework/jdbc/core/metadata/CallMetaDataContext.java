@@ -379,7 +379,7 @@ public class CallMetaDataContext {
 		}
 
 
-		// 参数映射
+		// 参数映射表
 		Map<String, String> limitedInParamNamesMap = new HashMap<>(this.limitedInParameterNames.size());
 		for (String limitedParamName : this.limitedInParameterNames) {
 			limitedInParamNamesMap.put(lowerCase(provider.parameterNameToUse(limitedParamName)), limitedParamName);
@@ -387,11 +387,15 @@ public class CallMetaDataContext {
 
 		// 执行参数元数据处理
 		for (CallParameterMetaData meta : provider.getCallParameterMetaData()) {
+			// 提取参数名称
 			String paramName = meta.getParameterName();
+			// 用于检查的参数名称
 			String paramNameToCheck = null;
 			if (paramName != null) {
+				// 小写参数名称
 				paramNameToCheck = lowerCase(provider.parameterNameToUse(paramName));
 			}
+
 			String paramNameToUse = provider.parameterNameToUse(paramName);
 			if (declaredParams.containsKey(paramNameToCheck) || (meta.isReturnParameter() && returnDeclared)) {
 				SqlParameter param;
@@ -420,6 +424,7 @@ public class CallMetaDataContext {
 					}
 				}
 			}
+			// 不同类型的workParams创建
 			else {
 				if (meta.isReturnParameter()) {
 					// DatabaseMetaData.procedureColumnReturn or possibly procedureColumnResult
@@ -491,6 +496,7 @@ public class CallMetaDataContext {
 	public Map<String, Object> matchInParameterValuesWithCallParameters(SqlParameterSource parameterSource) {
 		// For parameter source lookups we need to provide case-insensitive lookup support
 		// since the database meta-data is not necessarily providing case sensitive parameter names.
+		// 从 SqlParameterSource 类型中提取参数表, key: 参数名称,value:参数值
 		Map<String, String> caseInsensitiveParameterNames =
 				SqlParameterSourceUtils.extractCaseInsensitiveParameterNames(parameterSource);
 
@@ -558,15 +564,19 @@ public class CallMetaDataContext {
 	 * @return a Map containing the matched parameter names with the value taken from the input
 	 */
 	public Map<String, ?> matchInParameterValuesWithCallParameters(Map<String, ?> inParameters) {
+		// 提取执行元数据
 		CallMetaDataProvider provider = obtainMetaDataProvider();
+		// 是否需要使用列元数据
 		if (!provider.isProcedureColumnMetaDataUsed()) {
 			return inParameters;
 		}
 
+		// 参数名称对应关系,key 小写,value原始值
 		Map<String, String> callParameterNames = new HashMap<>(this.callParameters.size());
 		for (SqlParameter parameter : this.callParameters) {
 			if (parameter.isInputValueProvided()) {
-				String parameterName =  parameter.getName();
+				String parameterName = parameter.getName();
+				// 从执行原数据中获取参数名称对应的数据
 				String parameterNameToMatch = provider.parameterNameToUse(parameterName);
 				if (parameterNameToMatch != null) {
 					callParameterNames.put(parameterNameToMatch.toLowerCase(), parameterName);
@@ -574,9 +584,12 @@ public class CallMetaDataContext {
 			}
 		}
 
+		// 方法返回值容器,key:参数名称,value:参数值.
 		Map<String, Object> matchedParameters = new HashMap<>(inParameters.size());
 		inParameters.forEach((parameterName, parameterValue) -> {
+			// 从执行元数据中获取参数名称对应的数据值
 			String parameterNameToMatch = provider.parameterNameToUse(parameterName);
+			// 从参数名称映射关系中获取对应数据
 			String callParameterName = callParameterNames.get(lowerCase(parameterNameToMatch));
 			if (callParameterName == null) {
 				if (logger.isDebugEnabled()) {
@@ -595,6 +608,7 @@ public class CallMetaDataContext {
 			}
 		});
 
+		// 数量差异的日志记录
 		if (matchedParameters.size() < callParameterNames.size()) {
 			for (String parameterName : callParameterNames.keySet()) {
 				String parameterNameToMatch = provider.parameterNameToUse(parameterName);
@@ -634,11 +648,14 @@ public class CallMetaDataContext {
 
 		StringBuilder callString;
 		int parameterCount = 0;
+		// catalogName
 		String catalogNameToUse;
+		// schemaName
 		String schemaNameToUse;
 
 		// For Oracle where catalogs are not supported we need to reverse the schema name
 		// and the catalog name since the catalog is used for the package name
+//		对于不支持目录的Oracle，我们需要反转模式名称和目录名称，因为目录用于包名称
 		if (this.metaDataProvider.isSupportsSchemasInProcedureCalls() &&
 				!this.metaDataProvider.isSupportsCatalogsInProcedureCalls()) {
 			schemaNameToUse = this.metaDataProvider.catalogNameToUse(getCatalogName());
@@ -649,7 +666,9 @@ public class CallMetaDataContext {
 			schemaNameToUse = this.metaDataProvider.schemaNameToUse(getSchemaName());
 		}
 
+		// 需要执行的语句名称
 		String procedureNameToUse = this.metaDataProvider.procedureNameToUse(getProcedureName());
+		// 进行字符串组装
 		if (isFunction() || isReturnValueRequired()) {
 			callString = new StringBuilder().append("{? = call ").
 					append(StringUtils.hasLength(catalogNameToUse) ? catalogNameToUse + "." : "").
@@ -664,6 +683,7 @@ public class CallMetaDataContext {
 					append(procedureNameToUse).append("(");
 		}
 
+		// 在执行语句中将参数写入
 		for (SqlParameter parameter : this.callParameters) {
 			if (!parameter.isResultsParameter()) {
 				if (parameterCount > 0) {
