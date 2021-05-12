@@ -1167,10 +1167,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	public Map<String, Object> call(CallableStatementCreator csc, List<SqlParameter> declaredParameters)
 			throws DataAccessException {
 
+		// 更新参数列表
 		final List<SqlParameter> updateCountParameters = new ArrayList<>();
+		// 返回值参数列表
 		final List<SqlParameter> resultSetParameters = new ArrayList<>();
+		// 执行参数列表
 		final List<SqlParameter> callParameters = new ArrayList<>();
 
+		// sql参数分类
 		for (SqlParameter parameter : declaredParameters) {
 			if (parameter.isResultsParameter()) {
 				if (parameter instanceof SqlReturnResultSet) {
@@ -1185,6 +1189,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			}
 		}
 
+		// 执行
 		Map<String, Object> result = execute(csc, cs -> {
 			boolean retVal = cs.execute();
 			int updateCount = cs.getUpdateCount();
@@ -1222,6 +1227,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (!this.skipResultsProcessing) {
 			do {
 				if (updateCount == -1) {
+					// 通过 processResultSet 处理数据值
 					if (resultSetParameters != null && resultSetParameters.size() > rsIndex) {
 						SqlReturnResultSet declaredRsParam = (SqlReturnResultSet) resultSetParameters.get(rsIndex);
 						results.putAll(processResultSet(cs.getResultSet(), declaredRsParam));
@@ -1240,6 +1246,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					}
 				}
 				else {
+					// 非批量添加
 					if (updateCountParameters != null && updateCountParameters.size() > updateIndex) {
 						SqlReturnUpdateCount ucParam = (SqlReturnUpdateCount) updateCountParameters.get(updateIndex);
 						String declaredUcName = ucParam.getName();
