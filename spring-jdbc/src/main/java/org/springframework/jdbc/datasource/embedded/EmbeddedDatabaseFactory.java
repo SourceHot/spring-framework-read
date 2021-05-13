@@ -172,16 +172,22 @@ public class EmbeddedDatabaseFactory {
 	 * {@link DataSource} providing connectivity to the database.
 	 */
 	protected void initDatabase() {
+		// 是否需要生成唯一数据苦麦菜
 		if (this.generateUniqueDatabaseName) {
 			setDatabaseName(UUID.randomUUID().toString());
 		}
 
+		// 创建嵌入式数据库
 		// Create the embedded database first
 		if (this.databaseConfigurer == null) {
+			// 嵌入式数据库配置初始化
 			this.databaseConfigurer = EmbeddedDatabaseConfigurerFactory.getConfigurer(EmbeddedDatabaseType.HSQL);
 		}
+
+		// 配置嵌入式数据库连接属性
 		this.databaseConfigurer.configureConnectionProperties(
 				this.dataSourceFactory.getConnectionProperties(), this.databaseName);
+		// 获取数据源对象
 		this.dataSource = this.dataSourceFactory.getDataSource();
 
 		if (logger.isInfoEnabled()) {
@@ -198,6 +204,7 @@ public class EmbeddedDatabaseFactory {
 		// Now populate the database
 		if (this.databasePopulator != null) {
 			try {
+				// 执行sql
 				DatabasePopulatorUtils.execute(this.databasePopulator, this.dataSource);
 			}
 			catch (RuntimeException ex) {
