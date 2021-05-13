@@ -190,23 +190,30 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
 	protected Connection getConnectionFromDriver(@Nullable String username, @Nullable String password) throws SQLException {
+		// 创建属性表
 		Properties mergedProps = new Properties();
+		// 获取成员变量的连接属性表
 		Properties connProps = getConnectionProperties();
 		if (connProps != null) {
 			mergedProps.putAll(connProps);
 		}
+		// 放入账号
 		if (username != null) {
 			mergedProps.setProperty("user", username);
 		}
+		// 放入密码
 		if (password != null) {
 			mergedProps.setProperty("password", password);
 		}
 
+		// 抽象方法:获取数据库连接对象
 		Connection con = getConnectionFromDriver(mergedProps);
 		if (this.catalog != null) {
+			// 设置catalog
 			con.setCatalog(this.catalog);
 		}
 		if (this.schema != null) {
+			// 设置schema
 			con.setSchema(this.schema);
 		}
 		return con;

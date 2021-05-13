@@ -136,6 +136,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	@Override
 	protected Connection doGetConnection(@Nullable String username, @Nullable String password) throws SQLException {
 		// Create JDBCConnectionSpec using current isolation level value and read-only flag.
+		// 创建JDBCConnectionSpec对象
 		Object connSpec = createConnectionSpec(
 				getCurrentIsolationLevel(), getCurrentReadOnlyFlag(), username, password);
 		if (logger.isDebugEnabled()) {
@@ -143,6 +144,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 					getTargetDataSource() + "], using ConnectionSpec [" + connSpec + "]");
 		}
 		// Create Connection through invoking WSDataSource.getConnection(JDBCConnectionSpec)
+		// 从WSDataSource中获取连接对象
 		Connection con = (Connection) invokeJdbcMethod(
 				this.wsDataSourceGetConnectionMethod, obtainTargetDataSource(), connSpec);
 		Assert.state(con != null, "No Connection");

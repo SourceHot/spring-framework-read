@@ -155,6 +155,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
+		// 获取JDBC用户名和密码数据
 		JdbcUserCredentials threadCredentials = this.threadBoundCredentials.get();
 		Connection con = (threadCredentials != null ?
 				doGetConnection(threadCredentials.username, threadCredentials.password) :

@@ -127,11 +127,14 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	 */
 	@Override
 	protected Connection doGetConnection(@Nullable String username, @Nullable String password) throws SQLException {
+		// 父类方法调用
 		Connection con = super.doGetConnection(username, password);
+		// 只读标记
 		Boolean readOnlyToUse = getCurrentReadOnlyFlag();
 		if (readOnlyToUse != null) {
 			con.setReadOnly(readOnlyToUse);
 		}
+		// 隔离级别
 		Integer isolationLevelToUse = getCurrentIsolationLevel();
 		if (isolationLevelToUse != null) {
 			con.setTransactionIsolation(isolationLevelToUse);

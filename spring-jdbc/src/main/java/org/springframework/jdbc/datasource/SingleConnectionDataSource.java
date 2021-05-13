@@ -222,6 +222,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 		synchronized (this.connectionMonitor) {
 			closeConnection();
 			this.target = getConnectionFromDriver(getUsername(), getPassword());
+			// 设置是否自动提交
 			prepareConnection(this.target);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Established shared JDBC Connection: " + this.target);
