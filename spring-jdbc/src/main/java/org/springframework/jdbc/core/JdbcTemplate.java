@@ -1227,13 +1227,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (!this.skipResultsProcessing) {
 			do {
 				if (updateCount == -1) {
-					// 通过 processResultSet 处理数据值
+//					参数CallableStatement的结果集合+参数resultSetParameters中提取。
 					if (resultSetParameters != null && resultSetParameters.size() > rsIndex) {
 						SqlReturnResultSet declaredRsParam = (SqlReturnResultSet) resultSetParameters.get(rsIndex);
 						results.putAll(processResultSet(cs.getResultSet(), declaredRsParam));
 						rsIndex++;
 					}
 					else {
+//						参数CallableStatement的结果集合+返回值前缀+索引提取
 						if (!this.skipUndeclaredResults) {
 							String rsName = RETURN_RESULT_SET_PREFIX + (rsIndex + 1);
 							SqlReturnResultSet undeclaredRsParam = new SqlReturnResultSet(rsName, getColumnMapRowMapper());
@@ -1287,9 +1288,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		Map<String, Object> results = new LinkedHashMap<>(parameters.size());
 		int sqlColIndex = 1;
 		for (SqlParameter param : parameters) {
+			// 判断数据类型
 			if (param instanceof SqlOutParameter) {
 				SqlOutParameter outParam = (SqlOutParameter) param;
 				Assert.state(outParam.getName() != null, "Anonymous parameters not allowed");
+				// 获取sql返回值类型
 				SqlReturnType returnType = outParam.getSqlReturnType();
 				if (returnType != null) {
 					Object out = returnType.getTypeValue(cs, sqlColIndex, outParam.getSqlType(), outParam.getTypeName());

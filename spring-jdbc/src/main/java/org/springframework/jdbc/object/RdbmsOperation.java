@@ -339,19 +339,24 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * been correctly initialized, for example if no DataSource has been provided
 	 */
 	public final void compile() throws InvalidDataAccessApiUsageException {
+		// 判断是否编译完成
 		if (!isCompiled()) {
+			// sql为空抛出异常
 			if (getSql() == null) {
 				throw new InvalidDataAccessApiUsageException("Property 'sql' is required");
 			}
 
 			try {
+				// 进行 jdbcTemplate 的初始化操作
 				this.jdbcTemplate.afterPropertiesSet();
 			}
 			catch (IllegalArgumentException ex) {
 				throw new InvalidDataAccessApiUsageException(ex.getMessage());
 			}
 
+			// 抽象方法子类处理
 			compileInternal();
+			// 将编译状态设置为true
 			this.compiled = true;
 
 			if (logger.isDebugEnabled()) {
@@ -391,10 +396,13 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
 	 */
 	protected void validateParameters(@Nullable Object[] parameters) throws InvalidDataAccessApiUsageException {
+		// 编译检查
 		checkCompiled();
 		int declaredInParameters = 0;
 		for (SqlParameter param : this.declaredParameters) {
+			// 判断参数是否是执行前保留的输入值
 			if (param.isInputValueProvided()) {
+				// 判断是否支持lob类型参数
 				if (!supportsLobParameters() &&
 						(param.getSqlType() == Types.BLOB || param.getSqlType() == Types.CLOB)) {
 					throw new InvalidDataAccessApiUsageException(
@@ -403,6 +411,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 				declaredInParameters++;
 			}
 		}
+		// 数量检查
 		validateParameterCount((parameters != null ? parameters.length : 0), declaredInParameters);
 	}
 

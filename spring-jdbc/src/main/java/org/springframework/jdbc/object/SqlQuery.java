@@ -109,8 +109,11 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * will be of the same class, although it is possible to use different types.
 	 */
 	public List<T> execute(@Nullable Object[] params, @Nullable Map<?, ?> context) throws DataAccessException {
+		// 参数验证
 		validateParameters(params);
+		// 创建RowMapper
 		RowMapper<T> rowMapper = newRowMapper(params, context);
+		// 通过JdbcTemplate进行查询操作
 		return getJdbcTemplate().query(newPreparedStatementCreator(params), rowMapper);
 	}
 

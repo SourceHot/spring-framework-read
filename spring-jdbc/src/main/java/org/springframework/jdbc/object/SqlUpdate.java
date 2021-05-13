@@ -165,8 +165,11 @@ public class SqlUpdate extends SqlOperation {
 	 * @return the number of rows affected by the update
 	 */
 	public int update(Object... params) throws DataAccessException {
+		// 参数验证
 		validateParameters(params);
+		// jdbcTemplate 执行
 		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(params));
+		// 检查最大行数和所需数量
 		checkRowsAffected(rowsAffected);
 		return rowsAffected;
 	}

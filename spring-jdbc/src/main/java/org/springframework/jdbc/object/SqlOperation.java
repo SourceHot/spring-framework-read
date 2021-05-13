@@ -57,11 +57,16 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 */
 	@Override
 	protected final void compileInternal() {
+		// 创建 PreparedStatementCreatorFactory 对象
 		this.preparedStatementFactory = new PreparedStatementCreatorFactory(resolveSql(), getDeclaredParameters());
+		// 设置返回值类型
 		this.preparedStatementFactory.setResultSetType(getResultSetType());
+		// 设置ResultSet是否是可更新
 		this.preparedStatementFactory.setUpdatableResults(isUpdatableResults());
+		// 设置返回值是否需要更新key。
 		this.preparedStatementFactory.setReturnGeneratedKeys(isReturnGeneratedKeys());
 		if (getGeneratedKeysColumnNames() != null) {
+			// 设置更新的key列名
 			this.preparedStatementFactory.setGeneratedKeysColumnNames(getGeneratedKeysColumnNames());
 		}
 
