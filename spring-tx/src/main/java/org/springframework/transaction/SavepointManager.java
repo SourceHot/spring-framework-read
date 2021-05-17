@@ -42,6 +42,7 @@ public interface SavepointManager {
 	 * that you don't need anymore via {@code releaseSavepoint}.
 	 * <p>Note that most transaction managers will automatically release
 	 * savepoints at transaction completion.
+	 * 创建一个保存点
 	 * @return a savepoint object, to be passed into
 	 * {@link #rollbackToSavepoint} or {@link #releaseSavepoint}
 	 * @throws NestedTransactionNotSupportedException if the underlying
@@ -57,6 +58,8 @@ public interface SavepointManager {
 	 * <p>The savepoint will <i>not</i> be automatically released afterwards.
 	 * You may explicitly call {@link #releaseSavepoint(Object)} or rely on
 	 * automatic release on transaction completion.
+	 *
+	 * 回滚某一个保存点
 	 * @param savepoint the savepoint to roll back to
 	 * @throws NestedTransactionNotSupportedException if the underlying
 	 * transaction does not support savepoints
@@ -71,6 +74,8 @@ public interface SavepointManager {
 	 * savepoints on transaction completion.
 	 * <p>Implementations should fail as silently as possible if proper
 	 * resource cleanup will eventually happen at transaction completion.
+	 *
+	 * 释放保存点
 	 * @param savepoint the savepoint to release
 	 * @throws NestedTransactionNotSupportedException if the underlying
 	 * transaction does not support savepoints

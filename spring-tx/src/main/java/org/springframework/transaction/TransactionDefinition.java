@@ -196,6 +196,7 @@ public interface TransactionDefinition {
 	 * <p>For customization purposes, use the modifiable
 	 * {@link org.springframework.transaction.support.DefaultTransactionDefinition} instead.
 	 *
+	 * 获取默认的不可修改的事务定义对象。
 	 * @since 5.2
 	 */
 	static TransactionDefinition withDefaults() {
@@ -208,6 +209,7 @@ public interface TransactionDefinition {
 	 * defined on {@link TransactionDefinition this interface}.
 	 * <p>The default is {@link #PROPAGATION_REQUIRED}.
 	 *
+	 * 获取事务的传播行为。
 	 * @return the propagation behavior
 	 * @see #PROPAGATION_REQUIRED
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isActualTransactionActive()
@@ -248,6 +250,7 @@ public interface TransactionDefinition {
 	 * an exception when given any other timeout than {@link #TIMEOUT_DEFAULT}.
 	 * <p>The default is {@link #TIMEOUT_DEFAULT}.
 	 *
+	 * 获取事务处理的超时时间
 	 * @return the transaction timeout
 	 */
 	default int getTimeout() {

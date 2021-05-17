@@ -390,10 +390,14 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				DefaultTransactionStatus status = newTransactionStatus(
 						def, transaction, true, newSynchronization, debugEnabled,
 						suspendedResources);
+				// 开始事务
 				doBegin(transaction, def);
+				// 同步事务处理
 				prepareSynchronization(status, def);
 				return status;
-			} catch (RuntimeException | Error ex) {
+			}
+			catch (RuntimeException | Error ex) {
+				// 恢复挂起的事务
 				resume(null, suspendedResources);
 				throw ex;
 			}
@@ -407,6 +411,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 			boolean newSynchronization = (getTransactionSynchronization()
 					== SYNCHRONIZATION_ALWAYS);
+			// 创建TransactionStatus对象
 			return prepareTransactionStatus(def, null, true, newSynchronization, debugEnabled,
 					null);
 		}
@@ -414,23 +419,27 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	/**
 	 * Create a TransactionStatus for an existing transaction.
-	 * 处理事务嵌套
 	 */
 	private TransactionStatus handleExistingTransaction(
 			TransactionDefinition definition, Object transaction, boolean debugEnabled)
 			throws TransactionException {
 
+		// 获取事务传播行为 ,如果事务传播行为标记是PROPAGATION_NEVER抛出异常
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NEVER) {
 			throw new IllegalTransactionStateException(
 					"Existing transaction found for transaction marked with propagation 'never'");
 		}
 
+
+		// 获取事务传播行为,如果事务传播行为标记是PROPAGATION_NOT_SUPPORTED
 		if (definition.getPropagationBehavior()
 				== TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
 			if (debugEnabled) {
 				logger.debug("Suspending current transaction");
 			}
+			// 挂起当前事务
 			Object suspendedResources = suspend(transaction);
+			//
 			boolean newSynchronization = (getTransactionSynchronization()
 					== SYNCHRONIZATION_ALWAYS);
 			return prepareTransactionStatus(
