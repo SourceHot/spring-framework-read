@@ -88,6 +88,8 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 * Template method for determining the global rollback-only flag of the
 	 * underlying transaction, if any.
 	 * <p>This implementation always returns {@code false}.
+	 *
+	 * 用于确定基础事务的全局回滚标志
 	 */
 	public boolean isGlobalRollbackOnly() {
 		return false;
@@ -146,13 +148,17 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 * and release the savepoint right afterwards.
 	 */
 	public void rollbackToHeldSavepoint() throws TransactionException {
+		// 获取保存点
 		Object savepoint = getSavepoint();
 		if (savepoint == null) {
 			throw new TransactionUsageException(
 					"Cannot roll back to savepoint - no savepoint associated with current transaction");
 		}
+		// 从保存点管理器进行回滚到指定保存点
 		getSavepointManager().rollbackToSavepoint(savepoint);
+		// 从保存点管理器进行释放保存点
 		getSavepointManager().releaseSavepoint(savepoint);
+		// 设置帮存点为null
 		setSavepoint(null);
 	}
 
