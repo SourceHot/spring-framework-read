@@ -270,6 +270,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		Connection con = null;
 
 		try {
+			// 判断连接是否已经持有
+			// 是否同步事务
 			if (!txObject.hasConnectionHolder() ||
 					txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
 				// 数据库链接对象
@@ -324,7 +326,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 				TransactionSynchronizationManager
 						.bindResource(obtainDataSource(), txObject.getConnectionHolder());
 			}
-		} catch (Throwable ex) {
+		}
+		catch (Throwable ex) {
 			if (txObject.isNewConnectionHolder()) {
 				// 释放链接
 				DataSourceUtils.releaseConnection(con, obtainDataSource());
@@ -486,6 +489,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	protected void prepareTransactionalConnection(Connection con, TransactionDefinition definition)
 			throws SQLException {
 
+		// 只读时
 		if (isEnforceReadOnly() && definition.isReadOnly()) {
 			try (Statement stmt = con.createStatement()) {
 				// 执行sql 类似事务隔离级别

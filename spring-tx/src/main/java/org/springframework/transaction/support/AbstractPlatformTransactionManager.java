@@ -1054,12 +1054,15 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	private void doRollbackOnCommitException(DefaultTransactionStatus status, Throwable ex)
 			throws TransactionException {
 		try {
+			// 判断是否存在新事务
 			if (status.isNewTransaction()) {
 				if (status.isDebug()) {
 					logger.debug("Initiating transaction rollback after commit exception", ex);
 				}
 				doRollback(status);
-			} else if (status.hasTransaction() && isGlobalRollbackOnParticipationFailure()) {
+			}
+			// 判断是否存在事务并且参与事务操作失败后是否将现有事务全局标记为仅回滚。
+			else if (status.hasTransaction() && isGlobalRollbackOnParticipationFailure()) {
 				if (status.isDebug()) {
 					logger.debug(
 							"Marking existing transaction as rollback-only after commit exception",
@@ -1072,6 +1075,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
 			throw rbex;
 		}
+		// 执行 afterCompletion 方法
 		triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK);
 	}
 
