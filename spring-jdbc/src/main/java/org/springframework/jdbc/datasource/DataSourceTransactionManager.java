@@ -428,6 +428,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 					"Setting JDBC transaction [" + txObject.getConnectionHolder().getConnection() +
 							"] rollback-only");
 		}
+		// 将事务标记位只读事务
 		txObject.setRollbackOnly();
 	}
 
@@ -463,6 +464,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			if (logger.isDebugEnabled()) {
 				logger.debug("Releasing JDBC Connection [" + con + "] after transaction");
 			}
+			// 释放数据库连接
 			DataSourceUtils.releaseConnection(con, this.dataSource);
 		}
 
