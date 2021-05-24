@@ -16,14 +16,18 @@
 
 package org.springframework.transaction.interceptor;
 
-import io.vavr.control.Try;
 import java.lang.reflect.Method;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
+
+import io.vavr.control.Try;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -47,8 +51,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /**
  * Base class for transactional aspects, such as the {@link TransactionInterceptor} or an AspectJ
@@ -71,6 +73,7 @@ import reactor.core.publisher.Mono;
  * <p>A transaction aspect is serializable if its {@code PlatformTransactionManager}
  * and {@code TransactionAttributeSource} are serializable.
  *
+ * 事务切面支持
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Stéphane Nicoll
@@ -91,17 +94,22 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	/**
 	 * Key to use to store the default transaction manager.
+	 *
+	 * 用于存储默认事务管理器的键。
 	 */
 	private static final Object DEFAULT_TRANSACTION_MANAGER_KEY = new Object();
 
 	/**
 	 * Vavr library present on the classpath?
+	 * 是否存在io.vavr.control.Try类
 	 */
 	private static final boolean vavrPresent = ClassUtils.isPresent(
 			"io.vavr.control.Try", TransactionAspectSupport.class.getClassLoader());
 
 	/**
 	 * Reactive Streams API present on the classpath?
+	 *
+	 * 是否存在org.reactivestreams.Publisher类
 	 */
 	private static final boolean reactiveStreamsPresent =
 			ClassUtils.isPresent("org.reactivestreams.Publisher",
@@ -111,32 +119,62 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * Holder to support the {@code currentTransactionStatus()} method, and to support communication
 	 * between different cooperating advices (e.g. before and after advice) if the aspect involves
 	 * more than a single method (as will be the case for around advice).
+	 *
+	 * 线程变量,用于存储事务信息
 	 */
 	private static final ThreadLocal<TransactionInfo> transactionInfoHolder =
 			new NamedThreadLocal<>("Current aspect-driven transaction");
+
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	/**
+	 * 响应式适配器注册表
+	 */
 	@Nullable
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
+
+	/**
+	 * 事务管理器缓存
+	 */
 	private final ConcurrentMap<Object, TransactionManager> transactionManagerCache =
 			new ConcurrentReferenceHashMap<>(4);
+
+	/**
+	 * 响应式事务支持(反应式事务支持)
+	 *
+	 */
 	private final ConcurrentMap<Method, ReactiveTransactionSupport> transactionSupportCache =
 			new ConcurrentReferenceHashMap<>(1024);
+
+	/**
+	 * 事务管理器名称
+	 */
 	@Nullable
 	private String transactionManagerBeanName;
 
+	/**
+	 * 事务管理器
+	 */
 	@Nullable
 	private TransactionManager transactionManager;
 
+	/**
+	 * 事务属性源
+	 */
 	@Nullable
 	private TransactionAttributeSource transactionAttributeSource;
 
+	/**
+	 * Bean工程，用于存储Bean实例或者创建Bean实例。
+	 */
 	@Nullable
 	private BeanFactory beanFactory;
 
 	protected TransactionAspectSupport() {
 		if (reactiveStreamsPresent) {
 			this.reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
-		} else {
+		}
+		else {
 			this.reactiveAdapterRegistry = null;
 		}
 	}
@@ -298,12 +336,14 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 */
 	@Override
 	public void afterPropertiesSet() {
+		// 事务管理对象为空 并且 BeanFactory 为空
 		if (getTransactionManager() == null && this.beanFactory == null) {
 			throw new IllegalStateException(
 					"Set the 'transactionManager' property or make sure to run within a BeanFactory "
 							+
 							"containing a TransactionManager bean!");
 		}
+		// 事务属性源对象为空
 		if (getTransactionAttributeSource() == null) {
 			throw new IllegalStateException(
 					"Either 'transactionAttributeSource' or 'transactionAttributes' is required: " +
@@ -332,12 +372,15 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		// If the transaction attribute is null, the method is non-transactional.
 		// 获取事务属性
 		TransactionAttributeSource tas = getTransactionAttributeSource();
+		// 获取事务属性
 		final TransactionAttribute txAttr = (tas != null ? tas
 				.getTransactionAttribute(method, targetClass) : null);
 		// 确定事物管理器
 		final TransactionManager tm = determineTransactionManager(txAttr);
 
+		// 事务管理器是响应式的处理
 		if (this.reactiveAdapterRegistry != null && tm instanceof ReactiveTransactionManager) {
+			// 从响应式事务缓存中获取响应式事务支持对象
 			ReactiveTransactionSupport txSupport = this.transactionSupportCache
 					.computeIfAbsent(method, key -> {
 						if (KotlinDetector.isKotlinType(method.getDeclaringClass())
@@ -347,6 +390,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 											+ method +
 											". Use TransactionalOperator.transactional extensions instead.");
 						}
+						// 响应式适配器注册表中获取欧响应式适配器
 						ReactiveAdapter adapter = this.reactiveAdapterRegistry
 								.getAdapter(method.getReturnType());
 						if (adapter == null) {
@@ -357,18 +401,20 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 						}
 						return new ReactiveTransactionSupport(adapter);
 					});
+			// 响应式事务执行方法
 			return txSupport.invokeWithinTransaction(
 					method, targetClass, invocation, txAttr, (ReactiveTransactionManager) tm);
 		}
 
-		// 类型转换
+		// 事务类型转换
 		PlatformTransactionManager ptm = asPlatformTransactionManager(tm);
-		// 切点
+		// 确定切点
 		final String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
+		// 事务属性为空 事务类型不是CallbackPreferringPlatformTransactionManager
 		if (txAttr == null || !(ptm instanceof CallbackPreferringPlatformTransactionManager)) {
 			// Standard transaction demarcation with getTransaction and commit/rollback calls.
-			// 创建一个新的事务根据事务传播性
+			// 创建一个新的事务信息
 			TransactionInfo txInfo = createTransactionIfNecessary(ptm, txAttr,
 					joinpointIdentification);
 
@@ -378,16 +424,19 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				// This will normally result in a target object being invoked.
 				// 回调方法
 				retVal = invocation.proceedWithInvocation();
-			} catch (Throwable ex) {
+			}
+			catch (Throwable ex) {
 				// target invocation exception
 				// 回滚异常
 				completeTransactionAfterThrowing(txInfo, ex);
 				throw ex;
-			} finally {
-				// 消息清理
+			}
+			finally {
+				// 清除事务信息
 				cleanupTransactionInfo(txInfo);
 			}
 
+			// vavr相关处理
 			if (vavrPresent && VavrDelegate.isVavrTry(retVal)) {
 				// Set rollback-only in case of Vavr failure matching our rollback rules...
 				TransactionStatus status = txInfo.getTransactionStatus();
@@ -399,56 +448,75 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			// 提交事务的后置操作
 			commitTransactionAfterReturning(txInfo);
 			return retVal;
-		} else {
+		}
+		// 事务管理器是CallbackPreferringPlatformTransactionManager时的处理
+		else {
+			// 异常持有器
 			final ThrowableHolder throwableHolder = new ThrowableHolder();
 
 			// It's a CallbackPreferringPlatformTransactionManager: pass a TransactionCallback in.
 			try {
+				// 执行
 				Object result = ((CallbackPreferringPlatformTransactionManager) ptm)
 						.execute(txAttr, status -> {
+							// 根据事务属性 + 切点 + 事务状态创建事务属性对象
 							TransactionInfo txInfo = prepareTransactionInfo(ptm, txAttr,
 									joinpointIdentification, status);
 							try {
+								// 调用实际方法
 								Object retVal = invocation.proceedWithInvocation();
+								// vavr 支持处理
 								if (vavrPresent && VavrDelegate.isVavrTry(retVal)) {
 									// Set rollback-only in case of Vavr failure matching our rollback rules...
 									retVal = VavrDelegate
 											.evaluateTryFailure(retVal, txAttr, status);
 								}
 								return retVal;
-							} catch (Throwable ex) {
+							}
+							catch (Throwable ex) {
+								// 回滚异常
 								if (txAttr.rollbackOn(ex)) {
 									// A RuntimeException: will lead to a rollback.
 									if (ex instanceof RuntimeException) {
 										throw (RuntimeException) ex;
-									} else {
+									}
+									else {
 										throw new ThrowableHolderException(ex);
 									}
-								} else {
+								}
+								else {
 									// A normal return value: will lead to a commit.
+									// 异常对象设置
 									throwableHolder.throwable = ex;
 									return null;
 								}
-							} finally {
+							}
+							finally {
+								// 清除事务信息
 								cleanupTransactionInfo(txInfo);
 							}
 						});
 
 				// Check result state: It might indicate a Throwable to rethrow.
+				// 异常持有器中持有异常抛出异常
 				if (throwableHolder.throwable != null) {
 					throw throwableHolder.throwable;
 				}
+				// 处理结果返回
 				return result;
-			} catch (ThrowableHolderException ex) {
+			}
+			catch (ThrowableHolderException ex) {
 				throw ex.getCause();
-			} catch (TransactionSystemException ex2) {
+			}
+			catch (TransactionSystemException ex2) {
 				if (throwableHolder.throwable != null) {
 					logger.error("Application exception overridden by commit exception",
 							throwableHolder.throwable);
 					ex2.initApplicationException(throwableHolder.throwable);
 				}
 				throw ex2;
-			} catch (Throwable ex2) {
+			}
+			catch (Throwable ex2) {
 				if (throwableHolder.throwable != null) {
 					logger.error("Application exception overridden by commit exception",
 							throwableHolder.throwable);
@@ -467,7 +535,10 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	}
 
 	/**
-	 * Determine the specific transaction manager to use for the given transaction. 确定事务管理器
+	 * Determine the specific transaction manager to use for the given transaction.
+	 *
+	 * <p></p>
+	 * 确定事务管理器
 	 */
 	@Nullable
 	protected TransactionManager determineTransactionManager(
@@ -478,18 +549,20 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			return getTransactionManager();
 		}
 
-		// 属性是否有别名
+		// 属性是否有限定词
 		String qualifier = txAttr.getQualifier();
-		// 如果有
+		// 如果有别名
 		if (StringUtils.hasText(qualifier)) {
 			// 从 ioc 容器中根据类型和名称获取事务管理器
 			return determineQualifiedTransactionManager(this.beanFactory, qualifier);
-		} else if (StringUtils.hasText(this.transactionManagerBeanName)) {
+		}
+		else if (StringUtils.hasText(this.transactionManagerBeanName)) {
 			// 从 ioc 容器中根据类型和名称获取事务管理器
 			return determineQualifiedTransactionManager(this.beanFactory,
 					this.transactionManagerBeanName);
-		} else {
-			// 通过get方法获取
+		}
+		else {
+			// 获取成员变量 transactionManager
 			TransactionManager defaultTransactionManager = getTransactionManager();
 			// 如果没有
 			if (defaultTransactionManager == null) {
@@ -499,6 +572,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				// 缓存里面没有从 ioc 容器中获取并且设置缓存
 				if (defaultTransactionManager == null) {
 					defaultTransactionManager = this.beanFactory.getBean(TransactionManager.class);
+					// 放置到缓存中
 					this.transactionManagerCache.putIfAbsent(
 							DEFAULT_TRANSACTION_MANAGER_KEY, defaultTransactionManager);
 				}
@@ -516,10 +590,14 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 */
 	private TransactionManager determineQualifiedTransactionManager(BeanFactory beanFactory,
 			String qualifier) {
+		// 从缓存中获取
 		TransactionManager txManager = this.transactionManagerCache.get(qualifier);
+		// 缓存中获取失败
 		if (txManager == null) {
+			// 通过工具类获取
 			txManager = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
 					beanFactory, TransactionManager.class, qualifier);
+			// 将数据放入缓存
 			this.transactionManagerCache.putIfAbsent(qualifier, txManager);
 		}
 		return txManager;
@@ -538,7 +616,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		if (transactionManager == null
 				|| transactionManager instanceof PlatformTransactionManager) {
 			return (PlatformTransactionManager) transactionManager;
-		} else {
+		}
+		else {
 			throw new IllegalStateException(
 					"Specified transaction manager is not a PlatformTransactionManager: "
 							+ transactionManager);
@@ -620,7 +699,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				// 事务状态
 				// 获取事务
 				status = tm.getTransaction(txAttr);
-			} else {
+			}
+			else {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Skipping transactional joinpoint [" + joinpointIdentification +
 							"] because no transaction manager has been configured");
@@ -654,7 +734,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			}
 			// The transaction manager will flag an error if an incompatible tx already exists.
 			txInfo.newTransactionStatus(status);
-		} else {
+		}
+		else {
 			// The TransactionInfo.hasTransaction() method will return false. We created it only
 			// to preserve the integrity of the ThreadLocal stack maintained in this class.
 			if (logger.isTraceEnabled()) {
@@ -708,25 +789,30 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				try {
 					// 做回滚
 					txInfo.getTransactionManager().rollback(txInfo.getTransactionStatus());
-				} catch (TransactionSystemException ex2) {
+				}
+				catch (TransactionSystemException ex2) {
 					logger.error("Application exception overridden by rollback exception", ex);
 					ex2.initApplicationException(ex);
 					throw ex2;
-				} catch (RuntimeException | Error ex2) {
+				}
+				catch (RuntimeException | Error ex2) {
 					logger.error("Application exception overridden by rollback exception", ex);
 					throw ex2;
 				}
-			} else {
+			}
+			else {
 				// We don't roll back on this exception.
 				// Will still roll back if TransactionStatus.isRollbackOnly() is true.
 				try {
 					// org.springframework.transaction.support.AbstractPlatformTransactionManager.commit 的方法
 					txInfo.getTransactionManager().commit(txInfo.getTransactionStatus());
-				} catch (TransactionSystemException ex2) {
+				}
+				catch (TransactionSystemException ex2) {
 					logger.error("Application exception overridden by commit exception", ex);
 					ex2.initApplicationException(ex);
 					throw ex2;
-				} catch (RuntimeException | Error ex2) {
+				}
+				catch (RuntimeException | Error ex2) {
 					logger.error("Application exception overridden by commit exception", ex);
 					throw ex2;
 				}
@@ -762,18 +848,32 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * on this class, but not see its internals.
 	 */
 	protected static final class TransactionInfo {
-
+		/**
+		 * 事务管理器
+		 */
 		@Nullable
 		private final PlatformTransactionManager transactionManager;
 
+		/**
+		 * 事务属性
+		 */
 		@Nullable
 		private final TransactionAttribute transactionAttribute;
 
+		/**
+		 * 接入点,切点
+		 */
 		private final String joinpointIdentification;
 
+		/**
+		 * 事务状态
+		 */
 		@Nullable
 		private TransactionStatus transactionStatus;
 
+		/**
+		 * 事务信息
+		 */
 		@Nullable
 		private TransactionInfo oldTransactionInfo;
 
@@ -844,6 +944,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	/**
 	 * Internal holder class for a Throwable in a callback transaction model.
+	 * 异常持有器
 	 */
 	private static class ThrowableHolder {
 
@@ -855,6 +956,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	/**
 	 * Internal holder class for a Throwable, used as a RuntimeException to be thrown from a
 	 * TransactionCallback (and subsequently unwrapped again).
+	 *
+	 * 运行时异常对象
 	 */
 	@SuppressWarnings("serial")
 	private static class ThrowableHolderException extends RuntimeException {
@@ -872,6 +975,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	/**
 	 * Inner class to avoid a hard dependency on the Vavr library at runtime.
+	 *
+	 * Vavr 相关类
 	 */
 	private static class VavrDelegate {
 
@@ -891,6 +996,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 *
+	 * kotlin 相关类
 	 */
 	private static class KotlinDelegate {
 
@@ -905,14 +1012,26 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 */
 	private static final class ReactiveTransactionInfo {
 
+		/**
+		 * 响应式事务管理器
+		 */
 		@Nullable
 		private final ReactiveTransactionManager transactionManager;
 
+		/**
+		 * 事务属性
+		 */
 		@Nullable
 		private final TransactionAttribute transactionAttribute;
 
+		/**
+		 * 切入点,切面
+		 */
 		private final String joinpointIdentification;
 
+		/**
+		 * 响应式事务
+		 */
 		@Nullable
 		private ReactiveTransaction reactiveTransaction;
 
@@ -961,6 +1080,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	/**
 	 * Delegate for Reactor-based management of transactional methods with a reactive return type.
+	 *
+	 *
+	 * 响应式事务处理类
 	 */
 	private class ReactiveTransactionSupport {
 
@@ -970,6 +1092,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			this.adapter = adapter;
 		}
 
+		/**
+		 * 带有事务的情况下执行函数
+		 */
 		public Object invokeWithinTransaction(Method method, @Nullable Class<?> targetClass,
 				InvocationCallback invocation, @Nullable TransactionAttribute txAttr,
 				ReactiveTransactionManager rtm) {
@@ -989,7 +1114,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 													try {
 														return (Mono<?>) invocation
 																.proceedWithInvocation();
-													} catch (Throwable ex) {
+													}
+													catch (Throwable ex) {
 														return Mono.error(ex);
 													}
 												},
@@ -999,7 +1125,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 												.onErrorResume(ex ->
 														completeTransactionAfterThrowing(it, ex)
 																.then(Mono.error(ex)));
-									} catch (Throwable ex) {
+									}
+									catch (Throwable ex) {
 										// target invocation exception
 										return completeTransactionAfterThrowing(it, ex)
 												.then(Mono.error(ex));
@@ -1024,7 +1151,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 																	return this.adapter.toPublisher(
 																			invocation
 																					.proceedWithInvocation());
-																} catch (Throwable ex) {
+																}
+																catch (Throwable ex) {
 																	return Mono.error(ex);
 																}
 															},
@@ -1034,7 +1162,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 													.onErrorResume(ex ->
 															completeTransactionAfterThrowing(it, ex)
 																	.then(Mono.error(ex)));
-										} catch (Throwable ex) {
+										}
+										catch (Throwable ex) {
 											// target invocation exception
 											return completeTransactionAfterThrowing(it, ex)
 													.then(Mono.error(ex));
@@ -1084,7 +1213,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				}
 				// The transaction manager will flag an error if an incompatible tx already exists.
 				txInfo.newReactiveTransaction(transaction);
-			} else {
+			}
+			else {
 				// The TransactionInfo.hasTransaction() method will return false. We created it only
 				// to preserve the integrity of the ThreadLocal stack maintained in this class.
 				if (logger.isTraceEnabled()) {
@@ -1131,7 +1261,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 										return ex2;
 									}
 							);
-				} else {
+				}
+				else {
 					// We don't roll back on this exception.
 					// Will still roll back if TransactionStatus.isRollbackOnly() is true.
 					return txInfo.getTransactionManager().commit(txInfo.getReactiveTransaction())

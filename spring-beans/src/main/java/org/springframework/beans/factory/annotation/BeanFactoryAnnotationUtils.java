@@ -115,9 +115,11 @@ public abstract class BeanFactoryAnnotationUtils {
 	 * @return the matching bean of type {@code T} (never {@code null})
 	 */
 	private static <T> T qualifiedBeanOfType(ListableBeanFactory bf, Class<T> beanType, String qualifier) {
+		// 根据类型搜索对应的BeanName
 		String[] candidateBeans = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(bf, beanType);
 		String matchingBean = null;
 		for (String beanName : candidateBeans) {
+			// 对比名称名称是否相同
 			if (isQualifierMatch(qualifier::equals, beanName, bf)) {
 				if (matchingBean != null) {
 					throw new NoUniqueBeanDefinitionException(beanType, matchingBean, beanName);

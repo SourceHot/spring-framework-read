@@ -25,6 +25,7 @@ package org.springframework.transaction;
  * and to programmatically request a rollback (instead of throwing
  * an exception that causes an implicit rollback).
  *
+ * 响应式事务、反应式事务
  * @author Mark Paluch
  * @author Juergen Hoeller
  * @since 5.2
