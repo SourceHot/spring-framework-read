@@ -41,8 +41,10 @@ public class AspectJJtaTransactionManagementConfiguration extends AspectJTransac
 	@Bean(name = TransactionManagementConfigUtils.JTA_TRANSACTION_ASPECT_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public JtaAnnotationTransactionAspect jtaTransactionAspect() {
+		// 事务切面
 		JtaAnnotationTransactionAspect txAspect = JtaAnnotationTransactionAspect.aspectOf();
 		if (this.txManager != null) {
+			// 设置事务管理器
 			txAspect.setTransactionManager(this.txManager);
 		}
 		return txAspect;

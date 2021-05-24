@@ -60,15 +60,21 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
+		// 同步事务是否处于活动状态
+		// 同步事务是否激活
 		if (TransactionSynchronizationManager.isSynchronizationActive() &&
 				TransactionSynchronizationManager.isActualTransactionActive()) {
+			// 创建同步事务
 			TransactionSynchronization transactionSynchronization = createTransactionSynchronization(event);
+			// 注册同步事务
 			TransactionSynchronizationManager.registerSynchronization(transactionSynchronization);
 		}
+		// 判断 TransactionalEventListener 注解中的fallbackExecution数据是否为true
 		else if (this.annotation.fallbackExecution()) {
 			if (this.annotation.phase() == TransactionPhase.AFTER_ROLLBACK && logger.isWarnEnabled()) {
 				logger.warn("Processing " + event + " as a fallback execution on AFTER_ROLLBACK phase");
 			}
+			// 处理事件
 			processEvent(event);
 		}
 		else {

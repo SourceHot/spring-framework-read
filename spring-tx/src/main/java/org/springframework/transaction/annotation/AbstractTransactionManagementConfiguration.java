@@ -54,6 +54,9 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 	protected TransactionManager txManager;
 
 
+	/**
+	 * 设置元数据
+	 */
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableTx = AnnotationAttributes.fromMap(
@@ -72,11 +75,16 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 		if (configurers.size() > 1) {
 			throw new IllegalStateException("Only one TransactionManagementConfigurer may exist");
 		}
+		// 从事务配置集合中获取一个事务配置对象
 		TransactionManagementConfigurer configurer = configurers.iterator().next();
+		// 通过事务配置对象获取事务管理器
 		this.txManager = configurer.annotationDrivenTransactionManager();
 	}
 
 
+	/**
+	 * 事务事件监听工厂
+	 */
 	@Bean(name = TransactionManagementConfigUtils.TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public static TransactionalEventListenerFactory transactionalEventListenerFactory() {

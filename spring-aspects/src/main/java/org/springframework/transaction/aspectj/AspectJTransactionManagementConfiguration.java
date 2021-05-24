@@ -43,8 +43,10 @@ public class AspectJTransactionManagementConfiguration extends AbstractTransacti
 	@Bean(name = TransactionManagementConfigUtils.TRANSACTION_ASPECT_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public AnnotationTransactionAspect transactionAspect() {
+		// 事务切面
 		AnnotationTransactionAspect txAspect = AnnotationTransactionAspect.aspectOf();
 		if (this.txManager != null) {
+			// 设置事务管理器
 			txAspect.setTransactionManager(this.txManager);
 		}
 		return txAspect;
