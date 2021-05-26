@@ -4,9 +4,12 @@ import javax.sql.DataSource;
 
 import org.apache.tomcat.dbcp.dbcp2.BasicDataSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.DebuggingClassWriter;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -16,7 +19,26 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class AppConfig {
 
 	public static void main(String[] args) {
+		System.getProperties().put("sun.misc.ProxyGenerator.saveGeneratedFiles", "true");
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+		System.setProperty(DebuggingClassWriter.DEBUG_LOCATION_PROPERTY,
+				"D:\\desktop\\git_repo\\spring-ebk\\spring-framework-read\\spring-source-hot-data-book\\prox");
+		WorkService bean = context.getBean(WorkService.class);
+		bean.work();
+
+		while (true) {
+
+		}
+	}
+
+	@Bean
+	public WorkService workService(
+			@Autowired DataSource dataSource
+	) {
+
+		WorkService workService = new WorkService();
+		workService.setJdbcTemplate(new JdbcTemplate(dataSource));
+		return workService;
 	}
 
 	@Bean

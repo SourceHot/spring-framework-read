@@ -390,7 +390,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 											+ method +
 											". Use TransactionalOperator.transactional extensions instead.");
 						}
-						// 响应式适配器注册表中获取欧响应式适配器
+						// 响应式适配器注册表中获取响应式适配器
 						ReactiveAdapter adapter = this.reactiveAdapterRegistry
 								.getAdapter(method.getReturnType());
 						if (adapter == null) {
@@ -474,7 +474,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 								return retVal;
 							}
 							catch (Throwable ex) {
-								// 回滚异常
+								// 判断是否是需要处理的异常
 								if (txAttr.rollbackOn(ex)) {
 									// A RuntimeException: will lead to a rollback.
 									if (ex instanceof RuntimeException) {
@@ -613,6 +613,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	@Nullable
 	private PlatformTransactionManager asPlatformTransactionManager(
 			@Nullable Object transactionManager) {
+		// 判断事务管理对象为空 或者事务管理对象类型是PlatformTransactionManager
 		if (transactionManager == null
 				|| transactionManager instanceof PlatformTransactionManager) {
 			return (PlatformTransactionManager) transactionManager;
@@ -635,13 +636,17 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	private String methodIdentification(Method method, @Nullable Class<?> targetClass,
 			@Nullable TransactionAttribute txAttr) {
 
+		// 方法签名
 		String methodIdentification = methodIdentification(method, targetClass);
+		// 方法签名为空时
 		if (methodIdentification == null) {
+			// 事务属性类型是DefaultTransactionAttribute
 			if (txAttr instanceof DefaultTransactionAttribute) {
-				// 直接就获取了.方法签名.
+				// 通过DefaultTransactionAttribute提供给的getDescriptor方法获取切入点
 				methodIdentification = ((DefaultTransactionAttribute) txAttr).getDescriptor();
 			}
 			if (methodIdentification == null) {
+				// 获取方法签名
 				methodIdentification = ClassUtils.getQualifiedMethodName(method, targetClass);
 			}
 		}
@@ -683,7 +688,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			@Nullable TransactionAttribute txAttr, final String joinpointIdentification) {
 
 		// If no name specified, apply method identification as transaction name.
-		// 把切面的地址放进去
+		// 将切面地址作为 DelegatingTransactionAttribute 的 getName方法返回值
 		if (txAttr != null && txAttr.getName() == null) {
 			txAttr = new DelegatingTransactionAttribute(txAttr) {
 				@Override
@@ -693,11 +698,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			};
 		}
 
+		// 准备事务状态对象
 		TransactionStatus status = null;
 		if (txAttr != null) {
 			if (tm != null) {
-				// 事务状态
-				// 获取事务
+				// 获取事务状态对象
 				status = tm.getTransaction(txAttr);
 			}
 			else {
@@ -787,7 +792,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			// 判断是否需要进行回滚
 			if (txInfo.transactionAttribute != null && txInfo.transactionAttribute.rollbackOn(ex)) {
 				try {
-					// 做回滚
+					// 做回滚操作
 					txInfo.getTransactionManager().rollback(txInfo.getTransactionStatus());
 				}
 				catch (TransactionSystemException ex2) {
@@ -872,7 +877,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		private TransactionStatus transactionStatus;
 
 		/**
-		 * 事务信息
+		 * 历史事务信息
 		 */
 		@Nullable
 		private TransactionInfo oldTransactionInfo;

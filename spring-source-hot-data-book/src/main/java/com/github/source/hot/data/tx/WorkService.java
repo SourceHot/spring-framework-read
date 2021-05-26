@@ -17,6 +17,6 @@ public class WorkService {
 	@Transactional(rollbackFor = Exception.class)
 	public void work() {
 		jdbcTemplate.execute("INSERT INTO `t_user`(`name`) VALUES ('12')");
-		throw new RuntimeException("111");
+//		throw new RuntimeException("111");
 	}
 }
