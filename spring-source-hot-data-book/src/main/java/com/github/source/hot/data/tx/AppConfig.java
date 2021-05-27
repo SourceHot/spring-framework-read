@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement()
 public class AppConfig {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		System.getProperties().put("sun.misc.ProxyGenerator.saveGeneratedFiles", "true");
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
 		System.setProperty(DebuggingClassWriter.DEBUG_LOCATION_PROPERTY,

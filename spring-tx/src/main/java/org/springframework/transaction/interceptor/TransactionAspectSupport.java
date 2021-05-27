@@ -1104,11 +1104,16 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				InvocationCallback invocation, @Nullable TransactionAttribute txAttr,
 				ReactiveTransactionManager rtm) {
 
+			// 获取切入点
 			String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
 			// Optimize for Mono
+			// 判断方法返回值是否是Mono
 			if (Mono.class.isAssignableFrom(method.getReturnType())) {
+
+				// 进行实际处理操作
 				return TransactionContextManager.currentContext().flatMap(context ->
+						// 创建响应式事务对象
 						createTransactionIfNecessary(rtm, txAttr, joinpointIdentification)
 								.flatMap(it -> {
 									try {
@@ -1117,6 +1122,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 												Mono.just(it),
 												txInfo -> {
 													try {
+														// 进行回调函数执行操作
 														return (Mono<?>) invocation
 																.proceedWithInvocation();
 													}
@@ -1124,10 +1130,12 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 														return Mono.error(ex);
 													}
 												},
+												// 事务提交后的处理
 												this::commitTransactionAfterReturning,
 												(txInfo, err) -> Mono.empty(),
 												this::commitTransactionAfterReturning)
 												.onErrorResume(ex ->
+														// 异常处理
 														completeTransactionAfterThrowing(it, ex)
 																.then(Mono.error(ex)));
 									}
@@ -1142,6 +1150,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			}
 
 			// Any other reactive type, typically a Flux
+			// 通过响应式适配器对象进行事务处理
 			return this.adapter
 					.fromPublisher(TransactionContextManager.currentContext().flatMapMany(context ->
 							createTransactionIfNecessary(rtm, txAttr, joinpointIdentification)
@@ -1153,6 +1162,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 															Mono.just(it),
 															txInfo -> {
 																try {
+																	// 响应式对象将需要处理的事务和方法进行提交
 																	return this.adapter.toPublisher(
 																			invocation
 																					.proceedWithInvocation());
@@ -1161,10 +1171,13 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 																	return Mono.error(ex);
 																}
 															},
+															// 事务提交后的处理
 															this::commitTransactionAfterReturning,
 															(txInfo, ex) -> Mono.empty(),
+															// 事务提交后的处理
 															this::commitTransactionAfterReturning)
 													.onErrorResume(ex ->
+															// 异常处理
 															completeTransactionAfterThrowing(it, ex)
 																	.then(Mono.error(ex)));
 										}
@@ -1179,13 +1192,23 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 									TransactionContextManager.getOrCreateContextHolder()));
 		}
 
+
+		/**
+		 *创建事务信息对象
+		 * @param tm 响应式事务管理器
+		 * @param txAttr 事务属性对象
+		 * @param joinpointIdentification 切点
+		 * @return
+		 */
 		@SuppressWarnings("serial")
 		private Mono<ReactiveTransactionInfo> createTransactionIfNecessary(
 				ReactiveTransactionManager tm,
 				@Nullable TransactionAttribute txAttr, final String joinpointIdentification) {
 
+
 			// If no name specified, apply method identification as transaction name.
 			if (txAttr != null && txAttr.getName() == null) {
+				// 设置切面信息为getName的方法返回值
 				txAttr = new DelegatingTransactionAttribute(txAttr) {
 					@Override
 					public String getName() {
@@ -1195,27 +1218,40 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			}
 
 			final TransactionAttribute attrToUse = txAttr;
+			// 从响应式事务管理器中获取响应式事务对象
 			Mono<ReactiveTransaction> tx = (attrToUse != null ? tm.getReactiveTransaction(attrToUse)
 					: Mono.empty());
+			// 从响应式事务对象中获取响应式事务信息对象
 			return tx.map(it -> prepareTransactionInfo(tm, attrToUse, joinpointIdentification, it))
 					.switchIfEmpty(
 							Mono.defer(() -> Mono.just(prepareTransactionInfo(tm, attrToUse,
 									joinpointIdentification, null))));
 		}
 
+		/**
+		 * 准备响应式事务信息对象
+		 * @param tm
+		 * @param txAttr
+		 * @param joinpointIdentification
+		 * @param transaction
+		 * @return
+		 */
 		private ReactiveTransactionInfo prepareTransactionInfo(
 				@Nullable ReactiveTransactionManager tm,
 				@Nullable TransactionAttribute txAttr, String joinpointIdentification,
 				@Nullable ReactiveTransaction transaction) {
 
+			// 根据响应式事务管理器、事务信息和切点创建响应式事务信息对象
 			ReactiveTransactionInfo txInfo = new ReactiveTransactionInfo(tm, txAttr,
 					joinpointIdentification);
+			// 事务属性对象不为
 			if (txAttr != null) {
 				// We need a transaction for this method...
 				if (logger.isTraceEnabled()) {
 					logger.trace("Getting transaction for [" + txInfo.getJoinpointIdentification()
 							+ "]");
 				}
+				// 设置响应式事务对象
 				// The transaction manager will flag an error if an incompatible tx already exists.
 				txInfo.newReactiveTransaction(transaction);
 			}
@@ -1232,6 +1268,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			return txInfo;
 		}
 
+		/**
+		 * 处理提交事务后的处理
+		 * @param txInfo
+		 * @return
+		 */
 		private Mono<Void> commitTransactionAfterReturning(
 				@Nullable ReactiveTransactionInfo txInfo) {
 			if (txInfo != null && txInfo.getReactiveTransaction() != null) {
@@ -1240,11 +1281,18 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 							"Completing transaction for [" + txInfo.getJoinpointIdentification()
 									+ "]");
 				}
+				// 响应式事务提交
 				return txInfo.getTransactionManager().commit(txInfo.getReactiveTransaction());
 			}
 			return Mono.empty();
 		}
 
+		/**
+		 * 出现异常时的处理
+		 * @param txInfo
+		 * @param ex
+		 * @return
+		 */
 		private Mono<Void> completeTransactionAfterThrowing(
 				@Nullable ReactiveTransactionInfo txInfo, Throwable ex) {
 			if (txInfo != null && txInfo.getReactiveTransaction() != null) {
@@ -1253,6 +1301,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 							"Completing transaction for [" + txInfo.getJoinpointIdentification() +
 									"] after exception: " + ex);
 				}
+				// 判断是否存在事务属性
+				// 判断是否是需要处理的异常
 				if (txInfo.transactionAttribute != null && txInfo.transactionAttribute
 						.rollbackOn(ex)) {
 					return txInfo.getTransactionManager().rollback(txInfo.getReactiveTransaction())
@@ -1270,6 +1320,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				else {
 					// We don't roll back on this exception.
 					// Will still roll back if TransactionStatus.isRollbackOnly() is true.
+					// 提交响应式事务
 					return txInfo.getTransactionManager().commit(txInfo.getReactiveTransaction())
 							.onErrorMap(ex2 -> {
 										logger.error("Application exception overridden by commit exception",

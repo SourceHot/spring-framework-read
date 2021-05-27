@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
  * <p>Implementations know how to source transaction attributes, whether from configuration,
  * metadata attributes at source level (such as Java 5 annotations), or anywhere else.
  *
- * 事务原属性
+ * 事务属性源对象
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15.04.2003
@@ -44,6 +44,8 @@ public interface TransactionAttributeSource {
 	 * Returning {@code false} is therefore an optimization for non-affected
 	 * classes, whereas {@code true} simply means that the class needs to get
 	 * fully introspected for each method on the given class individually.
+	 *
+	 * 判断输入的类是否是事务属性源支持的对象
 	 * @param targetClass the class to introspect
 	 * @return {@code false} if the class is known to have no transaction
 	 * attributes at class or method level; {@code true} otherwise. The default
@@ -57,6 +59,8 @@ public interface TransactionAttributeSource {
 	/**
 	 * Return the transaction attribute for the given method,
 	 * or {@code null} if the method is non-transactional.
+	 *
+	 * 获取事务属性对象
 	 * @param method the method to introspect
 	 * @param targetClass the target class (may be {@code null},
 	 * in which case the declaring class of the method must be used)

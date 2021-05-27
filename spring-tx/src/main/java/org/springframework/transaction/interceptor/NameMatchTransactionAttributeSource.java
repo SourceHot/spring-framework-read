@@ -35,6 +35,7 @@ import org.springframework.util.PatternMatchUtils;
  * Simple {@link TransactionAttributeSource} implementation that
  * allows attributes to be matched by registered name.
  *
+ * 名称匹配的事务属性源对象
  * @author Juergen Hoeller
  * @since 21.08.2003
  * @see #isMatch
@@ -49,7 +50,12 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	 */
 	protected static final Log logger = LogFactory.getLog(NameMatchTransactionAttributeSource.class);
 
-	/** Keys are method names; values are TransactionAttributes. */
+	/**
+	 * Keys are method names; values are TransactionAttributes.
+	 * 方法名称和事务属性的映射关系.
+	 * key: 方法名称
+	 * value: 事务属性
+	 * */
 	private Map<String, TransactionAttribute> nameMap = new HashMap<>();
 
 
@@ -87,6 +93,8 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	 * Add an attribute for a transactional method.
 	 * <p>Method names can be exact matches, or of the pattern "xxx*",
 	 * "*xxx" or "*xxx*" for matching multiple methods.
+	 *
+	 * 进行方法名和事务属性对象进行关系绑定
 	 * @param methodName the name of the method
 	 * @param attr attribute associated with the method
 	 */

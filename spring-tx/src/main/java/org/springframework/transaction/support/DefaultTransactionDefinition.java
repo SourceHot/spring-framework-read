@@ -39,21 +39,29 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 	/**
 	 * Prefix for the propagation constants defined in TransactionDefinition.
+	 *
+	 * 传播前缀
 	 */
 	public static final String PREFIX_PROPAGATION = "PROPAGATION_";
 
 	/**
 	 * Prefix for the isolation constants defined in TransactionDefinition.
+	 *
+	 * 事务隔离级别前缀
 	 */
 	public static final String PREFIX_ISOLATION = "ISOLATION_";
 
 	/**
 	 * Prefix for transaction timeout values in description strings.
+	 *
+	 * 超时时间前缀
 	 */
 	public static final String PREFIX_TIMEOUT = "timeout_";
 
 	/**
 	 * Marker for read-only transactions in description strings.
+	 *
+	 * 只读标记
 	 */
 	public static final String READ_ONLY_MARKER = "readOnly";
 
@@ -63,8 +71,14 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 */
 	static final Constants constants = new Constants(TransactionDefinition.class);
 
+	/**
+	 * 事务传播行为
+	 */
 	private int propagationBehavior = PROPAGATION_REQUIRED;
 
+	/**
+	 * 事务隔离级别
+	 */
 	private int isolationLevel = ISOLATION_DEFAULT;
 
 	/**
@@ -77,6 +91,9 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 */
 	private boolean readOnly = false;
 
+	/**
+	 * 事务名称
+	 */
 	@Nullable
 	private String name;
 

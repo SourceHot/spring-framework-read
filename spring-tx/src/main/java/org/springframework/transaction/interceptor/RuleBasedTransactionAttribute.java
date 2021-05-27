@@ -43,11 +43,13 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 
 	/**
 	 * Prefix for rollback-on-exception rules in description strings.
+	 * 异常回滚的前缀
 	 */
 	public static final String PREFIX_ROLLBACK_RULE = "-";
 
 	/**
 	 * Prefix for commit-on-exception rules in description strings.
+	 * 异常提交的前缀
 	 */
 	public static final String PREFIX_COMMIT_RULE = "+";
 
@@ -57,6 +59,9 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 	 */
 	private static final Log logger = LogFactory.getLog(RuleBasedTransactionAttribute.class);
 
+	/**
+	 * 回滚规则集合
+	 */
 	@Nullable
 	private List<RollbackRuleAttribute> rollbackRules;
 
@@ -143,11 +148,14 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 					"Applying rules to determine whether transaction should rollback on " + ex);
 		}
 
+		// 回滚规则属性
 		RollbackRuleAttribute winner = null;
 		int deepest = Integer.MAX_VALUE;
 
+		// 回滚规则存在的情况下进行规则确认
 		if (this.rollbackRules != null) {
 			for (RollbackRuleAttribute rule : this.rollbackRules) {
+				// 深度
 				int depth = rule.getDepth(ex);
 				if (depth >= 0 && depth < deepest) {
 					deepest = depth;
@@ -161,11 +169,13 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 		}
 
 		// User superclass behavior (rollback on unchecked) if no rule matches.
+		// 如果回滚规则为空调用父类的rollbackOn方法
 		if (winner == null) {
 			logger.trace("No relevant rollback rule found: applying default rules");
 			return super.rollbackOn(ex);
 		}
 
+		// 判断回滚规则的类型是否是NoRollbackRuleAttribute
 		return !(winner instanceof NoRollbackRuleAttribute);
 	}
 
