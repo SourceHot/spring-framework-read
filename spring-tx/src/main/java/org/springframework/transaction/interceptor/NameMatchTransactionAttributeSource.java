@@ -78,13 +78,21 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	 * @see TransactionAttributeEditor
 	 */
 	public void setProperties(Properties transactionAttributes) {
+		// 事务属性编辑对象
 		TransactionAttributeEditor tae = new TransactionAttributeEditor();
+		// 属性名称列表
 		Enumeration<?> propNames = transactionAttributes.propertyNames();
+
 		while (propNames.hasMoreElements()) {
+			// 获取属性名
 			String methodName = (String) propNames.nextElement();
+			// 获取属性值
 			String value = transactionAttributes.getProperty(methodName);
+			// 将属性值设置给事务属性编辑器对象
 			tae.setAsText(value);
+			// 通过事务属性编辑器对象获取事务属性对象
 			TransactionAttribute attr = (TransactionAttribute) tae.getValue();
+			// 关系绑定
 			addTransactionalMethod(methodName, attr);
 		}
 	}
@@ -114,15 +122,22 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 		}
 
 		// Look for direct name match.
+		// 获取方法名称
 		String methodName = method.getName();
+		// 从缓存中获取方法名对应的事务属性
 		TransactionAttribute attr = this.nameMap.get(methodName);
 
+		// 事务属性为空的处理
 		if (attr == null) {
 			// Look for most specific name match.
+			// 检索最佳匹配值
 			String bestNameMatch = null;
+			// 循环缓存容器中的key
 			for (String mappedName : this.nameMap.keySet()) {
+				// 如果匹配则从缓存中获取事务属性对象
 				if (isMatch(methodName, mappedName) &&
 						(bestNameMatch == null || bestNameMatch.length() <= mappedName.length())) {
+
 					attr = this.nameMap.get(mappedName);
 					bestNameMatch = mappedName;
 				}
