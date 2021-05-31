@@ -62,29 +62,39 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 	}
 
 	protected TransactionAttribute parseTransactionAnnotation(AnnotationAttributes attributes) {
+		// 创建基于规则的事务属性对象
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 
+		// 提取事务传播类型
 		Propagation propagation = attributes.getEnum("propagation");
 		rbta.setPropagationBehavior(propagation.value());
+		// 提取事务隔离级别
 		Isolation isolation = attributes.getEnum("isolation");
 		rbta.setIsolationLevel(isolation.value());
+		// 提取超时时间
 		rbta.setTimeout(attributes.getNumber("timeout").intValue());
+		// 提取只读标记
 		rbta.setReadOnly(attributes.getBoolean("readOnly"));
+		// 提取限定名
 		rbta.setQualifier(attributes.getString("value"));
 
+		// 回滚规则属性集合
 		List<RollbackRuleAttribute> rollbackRules = new ArrayList<>();
+		// 需要回滚的类
 		for (Class<?> rbRule : attributes.getClassArray("rollbackFor")) {
 			rollbackRules.add(new RollbackRuleAttribute(rbRule));
 		}
 		for (String rbRule : attributes.getStringArray("rollbackForClassName")) {
 			rollbackRules.add(new RollbackRuleAttribute(rbRule));
 		}
+		// 不需要回滚的类
 		for (Class<?> rbRule : attributes.getClassArray("noRollbackFor")) {
 			rollbackRules.add(new NoRollbackRuleAttribute(rbRule));
 		}
 		for (String rbRule : attributes.getStringArray("noRollbackForClassName")) {
 			rollbackRules.add(new NoRollbackRuleAttribute(rbRule));
 		}
+		// 规则集合设置
 		rbta.setRollbackRules(rollbackRules);
 
 		return rbta;

@@ -39,14 +39,17 @@ public class Ejb3TransactionAnnotationParser implements TransactionAnnotationPar
 
 	@Override
 	public boolean isCandidateClass(Class<?> targetClass) {
+		// 判断类是否有TransactionAttribute注解标记
 		return AnnotationUtils.isCandidateClass(targetClass, javax.ejb.TransactionAttribute.class);
 	}
 
 	@Override
 	@Nullable
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement element) {
+		// 提取注解
 		javax.ejb.TransactionAttribute ann = element.getAnnotation(javax.ejb.TransactionAttribute.class);
 		if (ann != null) {
+			// 解析方法
 			return parseTransactionAnnotation(ann);
 		}
 		else {
@@ -77,6 +80,7 @@ public class Ejb3TransactionAnnotationParser implements TransactionAnnotationPar
 	private static class Ejb3TransactionAttribute extends DefaultTransactionAttribute {
 
 		public Ejb3TransactionAttribute(TransactionAttributeType type) {
+			// 设置传播行为
 			setPropagationBehaviorName(PREFIX_PROPAGATION + type.name());
 		}
 

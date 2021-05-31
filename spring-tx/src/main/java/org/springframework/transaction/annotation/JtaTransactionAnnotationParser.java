@@ -62,18 +62,24 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 	}
 
 	protected TransactionAttribute parseTransactionAnnotation(AnnotationAttributes attributes) {
+		// 创建基于规则的事务属性对象
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 
+		// 设置事务传播行为
 		rbta.setPropagationBehaviorName(
 				RuleBasedTransactionAttribute.PREFIX_PROPAGATION + attributes.getEnum("value").toString());
 
+		// 回滚规则属性集合
 		List<RollbackRuleAttribute> rollbackRules = new ArrayList<>();
+		// 需要回滚的规则
 		for (Class<?> rbRule : attributes.getClassArray("rollbackOn")) {
 			rollbackRules.add(new RollbackRuleAttribute(rbRule));
 		}
+		// 不需要回滚的规则
 		for (Class<?> rbRule : attributes.getClassArray("dontRollbackOn")) {
 			rollbackRules.add(new NoRollbackRuleAttribute(rbRule));
 		}
+		// 规则集合设置
 		rbta.setRollbackRules(rollbackRules);
 
 		return rbta;
