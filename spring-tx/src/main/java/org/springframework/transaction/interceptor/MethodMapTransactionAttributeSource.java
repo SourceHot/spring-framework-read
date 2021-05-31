@@ -58,12 +58,20 @@ public class MethodMapTransactionAttributeSource
 
 	private boolean eagerlyInitialized = false;
 
+	/**
+	 * 是否实例化标记,主要用于标记methodMap是否已经被转换到transactionAttributeMap中
+	 */
 	private boolean initialized = false;
 
 	/** Map from Method to TransactionAttribute. */
 	private final Map<Method, TransactionAttribute> transactionAttributeMap = new HashMap<>();
 
-	/** Map from Method to name pattern used for registration. */
+	/**
+	 * Map from Method to name pattern used for registration.
+	 *
+	 * key: 方法对象
+	 * value: 注册名称,类名+"."+方法名
+	 * */
 	private final Map<Method, String> methodNameMap = new HashMap<>();
 
 
@@ -126,9 +134,13 @@ public class MethodMapTransactionAttributeSource
 		if (lastDotIndex == -1) {
 			throw new IllegalArgumentException("'" + name + "' is not a valid method name: format is FQN.methodName");
 		}
+		// 提取类名
 		String className = name.substring(0, lastDotIndex);
+		// 提取方法名
 		String methodName = name.substring(lastDotIndex + 1);
+		// 通过类名加载类对象
 		Class<?> clazz = ClassUtils.resolveClassName(className, this.beanClassLoader);
+		// 核心注册流程
 		addTransactionalMethod(clazz, methodName, attr);
 	}
 
@@ -142,11 +154,16 @@ public class MethodMapTransactionAttributeSource
 	public void addTransactionalMethod(Class<?> clazz, String mappedName, TransactionAttribute attr) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(mappedName, "Mapped name must not be null");
+		// 类名和方法名组合
 		String name = clazz.getName() + '.'  + mappedName;
 
+		// 提取类中的方法列表
 		Method[] methods = clazz.getDeclaredMethods();
+		// 匹配的方法列表
 		List<Method> matchingMethods = new ArrayList<>();
+		// 循环
 		for (Method method : methods) {
+			// 判断方法名和参数mappedName是否匹配
 			if (isMatch(method.getName(), mappedName)) {
 				matchingMethods.add(method);
 			}
@@ -157,7 +174,9 @@ public class MethodMapTransactionAttributeSource
 		}
 
 		// Register all matching methods
+		// 注册匹配的方法
 		for (Method method : matchingMethods) {
+			// 从缓存中根据方法获取注册名称
 			String regMethodName = this.methodNameMap.get(method);
 			if (regMethodName == null || (!regMethodName.equals(name) && regMethodName.length() <= name.length())) {
 				// No already registered method name, or more specific
@@ -166,7 +185,9 @@ public class MethodMapTransactionAttributeSource
 					logger.debug("Replacing attribute for transactional method [" + method + "]: current name '" +
 							name + "' is more specific than '" + regMethodName + "'");
 				}
+				// 方法和方法名关系绑定
 				this.methodNameMap.put(method, name);
+				// 方法和事务属性进行关系绑定
 				addTransactionalMethod(method, attr);
 			}
 			else {
@@ -214,7 +235,9 @@ public class MethodMapTransactionAttributeSource
 		}
 		else {
 			synchronized (this.transactionAttributeMap) {
+				// 没有实例化
 				if (!this.initialized) {
+					// 初始化
 					initMethodMap(this.methodMap);
 					this.initialized = true;
 				}

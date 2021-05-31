@@ -32,6 +32,9 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class CompositeTransactionAttributeSource implements TransactionAttributeSource, Serializable {
 
+	/**
+	 * 事务属性源数组
+	 */
 	private final TransactionAttributeSource[] transactionAttributeSources;
 
 

@@ -55,21 +55,25 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("serial")
 public class AnnotationTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource
 		implements Serializable {
-
+	/**
+	 *是否存在javax.transaction.Transactional类。
+	 */
 	private static final boolean jta12Present;
 
+	/**
+	 *是否存在javax.ejb.TransactionAttribute类。
+	 */
 	private static final boolean ejb3Present;
 
-	static {
-		ClassLoader classLoader = AnnotationTransactionAttributeSource.class.getClassLoader();
-		jta12Present = ClassUtils.isPresent("javax.transaction.Transactional", classLoader);
-		ejb3Present = ClassUtils.isPresent("javax.ejb.TransactionAttribute", classLoader);
-	}
-
+	/**
+	 *是否只支持带有Transactional的公共方法。
+	 */
 	private final boolean publicMethodsOnly;
 
+	/**
+	 *存储事务注解解析（TransactionAnnotationParser）接口。
+	 */
 	private final Set<TransactionAnnotationParser> annotationParsers;
-
 
 	/**
 	 * Create a default AnnotationTransactionAttributeSource, supporting
@@ -79,6 +83,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	public AnnotationTransactionAttributeSource() {
 		this(true);
 	}
+
 
 	/**
 	 * Create a custom AnnotationTransactionAttributeSource, supporting
@@ -136,9 +141,9 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 		this.annotationParsers = annotationParsers;
 	}
 
-
 	@Override
 	public boolean isCandidateClass(Class<?> targetClass) {
+		// 通过事务注解解析接口来判断是否可以支持处理
 		for (TransactionAnnotationParser parser : this.annotationParsers) {
 			if (parser.isCandidateClass(targetClass)) {
 				return true;
@@ -171,6 +176,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 */
 	@Nullable
 	protected TransactionAttribute determineTransactionAttribute(AnnotatedElement element) {
+		// 通过事务注解解析接口来解析数据(类或者方法)对应的事务属性
 		for (TransactionAnnotationParser parser : this.annotationParsers) {
 			TransactionAttribute attr = parser.parseTransactionAnnotation(element);
 			if (attr != null) {
@@ -188,7 +194,6 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 		return this.publicMethodsOnly;
 	}
 
-
 	@Override
 	public boolean equals(@Nullable Object other) {
 		if (this == other) {
@@ -205,6 +210,12 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	@Override
 	public int hashCode() {
 		return this.annotationParsers.hashCode();
+	}
+
+	static {
+		ClassLoader classLoader = AnnotationTransactionAttributeSource.class.getClassLoader();
+		jta12Present = ClassUtils.isPresent("javax.transaction.Transactional", classLoader);
+		ejb3Present = ClassUtils.isPresent("javax.ejb.TransactionAttribute", classLoader);
 	}
 
 }

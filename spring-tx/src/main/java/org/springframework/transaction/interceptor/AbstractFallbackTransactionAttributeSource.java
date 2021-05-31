@@ -74,6 +74,9 @@ public abstract class AbstractFallbackTransactionAttributeSource implements
 	 * Cache of TransactionAttributes, keyed by method on a specific target class.
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
+	 *
+	 * key: MethodClassKey
+	 *
 	 */
 	private final Map<Object, TransactionAttribute> attributeCache = new ConcurrentHashMap<>(1024);
 
@@ -97,12 +100,14 @@ public abstract class AbstractFallbackTransactionAttributeSource implements
 		}
 
 		// First, see if we have a cached value.
-		// 尝试缓存中获取
+		// 获取缓存的key
 		Object cacheKey = getCacheKey(method, targetClass);
+		// 从缓存中获取
 		TransactionAttribute cached = this.attributeCache.get(cacheKey);
 		if (cached != null) {
 			// Value will either be canonical value indicating there is no transaction attribute,
 			// or an actual transaction attribute.
+			// 判断是否是空的事务属性对象
 			if (cached == NULL_TRANSACTION_ATTRIBUTE) {
 				return null;
 			} else {
@@ -110,15 +115,19 @@ public abstract class AbstractFallbackTransactionAttributeSource implements
 			}
 		} else {
 			// We need to work it out.
-			// 自行构建一个事务属性
+			// 搜索事务属性对象
 			TransactionAttribute txAttr = computeTransactionAttribute(method, targetClass);
 			// Put it in the cache.
 			if (txAttr == null) {
+				// 设置缓存
 				this.attributeCache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
 			} else {
+				// 获取方法签名
 				String methodIdentification = ClassUtils
 						.getQualifiedMethodName(method, targetClass);
+				// 事务属性对象类型是DefaultTransactionAttribute
 				if (txAttr instanceof DefaultTransactionAttribute) {
+					// 设置描述
 					((DefaultTransactionAttribute) txAttr).setDescriptor(methodIdentification);
 				}
 				if (logger.isTraceEnabled()) {
@@ -156,26 +165,32 @@ public abstract class AbstractFallbackTransactionAttributeSource implements
 	protected TransactionAttribute computeTransactionAttribute(Method method,
 			@Nullable Class<?> targetClass) {
 		// Don't allow no-public methods as required.
+		// 判断是否允许public修饰的方法获取事务属性对象。
+		// 判断方法是否是public修饰
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;
 		}
 
 		// The method may be on an interface, but we need attributes from the target class.
 		// If the target class is null, the method will be unchanged.
+		// 可能存在aop代理类的情况下获取真实的方法
 		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 
 		// First try is the method in the target class.
+		// 通过方法搜索事务属性对象
 		TransactionAttribute txAttr = findTransactionAttribute(specificMethod);
 		if (txAttr != null) {
 			return txAttr;
 		}
 
 		// Second try is the transaction attribute on the target class.
+		// 通过类搜索事务属性对象
 		txAttr = findTransactionAttribute(specificMethod.getDeclaringClass());
 		if (txAttr != null && ClassUtils.isUserLevelMethod(method)) {
 			return txAttr;
 		}
 
+		// 方法不相同
 		if (specificMethod != method) {
 			// Fallback is to look at the original method.
 			txAttr = findTransactionAttribute(method);
@@ -197,6 +212,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements
 	 * Subclasses need to implement this to return the transaction attribute for the given class, if
 	 * any.
 	 *
+	 * 子类实现,用于寻找事务属性对象
 	 * @param clazz the class to retrieve the attribute for
 	 * @return all transaction attribute associated with this class, or {@code null} if none
 	 */
@@ -207,6 +223,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements
 	 * Subclasses need to implement this to return the transaction attribute for the given method,
 	 * if any.
 	 *
+	 * 子类实现,用于寻找事务属性对象
 	 * @param method the method to retrieve the attribute for
 	 * @return all transaction attribute associated with this method, or {@code null} if none
 	 */
@@ -215,6 +232,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements
 
 	/**
 	 * Should only public methods be allowed to have transactional semantics?
+	 * 是否允许public修饰的方法获取事务
 	 * <p>The default implementation returns {@code false}.
 	 */
 	protected boolean allowPublicMethodsOnly() {
