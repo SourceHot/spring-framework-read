@@ -51,14 +51,26 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	private static final Log logger = LogFactory.getLog(JdbcTransactionObjectSupport.class);
 
 
+	/**
+	 * 连接持有者
+	 */
 	@Nullable
 	private ConnectionHolder connectionHolder;
 
+	/**
+	 * 上一个事务隔离级别
+	 */
 	@Nullable
 	private Integer previousIsolationLevel;
 
+	/**
+	 * 只读标记
+	 */
 	private boolean readOnly = false;
 
+	/**
+	 * 是否允许出现保存点
+	 */
 	private boolean savepointAllowed = false;
 
 
@@ -147,16 +159,20 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	 */
 	@Override
 	public Object createSavepoint() throws TransactionException {
+		// 获取连接持有者
 		ConnectionHolder conHolder = getConnectionHolderForSavepoint();
 		try {
+			// 连接持有者不支持保存点抛出异常
 			if (!conHolder.supportsSavepoints()) {
 				throw new NestedTransactionNotSupportedException(
 						"Cannot create a nested transaction because savepoints are not supported by your JDBC driver");
 			}
+			// 连接持有点只支持回滚
 			if (conHolder.isRollbackOnly()) {
 				throw new CannotCreateTransactionException(
 						"Cannot create savepoint for transaction which is already marked as rollback-only");
 			}
+			// 连接持有者创建保存点
 			return conHolder.createSavepoint();
 		}
 		catch (SQLException ex) {
@@ -173,6 +189,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 		ConnectionHolder conHolder = getConnectionHolderForSavepoint();
 		try {
 			conHolder.getConnection().rollback((Savepoint) savepoint);
+			// 重置rollbackOnly属性
 			conHolder.resetRollbackOnly();
 		}
 		catch (Throwable ex) {

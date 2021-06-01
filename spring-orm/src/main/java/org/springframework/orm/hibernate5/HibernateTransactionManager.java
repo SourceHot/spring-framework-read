@@ -335,6 +335,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * Return the current Hibernate entity interceptor, or {@code null} if none.
 	 * Resolves an entity interceptor bean name via the bean factory,
 	 * if necessary.
+	 *
+	 * 获取拦截器接口
 	 * @throws IllegalStateException if bean name specified but no bean factory set
 	 * @throws BeansException if bean name resolution via the bean factory failed
 	 * @see #setEntityInterceptor
@@ -811,13 +813,26 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 */
 	private class HibernateTransactionObject extends JdbcTransactionObjectSupport {
 
+		/**
+		 * session 持有器
+		 */
 		@Nullable
 		private SessionHolder sessionHolder;
 
+		/**
+		 * 是否是一个新的session持有器
+		 */
 		private boolean newSessionHolder;
 
+		/**
+		 * 是否是新的session
+		 */
 		private boolean newSession;
 
+		/**
+		 * 上一个的 Holdability 属性
+		 * java.sql.Connection#getHoldability()
+		 */
 		@Nullable
 		private Integer previousHoldability;
 

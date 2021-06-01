@@ -510,7 +510,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	private static class DataSourceTransactionObject extends JdbcTransactionObjectSupport {
 
 		/**
-		 * 是否有新的链接
+		 * 是否是一个新的连接持有者
 		 */
 		private boolean newConnectionHolder;
 

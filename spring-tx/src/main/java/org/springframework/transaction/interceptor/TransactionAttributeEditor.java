@@ -50,7 +50,9 @@ public class TransactionAttributeEditor extends PropertyEditorSupport {
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (StringUtils.hasLength(text)) {
 			// tokenize it with ","
+			// 根据逗号进行切割
 			String[] tokens = StringUtils.commaDelimitedListToStringArray(text);
+
 			RuleBasedTransactionAttribute attr = new RuleBasedTransactionAttribute();
 			for (String token : tokens) {
 				// Trim leading and trailing whitespace.

@@ -45,11 +45,19 @@ import org.springframework.transaction.TransactionUsageException;
  * @see DefaultTransactionStatus
  */
 public abstract class AbstractTransactionStatus implements TransactionStatus {
-
+	/**
+	 * 仅回滚
+	 */
 	private boolean rollbackOnly = false;
 
+	/**
+	 * 是否完成标记
+	 */
 	private boolean completed = false;
 
+	/**
+	 * 保存点
+	 */
 	@Nullable
 	private Object savepoint;
 
@@ -158,7 +166,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 		getSavepointManager().rollbackToSavepoint(savepoint);
 		// 从保存点管理器进行释放保存点
 		getSavepointManager().releaseSavepoint(savepoint);
-		// 设置帮存点为null
+		// 设置保存点为null
 		setSavepoint(null);
 	}
 
@@ -166,12 +174,15 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 * Release the savepoint that is held for the transaction.
 	 */
 	public void releaseHeldSavepoint() throws TransactionException {
+		// 获取保存点
 		Object savepoint = getSavepoint();
 		if (savepoint == null) {
 			throw new TransactionUsageException(
 					"Cannot release savepoint - no savepoint associated with current transaction");
 		}
+		// 从保存点管理器进行释放保存点
 		getSavepointManager().releaseSavepoint(savepoint);
+		// 设置保存点为null
 		setSavepoint(null);
 	}
 

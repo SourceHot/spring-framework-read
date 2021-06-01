@@ -33,7 +33,9 @@ package org.springframework.transaction.support;
  * @see TransactionCallback#doInTransaction
  */
 public class SimpleTransactionStatus extends AbstractTransactionStatus {
-
+	/**
+	 * 是否是一个新事务
+	 */
 	private final boolean newTransaction;
 
 
