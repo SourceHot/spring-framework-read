@@ -124,6 +124,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Default JNDI location for the JTA UserTransaction. Many Java EE servers
 	 * also provide support for the JTA TransactionManager interface there.
+	 *
+	 * 默认的UserTransaction名称
 	 * @see #setUserTransactionName
 	 * @see #setAutodetectTransactionManager
 	 */
@@ -133,6 +135,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * Fallback JNDI locations for the JTA TransactionManager. Applied if
 	 * the JTA UserTransaction does not implement the JTA TransactionManager
 	 * interface, provided that the "autodetectTransactionManager" flag is "true".
+	 *
+	 * 事务管理器名称列表
 	 * @see #setTransactionManagerName
 	 * @see #setAutodetectTransactionManager
 	 */
@@ -143,41 +147,81 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Standard Java EE 5 JNDI location for the JTA TransactionSynchronizationRegistry.
 	 * Autodetected when available.
+	 * 默认的同步事务注册器名称
 	 */
 	public static final String DEFAULT_TRANSACTION_SYNCHRONIZATION_REGISTRY_NAME =
 			"java:comp/TransactionSynchronizationRegistry";
 
 
+	/**
+	 * jndi 模板类
+	 */
 	private transient JndiTemplate jndiTemplate = new JndiTemplate();
 
+	/**
+	 * 事务操作接口
+	 */
 	@Nullable
 	private transient UserTransaction userTransaction;
 
+	/**
+	 * UserTransaction 名称
+	 */
 	@Nullable
 	private String userTransactionName;
 
+	/**
+	 * 是否需要检查UserTransaction对象
+	 */
 	private boolean autodetectUserTransaction = true;
 
+	/**
+	 * 是否缓存UserTransaction对象
+	 */
 	private boolean cacheUserTransaction = true;
 
+	/**
+	 * 是否从 jndi中获取UserTransaction
+	 */
 	private boolean userTransactionObtainedFromJndi = false;
 
+	/**
+	 * 事务管理器
+	 */
 	@Nullable
 	private transient TransactionManager transactionManager;
 
+	/**
+	 * 事务管理器名称
+	 */
 	@Nullable
 	private String transactionManagerName;
 
+	/**
+	 * 是否自动检测事务管理器
+	 */
 	private boolean autodetectTransactionManager = true;
 
+	/**
+	 * 同步事务注册器
+	 */
 	@Nullable
 	private transient TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
+	/**
+	 * 同步事务注册器名称
+	 */
 	@Nullable
 	private String transactionSynchronizationRegistryName;
 
+	/**
+	 * 是否自动检测同步事务注册表
+	 */
 	private boolean autodetectTransactionSynchronizationRegistry = true;
 
+	/**
+	 * 是否允许自定义事务隔离级别
+	 */
 	private boolean allowCustomIsolationLevels = false;
 
 
@@ -444,8 +488,11 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	@Override
 	public void afterPropertiesSet() throws TransactionSystemException {
+		// 初始化 UserTransaction 和 TransactionManager
 		initUserTransactionAndTransactionManager();
+		// 检查 UserTransaction 和 TransactionManager
 		checkUserTransactionAndTransactionManager();
+		// 初始化 TransactionSynchronizationRegistry
 		initTransactionSynchronizationRegistry();
 	}
 
@@ -454,14 +501,18 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @throws TransactionSystemException if initialization failed
 	 */
 	protected void initUserTransactionAndTransactionManager() throws TransactionSystemException {
+		// 事务操作接口为空
 		if (this.userTransaction == null) {
 			// Fetch JTA UserTransaction from JNDI, if necessary.
 			if (StringUtils.hasLength(this.userTransactionName)) {
+				// 通过 JNDI 搜索 UserTransaction 对象
 				this.userTransaction = lookupUserTransaction(this.userTransactionName);
 				this.userTransactionObtainedFromJndi = true;
 			}
 			else {
+				// 通过子类搜索
 				this.userTransaction = retrieveUserTransaction();
+				// 子类搜索失败的情况下通过 JNDI 进行搜索
 				if (this.userTransaction == null && this.autodetectUserTransaction) {
 					// Autodetect UserTransaction at its default JNDI location.
 					this.userTransaction = findUserTransaction();
@@ -469,13 +520,17 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 
+		// 事务管理器为空
 		if (this.transactionManager == null) {
 			// Fetch JTA TransactionManager from JNDI, if necessary.
 			if (StringUtils.hasLength(this.transactionManagerName)) {
+				// 通过 JNDI 搜索 TransactionManager 对象
 				this.transactionManager = lookupTransactionManager(this.transactionManagerName);
 			}
 			else {
+				// 通过子类搜索
 				this.transactionManager = retrieveTransactionManager();
+				// 子类搜索失败的情况下通过 JNDI 进行搜索
 				if (this.transactionManager == null && this.autodetectTransactionManager) {
 					// Autodetect UserTransaction object that implements TransactionManager,
 					// and check fallback JNDI locations otherwise.
@@ -485,6 +540,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		// If only JTA TransactionManager specified, create UserTransaction handle for it.
+		// 在UserTransaction为空并且TransactionManager存在的情况下手工创建UserTransaction
 		if (this.userTransaction == null && this.transactionManager != null) {
 			this.userTransaction = buildUserTransaction(this.transactionManager);
 		}
@@ -497,6 +553,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	protected void checkUserTransactionAndTransactionManager() throws IllegalStateException {
 		// We at least need the JTA UserTransaction.
+		// 检查UserTransaction
 		if (this.userTransaction != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using JTA UserTransaction: " + this.userTransaction);
@@ -508,6 +565,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		// For transaction suspension, the JTA TransactionManager is necessary too.
+		// 检查TransactionManager
 		if (this.transactionManager != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using JTA TransactionManager: " + this.transactionManager);
@@ -525,14 +583,19 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @throws TransactionSystemException if initialization failed
 	 */
 	protected void initTransactionSynchronizationRegistry() {
+		// TransactionSynchronizationRegistry 为空
 		if (this.transactionSynchronizationRegistry == null) {
 			// Fetch JTA TransactionSynchronizationRegistry from JNDI, if necessary.
+			// transactionSynchronizationRegistryName 不为空
 			if (StringUtils.hasLength(this.transactionSynchronizationRegistryName)) {
+				// JNDI 进行搜索
 				this.transactionSynchronizationRegistry =
 						lookupTransactionSynchronizationRegistry(this.transactionSynchronizationRegistryName);
 			}
 			else {
+				// 通过子类搜索
 				this.transactionSynchronizationRegistry = retrieveTransactionSynchronizationRegistry();
+				// 子类搜索失败的情况下通过 JNDI 进行搜索
 				if (this.transactionSynchronizationRegistry == null && this.autodetectTransactionSynchronizationRegistry) {
 					// Autodetect in JNDI if applicable, and check UserTransaction/TransactionManager
 					// object that implements TransactionSynchronizationRegistry otherwise.
@@ -794,15 +857,19 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	@Override
 	protected Object doGetTransaction() {
+		// 获取 UserTransaction 对象
 		UserTransaction ut = getUserTransaction();
+		// 对象为空抛出异常
 		if (ut == null) {
 			throw new CannotCreateTransactionException("No JTA UserTransaction available - " +
 					"programmatic PlatformTransactionManager.getTransaction usage not supported");
 		}
+		// 不换成的情况下
 		if (!this.cacheUserTransaction) {
 			ut = lookupUserTransaction(
 					this.userTransactionName != null ? this.userTransactionName : DEFAULT_USER_TRANSACTION_NAME);
 		}
+		// 创建JtaTransactionObject对象
 		return doGetJtaTransaction(ut);
 	}
 
@@ -844,8 +911,10 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
+		// 获取事务对象
 		JtaTransactionObject txObject = (JtaTransactionObject) transaction;
 		try {
+			// 核心处理
 			doJtaBegin(txObject, definition);
 		}
 		catch (NotSupportedException | UnsupportedOperationException ex) {
@@ -880,9 +949,13 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	protected void doJtaBegin(JtaTransactionObject txObject, TransactionDefinition definition)
 			throws NotSupportedException, SystemException {
 
+		// 应用事务隔离级别
 		applyIsolationLevel(txObject, definition.getIsolationLevel());
+		// 确认超时时间
 		int timeout = determineTimeout(definition);
+		// 设置超时时间
 		applyTimeout(txObject, timeout);
+		// 开始事务
 		txObject.getUserTransaction().begin();
 	}
 

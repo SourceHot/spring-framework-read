@@ -42,6 +42,7 @@ public interface TransactionFactory {
 
 	/**
 	 * Create an active Transaction object based on the given name and timeout.
+	 * 创建事务对象
 	 * @param name the transaction name (may be {@code null})
 	 * @param timeout the transaction timeout (may be -1 for the default timeout)
 	 * @return the active Transaction object (never {@code null})

@@ -51,14 +51,26 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 事务工厂
+	 */
 	@Nullable
 	private TransactionFactory transactionFactory;
 
+	/**
+	 * 事务名称
+	 */
 	@Nullable
 	private String transactionName;
 
+	/**
+	 * 事务超时时间
+	 */
 	private int transactionTimeout = -1;
 
+	/**
+	 * beanName
+	 */
 	@Nullable
 	private String beanName;
 

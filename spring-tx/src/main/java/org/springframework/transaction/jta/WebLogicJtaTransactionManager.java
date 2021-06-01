@@ -75,34 +75,68 @@ import org.springframework.util.Assert;
  */
 @SuppressWarnings("serial")
 public class WebLogicJtaTransactionManager extends JtaTransactionManager {
-
+	/**
+	 * UserTransaction 类名
+	 */
 	private static final String USER_TRANSACTION_CLASS_NAME = "weblogic.transaction.UserTransaction";
 
+	/**
+	 * 事务管理器名称
+	 */
 	private static final String CLIENT_TRANSACTION_MANAGER_CLASS_NAME = "weblogic.transaction.ClientTransactionManager";
 
+	/**
+	 * 事务类名
+	 */
 	private static final String TRANSACTION_CLASS_NAME = "weblogic.transaction.Transaction";
 
+	/**
+	 * 事务帮助类的类名
+	 */
 	private static final String TRANSACTION_HELPER_CLASS_NAME = "weblogic.transaction.TransactionHelper";
 
+	/**
+	 * 事务隔离级别的键
+	 */
 	private static final String ISOLATION_LEVEL_KEY = "ISOLATION LEVEL";
 
-
+	/**
+	 *weblogic 事务是否可以使用
+	 */
 	private boolean weblogicUserTransactionAvailable;
 
+	/**
+	 * 开始事务的方法,根据名称
+	 */
 	@Nullable
 	private Method beginWithNameMethod;
 
+	/**
+	 * 开始事务的方法,根据名称和超时时间
+	 */
 	@Nullable
 	private Method beginWithNameAndTimeoutMethod;
 
+	/**
+	 *weblogic 事务管理器是否可用
+	 */
 	private boolean weblogicTransactionManagerAvailable;
 
+	/**
+	 *强制恢复的方法
+	 */
 	@Nullable
 	private Method forceResumeMethod;
 
+	/**
+	 * 设置属性的方法
+	 */
 	@Nullable
 	private Method setPropertyMethod;
 
+	/**
+	 * 事务帮助类
+	 */
 	@Nullable
 	private Object transactionHelper;
 
@@ -176,10 +210,14 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 
 	private void loadWebLogicTransactionClasses() throws TransactionSystemException {
 		try {
+			// 加载weblogic.transaction.UserTransaction
 			Class<?> userTransactionClass = getClass().getClassLoader().loadClass(USER_TRANSACTION_CLASS_NAME);
 			this.weblogicUserTransactionAvailable = userTransactionClass.isInstance(getUserTransaction());
+			// 是接口的情况下进行begin的两个方法获取
 			if (this.weblogicUserTransactionAvailable) {
+				// 根据名称搜索的方法对象
 				this.beginWithNameMethod = userTransactionClass.getMethod("begin", String.class);
+				// 根据名称和超时时间搜索的对象
 				this.beginWithNameAndTimeoutMethod = userTransactionClass.getMethod("begin", String.class, int.class);
 				logger.debug("Support for WebLogic transaction names available");
 			}
@@ -188,6 +226,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			}
 
 			// Obtain WebLogic ClientTransactionManager interface.
+			// 加载ClientTransactionManager类
 			Class<?> transactionManagerClass =
 					getClass().getClassLoader().loadClass(CLIENT_TRANSACTION_MANAGER_CLASS_NAME);
 			logger.trace("WebLogic ClientTransactionManager found");
@@ -195,7 +234,9 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			this.weblogicTransactionManagerAvailable = transactionManagerClass.isInstance(getTransactionManager());
 			if (this.weblogicTransactionManagerAvailable) {
 				Class<?> transactionClass = getClass().getClassLoader().loadClass(TRANSACTION_CLASS_NAME);
+				// 强制恢复的方法
 				this.forceResumeMethod = transactionManagerClass.getMethod("forceResume", Transaction.class);
+				// 获取设置属性的方法
 				this.setPropertyMethod = transactionClass.getMethod("setProperty", String.class, Serializable.class);
 				logger.debug("Support for WebLogic forceResume available");
 			}
@@ -301,7 +342,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Standard JTA resume threw InvalidTransactionException: " + ex.getMessage() +
-					" - trying WebLogic JTA forceResume");
+						" - trying WebLogic JTA forceResume");
 			}
 			/*
 			weblogic.transaction.TransactionManager wtm =
