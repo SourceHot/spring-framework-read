@@ -185,12 +185,20 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		}
 	}
 
+	/**
+	 * 初始化 weblogic.transaction.TransactionHelper
+	 */
 	private Object loadWebLogicTransactionHelper() throws TransactionSystemException {
+		// 获取成员变量中的事务帮助对象
 		Object helper = this.transactionHelper;
+		// 事务帮助对象为空的情况下在进行搜搜操作
 		if (helper == null) {
 			try {
+				// 加载 weblogic.transaction.TransactionHelper 类
 				Class<?> transactionHelperClass = getClass().getClassLoader().loadClass(TRANSACTION_HELPER_CLASS_NAME);
+				// 获取getTransactionHelper方法
 				Method getTransactionHelperMethod = transactionHelperClass.getMethod("getTransactionHelper");
+				// 通过 getTransactionHelper 方法调用后获取对象
 				helper = getTransactionHelperMethod.invoke(null);
 				this.transactionHelper = helper;
 				logger.trace("WebLogic TransactionHelper found");
@@ -262,11 +270,14 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 	protected void doJtaBegin(JtaTransactionObject txObject, TransactionDefinition definition)
 			throws NotSupportedException, SystemException {
 
+		// 确认超时时间
 		int timeout = determineTimeout(definition);
 
 		// Apply transaction name (if any) to WebLogic transaction.
+		// weblogic事务是否可以使用 并且名称不为空
 		if (this.weblogicUserTransactionAvailable && definition.getName() != null) {
 			try {
+				// 超时时间大于默认时间的处理
 				if (timeout > TransactionDefinition.TIMEOUT_DEFAULT) {
 					/*
 					weblogic.transaction.UserTransaction wut = (weblogic.transaction.UserTransaction) ut;
@@ -275,6 +286,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 					Assert.state(this.beginWithNameAndTimeoutMethod != null, "WebLogic JTA API not initialized");
 					this.beginWithNameAndTimeoutMethod.invoke(txObject.getUserTransaction(), definition.getName(), timeout);
 				}
+				// 超时时间小于等于默认时间的处理
 				else {
 					/*
 					weblogic.transaction.UserTransaction wut = (weblogic.transaction.UserTransaction) ut;
@@ -296,21 +308,28 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		else {
 			// No WebLogic UserTransaction available or no transaction name specified
 			// -> standard JTA begin call.
+			// 应用超时时间
 			applyTimeout(txObject, timeout);
+			// 开始事务
 			txObject.getUserTransaction().begin();
 		}
 
 		// Specify isolation level, if any, through corresponding WebLogic transaction property.
+		// 判断 weblogic事务管理器是否可用
 		if (this.weblogicTransactionManagerAvailable) {
+			// 事务隔离级别不等于默认事务隔离级别
 			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 				try {
+					// 获取事务对象
 					Transaction tx = obtainTransactionManager().getTransaction();
+					// 从事务定义对象中获取事务隔离级别
 					Integer isolationLevel = definition.getIsolationLevel();
 					/*
 					weblogic.transaction.Transaction wtx = (weblogic.transaction.Transaction) tx;
 					wtx.setProperty(ISOLATION_LEVEL_KEY, isolationLevel);
 					*/
 					Assert.state(this.setPropertyMethod != null, "WebLogic JTA API not initialized");
+					// 通过属性设置方法进行事务隔离级别设置
 					this.setPropertyMethod.invoke(tx, ISOLATION_LEVEL_KEY, isolationLevel);
 				}
 				catch (InvocationTargetException ex) {
@@ -324,6 +343,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			}
 		}
 		else {
+			// 应用事务隔离级别
 			applyIsolationLevel(txObject, definition.getIsolationLevel());
 		}
 	}
@@ -333,9 +353,11 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			throws InvalidTransactionException, SystemException {
 
 		try {
+			// 获取事务管理器, 通过事务管理器进行恢复操作
 			obtainTransactionManager().resume((Transaction) suspendedTransaction);
 		}
 		catch (InvalidTransactionException ex) {
+			// 判断 weblogic事务管理器是否可用
 			if (!this.weblogicTransactionManagerAvailable) {
 				throw ex;
 			}
@@ -351,6 +373,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			*/
 			try {
 				Assert.state(this.forceResumeMethod != null, "WebLogic JTA API not initialized");
+				// 强制执行
 				this.forceResumeMethod.invoke(getTransactionManager(), suspendedTransaction);
 			}
 			catch (InvocationTargetException ex2) {
@@ -366,6 +389,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 
 	@Override
 	public Transaction createTransaction(@Nullable String name, int timeout) throws NotSupportedException, SystemException {
+		// weblogic事务是否可以使用 名称是否为空
 		if (this.weblogicUserTransactionAvailable && name != null) {
 			try {
 				if (timeout >= 0) {
