@@ -92,14 +92,21 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 
 	/**
 	 * Default JNDI location for the WebSphere UOWManager.
+	 *
+	 * 默认的UOWMananger名称
 	 * @see #setUowManagerName
 	 */
 	public static final String DEFAULT_UOW_MANAGER_NAME = "java:comp/websphere/UOWManager";
 
-
+	/**
+	 *UOWManager
+	 */
 	@Nullable
 	private UOWManager uowManager;
 
+	/**
+	 *UOWMananger名称
+	 */
 	@Nullable
 	private String uowManagerName;
 
@@ -234,13 +241,17 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 			throws TransactionException {
 
 		// Use defaults if no transaction definition given.
+		// 确认事务定义对象
 		TransactionDefinition def = (definition != null ? definition : TransactionDefinition.withDefaults());
 
+		// 小于默认时间抛出异常
 		if (def.getTimeout() < TransactionDefinition.TIMEOUT_DEFAULT) {
 			throw new InvalidTimeoutException("Invalid transaction timeout", def.getTimeout());
 		}
 
+		// 获取 UOWManager 对象
 		UOWManager uowManager = obtainUOWManager();
+		// 事务传播行为
 		int pb = def.getPropagationBehavior();
 		boolean existingTx = (uowManager.getUOWStatus() != UOWSynchronizationRegistry.UOW_STATUS_NONE &&
 				uowManager.getUOWType() != UOWSynchronizationRegistry.UOW_TYPE_LOCAL_TRANSACTION);
