@@ -104,7 +104,7 @@ public abstract class DataSourceUtils {
 		// 事务同步管理器中获取链接持有器对象
 		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager
 				.getResource(dataSource);
-		// 从连接持有器中获取连接对象
+		// 从链接持有器中获取链接对象
 		if (conHolder != null && (conHolder.hasConnection() || conHolder
 				.isSynchronizedWithTransaction())) {
 			conHolder.requested();
@@ -117,7 +117,7 @@ public abstract class DataSourceUtils {
 		// Else we either got no holder or an empty thread-bound holder here.
 
 		logger.debug("Fetching JDBC Connection from DataSource");
-		// 从数据源中获取连接对象
+		// 从数据源中获取链接对象
 		Connection con = fetchConnection(dataSource);
 
 		// 判断是否处于同步状态
@@ -130,7 +130,7 @@ public abstract class DataSourceUtils {
 				if (holderToUse == null) {
 					holderToUse = new ConnectionHolder(con);
 				}
-				// 不为空将其进行连接对象设置
+				// 不为空将其进行链接对象设置
 				else {
 					holderToUse.setConnection(con);
 				}
@@ -147,7 +147,7 @@ public abstract class DataSourceUtils {
 				}
 			} catch (RuntimeException ex) {
 				// Unexpected exception from external delegation call -> close Connection and rethrow.
-				// 释放连接
+				// 释放链接
 				releaseConnection(con, dataSource);
 				throw ex;
 			}

@@ -115,17 +115,32 @@ import org.springframework.util.CollectionUtils;
 public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
 
+	/**
+	 * jpa属性表
+	 */
 	private final Map<String, Object> jpaPropertyMap = new HashMap<>();
 
+	/**
+	 * 实体管理工厂
+	 */
 	@Nullable
 	private EntityManagerFactory entityManagerFactory;
 
+	/**
+	 * 持久单元名称
+	 */
 	@Nullable
 	private String persistenceUnitName;
 
+	/**
+	 * 数据源
+	 */
 	@Nullable
 	private DataSource dataSource;
 
+	/**
+	 * JPA方言接口
+	 */
 	private JpaDialect jpaDialect = new DefaultJpaDialect();
 
 
@@ -321,17 +336,23 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	@Override
 	public void afterPropertiesSet() {
+
+		// entityManagerFactory 为空抛出异常
 		if (getEntityManagerFactory() == null) {
 			throw new IllegalArgumentException("'entityManagerFactory' or 'persistenceUnitName' is required");
 		}
+		// 类型是EntityManagerFactoryInfo的处理
 		if (getEntityManagerFactory() instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) getEntityManagerFactory();
+			// 从实体管理工厂信息对象中获取数据源对象
 			DataSource dataSource = emfInfo.getDataSource();
 			if (dataSource != null) {
+				// 设置数据源
 				setDataSource(dataSource);
 			}
 			JpaDialect jpaDialect = emfInfo.getJpaDialect();
 			if (jpaDialect != null) {
+				// 设置JPA方言
 				setJpaDialect(jpaDialect);
 			}
 		}
@@ -374,8 +395,11 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
+		// 事务对象转换,转换目标是JpaTransactionObject
 		JpaTransactionObject txObject = (JpaTransactionObject) transaction;
 
+		// 事务对象有连接持有器
+		// 同步事务标记为false
 		if (txObject.hasConnectionHolder() && !txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
 			throw new IllegalTransactionStateException(
 					"Pre-bound JDBC Connection found! JpaTransactionManager does not support " +
@@ -385,41 +409,57 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		try {
+			// 事务对象中不存在EntityManager 持有器
+			// 同步事务标记为true
 			if (!txObject.hasEntityManagerHolder() ||
 					txObject.getEntityManagerHolder().isSynchronizedWithTransaction()) {
+				// 创建实体管理器
 				EntityManager newEm = createEntityManagerForTransaction();
 				if (logger.isDebugEnabled()) {
 					logger.debug("Opened new EntityManager [" + newEm + "] for JPA transaction");
 				}
+				// 设置实体管理器持有者
 				txObject.setEntityManagerHolder(new EntityManagerHolder(newEm), true);
 			}
 
+			// 获取实体管理器
 			EntityManager em = txObject.getEntityManagerHolder().getEntityManager();
 
 			// Delegate to JpaDialect for actual transaction begin.
+			// 确定超时时间
 			final int timeoutToUse = determineTimeout(definition);
+			// 获取事务数据, 主要通过JPA方言对象进行事务开启
 			Object transactionData = getJpaDialect().beginTransaction(em,
 					new JpaTransactionDefinition(definition, timeoutToUse, txObject.isNewEntityManagerHolder()));
+			// 为事务对象设置事务数据
 			txObject.setTransactionData(transactionData);
+			// 为事务对象设置是否仅回滚标记.
 			txObject.setReadOnly(definition.isReadOnly());
 
 			// Register transaction timeout.
+			// 事务超时时间设置
 			if (timeoutToUse != TransactionDefinition.TIMEOUT_DEFAULT) {
 				txObject.getEntityManagerHolder().setTimeoutInSeconds(timeoutToUse);
 			}
 
 			// Register the JPA EntityManager's JDBC Connection for the DataSource, if set.
+			// 数据源不为空的情况下
 			if (getDataSource() != null) {
+				// 获取连接处理器
 				ConnectionHandle conHandle = getJpaDialect().getJdbcConnection(em, definition.isReadOnly());
 				if (conHandle != null) {
+					// 创建连接持有器,持有的是连接处理器
 					ConnectionHolder conHolder = new ConnectionHolder(conHandle);
+					// 设置超时时间
 					if (timeoutToUse != TransactionDefinition.TIMEOUT_DEFAULT) {
 						conHolder.setTimeoutInSeconds(timeoutToUse);
 					}
 					if (logger.isDebugEnabled()) {
 						logger.debug("Exposing JPA transaction as JDBC [" + conHandle + "]");
 					}
+					// 进行资源绑定
 					TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
+					// 设置连接持有器
 					txObject.setConnectionHolder(conHolder);
 				}
 				else {
@@ -431,14 +471,18 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			}
 
 			// Bind the entity manager holder to the thread.
+			// 判断是否是一个新的实体管理持有器
 			if (txObject.isNewEntityManagerHolder()) {
+				// 进行资源绑定
 				TransactionSynchronizationManager.bindResource(
 						obtainEntityManagerFactory(), txObject.getEntityManagerHolder());
 			}
+			// 设置同步事务标记为true
 			txObject.getEntityManagerHolder().setSynchronizedWithTransaction(true);
 		}
 
 		catch (TransactionException ex) {
+			// 关闭实体管理器
 			closeEntityManagerAfterFailedBegin(txObject);
 			throw ex;
 		}

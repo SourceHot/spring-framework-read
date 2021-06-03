@@ -41,7 +41,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	private final BeanDefinition[] innerBeanDefinitions;
 
 	/**
-	 *  bean 连接列表
+	 *  bean 链接列表
 	 */
 	private final BeanReference[] beanReferences;
 

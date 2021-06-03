@@ -184,7 +184,7 @@ public class EmbeddedDatabaseFactory {
 			this.databaseConfigurer = EmbeddedDatabaseConfigurerFactory.getConfigurer(EmbeddedDatabaseType.HSQL);
 		}
 
-		// 配置嵌入式数据库连接属性
+		// 配置嵌入式数据库链接属性
 		this.databaseConfigurer.configureConnectionProperties(
 				this.dataSourceFactory.getConnectionProperties(), this.databaseName);
 		// 获取数据源对象

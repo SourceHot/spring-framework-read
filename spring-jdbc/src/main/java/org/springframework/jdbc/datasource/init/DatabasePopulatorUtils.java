@@ -44,7 +44,7 @@ public abstract class DatabasePopulatorUtils {
 		Assert.notNull(populator, "DatabasePopulator must not be null");
 		Assert.notNull(dataSource, "DataSource must not be null");
 		try {
-			// 获取数据库连接
+			// 获取数据库链接
 			Connection connection = DataSourceUtils.getConnection(dataSource);
 			try {
 				// 处理sql

@@ -192,7 +192,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	protected Connection getConnectionFromDriver(@Nullable String username, @Nullable String password) throws SQLException {
 		// 创建属性表
 		Properties mergedProps = new Properties();
-		// 获取成员变量的连接属性表
+		// 获取成员变量的链接属性表
 		Properties connProps = getConnectionProperties();
 		if (connProps != null) {
 			mergedProps.putAll(connProps);
@@ -206,7 +206,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 			mergedProps.setProperty("password", password);
 		}
 
-		// 抽象方法:获取数据库连接对象
+		// 抽象方法:获取数据库链接对象
 		Connection con = getConnectionFromDriver(mergedProps);
 		if (this.catalog != null) {
 			// 设置catalog

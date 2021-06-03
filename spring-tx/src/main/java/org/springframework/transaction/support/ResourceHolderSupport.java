@@ -35,15 +35,30 @@ import org.springframework.transaction.TransactionTimedOutException;
  */
 public abstract class ResourceHolderSupport implements ResourceHolder {
 
+	/**
+	 * 事务是否同步标记
+	 */
 	private boolean synchronizedWithTransaction = false;
 
+	/**
+	 * 是否只回滚
+	 */
 	private boolean rollbackOnly = false;
 
+	/**
+	 * 最后时间
+	 */
 	@Nullable
 	private Date deadline;
 
+	/**
+	 * 计数器
+	 */
 	private int referenceCount = 0;
 
+	/**
+	 * 是否 void
+	 */
 	private boolean isVoid = false;
 
 

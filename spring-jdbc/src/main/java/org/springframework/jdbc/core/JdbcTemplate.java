@@ -327,11 +327,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	public <T> T execute(ConnectionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
-		// 获取数据库连接对象
+		// 获取数据库链接对象
 		Connection con = DataSourceUtils.getConnection(obtainDataSource());
 		try {
 			// Create close-suppressing Connection proxy, also preparing returned Statements.
-			// 创建代理连接对象
+			// 创建代理链接对象
 			Connection conToUse = createConnectionProxy(con);
 			// 通过action对象将数据进行处理
 			return action.doInConnection(conToUse);
@@ -341,14 +341,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			// in the case when the exception translator hasn't been initialized yet.
 			// 获取sql
 			String sql = getSql(action);
-			// 释放数据库连接对象
+			// 释放数据库链接对象
 			DataSourceUtils.releaseConnection(con, getDataSource());
 			con = null;
 			// 抛出异常
 			throw translateException("ConnectionCallback", sql, ex);
 		}
 		finally {
-			// 释放数据库连接对象
+			// 释放数据库链接对象
 			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
 	}
@@ -381,7 +381,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	public <T> T execute(StatementCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
-		// 获取连接对象
+		// 获取链接对象
 		Connection con = DataSourceUtils.getConnection(obtainDataSource());
 		Statement stmt = null;
 		try {
@@ -402,7 +402,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			// 关闭 Statement 对象
 			JdbcUtils.closeStatement(stmt);
 			stmt = null;
-			// 释放连接
+			// 释放链接
 			DataSourceUtils.releaseConnection(con, getDataSource());
 			con = null;
 			// 抛出异常
@@ -411,7 +411,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		finally {
 			// 关闭 Statement 对象
 			JdbcUtils.closeStatement(stmt);
-			// 释放连接
+			// 释放链接
 			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
 	}
@@ -637,7 +637,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			logger.debug("Executing prepared SQL statement" + (sql != null ? " [" + sql + "]" : ""));
 		}
 
-		// 获取数据库连接对象
+		// 获取数据库链接对象
 		Connection con = DataSourceUtils.getConnection(obtainDataSource());
 		PreparedStatement ps = null;
 		try {
@@ -664,7 +664,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			// 关闭 Statement
 			JdbcUtils.closeStatement(ps);
 			ps = null;
-			// 是否数据库连接
+			// 是否数据库链接
 			DataSourceUtils.releaseConnection(con, getDataSource());
 			con = null;
 			// 抛出异常
@@ -677,7 +677,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			}
 			// 关闭 Statement
 			JdbcUtils.closeStatement(ps);
-			// 释放连接
+			// 释放链接
 			DataSourceUtils.releaseConnection(con, getDataSource());
 		}
 	}

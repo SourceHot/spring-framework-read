@@ -25,6 +25,7 @@ import javax.resource.spi.LocalTransactionException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
@@ -65,9 +66,8 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class CciLocalTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
-
 	/**
-	 * 连接工厂
+	 * 链接工厂
 	 */
 	@Nullable
 	private ConnectionFactory connectionFactory;
@@ -139,10 +139,10 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	protected Object doGetTransaction() {
 		// 创建 CCI 的本地事务对象
 		CciLocalTransactionObject txObject = new CciLocalTransactionObject();
-		// 获取连接持有对象
+		// 获取链接持有对象
 		ConnectionHolder conHolder =
 				(ConnectionHolder) TransactionSynchronizationManager.getResource(obtainConnectionFactory());
-		// 设置连接持有对象
+		// 设置链接持有对象
 		txObject.setConnectionHolder(conHolder);
 		// 返回
 		return txObject;
@@ -159,29 +159,37 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		// 事务对象类型转换
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) transaction;
-		// 获取连接工厂
+		// 获取链接工厂
 		ConnectionFactory connectionFactory = obtainConnectionFactory();
+		// 链接对象
 		Connection con = null;
 
 		try {
+			// 通过链接工厂创建链接
 			con = connectionFactory.getConnection();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Acquired Connection [" + con + "] for local CCI transaction");
 			}
 
+			// 创建链接持有器
 			ConnectionHolder connectionHolder = new ConnectionHolder(con);
+			// 设置事务同步标记为true
 			connectionHolder.setSynchronizedWithTransaction(true);
-
+			// 通过链接对象获取本地事务并开始事务
 			con.getLocalTransaction().begin();
+			// 获取超时时间
 			int timeout = determineTimeout(definition);
 			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
 				connectionHolder.setTimeoutInSeconds(timeout);
 			}
 
+			// 事务对象设置链接持有者
 			txObject.setConnectionHolder(connectionHolder);
+			// 进行链接工厂和链接持有器的绑定
 			TransactionSynchronizationManager.bindResource(connectionFactory, connectionHolder);
 		}
 		catch (NotSupportedException ex) {
+			// 释放链接
 			ConnectionFactoryUtils.releaseConnection(con, connectionFactory);
 			throw new CannotCreateTransactionException("CCI Connection does not support local transactions", ex);
 		}
@@ -197,14 +205,19 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 
 	@Override
 	protected Object doSuspend(Object transaction) {
+		// 将参数事务对象进行类型转换，转换成CciLocalTransactionObject类型。
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) transaction;
+		// 将连接持有器设置为null
 		txObject.setConnectionHolder(null);
+		// 解绑资源
 		return TransactionSynchronizationManager.unbindResource(obtainConnectionFactory());
 	}
 
 	@Override
 	protected void doResume(@Nullable Object transaction, Object suspendedResources) {
+		// 资源对象转换成连接持有器
 		ConnectionHolder conHolder = (ConnectionHolder) suspendedResources;
+		// 连接工厂与链接持有器进行绑定
 		TransactionSynchronizationManager.bindResource(obtainConnectionFactory(), conHolder);
 	}
 
@@ -215,12 +228,15 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 
 	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
+		// 从事务状态对象中获取事务对象并强制转换为CciLocalTransactionObject类型
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) status.getTransaction();
+		// 通过事务对象获取连接持有器再获取连接对象
 		Connection con = txObject.getConnectionHolder().getConnection();
 		if (status.isDebug()) {
 			logger.debug("Committing CCI local transaction on Connection [" + con + "]");
 		}
 		try {
+			// 通过连接对象获取本地事务进行事务提交
 			con.getLocalTransaction().commit();
 		}
 		catch (LocalTransactionException ex) {
@@ -233,12 +249,15 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 
 	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
+		// 从事务状态对象中获取事务对象并强制转换为CciLocalTransactionObject类型
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) status.getTransaction();
+		// 通过事务对象获取连接持有器再获取连接对象
 		Connection con = txObject.getConnectionHolder().getConnection();
 		if (status.isDebug()) {
 			logger.debug("Rolling back CCI local transaction on Connection [" + con + "]");
 		}
 		try {
+			// 通过连接对象获取本地事务进行事务回滚操作
 			con.getLocalTransaction().rollback();
 		}
 		catch (LocalTransactionException ex) {
@@ -251,27 +270,35 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 
 	@Override
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
+		// 从事务状态对象中获取事务对象
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
 			logger.debug("Setting CCI local transaction [" + txObject.getConnectionHolder().getConnection() +
 					"] rollback-only");
 		}
+		// 通过事务对象获取连接持有器,通过连接持有器进行仅回滚标记的设置
 		txObject.getConnectionHolder().setRollbackOnly();
 	}
 
 	@Override
 	protected void doCleanupAfterCompletion(Object transaction) {
+		// 将参数事务对象进行类型转换，转换成CciLocalTransactionObject类型。
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) transaction;
+		// 获取连接工厂
 		ConnectionFactory connectionFactory = obtainConnectionFactory();
 
 		// Remove the connection holder from the thread.
+		// 解绑连接工厂对应的资源
 		TransactionSynchronizationManager.unbindResource(connectionFactory);
+		// 获取事务对象中的连接持有器进行清除方法的调用
 		txObject.getConnectionHolder().clear();
 
+		// 从事务对象中获取连接持有器再获取连接对象
 		Connection con = txObject.getConnectionHolder().getConnection();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Releasing CCI Connection [" + con + "] after transaction");
 		}
+		// 连接对象和连接工厂的关系解绑
 		ConnectionFactoryUtils.releaseConnection(con, connectionFactory);
 	}
 

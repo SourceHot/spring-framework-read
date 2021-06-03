@@ -270,7 +270,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		Connection con = null;
 
 		try {
-			// 判断连接是否已经持有
+			// 判断链接是否已经持有
 			// 是否同步事务
 			if (!txObject.hasConnectionHolder() ||
 					txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
@@ -279,7 +279,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 				if (logger.isDebugEnabled()) {
 					logger.debug("Acquired Connection [" + newCon + "] for JDBC transaction");
 				}
-				// 设置数据库连接
+				// 设置数据库链接
 				txObject.setConnectionHolder(new ConnectionHolder(newCon), true);
 			}
 			// 拿出链接对象并且设置同步事务
@@ -348,7 +348,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	protected Object doSuspend(Object transaction) {
 		// 获取事务对象
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
-		// 连接置空
+		// 链接置空
 		txObject.setConnectionHolder(null);
 		// 解除资源绑定
 		return TransactionSynchronizationManager.unbindResource(obtainDataSource());
@@ -464,7 +464,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			if (logger.isDebugEnabled()) {
 				logger.debug("Releasing JDBC Connection [" + con + "] after transaction");
 			}
-			// 释放数据库连接
+			// 释放数据库链接
 			DataSourceUtils.releaseConnection(con, this.dataSource);
 		}
 
@@ -510,7 +510,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	private static class DataSourceTransactionObject extends JdbcTransactionObjectSupport {
 
 		/**
-		 * 是否是一个新的连接持有者
+		 * 是否是一个新的链接持有者
 		 */
 		private boolean newConnectionHolder;
 

@@ -175,7 +175,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Return whether this bean is a candidate for getting autowired into some other bean.
-	 * 是否需要自动连接到别的bean
+	 * 是否需要自动链接到别的bean
 	 */
 	boolean isAutowireCandidate();
 
@@ -185,7 +185,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * It does not affect explicit references by name, which will get resolved even if the specified
 	 * bean is not marked as an autowire candidate. As a consequence, autowiring by name will
 	 * nevertheless inject a bean if the name matches.
-	 * 设置是否需要自动连接到背的bean
+	 * 设置是否需要自动链接到背的bean
 	 */
 	void setAutowireCandidate(boolean autowireCandidate);
 

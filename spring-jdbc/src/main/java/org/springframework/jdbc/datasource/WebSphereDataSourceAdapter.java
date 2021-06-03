@@ -144,7 +144,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 					getTargetDataSource() + "], using ConnectionSpec [" + connSpec + "]");
 		}
 		// Create Connection through invoking WSDataSource.getConnection(JDBCConnectionSpec)
-		// 从WSDataSource中获取连接对象
+		// 从WSDataSource中获取链接对象
 		Connection con = (Connection) invokeJdbcMethod(
 				this.wsDataSourceGetConnectionMethod, obtainTargetDataSource(), connSpec);
 		Assert.state(con != null, "No Connection");
