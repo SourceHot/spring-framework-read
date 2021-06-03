@@ -66,6 +66,9 @@ import org.springframework.util.Assert;
 public class CciLocalTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
 
+	/**
+	 * 连接工厂
+	 */
 	@Nullable
 	private ConnectionFactory connectionFactory;
 
@@ -134,10 +137,14 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 
 	@Override
 	protected Object doGetTransaction() {
+		// 创建 CCI 的本地事务对象
 		CciLocalTransactionObject txObject = new CciLocalTransactionObject();
+		// 获取连接持有对象
 		ConnectionHolder conHolder =
 				(ConnectionHolder) TransactionSynchronizationManager.getResource(obtainConnectionFactory());
+		// 设置连接持有对象
 		txObject.setConnectionHolder(conHolder);
+		// 返回
 		return txObject;
 	}
 
@@ -150,7 +157,9 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 
 	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
+		// 事务对象类型转换
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) transaction;
+		// 获取连接工厂
 		ConnectionFactory connectionFactory = obtainConnectionFactory();
 		Connection con = null;
 

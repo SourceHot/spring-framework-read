@@ -20,6 +20,7 @@ package org.springframework.transaction;
  * Common representation of the current state of a transaction. Serves as base interface for {@link
  * TransactionStatus} as well as {@link ReactiveTransaction}.
  *
+ * 事务执行器
  * @author Juergen Hoeller
  * @since 5.2
  */
