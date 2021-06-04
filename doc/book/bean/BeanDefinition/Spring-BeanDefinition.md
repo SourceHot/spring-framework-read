@@ -127,12 +127,12 @@ String[] getDependsOn();
 void setDependsOn(@Nullable String... dependsOn);
 
 /**
- * 是否需要自动连接到别的bean
+ * 是否需要自动链接到别的bean
  */
 boolean isAutowireCandidate();
 
 /**
- * 设置是否需要自动连接到背的bean
+ * 设置是否需要自动链接到背的bean
  */
 void setAutowireCandidate(boolean autowireCandidate);
 

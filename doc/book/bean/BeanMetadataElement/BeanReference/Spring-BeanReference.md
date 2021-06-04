@@ -1,6 +1,6 @@
 # Spring BeanReference
 - 类全路径: `org.springframework.beans.factory.config.BeanReference`
-- bean 连接接口. 返回 beanName 
+- bean 链接接口. 返回 beanName 
 
 
 

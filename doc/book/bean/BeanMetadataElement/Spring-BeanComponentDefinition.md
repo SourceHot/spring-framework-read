@@ -1,6 +1,6 @@
 # Spring BeanComponentDefinition
 - 类全路径: `org.springframework.beans.factory.parsing.BeanComponentDefinition`
-- `BeanComponentDefinition` 作为`BeanDefinitionHolder`的补充, 补充 BeanDefinition 中的 连接bean和内部bean
+- `BeanComponentDefinition` 作为`BeanDefinitionHolder`的补充, 补充 BeanDefinition 中的 链接bean和内部bean
 
 ## 成员变量
 
@@ -11,7 +11,7 @@
 	private final BeanDefinition[] innerBeanDefinitions;
 
 	/**
-	 *  bean 连接列表
+	 *  bean 链接列表
 	 */
 	private final BeanReference[] beanReferences;
 ```

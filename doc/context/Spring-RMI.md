@@ -153,7 +153,7 @@ public class RMIClientSourceCode {
     private RMIServerSocketFactory serverSocketFactory;
 
     /**
-     * true: 该参数在获取{@link Registry}时测试是否建立连接,如果建立连接则直接使用,否则创建新连接
+     * true: 该参数在获取{@link Registry}时测试是否建立链接,如果建立链接则直接使用,否则创建新链接
      * 是否总是创建{@link Registry}
      */
     private boolean alwaysCreateRegistry = false;

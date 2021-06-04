@@ -104,9 +104,15 @@ import org.springframework.util.Assert;
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
 
+	/**
+	 * 数据源
+	 */
 	@Nullable
 	private DataSource dataSource;
 
+	/**
+	 * 是否强制只读
+	 */
 	private boolean enforceReadOnly = false;
 
 

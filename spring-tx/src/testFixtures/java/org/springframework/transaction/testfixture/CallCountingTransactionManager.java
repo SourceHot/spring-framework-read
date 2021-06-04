@@ -27,6 +27,9 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 @SuppressWarnings("serial")
 public class CallCountingTransactionManager extends AbstractPlatformTransactionManager {
 
+	/**
+	 * 事务定义
+	 */
 	public TransactionDefinition lastDefinition;
 	public int begun;
 	public int commits;

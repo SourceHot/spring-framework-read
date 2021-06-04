@@ -1138,7 +1138,7 @@ doCleanupAfterCompletion
 				if (logger.isDebugEnabled()) {
 					logger.debug("Acquired Connection [" + newCon + "] for JDBC transaction");
 				}
-				// 设置数据库连接
+				// 设置数据库链接
 				txObject.setConnectionHolder(new ConnectionHolder(newCon), true);
 			}
 			// 拿出链接对象并且设置同步事务
@@ -1207,7 +1207,7 @@ doCleanupAfterCompletion
 	protected Object doSuspend(Object transaction) {
 		// 获取事务对象
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
-		// 连接置空
+		// 链接置空
 		txObject.setConnectionHolder(null);
 		// 解除资源绑定
 		return TransactionSynchronizationManager.unbindResource(obtainDataSource());

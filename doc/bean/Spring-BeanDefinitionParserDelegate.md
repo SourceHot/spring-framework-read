@@ -905,7 +905,7 @@ public Object parsePropertyValue(Element ele, BeanDefinition bd, @Nullable Strin
       if (!StringUtils.hasText(refName)) {
          error(elementName + " contains empty 'ref' attribute", ele);
       }
-      // 创建 连接对象
+      // 创建 链接对象
       RuntimeBeanReference ref = new RuntimeBeanReference(refName);
 
       ref.setSource(extractSource(ele));
@@ -988,7 +988,7 @@ public Object parsePropertySubElement(Element ele, @Nullable BeanDefinition bd, 
          error("<ref> element contains empty target attribute", ele);
          return null;
       }
-      // bean 连接对象创建
+      // bean 链接对象创建
       RuntimeBeanReference ref = new RuntimeBeanReference(refName, toParent);
       ref.setSource(extractSource(ele));
       return ref;
@@ -1274,7 +1274,7 @@ public Map<Object, Object> parseMapElement(Element mapEle, @Nullable BeanDefinit
          if (!StringUtils.hasText(refName)) {
             error("<entry> element contains empty 'key-ref' attribute", entryEle);
          }
-         // 创建 bean 连接对象
+         // 创建 bean 链接对象
          RuntimeBeanReference ref = new RuntimeBeanReference(refName);
          ref.setSource(extractSource(entryEle));
          key = ref;

@@ -207,7 +207,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	protected Object doSuspend(Object transaction) {
 		// 将参数事务对象进行类型转换，转换成CciLocalTransactionObject类型。
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) transaction;
-		// 将连接持有器设置为null
+		// 将链接持有器设置为null
 		txObject.setConnectionHolder(null);
 		// 解绑资源
 		return TransactionSynchronizationManager.unbindResource(obtainConnectionFactory());
@@ -215,9 +215,9 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 
 	@Override
 	protected void doResume(@Nullable Object transaction, Object suspendedResources) {
-		// 资源对象转换成连接持有器
+		// 资源对象转换成链接持有器
 		ConnectionHolder conHolder = (ConnectionHolder) suspendedResources;
-		// 连接工厂与链接持有器进行绑定
+		// 链接工厂与链接持有器进行绑定
 		TransactionSynchronizationManager.bindResource(obtainConnectionFactory(), conHolder);
 	}
 
@@ -230,13 +230,13 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	protected void doCommit(DefaultTransactionStatus status) {
 		// 从事务状态对象中获取事务对象并强制转换为CciLocalTransactionObject类型
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) status.getTransaction();
-		// 通过事务对象获取连接持有器再获取连接对象
+		// 通过事务对象获取链接持有器再获取链接对象
 		Connection con = txObject.getConnectionHolder().getConnection();
 		if (status.isDebug()) {
 			logger.debug("Committing CCI local transaction on Connection [" + con + "]");
 		}
 		try {
-			// 通过连接对象获取本地事务进行事务提交
+			// 通过链接对象获取本地事务进行事务提交
 			con.getLocalTransaction().commit();
 		}
 		catch (LocalTransactionException ex) {
@@ -251,13 +251,13 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	protected void doRollback(DefaultTransactionStatus status) {
 		// 从事务状态对象中获取事务对象并强制转换为CciLocalTransactionObject类型
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) status.getTransaction();
-		// 通过事务对象获取连接持有器再获取连接对象
+		// 通过事务对象获取链接持有器再获取链接对象
 		Connection con = txObject.getConnectionHolder().getConnection();
 		if (status.isDebug()) {
 			logger.debug("Rolling back CCI local transaction on Connection [" + con + "]");
 		}
 		try {
-			// 通过连接对象获取本地事务进行事务回滚操作
+			// 通过链接对象获取本地事务进行事务回滚操作
 			con.getLocalTransaction().rollback();
 		}
 		catch (LocalTransactionException ex) {
@@ -276,7 +276,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 			logger.debug("Setting CCI local transaction [" + txObject.getConnectionHolder().getConnection() +
 					"] rollback-only");
 		}
-		// 通过事务对象获取连接持有器,通过连接持有器进行仅回滚标记的设置
+		// 通过事务对象获取链接持有器,通过链接持有器进行仅回滚标记的设置
 		txObject.getConnectionHolder().setRollbackOnly();
 	}
 
@@ -284,21 +284,21 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	protected void doCleanupAfterCompletion(Object transaction) {
 		// 将参数事务对象进行类型转换，转换成CciLocalTransactionObject类型。
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) transaction;
-		// 获取连接工厂
+		// 获取链接工厂
 		ConnectionFactory connectionFactory = obtainConnectionFactory();
 
 		// Remove the connection holder from the thread.
-		// 解绑连接工厂对应的资源
+		// 解绑链接工厂对应的资源
 		TransactionSynchronizationManager.unbindResource(connectionFactory);
-		// 获取事务对象中的连接持有器进行清除方法的调用
+		// 获取事务对象中的链接持有器进行清除方法的调用
 		txObject.getConnectionHolder().clear();
 
-		// 从事务对象中获取连接持有器再获取连接对象
+		// 从事务对象中获取链接持有器再获取链接对象
 		Connection con = txObject.getConnectionHolder().getConnection();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Releasing CCI Connection [" + con + "] after transaction");
 		}
-		// 连接对象和连接工厂的关系解绑
+		// 链接对象和链接工厂的关系解绑
 		ConnectionFactoryUtils.releaseConnection(con, connectionFactory);
 	}
 

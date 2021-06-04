@@ -272,7 +272,7 @@ protected Set<Resource> doFindPathMatchingJarResources(Resource rootDirResource,
    String rootEntryPath;
    boolean closeJarFile;
 
-   // 是否是 jar 连接
+   // 是否是 jar 链接
    if (con instanceof JarURLConnection) {
       // Should usually be the case for traditional JAR files.
       JarURLConnection jarCon = (JarURLConnection) con;

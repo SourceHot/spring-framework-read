@@ -398,7 +398,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		// 事务对象转换,转换目标是JpaTransactionObject
 		JpaTransactionObject txObject = (JpaTransactionObject) transaction;
 
-		// 事务对象有连接持有器
+		// 事务对象有链接持有器
 		// 同步事务标记为false
 		if (txObject.hasConnectionHolder() && !txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
 			throw new IllegalTransactionStateException(
@@ -445,10 +445,10 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			// Register the JPA EntityManager's JDBC Connection for the DataSource, if set.
 			// 数据源不为空的情况下
 			if (getDataSource() != null) {
-				// 获取连接处理器
+				// 获取链接处理器
 				ConnectionHandle conHandle = getJpaDialect().getJdbcConnection(em, definition.isReadOnly());
 				if (conHandle != null) {
-					// 创建连接持有器,持有的是连接处理器
+					// 创建链接持有器,持有的是链接处理器
 					ConnectionHolder conHolder = new ConnectionHolder(conHandle);
 					// 设置超时时间
 					if (timeoutToUse != TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -459,7 +459,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 					}
 					// 进行资源绑定
 					TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
-					// 设置连接持有器
+					// 设置链接持有器
 					txObject.setConnectionHolder(conHolder);
 				}
 				else {

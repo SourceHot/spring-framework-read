@@ -170,7 +170,7 @@ public static void closeMessageProducer(@Nullable MessageProducer producer) {
             // JMS 资源信息
             JmsResourceHolder resourceHolder = null;
             if (connectionFactory != null) {
-                // 从连接对象中获取JMS 资源信息
+                // 从链接对象中获取JMS 资源信息
                 resourceHolder = (JmsResourceHolder) TransactionSynchronizationManager.getResource(connectionFactory);
             }
             if (resourceHolder != null && resourceHolder.hasTimeout()) {

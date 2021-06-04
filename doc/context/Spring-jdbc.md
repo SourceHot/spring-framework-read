@@ -132,20 +132,20 @@
           <property name="initialSize" value="1"/>
           <property name="minIdle" value="1"/>
   
-          <!-- 配置获取连接等待超时的时间 -->
+          <!-- 配置获取链接等待超时的时间 -->
           <property name="maxWait" value="60000"/>
   
-          <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+          <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲链接，单位是毫秒 -->
           <property name="timeBetweenEvictionRunsMillis" value="60000"/>
   
-          <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+          <!-- 配置一个链接在池中最小生存的时间，单位是毫秒 -->
           <property name="minEvictableIdleTimeMillis" value="300000"/>
   
           <property name="testWhileIdle" value="true"/>
           <property name="testOnBorrow" value="false"/>
           <property name="testOnReturn" value="false"/>
   
-          <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+          <!-- 打开PSCache，并且指定每个链接上PSCache的大小 -->
           <property name="poolPreparedStatements" value="true"/>
           <property name="maxOpenPreparedStatements" value="20"/>
       </bean>
@@ -213,7 +213,7 @@
             conHolder.requested();
             if (!conHolder.hasConnection()) {
                 logger.debug("Fetching resumed JDBC Connection from DataSource");
-                // 设置连接对象
+                // 设置链接对象
                 conHolder.setConnection(fetchConnection(dataSource));
             }
             return conHolder.getConnection();
@@ -292,7 +292,7 @@ public static void doReleaseConnection(@Nullable Connection con, @Nullable DataS
             ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
             if (conHolder != null && connectionEquals(conHolder, con)) {
                 // It's the transactional Connection: Don't close it.
-                // 连接数-1
+                // 链接数-1
                 conHolder.released();
                 return;
             }

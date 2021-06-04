@@ -110,21 +110,41 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
-
+	/**
+	 * Session 工厂
+	 */
 	@Nullable
 	private SessionFactory sessionFactory;
 
+	/**
+	 * 数据源
+	 */
 	@Nullable
 	private DataSource dataSource;
 
+	/**
+	 * 是否自动检测数据源
+	 */
 	private boolean autodetectDataSource = true;
 
+	/**
+	 * 是否准备链接
+	 */
 	private boolean prepareConnection = true;
 
+	/**
+	 * 是否允许允许访问所有结果
+	 */
 	private boolean allowResultAccessAfterCompletion = false;
 
+	/**
+	 * session 获取方式
+	 */
 	private boolean hibernateManagedSession = false;
 
+	/**
+	 *
+	 */
 	@Nullable
 	private Object entityInterceptor;
 
@@ -446,24 +466,29 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	@Override
 	@SuppressWarnings("deprecation")
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
+		// 事务对象转换,转换目标HibernateTransactionObject
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
 		if (txObject.hasConnectionHolder() && !txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
 			throw new IllegalTransactionStateException(
 					"Pre-bound JDBC Connection found! HibernateTransactionManager does not support " +
-					"running within DataSourceTransactionManager if told to manage the DataSource itself. " +
-					"It is recommended to use a single HibernateTransactionManager for all transactions " +
-					"on a single DataSource, no matter whether Hibernate or JDBC access.");
+							"running within DataSourceTransactionManager if told to manage the DataSource itself. " +
+							"It is recommended to use a single HibernateTransactionManager for all transactions " +
+							"on a single DataSource, no matter whether Hibernate or JDBC access.");
 		}
 
 		Session session = null;
 
 		try {
+			// 为事务对象系进行可能需要的session设置
 			if (!txObject.hasSessionHolder() || txObject.getSessionHolder().isSynchronizedWithTransaction()) {
+				// 获取实体拦截器
 				Interceptor entityInterceptor = getEntityInterceptor();
+				// 创建session
 				Session newSession = (entityInterceptor != null ?
 						obtainSessionFactory().withOptions().interceptor(entityInterceptor).openSession() :
 						obtainSessionFactory().openSession());
+
 				if (logger.isDebugEnabled()) {
 					logger.debug("Opened new Session [" + newSession + "] for Hibernate transaction");
 				}
@@ -473,7 +498,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			session = txObject.getSessionHolder().getSession();
 
 			boolean holdabilityNeeded = this.allowResultAccessAfterCompletion && !txObject.isNewSession();
+			// 是否为默认的事务隔离级别
 			boolean isolationLevelNeeded = (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT);
+
+			// 链接对象处理
 			if (holdabilityNeeded || isolationLevelNeeded || definition.isReadOnly()) {
 				if (this.prepareConnection && isSameConnectionForEntireSession(session)) {
 					// We're allowed to change the transaction settings of the JDBC Connection.
@@ -498,8 +526,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 						// We should set a specific isolation level but are not allowed to...
 						throw new InvalidIsolationLevelException(
 								"HibernateTransactionManager is not allowed to support custom isolation levels: " +
-								"make sure that its 'prepareConnection' flag is on (the default) and that the " +
-								"Hibernate connection release mode is set to 'on_close' (the default for JDBC).");
+										"make sure that its 'prepareConnection' flag is on (the default) and that the " +
+										"Hibernate connection release mode is set to 'on_close' (the default for JDBC).");
 					}
 					if (logger.isDebugEnabled()) {
 						logger.debug("Not preparing JDBC Connection of Hibernate Session [" + session + "]");
@@ -507,6 +535,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				}
 			}
 
+			// 设置刷新模式和是否只读
 			if (definition.isReadOnly() && txObject.isNewSession()) {
 				// Just set to MANUAL in case of a new Session for this transaction.
 				session.setFlushMode(FlushMode.MANUAL);
@@ -526,6 +555,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			Transaction hibTx;
 
 			// Register transaction timeout.
+			// 超时时间相关处理
 			int timeout = determineTimeout(definition);
 			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
 				// Use Hibernate's own transaction timeout mechanism on Hibernate 3.1+
@@ -543,6 +573,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			txObject.getSessionHolder().setTransaction(hibTx);
 
 			// Register the Hibernate Session's JDBC Connection for the DataSource, if set.
+			// 链接持有器相关处理
 			if (getDataSource() != null) {
 				SessionImplementor sessionImpl = (SessionImplementor) session;
 				// The following needs to use a lambda expression instead of a method reference
@@ -560,9 +591,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 
 			// Bind the session holder to the thread.
+			// 资源绑定
 			if (txObject.isNewSessionHolder()) {
 				TransactionSynchronizationManager.bindResource(obtainSessionFactory(), txObject.getSessionHolder());
 			}
+			// 同步事务标记设置
 			txObject.getSessionHolder().setSynchronizedWithTransaction(true);
 		}
 
