@@ -77,84 +77,164 @@ import org.springframework.util.ClassUtils;
  */
 public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 		implements FactoryBean<SessionFactory>, ResourceLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean {
-
+	/**
+	 * 数据源
+	 */
 	@Nullable
 	private DataSource dataSource;
 
+	/**
+	 * 配置资源集合
+	 */
 	@Nullable
 	private Resource[] configLocations;
 
+	/**
+	 * 映射资源集合
+	 */
 	@Nullable
 	private String[] mappingResources;
 
+	/**
+	 * 映射资源集合
+	 */
 	@Nullable
 	private Resource[] mappingLocations;
 
+	/**
+	 * 缓存的映射资源集合
+	 */
 	@Nullable
 	private Resource[] cacheableMappingLocations;
 
+	/**
+	 *映射资源集合,主要用于jar
+	 */
 	@Nullable
 	private Resource[] mappingJarLocations;
 
+	/**
+	 *映射资源集合,主要用于文件夹
+	 */
 	@Nullable
 	private Resource[] mappingDirectoryLocations;
 
+	/**
+	 *实体拦截器
+	 */
 	@Nullable
 	private Interceptor entityInterceptor;
 
+	/**
+	 * 隐式命名策略类
+	 */
 	@Nullable
 	private ImplicitNamingStrategy implicitNamingStrategy;
 
+	/**
+	 * 显示命名策略
+	 */
 	@Nullable
 	private PhysicalNamingStrategy physicalNamingStrategy;
 
+	/**
+	 *事务管理器
+	 */
 	@Nullable
 	private Object jtaTransactionManager;
 
+	/**
+	 * 缓存工厂
+	 */
 	@Nullable
 	private RegionFactory cacheRegionFactory;
 
+	/**
+	 * 多租户的连接器
+	 */
 	@Nullable
 	private MultiTenantConnectionProvider multiTenantConnectionProvider;
 
+	/**
+	 * 当前租户的解析器
+	 */
 	@Nullable
 	private CurrentTenantIdentifierResolver currentTenantIdentifierResolver;
 
+	/**
+	 * hibernate属性表
+	 */
 	@Nullable
 	private Properties hibernateProperties;
 
+	/**
+	 * 实体类型过滤器
+	 */
 	@Nullable
 	private TypeFilter[] entityTypeFilters;
 
+	/**
+	 * 注解类列表
+	 */
 	@Nullable
 	private Class<?>[] annotatedClasses;
 
+	/**
+	 * 注解包路径
+	 */
 	@Nullable
 	private String[] annotatedPackages;
 
+	/**
+	 * 扫描路径
+	 */
 	@Nullable
 	private String[] packagesToScan;
 
+	/**
+	 * 执行器
+	 */
 	@Nullable
 	private AsyncTaskExecutor bootstrapExecutor;
 
+	/**
+	 * hibernate拦截器
+	 */
 	@Nullable
 	private Integrator[] hibernateIntegrators;
 
+	/**
+	 *
+	 */
 	private boolean metadataSourcesAccessed = false;
 
+	/**
+	 * 元数据源
+	 */
 	@Nullable
 	private MetadataSources metadataSources;
 
+	/**
+	 * 资源解析器
+	 */
 	@Nullable
 	private ResourcePatternResolver resourcePatternResolver;
 
+	/**
+	 * Bean工厂
+	 */
 	@Nullable
 	private ConfigurableListableBeanFactory beanFactory;
 
+	/**
+	 * 配置对象
+	 */
 	@Nullable
 	private Configuration configuration;
 
+	/**
+	 * session 工厂
+	 */
 	@Nullable
 	private SessionFactory sessionFactory;
 
@@ -319,17 +399,6 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
-	 * Set Hibernate properties, such as "hibernate.dialect".
-	 * <p>Note: Do not specify a transaction provider here when using
-	 * Spring-driven transactions. It is also advisable to omit connection
-	 * provider settings and use a Spring-set DataSource instead.
-	 * @see #setDataSource
-	 */
-	public void setHibernateProperties(Properties hibernateProperties) {
-		this.hibernateProperties = hibernateProperties;
-	}
-
-	/**
 	 * Return the Hibernate properties, if any. Mainly available for
 	 * configuration through property paths that specify individual keys.
 	 */
@@ -338,6 +407,17 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 			this.hibernateProperties = new Properties();
 		}
 		return this.hibernateProperties;
+	}
+
+	/**
+	 * Set Hibernate properties, such as "hibernate.dialect".
+	 * <p>Note: Do not specify a transaction provider here when using
+	 * Spring-driven transactions. It is also advisable to omit connection
+	 * provider settings and use a Spring-set DataSource instead.
+	 * @see #setDataSource
+	 */
+	public void setHibernateProperties(Properties hibernateProperties) {
+		this.hibernateProperties = hibernateProperties;
 	}
 
 	/**
@@ -408,19 +488,6 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
-	 * Specify a Hibernate {@link MetadataSources} service to use (e.g. reusing an
-	 * existing one), potentially populated with a custom Hibernate bootstrap
-	 * {@link org.hibernate.service.ServiceRegistry} as well.
-	 * @since 4.3
-	 * @see MetadataSources#MetadataSources(ServiceRegistry)
-	 * @see BootstrapServiceRegistryBuilder#build()
-	 */
-	public void setMetadataSources(MetadataSources metadataSources) {
-		this.metadataSourcesAccessed = true;
-		this.metadataSources = metadataSources;
-	}
-
-	/**
 	 * Determine the Hibernate {@link MetadataSources} to use.
 	 * <p>Can also be externally called to initialize and pre-populate a {@link MetadataSources}
 	 * instance which is then going to be used for {@link SessionFactory} building.
@@ -446,12 +513,16 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
-	 * Specify a Spring {@link ResourceLoader} to use for Hibernate metadata.
-	 * @param resourceLoader the ResourceLoader to use (never {@code null})
+	 * Specify a Hibernate {@link MetadataSources} service to use (e.g. reusing an
+	 * existing one), potentially populated with a custom Hibernate bootstrap
+	 * {@link org.hibernate.service.ServiceRegistry} as well.
+	 * @since 4.3
+	 * @see MetadataSources#MetadataSources(ServiceRegistry)
+	 * @see BootstrapServiceRegistryBuilder#build()
 	 */
-	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
+	public void setMetadataSources(MetadataSources metadataSources) {
+		this.metadataSourcesAccessed = true;
+		this.metadataSources = metadataSources;
 	}
 
 	/**
@@ -464,6 +535,15 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 			this.resourcePatternResolver = new PathMatchingResourcePatternResolver();
 		}
 		return this.resourcePatternResolver;
+	}
+
+	/**
+	 * Specify a Spring {@link ResourceLoader} to use for Hibernate metadata.
+	 * @param resourceLoader the ResourceLoader to use (never {@code null})
+	 */
+	@Override
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
 
 	/**
@@ -487,14 +567,17 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 	@Override
 	public void afterPropertiesSet() throws IOException {
+		//
 		if (this.metadataSources != null && !this.metadataSourcesAccessed) {
 			// Repeated initialization with no user-customized MetadataSources -> clear it.
 			this.metadataSources = null;
 		}
 
+		// 创建 本地session工厂构造器
 		LocalSessionFactoryBuilder sfb = new LocalSessionFactoryBuilder(
 				this.dataSource, getResourceLoader(), getMetadataSources());
 
+		// 配置资源
 		if (this.configLocations != null) {
 			for (Resource resource : this.configLocations) {
 				// Load Hibernate configuration from given location.
@@ -502,6 +585,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 			}
 		}
 
+		// 映射资源
 		if (this.mappingResources != null) {
 			// Register given Hibernate mapping definitions, contained in resource files.
 			for (String mapping : this.mappingResources) {

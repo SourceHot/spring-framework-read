@@ -24,7 +24,6 @@ public class HibernateConf {
 		sessionFactory.setPackagesToScan(
 				"com.github.source.hot.data.model");
 		sessionFactory.setHibernateProperties(hibernateProperties());
-
 		return sessionFactory;
 	}
 
@@ -50,8 +49,6 @@ public class HibernateConf {
 		Properties hibernateProperties = new Properties();
 		hibernateProperties.setProperty(
 				"hibernate.hbm2ddl.auto", "update");
-		hibernateProperties.setProperty(
-				"hibernate.dialect", "org.hibernate.dialect.H2Dialect");
 		hibernateProperties.setProperty(
 				"hibernate.hibernate.hbm2ddl.auto", "update");
 		return hibernateProperties;
