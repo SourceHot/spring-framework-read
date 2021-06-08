@@ -83,6 +83,8 @@ public interface HibernateOperations {
 	 * {@link HibernateTransactionManager}. Generally, callback code must not
 	 * touch any {@code Session} lifecycle methods, like close,
 	 * disconnect, or reconnect, to let the template do its work.
+	 *
+	 * 执行方法
 	 * @param action callback object that specifies the Hibernate action
 	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException in case of Hibernate errors
@@ -104,6 +106,8 @@ public interface HibernateOperations {
 	 * {@link org.hibernate.Session#get(Class, Serializable)} for convenience.
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
+	 *
+	 * 根据ID获取实体
 	 * @param entityClass a persistent class
 	 * @param id the identifier of the persistent instance
 	 * @return the persistent instance, or {@code null} if not found
@@ -121,6 +125,7 @@ public interface HibernateOperations {
 	 * {@link org.hibernate.Session#get(Class, Serializable, LockMode)} for convenience.
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
+	 * 获取实体
 	 * @param entityClass a persistent class
 	 * @param id the identifier of the persistent instance
 	 * @param lockMode the lock mode to obtain
@@ -260,6 +265,7 @@ public interface HibernateOperations {
 
 	/**
 	 * Re-read the state of the given persistent instance.
+	 * 刷新给定实体
 	 * @param entity the persistent instance to re-read
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#refresh(Object)
@@ -269,6 +275,7 @@ public interface HibernateOperations {
 	/**
 	 * Re-read the state of the given persistent instance.
 	 * Obtains the specified lock mode for the instance.
+	 * 刷新给定实体
 	 * @param entity the persistent instance to re-read
 	 * @param lockMode the lock mode to obtain
 	 * @throws DataAccessException in case of Hibernate errors
@@ -278,6 +285,7 @@ public interface HibernateOperations {
 
 	/**
 	 * Check whether the given object is in the Session cache.
+	 * 判断实体师傅在缓存中。
 	 * @param entity the persistence instance to check
 	 * @return whether the given object is in the Session cache
 	 * @throws DataAccessException if there is a Hibernate error
@@ -287,6 +295,7 @@ public interface HibernateOperations {
 
 	/**
 	 * Remove the given object from the {@link org.hibernate.Session} cache.
+	 * 从缓存中删除该实体
 	 * @param entity the persistent instance to evict
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#evict
@@ -295,6 +304,7 @@ public interface HibernateOperations {
 
 	/**
 	 * Force initialization of a Hibernate proxy or persistent collection.
+	 * 强制初始化 Hibernate 代理或持久集合
 	 * @param proxy a proxy for a persistent object or a persistent collection
 	 * @throws DataAccessException if we can't initialize the proxy, for example
 	 * because it is not associated with an active Session
@@ -305,6 +315,7 @@ public interface HibernateOperations {
 	/**
 	 * Return an enabled Hibernate {@link Filter} for the given filter name.
 	 * The returned {@code Filter} instance can be used to set filter parameters.
+	 * 根据过滤器名称返回过滤器对象
 	 * @param filterName the name of the filter
 	 * @return the enabled Hibernate {@code Filter} (either already
 	 * enabled or enabled on the fly by this operation)
@@ -432,6 +443,8 @@ public interface HibernateOperations {
 	/**
 	 * Persist the state of the given detached instance according to the
 	 * given replication mode, reusing the current identifier value.
+	 *
+	 * 根据给定的复制模式保持给定分离实例的状态，重用当前标识符值。
 	 * @param entity the persistent object to replicate
 	 * @param replicationMode the Hibernate ReplicationMode
 	 * @throws DataAccessException in case of Hibernate errors
@@ -484,6 +497,8 @@ public interface HibernateOperations {
 	 * registering Spring's {@code IdTransferringMergeEventListener} if
 	 * you would like to have newly assigned ids transferred to the original
 	 * object graph too.
+	 *
+	 * 将给定对象的状态复制到具有相同标识符的持久对象上
 	 * @param entity the object to merge with the corresponding persistence instance
 	 * @return the updated, registered persistent instance
 	 * @throws DataAccessException in case of Hibernate errors

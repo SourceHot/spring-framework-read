@@ -89,51 +89,67 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.orm.hibernate5.support.OpenSessionInViewInterceptor
  */
 public class HibernateTemplate implements HibernateOperations, InitializingBean {
-
+	/**
+	 * 创建查询的函数。
+	 */
 	private static final Method createQueryMethod;
 
+	/**
+	 *获取查询名称的函数。
+	 */
 	private static final Method getNamedQueryMethod;
-
-	static {
-		// Hibernate 5.2's createQuery method declares a new subtype as return type,
-		// so we need to use reflection for binary compatibility with 5.0/5.1 here.
-		try {
-			createQueryMethod = Session.class.getMethod("createQuery", String.class);
-			getNamedQueryMethod = Session.class.getMethod("getNamedQuery", String.class);
-		}
-		catch (NoSuchMethodException ex) {
-			throw new IllegalStateException("Incompatible Hibernate Session API", ex);
-		}
-	}
-
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * session工厂。
+	 */
 	@Nullable
 	private SessionFactory sessionFactory;
 
+	/**
+	 * hibernate 过滤器名称。
+	 */
 	@Nullable
 	private String[] filterNames;
 
+	/**
+	 * 是否是本地session。
+	 */
 	private boolean exposeNativeSession = false;
 
+	/**
+	 * 是否需要在写操作的情况下检查Session是否处于只读模式。
+	 */
 	private boolean checkWriteOperations = true;
 
+	/**
+	 * 是否缓存此模板执行的所有查询。
+	 */
 	private boolean cacheQueries = false;
 
+	/**
+	 * 模板执行的查询的缓存区域的名称。
+	 */
 	@Nullable
 	private String queryCacheRegion;
 
+	/**
+	 * 提取大小。
+	 */
 	private int fetchSize = 0;
 
+	/**
+	 * 最大返回值数量。
+	 */
 	private int maxResults = 0;
-
 
 	/**
 	 * Create a new HibernateTemplate instance.
 	 */
 	public HibernateTemplate() {
 	}
+
 
 	/**
 	 * Create a new HibernateTemplate instance.
@@ -144,13 +160,16 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		afterPropertiesSet();
 	}
 
+	@Deprecated
+	@SuppressWarnings({"rawtypes", "deprecation"})
+	private static org.hibernate.Query queryObject(@Nullable Object result) {
+		Assert.state(result != null, "No Hibernate Query");
+		return (org.hibernate.Query) result;
+	}
 
-	/**
-	 * Set the Hibernate SessionFactory that should be used to create
-	 * Hibernate Sessions.
-	 */
-	public void setSessionFactory(@Nullable  SessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
+	private static <T> T nonNull(@Nullable T result) {
+		Assert.state(result != null, "No result");
+		return result;
 	}
 
 	/**
@@ -160,6 +179,14 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	@Nullable
 	public SessionFactory getSessionFactory() {
 		return this.sessionFactory;
+	}
+
+	/**
+	 * Set the Hibernate SessionFactory that should be used to create
+	 * Hibernate Sessions.
+	 */
+	public void setSessionFactory(@Nullable SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
 	}
 
 	/**
@@ -175,6 +202,14 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	/**
+	 * Return the names of Hibernate filters to be activated, if any.
+	 */
+	@Nullable
+	public String[] getFilterNames() {
+		return this.filterNames;
+	}
+
+	/**
 	 * Set one or more names of Hibernate filters to be activated for all
 	 * Sessions that this accessor works with.
 	 * <p>Each of those filters will be enabled at the beginning of each
@@ -184,16 +219,16 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * @see #enableFilters(Session)
 	 * @see Session#enableFilter(String)
 	 */
-	public void setFilterNames(@Nullable  String... filterNames) {
+	public void setFilterNames(@Nullable String... filterNames) {
 		this.filterNames = filterNames;
 	}
 
 	/**
-	 * Return the names of Hibernate filters to be activated, if any.
+	 * Return whether to expose the native Hibernate Session to
+	 * HibernateCallback code, or rather a Session proxy.
 	 */
-	@Nullable
-	public String[] getFilterNames() {
-		return this.filterNames;
+	public boolean isExposeNativeSession() {
+		return this.exposeNativeSession;
 	}
 
 	/**
@@ -214,11 +249,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	/**
-	 * Return whether to expose the native Hibernate Session to
-	 * HibernateCallback code, or rather a Session proxy.
+	 * Return whether to check that the Hibernate Session is not in read-only
+	 * mode in case of write operations (save/update/delete).
 	 */
-	public boolean isExposeNativeSession() {
-		return this.exposeNativeSession;
+	public boolean isCheckWriteOperations() {
+		return this.checkWriteOperations;
 	}
 
 	/**
@@ -235,11 +270,10 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	/**
-	 * Return whether to check that the Hibernate Session is not in read-only
-	 * mode in case of write operations (save/update/delete).
+	 * Return whether to cache all queries executed by this template.
 	 */
-	public boolean isCheckWriteOperations() {
-		return this.checkWriteOperations;
+	public boolean isCacheQueries() {
+		return this.cacheQueries;
 	}
 
 	/**
@@ -258,10 +292,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	/**
-	 * Return whether to cache all queries executed by this template.
+	 * Return the name of the cache region for queries executed by this template.
 	 */
-	public boolean isCacheQueries() {
-		return this.cacheQueries;
+	@Nullable
+	public String getQueryCacheRegion() {
+		return this.queryCacheRegion;
 	}
 
 	/**
@@ -279,11 +314,10 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	/**
-	 * Return the name of the cache region for queries executed by this template.
+	 * Return the fetch size specified for this HibernateTemplate.
 	 */
-	@Nullable
-	public String getQueryCacheRegion() {
-		return this.queryCacheRegion;
+	public int getFetchSize() {
+		return this.fetchSize;
 	}
 
 	/**
@@ -298,10 +332,10 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	/**
-	 * Return the fetch size specified for this HibernateTemplate.
+	 * Return the maximum number of rows specified for this HibernateTemplate.
 	 */
-	public int getFetchSize() {
-		return this.fetchSize;
+	public int getMaxResults() {
+		return this.maxResults;
 	}
 
 	/**
@@ -316,20 +350,12 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		this.maxResults = maxResults;
 	}
 
-	/**
-	 * Return the maximum number of rows specified for this HibernateTemplate.
-	 */
-	public int getMaxResults() {
-		return this.maxResults;
-	}
-
 	@Override
 	public void afterPropertiesSet() {
 		if (getSessionFactory() == null) {
 			throw new IllegalArgumentException("Property 'sessionFactory' is required");
 		}
 	}
-
 
 	@Override
 	@Nullable
@@ -364,31 +390,42 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	protected <T> T doExecute(HibernateCallback<T> action, boolean enforceNativeSession) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
+		// hibernate session 对象
 		Session session = null;
+		// 是否是一个新的session
 		boolean isNew = false;
 		try {
+			// 从session工厂中获取session对象
 			session = obtainSessionFactory().getCurrentSession();
 		}
 		catch (HibernateException ex) {
 			logger.debug("Could not retrieve pre-bound Hibernate session", ex);
 		}
+		// 经过session工厂打开session对象
 		if (session == null) {
 			session = obtainSessionFactory().openSession();
+			// 设置推送模式
 			session.setFlushMode(FlushMode.MANUAL);
+			// 将是否是新的session标记设置为true
 			isNew = true;
 		}
 
 		try {
+			// 应用session过滤器
 			enableFilters(session);
+			//  确定session对象 , 主要是进行代理对象的创建
 			Session sessionToExpose =
 					(enforceNativeSession || isExposeNativeSession() ? session : createSessionProxy(session));
+			// 回调执行
 			return action.doInHibernate(sessionToExpose);
 		}
 		catch (HibernateException ex) {
+			// 异常转换
 			throw SessionFactoryUtils.convertHibernateAccessException(ex);
 		}
 		catch (PersistenceException ex) {
 			if (ex.getCause() instanceof HibernateException) {
+				// 异常转换
 				throw SessionFactoryUtils.convertHibernateAccessException((HibernateException) ex.getCause());
 			}
 			throw ex;
@@ -398,10 +435,13 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			throw ex;
 		}
 		finally {
+			// 如果是新session
 			if (isNew) {
+				// 关闭session
 				SessionFactoryUtils.closeSession(session);
 			}
 			else {
+				// 摧毁应用的过滤器
 				disableFilters(session);
 			}
 		}
@@ -437,6 +477,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 	}
 
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for loading individual objects
+	//-------------------------------------------------------------------------
+
 	/**
 	 * Disable the specified filters on the given Session.
 	 * @param session the current Hibernate Session
@@ -451,11 +496,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			}
 		}
 	}
-
-
-	//-------------------------------------------------------------------------
-	// Convenience methods for loading individual objects
-	//-------------------------------------------------------------------------
 
 	@Override
 	@Nullable
@@ -540,7 +580,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	@Override
 	@SuppressWarnings({"unchecked", "deprecation"})
 	public <T> List<T> loadAll(final Class<T> entityClass) throws DataAccessException {
-		return nonNull(executeWithNativeSession((HibernateCallback<List<T>>) session -> {
+		return nonNull(executeWithNativeSession(session -> {
 			Criteria criteria = session.createCriteria(entityClass);
 			criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 			prepareCriteria(criteria);
@@ -600,6 +640,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 	}
 
+
+	//-------------------------------------------------------------------------
+	// Convenience methods for storing individual objects
+	//-------------------------------------------------------------------------
+
 	@Override
 	public Filter enableFilter(String filterName) throws IllegalStateException {
 		Session session = obtainSessionFactory().getCurrentSession();
@@ -609,11 +654,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 		return filter;
 	}
-
-
-	//-------------------------------------------------------------------------
-	// Convenience methods for storing individual objects
-	//-------------------------------------------------------------------------
 
 	@Override
 	public void lock(final Object entity, final LockMode lockMode) throws DataAccessException {
@@ -816,6 +856,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		});
 	}
 
+
+	//-------------------------------------------------------------------------
+	// Convenience finder methods for detached criteria
+	//-------------------------------------------------------------------------
+
 	@Override
 	public void clear() throws DataAccessException {
 		executeWithNativeSession(session -> {
@@ -823,11 +868,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			return null;
 		});
 	}
-
-
-	//-------------------------------------------------------------------------
-	// Convenience finder methods for detached criteria
-	//-------------------------------------------------------------------------
 
 	@Override
 	public List<?> findByCriteria(DetachedCriteria criteria) throws DataAccessException {
@@ -840,7 +880,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			throws DataAccessException {
 
 		Assert.notNull(criteria, "DetachedCriteria must not be null");
-		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
+		return nonNull(executeWithNativeSession(session -> {
 			Criteria executableCriteria = criteria.getExecutableCriteria(session);
 			prepareCriteria(executableCriteria);
 			if (firstResult >= 0) {
@@ -868,6 +908,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		return findByExample(null, exampleEntity, firstResult, maxResults);
 	}
 
+
+	//-------------------------------------------------------------------------
+	// Convenience finder methods for HQL strings
+	//-------------------------------------------------------------------------
+
 	@Override
 	@SuppressWarnings({"unchecked", "deprecation"})
 	public <T> List<T> findByExample(
@@ -875,7 +920,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			throws DataAccessException {
 
 		Assert.notNull(exampleEntity, "Example entity must not be null");
-		return nonNull(executeWithNativeSession((HibernateCallback<List<T>>) session -> {
+		return nonNull(executeWithNativeSession(session -> {
 			Criteria executableCriteria = (entityName != null ?
 					session.createCriteria(entityName) : session.createCriteria(exampleEntity.getClass()));
 			executableCriteria.add(Example.create(exampleEntity));
@@ -890,16 +935,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}));
 	}
 
-
-	//-------------------------------------------------------------------------
-	// Convenience finder methods for HQL strings
-	//-------------------------------------------------------------------------
-
 	@Deprecated
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 	public List<?> find(final String queryString, @Nullable final Object... values) throws DataAccessException {
-		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
+		return nonNull(executeWithNativeSession(session -> {
 			org.hibernate.Query queryObject = queryObject(
 					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
 			prepareQuery(queryObject);
@@ -929,28 +969,13 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		if (paramNames.length != values.length) {
 			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
-		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
+		return nonNull(executeWithNativeSession(session -> {
 			org.hibernate.Query queryObject = queryObject(
 					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
 			prepareQuery(queryObject);
 			for (int i = 0; i < values.length; i++) {
 				applyNamedParameterToQuery(queryObject, paramNames[i], values[i]);
 			}
-			return queryObject.list();
-		}));
-	}
-
-	@Deprecated
-	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
-	public List<?> findByValueBean(final String queryString, final Object valueBean)
-			throws DataAccessException {
-
-		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
-			org.hibernate.Query queryObject = queryObject(
-					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
-			prepareQuery(queryObject);
-			queryObject.setProperties(valueBean);
 			return queryObject.list();
 		}));
 	}
@@ -963,8 +988,23 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	@Deprecated
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
+	public List<?> findByValueBean(final String queryString, final Object valueBean)
+			throws DataAccessException {
+
+		return nonNull(executeWithNativeSession(session -> {
+			org.hibernate.Query queryObject = queryObject(
+					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
+			prepareQuery(queryObject);
+			queryObject.setProperties(valueBean);
+			return queryObject.list();
+		}));
+	}
+
+	@Deprecated
+	@Override
+	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 	public List<?> findByNamedQuery(final String queryName, @Nullable final Object... values) throws DataAccessException {
-		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
+		return nonNull(executeWithNativeSession(session -> {
 			org.hibernate.Query queryObject = queryObject(
 					ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName));
 			prepareQuery(queryObject);
@@ -995,7 +1035,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		if (values != null && (paramNames == null || paramNames.length != values.length)) {
 			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
-		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
+		return nonNull(executeWithNativeSession(session -> {
 			org.hibernate.Query queryObject = (org.hibernate.Query)
 					nonNull(ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName));
 			prepareQuery(queryObject);
@@ -1008,13 +1048,18 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}));
 	}
 
+
+	//-------------------------------------------------------------------------
+	// Convenience query methods for iteration and bulk updates/deletes
+	//-------------------------------------------------------------------------
+
 	@Deprecated
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 	public List<?> findByNamedQueryAndValueBean(final String queryName, final Object valueBean)
 			throws DataAccessException {
 
-		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
+		return nonNull(executeWithNativeSession(session -> {
 			org.hibernate.Query queryObject = queryObject(
 					ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName));
 			prepareQuery(queryObject);
@@ -1023,16 +1068,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}));
 	}
 
-
-	//-------------------------------------------------------------------------
-	// Convenience query methods for iteration and bulk updates/deletes
-	//-------------------------------------------------------------------------
-
 	@Deprecated
 	@Override
 	@SuppressWarnings({"rawtypes", "deprecation"})
 	public Iterator<?> iterate(final String queryString, @Nullable final Object... values) throws DataAccessException {
-		return nonNull(executeWithNativeSession((HibernateCallback<Iterator<?>>) session -> {
+		return nonNull(executeWithNativeSession(session -> {
 			org.hibernate.Query queryObject = queryObject(
 					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
 			prepareQuery(queryObject);
@@ -1056,6 +1096,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 	}
 
+
+	//-------------------------------------------------------------------------
+	// Helper methods used by the operations above
+	//-------------------------------------------------------------------------
+
 	@Deprecated
 	@Override
 	@SuppressWarnings({"rawtypes", "deprecation"})
@@ -1075,11 +1120,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		return result;
 	}
 
-
-	//-------------------------------------------------------------------------
-	// Helper methods used by the operations above
-	//-------------------------------------------------------------------------
-
 	/**
 	 * Check whether write operations are allowed on the given Session.
 	 * <p>Default implementation throws an InvalidDataAccessApiUsageException in
@@ -1093,8 +1133,8 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	protected void checkWriteOperationAllowed(Session session) throws InvalidDataAccessApiUsageException {
 		if (isCheckWriteOperations() && SessionFactoryUtils.getFlushMode(session).lessThan(FlushMode.COMMIT)) {
 			throw new InvalidDataAccessApiUsageException(
-					"Write operations are not allowed in read-only mode (FlushMode.MANUAL): "+
-					"Turn your Session into FlushMode.COMMIT/AUTO or remove 'readOnly' marker from transaction definition.");
+					"Write operations are not allowed in read-only mode (FlushMode.MANUAL): " +
+							"Turn your Session into FlushMode.COMMIT/AUTO or remove 'readOnly' marker from transaction definition.");
 		}
 	}
 
@@ -1178,19 +1218,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 	}
 
-	@Deprecated
-	@SuppressWarnings({"rawtypes", "deprecation"})
-	private static org.hibernate.Query queryObject(@Nullable Object result) {
-		Assert.state(result != null, "No Hibernate Query");
-		return (org.hibernate.Query) result;
-	}
-
-	private static <T> T nonNull(@Nullable T result) {
-		Assert.state(result != null, "No result");
-		return result;
-	}
-
-
 	/**
 	 * Invocation handler that suppresses close calls on Hibernate Sessions.
 	 * Also prepares returned Query and Criteria objects.
@@ -1241,6 +1268,18 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
 			}
+		}
+	}
+
+	static {
+		// Hibernate 5.2's createQuery method declares a new subtype as return type,
+		// so we need to use reflection for binary compatibility with 5.0/5.1 here.
+		try {
+			createQueryMethod = Session.class.getMethod("createQuery", String.class);
+			getNamedQueryMethod = Session.class.getMethod("getNamedQuery", String.class);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("Incompatible Hibernate Session API", ex);
 		}
 	}
 
