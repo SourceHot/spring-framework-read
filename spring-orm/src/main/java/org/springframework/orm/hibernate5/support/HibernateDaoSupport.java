@@ -55,6 +55,9 @@ import org.springframework.util.Assert;
  */
 public abstract class HibernateDaoSupport extends DaoSupport {
 
+	/**
+	 * hibernate 操作模板
+	 */
 	@Nullable
 	private HibernateTemplate hibernateTemplate;
 

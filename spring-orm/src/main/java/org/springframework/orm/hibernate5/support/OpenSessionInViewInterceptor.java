@@ -74,22 +74,19 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	 * Suffix that gets appended to the {@code SessionFactory}
 	 * {@code toString()} representation for the "participate in existing
 	 * session handling" request attribute.
+	 *
+	 * 后缀
 	 * @see #getParticipateAttributeName
 	 */
 	public static final String PARTICIPATE_SUFFIX = ".PARTICIPATE";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * session 工厂
+	 */
 	@Nullable
 	private SessionFactory sessionFactory;
-
-
-	/**
-	 * Set the Hibernate SessionFactory that should be used to create Hibernate Sessions.
-	 */
-	public void setSessionFactory(@Nullable SessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
-	}
 
 	/**
 	 * Return the Hibernate SessionFactory that should be used to create Hibernate Sessions.
@@ -97,6 +94,13 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	@Nullable
 	public SessionFactory getSessionFactory() {
 		return this.sessionFactory;
+	}
+
+	/**
+	 * Set the Hibernate SessionFactory that should be used to create Hibernate Sessions.
+	 */
+	public void setSessionFactory(@Nullable SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
 	}
 
 	private SessionFactory obtainSessionFactory() {
@@ -112,26 +116,38 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	 */
 	@Override
 	public void preHandle(WebRequest request) throws DataAccessException {
+		// 获取key ,key的组装方式是 SessionFactory.toString + .PARTICIPATE
 		String key = getParticipateAttributeName();
+		// 获取异步管理器
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		// 存在结果 并且绑定成功
 		if (asyncManager.hasConcurrentResult() && applySessionBindingInterceptor(asyncManager, key)) {
 			return;
 		}
 
+		// 事务管理器中存在当前session工厂对应的资源
 		if (TransactionSynchronizationManager.hasResource(obtainSessionFactory())) {
 			// Do not modify the Session: just mark the request accordingly.
+			// 获取count属性
 			Integer count = (Integer) request.getAttribute(key, WebRequest.SCOPE_REQUEST);
+			// 确定count的具体数据
 			int newCount = (count != null ? count + 1 : 1);
+			// 设置 count 数据给request
 			request.setAttribute(getParticipateAttributeName(), newCount, WebRequest.SCOPE_REQUEST);
 		}
 		else {
 			logger.debug("Opening Hibernate Session in OpenSessionInViewInterceptor");
+			// 开启session
 			Session session = openSession();
+			// 创建 session 持有器
 			SessionHolder sessionHolder = new SessionHolder(session);
+			// 进行资源绑定
 			TransactionSynchronizationManager.bindResource(obtainSessionFactory(), sessionHolder);
 
+			// 创建请求拦截器
 			AsyncRequestInterceptor asyncRequestInterceptor =
 					new AsyncRequestInterceptor(obtainSessionFactory(), sessionHolder);
+			// 网络管理器进行注册
 			asyncManager.registerCallableInterceptor(key, asyncRequestInterceptor);
 			asyncManager.registerDeferredResultInterceptor(key, asyncRequestInterceptor);
 		}
@@ -147,21 +163,28 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	 */
 	@Override
 	public void afterCompletion(WebRequest request, @Nullable Exception ex) throws DataAccessException {
+		// 减少计数项
 		if (!decrementParticipateCount(request)) {
+			// 获取session持有对象
 			SessionHolder sessionHolder =
 					(SessionHolder) TransactionSynchronizationManager.unbindResource(obtainSessionFactory());
 			logger.debug("Closing Hibernate Session in OpenSessionInViewInterceptor");
+			// 关闭session
 			SessionFactoryUtils.closeSession(sessionHolder.getSession());
 		}
 	}
 
 	private boolean decrementParticipateCount(WebRequest request) {
+		// 获取属性, key
 		String participateAttributeName = getParticipateAttributeName();
+		// 获取 count 属性
 		Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
+		// 为空则返回false
 		if (count == null) {
 			return false;
 		}
 		// Do not modify the Session: just clear the marker.
+		// 大于1时的处理
 		if (count > 1) {
 			request.setAttribute(participateAttributeName, count - 1, WebRequest.SCOPE_REQUEST);
 		}
@@ -205,7 +228,7 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	 * of the {@code SessionFactory} instance and appends {@link #PARTICIPATE_SUFFIX}.
 	 */
 	protected String getParticipateAttributeName() {
-		return obtainSessionFactory().toString() + PARTICIPATE_SUFFIX;
+		return obtainSessionFactory() + PARTICIPATE_SUFFIX;
 	}
 
 	private boolean applySessionBindingInterceptor(WebAsyncManager asyncManager, String key) {

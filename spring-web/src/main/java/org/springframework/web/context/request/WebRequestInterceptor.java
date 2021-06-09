@@ -52,6 +52,8 @@ public interface WebRequestInterceptor {
 	 * Intercept the execution of a request handler <i>before</i> its invocation.
 	 * <p>Allows for preparing context resources (such as a Hibernate Session)
 	 * and expose them as request attributes or as thread-local objects.
+	 *
+	 * 在调用之前拦截请求处理程序的执行。
 	 * @param request the current web request
 	 * @throws Exception in case of errors
 	 */
@@ -76,6 +78,7 @@ public interface WebRequestInterceptor {
 	 * for proper resource cleanup.
 	 * <p>Note: Will only be called if this interceptor's {@code preHandle}
 	 * method has successfully completed!
+	 * 请求处理完成后的回调，即渲染视图后。该方法会在preHandle之后执行
 	 * @param request the current web request
 	 * @param ex exception thrown on handler execution, if any
 	 * @throws Exception in case of errors

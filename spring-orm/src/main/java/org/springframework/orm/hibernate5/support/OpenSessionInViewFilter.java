@@ -85,6 +85,13 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
 	private String sessionFactoryBeanName = DEFAULT_SESSION_FACTORY_BEAN_NAME;
 
+	/**
+	 * Return the bean name of the SessionFactory to fetch from Spring's
+	 * root application context.
+	 */
+	protected String getSessionFactoryBeanName() {
+		return this.sessionFactoryBeanName;
+	}
 
 	/**
 	 * Set the bean name of the SessionFactory to fetch from Spring's
@@ -94,15 +101,6 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	public void setSessionFactoryBeanName(String sessionFactoryBeanName) {
 		this.sessionFactoryBeanName = sessionFactoryBeanName;
 	}
-
-	/**
-	 * Return the bean name of the SessionFactory to fetch from Spring's
-	 * root application context.
-	 */
-	protected String getSessionFactoryBeanName() {
-		return this.sessionFactoryBeanName;
-	}
-
 
 	/**
 	 * Returns "false" so that the filter may re-bind the opened Hibernate
@@ -128,40 +126,54 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
+		// 从容器中获取session工厂
 		SessionFactory sessionFactory = lookupSessionFactory(request);
 		boolean participate = false;
 
+
+		// 获取异步管理器
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		// 获取属性key
 		String key = getAlreadyFilteredAttributeName();
 
+		// session 工厂存在对应的资源
 		if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
 			// Do not modify the Session: just set the participate flag.
 			participate = true;
 		}
+		// session工厂不存在对应的资源
 		else {
+			// 是否是异步请求
 			boolean isFirstRequest = !isAsyncDispatch(request);
 			if (isFirstRequest || !applySessionBindingInterceptor(asyncManager, key)) {
 				logger.debug("Opening Hibernate Session in OpenSessionInViewFilter");
+				// 开启 session
 				Session session = openSession(sessionFactory);
+				// 创建 session持有器
 				SessionHolder sessionHolder = new SessionHolder(session);
+				// 进行资源绑定
 				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 
 				AsyncRequestInterceptor interceptor = new AsyncRequestInterceptor(sessionFactory, sessionHolder);
+				// 进行注册操作
 				asyncManager.registerCallableInterceptor(key, interceptor);
 				asyncManager.registerDeferredResultInterceptor(key, interceptor);
 			}
 		}
 
 		try {
+			// 过滤链对象向下执行
 			filterChain.doFilter(request, response);
 		}
 
 		finally {
 			if (!participate) {
+				// 解绑sessionFactory对应的资源
 				SessionHolder sessionHolder =
 						(SessionHolder) TransactionSynchronizationManager.unbindResource(sessionFactory);
 				if (!isAsyncStarted(request)) {
 					logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
+					// 关闭session对象
 					SessionFactoryUtils.closeSession(sessionHolder.getSession());
 				}
 			}

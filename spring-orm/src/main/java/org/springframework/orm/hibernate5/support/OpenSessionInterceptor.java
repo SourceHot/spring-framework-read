@@ -79,23 +79,33 @@ public class OpenSessionInterceptor implements MethodInterceptor, InitializingBe
 
 	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
+		// 获取 session 工厂
 		SessionFactory sf = getSessionFactory();
 		Assert.state(sf != null, "No SessionFactory set");
 
+		// 判断 session 工厂是否存在对应资源
+		// 不存在的情况下处理
 		if (!TransactionSynchronizationManager.hasResource(sf)) {
 			// New Session to be bound for the current method's scope...
+			// 打开session
 			Session session = openSession(sf);
 			try {
+				// 进行资源绑定
 				TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
+				// 执行方法
 				return invocation.proceed();
 			}
 			finally {
+				// 关闭session
 				SessionFactoryUtils.closeSession(session);
+				// 解绑资源
 				TransactionSynchronizationManager.unbindResource(sf);
 			}
 		}
+		// 存在的情况下处理
 		else {
 			// Pre-bound Session found -> simply proceed.
+			// 方法处理
 			return invocation.proceed();
 		}
 	}
