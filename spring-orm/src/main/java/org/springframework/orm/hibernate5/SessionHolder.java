@@ -39,19 +39,27 @@ import org.springframework.orm.jpa.EntityManagerHolder;
  * @see SessionFactoryUtils
  */
 public class SessionHolder extends EntityManagerHolder {
-
+	/**
+	 * session 对象
+	 */
 	private final Session session;
 
+	/**
+	 * 事务对象
+	 */
 	@Nullable
 	private Transaction transaction;
 
+	/**
+	 * 刷新方式
+	 */
 	@Nullable
 	private FlushMode previousFlushMode;
 
 
 	public SessionHolder(Session session) {
 		// Check below is always true against Hibernate >= 5.2 but not against 5.0/5.1 at runtime
-		super(EntityManager.class.isInstance(session) ? session : null);
+		super(session instanceof EntityManager ? session : null);
 		this.session = session;
 	}
 
@@ -60,18 +68,14 @@ public class SessionHolder extends EntityManagerHolder {
 		return this.session;
 	}
 
-	public void setTransaction(@Nullable Transaction transaction) {
-		this.transaction = transaction;
-		setTransactionActive(transaction != null);
-	}
-
 	@Nullable
 	public Transaction getTransaction() {
 		return this.transaction;
 	}
 
-	public void setPreviousFlushMode(@Nullable FlushMode previousFlushMode) {
-		this.previousFlushMode = previousFlushMode;
+	public void setTransaction(@Nullable Transaction transaction) {
+		this.transaction = transaction;
+		setTransactionActive(transaction != null);
 	}
 
 	@Nullable
@@ -79,6 +83,9 @@ public class SessionHolder extends EntityManagerHolder {
 		return this.previousFlushMode;
 	}
 
+	public void setPreviousFlushMode(@Nullable FlushMode previousFlushMode) {
+		this.previousFlushMode = previousFlushMode;
+	}
 
 	@Override
 	public void clear() {

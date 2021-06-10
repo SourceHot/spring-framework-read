@@ -78,8 +78,14 @@ public final class SpringBeanContainer implements BeanContainer {
 
 	private static final Log logger = LogFactory.getLog(SpringBeanContainer.class);
 
+	/**
+	 *  bean factory.
+	 */
 	private final ConfigurableListableBeanFactory beanFactory;
 
+	/**
+	 * bean 缓存
+	 */
 	private final Map<Object, SpringContainedBean<?>> beanCache = new ConcurrentReferenceHashMap<>();
 
 
@@ -99,14 +105,18 @@ public final class SpringBeanContainer implements BeanContainer {
 			Class<B> beanType, LifecycleOptions lifecycleOptions, BeanInstanceProducer fallbackProducer) {
 
 		SpringContainedBean<?> bean;
+		// 是否允许缓存
 		if (lifecycleOptions.canUseCachedReferences()) {
 			bean = this.beanCache.get(beanType);
 			if (bean == null) {
+				// 创建bean
 				bean = createBean(beanType, lifecycleOptions, fallbackProducer);
+				// 设置缓存
 				this.beanCache.put(beanType, bean);
 			}
 		}
 		else {
+			// 创建 bean
 			bean = createBean(beanType, lifecycleOptions, fallbackProducer);
 		}
 		return (SpringContainedBean<B>) bean;
@@ -142,6 +152,7 @@ public final class SpringBeanContainer implements BeanContainer {
 			Class<?> beanType, LifecycleOptions lifecycleOptions, BeanInstanceProducer fallbackProducer) {
 
 		try {
+
 			if (lifecycleOptions.useJpaCompliantCreation()) {
 				return new SpringContainedBean<>(
 						this.beanFactory.createBean(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false),

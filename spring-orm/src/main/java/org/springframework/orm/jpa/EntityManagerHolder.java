@@ -39,12 +39,20 @@ import org.springframework.util.Assert;
  * @see EntityManagerFactoryUtils
  */
 public class EntityManagerHolder extends ResourceHolderSupport {
-
+	/**
+	 * 实体管理器
+	 */
 	@Nullable
 	private final EntityManager entityManager;
 
+	/**
+	 * 事务是否处于活跃状态
+	 */
 	private boolean transactionActive;
 
+	/**
+	 * 保存点管理器
+	 */
 	@Nullable
 	private SavepointManager savepointManager;
 
