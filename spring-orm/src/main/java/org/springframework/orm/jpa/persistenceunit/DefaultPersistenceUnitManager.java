@@ -90,88 +90,144 @@ import org.springframework.util.ResourceUtils;
 public class DefaultPersistenceUnitManager
 		implements PersistenceUnitManager, ResourceLoaderAware, LoadTimeWeaverAware, InitializingBean {
 
-	private static final String CLASS_RESOURCE_PATTERN = "/**/*.class";
-
-	private static final String PACKAGE_INFO_SUFFIX = ".package-info";
-
-	private static final String DEFAULT_ORM_XML_RESOURCE = "META-INF/orm.xml";
-
-	private static final String PERSISTENCE_XML_FILENAME = "persistence.xml";
-
-	/**
-	 * Default location of the {@code persistence.xml} file:
-	 * "classpath*:META-INF/persistence.xml".
-	 */
-	public static final String DEFAULT_PERSISTENCE_XML_LOCATION = "classpath*:META-INF/" + PERSISTENCE_XML_FILENAME;
-
 	/**
 	 * Default location for the persistence unit root URL:
 	 * "classpath:", indicating the root of the classpath.
+	 * 根路径前缀
 	 */
 	public static final String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_ROOT_LOCATION = "classpath:";
 
 	/**
 	 * Default persistence unit name.
+	 * 默认持久化单元名称
 	 */
 	public static final String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME = "default";
 
+	/**
+	 * 类匹配规则
+	 */
+	private static final String CLASS_RESOURCE_PATTERN = "/**/*.class";
 
+	/**
+	 * package-info后缀
+	 */
+	private static final String PACKAGE_INFO_SUFFIX = ".package-info";
+
+	/**
+	 * 默认orm资源地址
+	 */
+	private static final String DEFAULT_ORM_XML_RESOURCE = "META-INF/orm.xml";
+
+	/**
+	 * hibernate中的持久化文件名
+	 */
+	private static final String PERSISTENCE_XML_FILENAME = "persistence.xml";
+
+	/**
+	 * Default location of the {@code persistence.xml} file:
+	 * "classpath*:META-INF/persistence.xml".
+	 *
+	 * 默认的hibernate持久化文件存储位置
+	 */
+	public static final String DEFAULT_PERSISTENCE_XML_LOCATION = "classpath*:META-INF/" + PERSISTENCE_XML_FILENAME;
+
+	/**
+	 * 注解类型过滤器
+	 */
 	private static final Set<AnnotationTypeFilter> entityTypeFilters;
-
-	static {
-		entityTypeFilters = new LinkedHashSet<>(8);
-		entityTypeFilters.add(new AnnotationTypeFilter(Entity.class, false));
-		entityTypeFilters.add(new AnnotationTypeFilter(Embeddable.class, false));
-		entityTypeFilters.add(new AnnotationTypeFilter(MappedSuperclass.class, false));
-		entityTypeFilters.add(new AnnotationTypeFilter(Converter.class, false));
-	}
-
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 持久化单元名称
+	 */
+	private final Set<String> persistenceUnitInfoNames = new HashSet<>();
+
+	/**
+	 * 持久单元信息
+	 */
+	private final Map<String, PersistenceUnitInfo> persistenceUnitInfos = new HashMap<>();
+
+	/**
+	 * 持久化xml文件地址
+	 */
 	private String[] persistenceXmlLocations = new String[] {DEFAULT_PERSISTENCE_XML_LOCATION};
 
+	/**
+	 * 默认持久化文件保存根路径
+	 */
 	@Nullable
 	private String defaultPersistenceUnitRootLocation = ORIGINAL_DEFAULT_PERSISTENCE_UNIT_ROOT_LOCATION;
 
+	/**
+	 * 默认持久化单元名称
+	 */
 	@Nullable
 	private String defaultPersistenceUnitName = ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME;
 
+	/**
+	 * 包扫描路径
+	 */
 	@Nullable
 	private String[] packagesToScan;
 
+	/**
+	 * 映射资源
+	 */
 	@Nullable
 	private String[] mappingResources;
 
+	/**
+	 * 缓存共享模式
+	 */
 	@Nullable
 	private SharedCacheMode sharedCacheMode;
 
+	/**
+	 * 验证模式
+	 */
 	@Nullable
 	private ValidationMode validationMode;
 
+	/**
+	 * 数据源查找器
+	 */
 	private DataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
 
+	/**
+	 * 默认数据源
+	 */
 	@Nullable
 	private DataSource defaultDataSource;
 
+	/**
+	 * 默认JTA数据源
+	 */
 	@Nullable
 	private DataSource defaultJtaDataSource;
 
+	/**
+	 * 持久单元后置处理器
+	 */
 	@Nullable
 	private PersistenceUnitPostProcessor[] persistenceUnitPostProcessors;
 
+	/**
+	 * loadTimeWeaver
+	 */
 	@Nullable
 	private LoadTimeWeaver loadTimeWeaver;
 
+	/**
+	 * 资源解析器
+	 */
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
+	/**
+	 * 候选索引
+	 */
 	@Nullable
 	private CandidateComponentsIndex componentsIndex;
-
-	private final Set<String> persistenceUnitInfoNames = new HashSet<>();
-
-	private final Map<String, PersistenceUnitInfo> persistenceUnitInfos = new HashMap<>();
-
 
 	/**
 	 * Specify the location of the {@code persistence.xml} files to load.
@@ -305,6 +361,16 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
+	 * Return the JDBC DataSourceLookup that provides DataSources for the
+	 * persistence provider, resolving data source names in {@code persistence.xml}
+	 * against Spring-managed DataSource instances.
+	 */
+	@Nullable
+	public DataSourceLookup getDataSourceLookup() {
+		return this.dataSourceLookup;
+	}
+
+	/**
 	 * Specify the JDBC DataSourceLookup that provides DataSources for the
 	 * persistence provider, resolving data source names in {@code persistence.xml}
 	 * against Spring-managed DataSource instances.
@@ -325,13 +391,12 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
-	 * Return the JDBC DataSourceLookup that provides DataSources for the
-	 * persistence provider, resolving data source names in {@code persistence.xml}
-	 * against Spring-managed DataSource instances.
+	 * Return the JDBC DataSource that the JPA persistence provider is supposed to use
+	 * for accessing the database if none has been specified in {@code persistence.xml}.
 	 */
 	@Nullable
-	public DataSourceLookup getDataSourceLookup() {
-		return this.dataSourceLookup;
+	public DataSource getDefaultDataSource() {
+		return this.defaultDataSource;
 	}
 
 	/**
@@ -348,12 +413,12 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
-	 * Return the JDBC DataSource that the JPA persistence provider is supposed to use
+	 * Return the JTA-aware DataSource that the JPA persistence provider is supposed to use
 	 * for accessing the database if none has been specified in {@code persistence.xml}.
 	 */
 	@Nullable
-	public DataSource getDefaultDataSource() {
-		return this.defaultDataSource;
+	public DataSource getDefaultJtaDataSource() {
+		return this.defaultJtaDataSource;
 	}
 
 	/**
@@ -370,12 +435,12 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
-	 * Return the JTA-aware DataSource that the JPA persistence provider is supposed to use
-	 * for accessing the database if none has been specified in {@code persistence.xml}.
+	 * Return the PersistenceUnitPostProcessors to be applied to each
+	 * PersistenceUnitInfo that has been parsed by this manager.
 	 */
 	@Nullable
-	public DataSource getDefaultJtaDataSource() {
-		return this.defaultJtaDataSource;
+	public PersistenceUnitPostProcessor[] getPersistenceUnitPostProcessors() {
+		return this.persistenceUnitPostProcessors;
 	}
 
 	/**
@@ -389,12 +454,12 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
-	 * Return the PersistenceUnitPostProcessors to be applied to each
-	 * PersistenceUnitInfo that has been parsed by this manager.
+	 * Return the Spring LoadTimeWeaver to use for class instrumentation according
+	 * to the JPA class transformer contract.
 	 */
 	@Nullable
-	public PersistenceUnitPostProcessor[] getPersistenceUnitPostProcessors() {
-		return this.persistenceUnitPostProcessors;
+	public LoadTimeWeaver getLoadTimeWeaver() {
+		return this.loadTimeWeaver;
 	}
 
 	/**
@@ -420,27 +485,19 @@ public class DefaultPersistenceUnitManager
 		this.loadTimeWeaver = loadTimeWeaver;
 	}
 
-	/**
-	 * Return the Spring LoadTimeWeaver to use for class instrumentation according
-	 * to the JPA class transformer contract.
-	 */
-	@Nullable
-	public LoadTimeWeaver getLoadTimeWeaver() {
-		return this.loadTimeWeaver;
-	}
-
 	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		this.componentsIndex = CandidateComponentsIndexLoader.loadIndex(resourceLoader.getClassLoader());
 	}
 
-
 	@Override
 	public void afterPropertiesSet() {
+		// loadTimeWeaver为空并且检查 Instrumentation 实例是否可用于当前 VM。
 		if (this.loadTimeWeaver == null && InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
 			this.loadTimeWeaver = new InstrumentationLoadTimeWeaver(this.resourcePatternResolver.getClassLoader());
 		}
+		// 处理持久单元信息
 		preparePersistenceUnitInfos();
 	}
 
@@ -454,41 +511,58 @@ public class DefaultPersistenceUnitManager
 	 * @see #obtainPersistenceUnitInfo(String)
 	 */
 	public void preparePersistenceUnitInfos() {
+		// 持久化单元名称清空
 		this.persistenceUnitInfoNames.clear();
+		// 持久单元信息清空
 		this.persistenceUnitInfos.clear();
 
+		// 读取持久单元信息
 		List<SpringPersistenceUnitInfo> puis = readPersistenceUnitInfos();
+		// 循环处理
 		for (SpringPersistenceUnitInfo pui : puis) {
+			// 设置持久单元根地址
 			if (pui.getPersistenceUnitRootUrl() == null) {
 				pui.setPersistenceUnitRootUrl(determineDefaultPersistenceUnitRootUrl());
 			}
+			// 设置 JTA 数据源
 			if (pui.getJtaDataSource() == null && this.defaultJtaDataSource != null) {
 				pui.setJtaDataSource(this.defaultJtaDataSource);
 			}
+			// 设置非 JTA 数据源
 			if (pui.getNonJtaDataSource() == null && this.defaultDataSource != null) {
 				pui.setNonJtaDataSource(this.defaultDataSource);
 			}
+			// 设置共享缓存模式
 			if (this.sharedCacheMode != null) {
 				pui.setSharedCacheMode(this.sharedCacheMode);
 			}
+			// 设置校验模式
 			if (this.validationMode != null) {
 				pui.setValidationMode(this.validationMode);
 			}
+			// 根据loadTimeWeaver进行初始化
 			if (this.loadTimeWeaver != null) {
 				pui.init(this.loadTimeWeaver);
 			}
+			// 根据resourcePatternResolver进行初始化
 			else {
 				pui.init(this.resourcePatternResolver.getClassLoader());
 			}
+			// 处理持久单元信息
 			postProcessPersistenceUnitInfo(pui);
+			// 获取持久单元名称
 			String name = pui.getPersistenceUnitName();
+			// 添加持久单元名称不成功
+			// 不允许覆盖同名持久性单元
 			if (!this.persistenceUnitInfoNames.add(name) && !isPersistenceUnitOverrideAllowed()) {
+				// 组装异常消息
 				StringBuilder msg = new StringBuilder();
 				msg.append("Conflicting persistence unit definitions for name '").append(name).append("': ");
 				msg.append(pui.getPersistenceUnitRootUrl()).append(", ");
 				msg.append(this.persistenceUnitInfos.get(name).getPersistenceUnitRootUrl());
 				throw new IllegalStateException(msg.toString());
 			}
+			// 添加到持久单元信息映射中
 			this.persistenceUnitInfos.put(name, pui);
 		}
 	}
@@ -498,21 +572,32 @@ public class DefaultPersistenceUnitManager
 	 * as defined in the JPA specification.
 	 */
 	private List<SpringPersistenceUnitInfo> readPersistenceUnitInfos() {
+		// 结果集合
 		List<SpringPersistenceUnitInfo> infos = new LinkedList<>();
+		// 默认持久单元名称
 		String defaultName = this.defaultPersistenceUnitName;
+		// 是否需要建立默认单元
 		boolean buildDefaultUnit = (this.packagesToScan != null || this.mappingResources != null);
+		// 是否找到默认单元
 		boolean foundDefaultUnit = false;
 
+		// 持久单元读取器
 		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourcePatternResolver, this.dataSourceLookup);
+		// 读取器读取持久xml文件
 		SpringPersistenceUnitInfo[] readInfos = reader.readPersistenceUnitInfos(this.persistenceXmlLocations);
+		// 循环处理持久单元信息
 		for (SpringPersistenceUnitInfo readInfo : readInfos) {
+			// 结果集合中添加
 			infos.add(readInfo);
+			// 满足默认持久名称不为空并且当前处理的持久单元信息的持久名称和默认持久单元名称相同将是否找到默认单元标记为true
 			if (defaultName != null && defaultName.equals(readInfo.getPersistenceUnitName())) {
 				foundDefaultUnit = true;
 			}
 		}
 
+		// 是否允许构件默认单元
 		if (buildDefaultUnit) {
+			// 是否找到默认单元
 			if (foundDefaultUnit) {
 				if (logger.isWarnEnabled()) {
 					logger.warn("Found explicit default persistence unit with name '" + defaultName + "' in persistence.xml - " +
@@ -520,6 +605,7 @@ public class DefaultPersistenceUnitManager
 				}
 			}
 			else {
+				// 构件默认持久单元后加入数据集合
 				infos.add(buildDefaultPersistenceUnitInfo());
 			}
 		}
@@ -531,29 +617,36 @@ public class DefaultPersistenceUnitManager
 	 * @see #setPackagesToScan
 	 */
 	private SpringPersistenceUnitInfo buildDefaultPersistenceUnitInfo() {
+		// 持久单元信息
 		SpringPersistenceUnitInfo scannedUnit = new SpringPersistenceUnitInfo();
+		// 设置默认持久单元名称
 		if (this.defaultPersistenceUnitName != null) {
 			scannedUnit.setPersistenceUnitName(this.defaultPersistenceUnitName);
 		}
 		scannedUnit.setExcludeUnlistedClasses(true);
 
+		// 包扫描路径进行扫描
 		if (this.packagesToScan != null) {
 			for (String pkg : this.packagesToScan) {
 				scanPackage(scannedUnit, pkg);
 			}
 		}
 
+		// 添加映射资源
 		if (this.mappingResources != null) {
 			for (String mappingFileName : this.mappingResources) {
 				scannedUnit.addMappingFileName(mappingFileName);
 			}
 		}
 		else {
+			// 获取默认的orm xml资源
 			Resource ormXml = getOrmXmlForDefaultPersistenceUnit();
 			if (ormXml != null) {
+				// 添加映射资源
 				scannedUnit.addMappingFileName(DEFAULT_ORM_XML_RESOURCE);
 				if (scannedUnit.getPersistenceUnitRootUrl() == null) {
 					try {
+						// 设置持久单元根路径
 						scannedUnit.setPersistenceUnitRootUrl(
 								PersistenceUnitReader.determinePersistenceUnitRootUrl(ormXml));
 					}
@@ -568,36 +661,57 @@ public class DefaultPersistenceUnitManager
 	}
 
 	private void scanPackage(SpringPersistenceUnitInfo scannedUnit, String pkg) {
+		// 候选索引不为空
 		if (this.componentsIndex != null) {
+			// 候选集合
 			Set<String> candidates = new HashSet<>();
+			// 注解类型过滤器
 			for (AnnotationTypeFilter filter : entityTypeFilters) {
+				// 过滤器搜索
 				candidates.addAll(this.componentsIndex.getCandidateTypes(pkg, filter.getAnnotationType().getName()));
 			}
+			// 循环加入到managedClassNames集合中
 			candidates.forEach(scannedUnit::addManagedClassName);
+			// 获取package-info文件
 			Set<String> managedPackages = this.componentsIndex.getCandidateTypes(pkg, "package-info");
+			// 循环加入到managedClassNames集合中
 			managedPackages.forEach(scannedUnit::addManagedPackage);
 			return;
 		}
 
 		try {
+			// 字符串组装得到匹配路径
 			String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					ClassUtils.convertClassNameToResourcePath(pkg) + CLASS_RESOURCE_PATTERN;
+			// 通过资源匹配路径搜索资源对象
 			Resource[] resources = this.resourcePatternResolver.getResources(pattern);
+			// 元数据读取工厂
 			MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
 			for (Resource resource : resources) {
+				// 资源是否可读
 				if (resource.isReadable()) {
+					// 创建元数据读取器
 					MetadataReader reader = readerFactory.getMetadataReader(resource);
+					// 类名
 					String className = reader.getClassMetadata().getClassName();
+					// 判断是否匹配
 					if (matchesFilter(reader, readerFactory)) {
+						// 加入到扫描集合中
 						scannedUnit.addManagedClassName(className);
+						// 持久单元根路径为空
 						if (scannedUnit.getPersistenceUnitRootUrl() == null) {
+							// 从资源对象中获取URL对象
 							URL url = resource.getURL();
+							// 判断是否是jar协议
 							if (ResourceUtils.isJarURL(url)) {
+								// 设置持久单元根路径
 								scannedUnit.setPersistenceUnitRootUrl(ResourceUtils.extractJarFileURL(url));
 							}
 						}
 					}
+					// 如果文件名是 .package-info 结尾
 					else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
+						// 添加到managedPackages集合中
 						scannedUnit.addManagedPackage(
 								className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
 					}
@@ -667,7 +781,6 @@ public class DefaultPersistenceUnitManager
 		return null;
 	}
 
-
 	/**
 	 * Return the specified PersistenceUnitInfo from this manager's cache
 	 * of processed persistence units, keeping it in the cache (i.e. not
@@ -710,7 +823,6 @@ public class DefaultPersistenceUnitManager
 		return false;
 	}
 
-
 	@Override
 	public PersistenceUnitInfo obtainDefaultPersistenceUnitInfo() {
 		if (this.persistenceUnitInfoNames.isEmpty()) {
@@ -743,6 +855,14 @@ public class DefaultPersistenceUnitManager
 			}
 		}
 		return pui;
+	}
+
+	static {
+		entityTypeFilters = new LinkedHashSet<>(8);
+		entityTypeFilters.add(new AnnotationTypeFilter(Entity.class, false));
+		entityTypeFilters.add(new AnnotationTypeFilter(Embeddable.class, false));
+		entityTypeFilters.add(new AnnotationTypeFilter(MappedSuperclass.class, false));
+		entityTypeFilters.add(new AnnotationTypeFilter(Converter.class, false));
 	}
 
 }

@@ -45,50 +45,92 @@ import org.springframework.util.ClassUtils;
  * @since 2.0
  */
 public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
+	/**
+	 * 映射文件名称集合
+	 */
+	private final List<String> mappingFileNames = new LinkedList<>();
 
+	/**
+	 * 托管类名集合
+	 */
+	private final List<String> managedClassNames = new LinkedList<>();
+
+	/**
+	 * 托管包名集合
+	 */
+	private final List<String> managedPackages = new LinkedList<>();
+
+	/**
+	 * 持久单元名称
+	 */
 	@Nullable
 	private String persistenceUnitName;
 
+	/**
+	 * persistence.xml文件中的provider元素
+	 */
 	@Nullable
 	private String persistenceProviderClassName;
 
+	/**
+	 * 持久单元的事务类型
+	 */
 	@Nullable
 	private PersistenceUnitTransactionType transactionType;
 
+	/**
+	 * 非JTA数据源
+	 */
 	@Nullable
 	private DataSource nonJtaDataSource;
 
+	/**
+	 * JTA数据源
+	 */
 	@Nullable
 	private DataSource jtaDataSource;
 
-	private final List<String> mappingFileNames = new LinkedList<>();
+	/**
+	 * JAR协议的URL地址集合
+	 */
+	private final List<URL> jarFileUrls = new LinkedList<>();
 
-	private List<URL> jarFileUrls = new LinkedList<>();
-
+	/**
+	 * 持久单元根路径
+	 */
 	@Nullable
 	private URL persistenceUnitRootUrl;
 
-	private final List<String> managedClassNames = new LinkedList<>();
-
-	private final List<String> managedPackages = new LinkedList<>();
-
+	/**
+	 * 是否排除未列出的类
+	 */
 	private boolean excludeUnlistedClasses = false;
 
+	/**
+	 * 缓存拱秀模式
+	 */
 	private SharedCacheMode sharedCacheMode = SharedCacheMode.UNSPECIFIED;
 
+	/**
+	 * 验证模式
+	 */
 	private ValidationMode validationMode = ValidationMode.AUTO;
 
+	/**
+	 * 属性表
+	 */
 	private Properties properties = new Properties();
 
+	/**
+	 * 持久单元xml版本号
+	 */
 	private String persistenceXMLSchemaVersion = "2.0";
 
+	/**
+	 * 持久能力提供者的包名
+	 */
 	@Nullable
 	private String persistenceProviderPackageName;
-
-
-	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
-		this.persistenceUnitName = persistenceUnitName;
-	}
 
 	@Override
 	@Nullable
@@ -96,8 +138,8 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.persistenceUnitName;
 	}
 
-	public void setPersistenceProviderClassName(@Nullable String persistenceProviderClassName) {
-		this.persistenceProviderClassName = persistenceProviderClassName;
+	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
+		this.persistenceUnitName = persistenceUnitName;
 	}
 
 	@Override
@@ -106,8 +148,8 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.persistenceProviderClassName;
 	}
 
-	public void setTransactionType(PersistenceUnitTransactionType transactionType) {
-		this.transactionType = transactionType;
+	public void setPersistenceProviderClassName(@Nullable String persistenceProviderClassName) {
+		this.persistenceProviderClassName = persistenceProviderClassName;
 	}
 
 	@Override
@@ -121,8 +163,8 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		}
 	}
 
-	public void setJtaDataSource(@Nullable DataSource jtaDataSource) {
-		this.jtaDataSource = jtaDataSource;
+	public void setTransactionType(PersistenceUnitTransactionType transactionType) {
+		this.transactionType = transactionType;
 	}
 
 	@Override
@@ -131,14 +173,18 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.jtaDataSource;
 	}
 
-	public void setNonJtaDataSource(@Nullable DataSource nonJtaDataSource) {
-		this.nonJtaDataSource = nonJtaDataSource;
+	public void setJtaDataSource(@Nullable DataSource jtaDataSource) {
+		this.jtaDataSource = jtaDataSource;
 	}
 
 	@Override
 	@Nullable
 	public DataSource getNonJtaDataSource() {
 		return this.nonJtaDataSource;
+	}
+
+	public void setNonJtaDataSource(@Nullable DataSource nonJtaDataSource) {
+		this.nonJtaDataSource = nonJtaDataSource;
 	}
 
 	public void addMappingFileName(String mappingFileName) {
@@ -159,14 +205,14 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.jarFileUrls;
 	}
 
-	public void setPersistenceUnitRootUrl(@Nullable URL persistenceUnitRootUrl) {
-		this.persistenceUnitRootUrl = persistenceUnitRootUrl;
-	}
-
 	@Override
 	@Nullable
 	public URL getPersistenceUnitRootUrl() {
 		return this.persistenceUnitRootUrl;
+	}
+
+	public void setPersistenceUnitRootUrl(@Nullable URL persistenceUnitRootUrl) {
+		this.persistenceUnitRootUrl = persistenceUnitRootUrl;
 	}
 
 	/**
@@ -210,17 +256,13 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.excludeUnlistedClasses;
 	}
 
-	public void setSharedCacheMode(SharedCacheMode sharedCacheMode) {
-		this.sharedCacheMode = sharedCacheMode;
-	}
-
 	@Override
 	public SharedCacheMode getSharedCacheMode() {
 		return this.sharedCacheMode;
 	}
 
-	public void setValidationMode(ValidationMode validationMode) {
-		this.validationMode = validationMode;
+	public void setSharedCacheMode(SharedCacheMode sharedCacheMode) {
+		this.sharedCacheMode = sharedCacheMode;
 	}
 
 	@Override
@@ -228,8 +270,17 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.validationMode;
 	}
 
+	public void setValidationMode(ValidationMode validationMode) {
+		this.validationMode = validationMode;
+	}
+
 	public void addProperty(String name, String value) {
 		this.properties.setProperty(name, value);
+	}
+
+	@Override
+	public Properties getProperties() {
+		return this.properties;
 	}
 
 	public void setProperties(Properties properties) {
@@ -238,22 +289,12 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	}
 
 	@Override
-	public Properties getProperties() {
-		return this.properties;
-	}
-
-	public void setPersistenceXMLSchemaVersion(String persistenceXMLSchemaVersion) {
-		this.persistenceXMLSchemaVersion = persistenceXMLSchemaVersion;
-	}
-
-	@Override
 	public String getPersistenceXMLSchemaVersion() {
 		return this.persistenceXMLSchemaVersion;
 	}
 
-	@Override
-	public void setPersistenceProviderPackageName(@Nullable String persistenceProviderPackageName) {
-		this.persistenceProviderPackageName = persistenceProviderPackageName;
+	public void setPersistenceXMLSchemaVersion(String persistenceXMLSchemaVersion) {
+		this.persistenceXMLSchemaVersion = persistenceXMLSchemaVersion;
 	}
 
 	@Nullable
@@ -261,6 +302,10 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.persistenceProviderPackageName;
 	}
 
+	@Override
+	public void setPersistenceProviderPackageName(@Nullable String persistenceProviderPackageName) {
+		this.persistenceProviderPackageName = persistenceProviderPackageName;
+	}
 
 	/**
 	 * This implementation returns the default ClassLoader.
