@@ -46,12 +46,24 @@ class AsyncRequestInterceptor implements CallableProcessingInterceptor, Deferred
 
 	private static final Log logger = LogFactory.getLog(AsyncRequestInterceptor.class);
 
+	/**
+	 * 实体管理器工厂
+	 */
 	private final EntityManagerFactory emFactory;
 
+	/**
+	 * 实体管理器持有者
+	 */
 	private final EntityManagerHolder emHolder;
 
+	/**
+	 * 是否处于超时处理中
+	 */
 	private volatile boolean timeoutInProgress;
 
+	/**
+	 * 是否处于异常处理中
+	 */
 	private volatile boolean errorInProgress;
 
 

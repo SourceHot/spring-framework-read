@@ -69,21 +69,38 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Default EntityManagerFactory bean name: "entityManagerFactory".
 	 * Only applies when no "persistenceUnitName" param has been specified.
+	 * 默认的实体管理器工厂名称
 	 * @see #setEntityManagerFactoryBeanName
 	 * @see #setPersistenceUnitName
 	 */
 	public static final String DEFAULT_ENTITY_MANAGER_FACTORY_BEAN_NAME = "entityManagerFactory";
 
-
+	/**
+	 * 实体管理器工厂的bean名称
+	 */
 	@Nullable
 	private String entityManagerFactoryBeanName;
 
+	/**
+	 *持久单元名称看·
+	 */
 	@Nullable
 	private String persistenceUnitName;
 
+	/**
+	 *实体管理器工厂
+	 */
 	@Nullable
 	private volatile EntityManagerFactory entityManagerFactory;
 
+	/**
+	 * Return the bean name of the EntityManagerFactory to fetch from Spring's
+	 * root application context.
+	 */
+	@Nullable
+	protected String getEntityManagerFactoryBeanName() {
+		return this.entityManagerFactoryBeanName;
+	}
 
 	/**
 	 * Set the bean name of the EntityManagerFactory to fetch from Spring's
@@ -98,12 +115,11 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * Return the bean name of the EntityManagerFactory to fetch from Spring's
-	 * root application context.
+	 * Return the name of the persistence unit to access the EntityManagerFactory for, if any.
 	 */
 	@Nullable
-	protected String getEntityManagerFactoryBeanName() {
-		return this.entityManagerFactoryBeanName;
+	protected String getPersistenceUnitName() {
+		return this.persistenceUnitName;
 	}
 
 	/**
@@ -119,15 +135,6 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
 		this.persistenceUnitName = persistenceUnitName;
 	}
-
-	/**
-	 * Return the name of the persistence unit to access the EntityManagerFactory for, if any.
-	 */
-	@Nullable
-	protected String getPersistenceUnitName() {
-		return this.persistenceUnitName;
-	}
-
 
 	/**
 	 * Returns "false" so that the filter may re-bind the opened {@code EntityManager}
@@ -153,26 +160,38 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
+		// 确定实体管理器工厂
 		EntityManagerFactory emf = lookupEntityManagerFactory(request);
+		// 是否参加处理标记
 		boolean participate = false;
 
+		// 获取异步网络请求管理器
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		// 确定属性key
 		String key = getAlreadyFilteredAttributeName();
 
+		// 如果实体管理器工厂存在对应资源
 		if (TransactionSynchronizationManager.hasResource(emf)) {
 			// Do not modify the EntityManager: just set the participate flag.
 			participate = true;
 		}
+		// 如果实体管理器工厂不存在对应资源
 		else {
+			// 确定一个异步请求是否处于处理中
 			boolean isFirstRequest = !isAsyncDispatch(request);
 			if (isFirstRequest || !applyEntityManagerBindingInterceptor(asyncManager, key)) {
 				logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewFilter");
 				try {
+					// 创建实体管理器
 					EntityManager em = createEntityManager(emf);
+					// 创建实体管理器持有类
 					EntityManagerHolder emHolder = new EntityManagerHolder(em);
+					// 进行资源绑定
 					TransactionSynchronizationManager.bindResource(emf, emHolder);
 
+					// 创建拦截器
 					AsyncRequestInterceptor interceptor = new AsyncRequestInterceptor(emf, emHolder);
+					// key和拦截器注册
 					asyncManager.registerCallableInterceptor(key, interceptor);
 					asyncManager.registerDeferredResultInterceptor(key, interceptor);
 				}
@@ -183,15 +202,18 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 		}
 
 		try {
+			// 过滤链进行下一个过滤操作
 			filterChain.doFilter(request, response);
 		}
 
 		finally {
 			if (!participate) {
+				// 解绑资源
 				EntityManagerHolder emHolder = (EntityManagerHolder)
 						TransactionSynchronizationManager.unbindResource(emf);
 				if (!isAsyncStarted(request)) {
 					logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewFilter");
+					// 关闭实体管理器
 					EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());
 				}
 			}
