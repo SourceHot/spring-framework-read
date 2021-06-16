@@ -47,12 +47,21 @@ public abstract class EntityManagerFactoryAccessor implements BeanFactoryAware {
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 实体管理器工厂
+	 */
 	@Nullable
 	private EntityManagerFactory entityManagerFactory;
 
+	/**
+	 * 持久化单元名称
+	 */
 	@Nullable
 	private String persistenceUnitName;
 
+	/**
+	 * JPA 属性集合
+	 */
 	private final Map<String, Object> jpaPropertyMap = new HashMap<>();
 
 

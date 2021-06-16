@@ -173,32 +173,60 @@ import org.springframework.util.StringUtils;
 public class PersistenceAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor,
 		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware, Serializable {
+	/**
+	 * 注入的元数据缓存
+	 */
+	private final transient Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
 
+	/**
+	 * 拓展的实体资源管理器
+	 */
+	private final Map<Object, EntityManager> extendedEntityManagersToClose = new ConcurrentHashMap<>(16);
+
+	/**
+	 * jndi环境配置
+	 */
 	@Nullable
 	private Object jndiEnvironment;
 
+	/**
+	 * 资源引用标记
+	 */
 	private boolean resourceRef = true;
 
+	/**
+	 * 持久单元映射表
+	 */
 	@Nullable
 	private transient Map<String, String> persistenceUnits;
 
+	/**
+	 * 持久上下文映射表
+	 */
 	@Nullable
 	private transient Map<String, String> persistenceContexts;
 
+	/**
+	 * 拓展持久化上下文映射
+	 */
 	@Nullable
 	private transient Map<String, String> extendedPersistenceContexts;
 
+	/**
+	 * 默认的持久单元名称
+	 */
 	private transient String defaultPersistenceUnitName = "";
 
+	/**
+	 * 序号
+	 */
 	private int order = Ordered.LOWEST_PRECEDENCE - 4;
 
+	/**
+	 * bean工厂
+	 */
 	@Nullable
 	private transient ListableBeanFactory beanFactory;
-
-	private final transient Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
-
-	private final Map<Object, EntityManager> extendedEntityManagersToClose = new ConcurrentHashMap<>(16);
-
 
 	/**
 	 * Set the JNDI template to use for JNDI lookups.
@@ -314,13 +342,13 @@ public class PersistenceAnnotationBeanPostProcessor
 		this.defaultPersistenceUnitName = (unitName != null ? unitName : "");
 	}
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
 	@Override
 	public int getOrder() {
 		return this.order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 
 	@Override
@@ -354,8 +382,10 @@ public class PersistenceAnnotationBeanPostProcessor
 
 	@Override
 	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
+		// 寻找持久化元信息
 		InjectionMetadata metadata = findPersistenceMetadata(beanName, bean.getClass(), pvs);
 		try {
+			// 元信息注入
 			metadata.inject(bean, beanName, pvs);
 		}
 		catch (Throwable ex) {
@@ -396,17 +426,27 @@ public class PersistenceAnnotationBeanPostProcessor
 
 	private InjectionMetadata findPersistenceMetadata(String beanName, final Class<?> clazz, @Nullable PropertyValues pvs) {
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
+		// 确定缓存名称
+		// 1. beanName
+		// 2. 类名
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
 		// Quick check on the concurrent map first, with minimal locking.
+		// 从缓存中获取
 		InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
+		// 判断是否需要刷新
 		if (InjectionMetadata.needsRefresh(metadata, clazz)) {
 			synchronized (this.injectionMetadataCache) {
+				// 从缓存中获取
 				metadata = this.injectionMetadataCache.get(cacheKey);
+				// 判断是否需要刷新
 				if (InjectionMetadata.needsRefresh(metadata, clazz)) {
+					// 元数据不为空的情况下清理元数据
 					if (metadata != null) {
 						metadata.clear(pvs);
 					}
+					// 构建元数据对象
 					metadata = buildPersistenceMetadata(clazz);
+					// 置入缓存
 					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
 			}
@@ -415,16 +455,19 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 	private InjectionMetadata buildPersistenceMetadata(final Class<?> clazz) {
+		// 确定是否包含PersistenceContext、PersistenceUnit注解
 		if (!AnnotationUtils.isCandidateClass(clazz, Arrays.asList(PersistenceContext.class, PersistenceUnit.class))) {
 			return InjectionMetadata.EMPTY;
 		}
 
+		// 元数据集合
 		List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
 		Class<?> targetClass = clazz;
 
 		do {
 			final LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<>();
 
+			// 反射处理字段
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
 				if (field.isAnnotationPresent(PersistenceContext.class) ||
 						field.isAnnotationPresent(PersistenceUnit.class)) {

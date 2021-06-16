@@ -164,13 +164,19 @@ public abstract class SharedEntityManagerCreator {
 	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, @Nullable Map<?, ?> properties,
 			boolean synchronizedWithTransaction, Class<?>... entityManagerInterfaces) {
 
+		// 获取类加载器
 		ClassLoader cl = null;
 		if (emf instanceof EntityManagerFactoryInfo) {
+			// 从实体管理器工厂中获取类加载器
 			cl = ((EntityManagerFactoryInfo) emf).getBeanClassLoader();
 		}
+		// 创建类列表
 		Class<?>[] ifcs = new Class<?>[entityManagerInterfaces.length + 1];
+		// 类列表拷贝数据
 		System.arraycopy(entityManagerInterfaces, 0, ifcs, 0, entityManagerInterfaces.length);
+		// 最后一位设置EntityManagerProxy.class
 		ifcs[entityManagerInterfaces.length] = EntityManagerProxy.class;
+		// 代理类创建
 		return (EntityManager) Proxy.newProxyInstance(
 				(cl != null ? cl : SharedEntityManagerCreator.class.getClassLoader()),
 				ifcs, new SharedEntityManagerInvocationHandler(emf, properties, synchronizedWithTransaction));

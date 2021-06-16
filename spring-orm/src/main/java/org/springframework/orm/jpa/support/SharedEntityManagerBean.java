@@ -52,11 +52,20 @@ import org.springframework.util.Assert;
 public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 		implements FactoryBean<EntityManager>, InitializingBean {
 
+	/**
+	 * 类EntityManager
+	 */
 	@Nullable
 	private Class<? extends EntityManager> entityManagerInterface;
 
+	/**
+	 * 同步事务标记
+	 */
 	private boolean synchronizedWithTransaction = true;
 
+	/**
+	 * EntityManager
+	 */
 	@Nullable
 	private EntityManager shared;
 
@@ -85,13 +94,18 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 
 	@Override
 	public final void afterPropertiesSet() {
+		// 获取实体类管理工厂
 		EntityManagerFactory emf = getEntityManagerFactory();
+		// 为空抛出异常
 		if (emf == null) {
 			throw new IllegalArgumentException("'entityManagerFactory' or 'persistenceUnitName' is required");
 		}
+		// 实体类管理工程是EntityManagerFactoryInfo的情况下
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
+			// 成员变量entityManagerInterface为空
 			if (this.entityManagerInterface == null) {
+				// 赋值成员变量
 				this.entityManagerInterface = emfInfo.getEntityManagerInterface();
 				if (this.entityManagerInterface == null) {
 					this.entityManagerInterface = EntityManager.class;
@@ -103,6 +117,7 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 				this.entityManagerInterface = EntityManager.class;
 			}
 		}
+		// 创建实体管理器
 		this.shared = SharedEntityManagerCreator.createSharedEntityManager(
 				emf, getJpaPropertyMap(), this.synchronizedWithTransaction, this.entityManagerInterface);
 	}
