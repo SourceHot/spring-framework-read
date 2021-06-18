@@ -70,21 +70,42 @@ import org.springframework.util.xml.StaxUtils;
  */
 public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 
+	/**
+	 * 实体解析器
+	 */
 	private static final EntityResolver NO_OP_ENTITY_RESOLVER =
 			(publicId, systemId) -> new InputSource(new StringReader(""));
 
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 *文档生成器工厂的锁
+	 */
+	private final Object documentBuilderFactoryMonitor = new Object();
+
+	/**
+	 * 是否支持DTD文件描述
+	 */
 	private boolean supportDtd = false;
 
+	/**
+	 * 是否处理外部实体
+	 */
 	private boolean processExternalEntities = false;
 
+	/**
+	 * 文档生成工厂
+	 */
 	@Nullable
 	private DocumentBuilderFactory documentBuilderFactory;
 
-	private final Object documentBuilderFactoryMonitor = new Object();
-
+	/**
+	 * Return whether DTD parsing is supported.
+	 */
+	public boolean isSupportDtd() {
+		return this.supportDtd;
+	}
 
 	/**
 	 * Indicate whether DTD parsing should be supported.
@@ -95,10 +116,11 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
-	 * Return whether DTD parsing is supported.
+	 * Return whether XML external entities are allowed.
+	 * @see #createXmlReader()
 	 */
-	public boolean isSupportDtd() {
-		return this.supportDtd;
+	public boolean isProcessExternalEntities() {
+		return this.processExternalEntities;
 	}
 
 	/**
@@ -119,15 +141,6 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
-	 * Return whether XML external entities are allowed.
-	 * @see #createXmlReader()
-	 */
-	public boolean isProcessExternalEntities() {
-		return this.processExternalEntities;
-	}
-
-
-	/**
 	 * Build a new {@link Document} from this marshaller's {@link DocumentBuilderFactory},
 	 * as a placeholder for a DOM node.
 	 * @see #createDocumentBuilderFactory()
@@ -140,8 +153,10 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 				if (this.documentBuilderFactory == null) {
 					this.documentBuilderFactory = createDocumentBuilderFactory();
 				}
+				// 创建文档构建器
 				documentBuilder = createDocumentBuilder(this.documentBuilderFactory);
 			}
+			// 构建文档
 			return documentBuilder.newDocument();
 		}
 		catch (ParserConfigurationException ex) {
@@ -230,15 +245,19 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	@Override
 	public final void marshal(Object graph, Result result) throws IOException, XmlMappingException {
 		if (result instanceof DOMResult) {
+			// 处理DOMResult的模板方法。
 			marshalDomResult(graph, (DOMResult) result);
 		}
 		else if (StaxUtils.isStaxResult(result)) {
+			// 处理StaxResult的模板方法
 			marshalStaxResult(graph, result);
 		}
 		else if (result instanceof SAXResult) {
+			//处理SAXResult的模板方法
 			marshalSaxResult(graph, (SAXResult) result);
 		}
 		else if (result instanceof StreamResult) {
+			// 处理StreamResult的模板方法。
 			marshalStreamResult(graph, (StreamResult) result);
 		}
 		else {
@@ -349,15 +368,19 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	@Override
 	public final Object unmarshal(Source source) throws IOException, XmlMappingException {
 		if (source instanceof DOMSource) {
+			// 处理DOMSource的模板方法
 			return unmarshalDomSource((DOMSource) source);
 		}
 		else if (StaxUtils.isStaxSource(source)) {
+			// 处理 StaxSource 的模板方法
 			return unmarshalStaxSource(source);
 		}
 		else if (source instanceof SAXSource) {
+			// 用于处理SAXSource的模板方法。
 			return unmarshalSaxSource((SAXSource) source);
 		}
 		else if (source instanceof StreamSource) {
+			// 处理StreamSource的模板方法
 			return unmarshalStreamSource((StreamSource) source);
 		}
 		else {

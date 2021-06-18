@@ -119,6 +119,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 
 	/**
 	 * The default encoding used for stream access: UTF-8.
+	 * 默认编码
 	 */
 	public static final String DEFAULT_ENCODING = "UTF-8";
 

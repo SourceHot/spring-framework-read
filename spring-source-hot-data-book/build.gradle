@@ -14,6 +14,9 @@ dependencies {
     compile(project(":spring-jdbc"))
     compile(project(":spring-context"))
     compile(project(":spring-orm"))
+    compile(project(":spring-oxm"))
+    implementation 'com.thoughtworks.xstream:xstream:1.4.11.1'
+    implementation 'xmlpull:xmlpull:1.1.3.1'
     implementation 'mysql:mysql-connector-java:5.1.46'
     implementation 'org.apache.tomcat:tomcat-dbcp:9.0.1'
     implementation 'com.h2database:h2:1.3.164'
