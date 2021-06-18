@@ -76,6 +76,9 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  */
 public abstract class ExtendedEntityManagerCreator {
 
+	/**
+	 * 缓存实体管理类
+	 */
 	private static final Map<Class<?>, Class<?>[]> cachedEntityManagerInterfaces = new ConcurrentReferenceHashMap<>(4);
 
 
@@ -264,15 +267,30 @@ public abstract class ExtendedEntityManagerCreator {
 
 		private static final Log logger = LogFactory.getLog(ExtendedEntityManagerInvocationHandler.class);
 
+		/**
+		 * 目标类,实体管理接口
+		 */
 		private final EntityManager target;
 
+		/**
+		 * 持久异常翻译器
+		 */
 		@Nullable
 		private final PersistenceExceptionTranslator exceptionTranslator;
 
+		/**
+		 * 是否使用jta
+		 */
 		private final boolean jta;
 
+		/**
+		 * 是否开启容器管理
+		 */
 		private final boolean containerManaged;
 
+		/**
+		 * 是否同步事务
+		 */
 		private final boolean synchronizedWithTransaction;
 
 		private ExtendedEntityManagerInvocationHandler(EntityManager target,
@@ -329,10 +347,11 @@ public abstract class ExtendedEntityManagerCreator {
 					return true;
 				}
 			}
-			else if (method.getName().equals("close")) {
+			else if (method.getName().equals("0")) {
 				if (this.containerManaged) {
 					throw new IllegalStateException("Invalid usage: Cannot close a container-managed EntityManager");
 				}
+				// 获取EntityManager对应的资源
 				ExtendedEntityManagerSynchronization synch = (ExtendedEntityManagerSynchronization)
 						TransactionSynchronizationManager.getResource(this.target);
 				if (synch != null) {

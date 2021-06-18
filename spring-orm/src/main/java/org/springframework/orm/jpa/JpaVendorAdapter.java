@@ -40,6 +40,8 @@ public interface JpaVendorAdapter {
 
 	/**
 	 * Return the vendor-specific persistence provider.
+	 *
+	 * 获取持久提供者接口
 	 */
 	PersistenceProvider getPersistenceProvider();
 
@@ -47,6 +49,8 @@ public interface JpaVendorAdapter {
 	 * Return the name of the persistence provider's root package
 	 * (e.g. "oracle.toplink.essentials"). Will be used for
 	 * excluding provider classes from temporary class overriding.
+	 *
+	 * 返回持久性提供者的根包的名称
 	 * @since 2.5.2
 	 */
 	@Nullable
@@ -70,6 +74,8 @@ public interface JpaVendorAdapter {
 	 * Java SE style bootstrapping via {@link javax.persistence.Persistence}
 	 * (i.e. {@link LocalEntityManagerFactoryBean}), the parameter-less
 	 * {@link #getJpaPropertyMap()} variant will be called directly.
+	 *
+	 * 获取JPA属性表
 	 * @param pui the PersistenceUnitInfo for the current persistence unit
 	 * @return a Map of JPA properties, as accepted by the standard JPA bootstrap
 	 * facilities, or an empty Map if there are no properties to expose
@@ -87,6 +93,7 @@ public interface JpaVendorAdapter {
 	 * <p>Note that there might be further JPA properties defined on the
 	 * EntityManagerFactory bean, which might potentially override individual
 	 * JPA property values specified here.
+	 * 获取JPA属性表
 	 * @return a Map of JPA properties, as accepted by the standard JPA bootstrap
 	 * facilities, or an empty Map if there are no properties to expose
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, Map)
@@ -98,6 +105,8 @@ public interface JpaVendorAdapter {
 	/**
 	 * Return the vendor-specific JpaDialect implementation for this
 	 * provider, or {@code null} if there is none.
+	 *
+	 * 获取JPA方言
 	 */
 	@Nullable
 	default JpaDialect getJpaDialect() {
@@ -110,6 +119,7 @@ public interface JpaVendorAdapter {
 	 * <p>If the provider does not offer any EntityManagerFactory extensions,
 	 * the adapter should simply return the standard
 	 * {@link javax.persistence.EntityManagerFactory} class here.
+	 * 获取实体管理器工厂接口
 	 * @since 2.5.2
 	 */
 	default Class<? extends EntityManagerFactory> getEntityManagerFactoryInterface() {
@@ -122,6 +132,8 @@ public interface JpaVendorAdapter {
 	 * <p>If the provider does not offer any EntityManager extensions,
 	 * the adapter should simply return the standard
 	 * {@link javax.persistence.EntityManager} class here.
+	 *
+	 * 获取实体管理器接口
 	 */
 	default Class<? extends EntityManager> getEntityManagerInterface() {
 		return EntityManager.class;
@@ -133,6 +145,7 @@ public interface JpaVendorAdapter {
 	 * <p>This can be used for triggering vendor-specific initialization processes.
 	 * While this is not expected to be used for most providers, it is included
 	 * here as a general extension hook.
+	 * 对实体管理工厂进行后置处理
 	 */
 	default void postProcessEntityManagerFactory(EntityManagerFactory emf) {
 	}

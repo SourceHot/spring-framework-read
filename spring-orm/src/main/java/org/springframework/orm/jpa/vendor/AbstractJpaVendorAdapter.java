@@ -37,13 +37,25 @@ import org.springframework.orm.jpa.JpaVendorAdapter;
  */
 public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
+	/**
+	 * 数据源
+	 */
 	private Database database = Database.DEFAULT;
 
+	/**
+	 * 数据库平台名称
+	 */
 	@Nullable
 	private String databasePlatform;
 
+	/**
+	 * 是否生成DDL语句
+	 */
 	private boolean generateDdl = false;
 
+	/**
+	 * 是否显示sql
+	 */
 	private boolean showSql = false;
 
 

@@ -48,9 +48,14 @@ import org.springframework.lang.Nullable;
  * @see org.eclipse.persistence.jpa.JpaEntityManager
  */
 public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
-
+	/**
+	 * 持久化提供者。
+	 */
 	private final PersistenceProvider persistenceProvider = new org.eclipse.persistence.jpa.PersistenceProvider();
 
+	/**
+	 * JPA方言,特指EclipseLinkJpaDialect
+	 */
 	private final EclipseLinkJpaDialect jpaDialect = new EclipseLinkJpaDialect();
 
 
@@ -61,8 +66,10 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	@Override
 	public Map<String, Object> getJpaPropertyMap() {
+		// 创建返回值
 		Map<String, Object> jpaProperties = new HashMap<>();
 
+		// 设置eclipselink.target-database属性
 		if (getDatabasePlatform() != null) {
 			jpaProperties.put(PersistenceUnitProperties.TARGET_DATABASE, getDatabasePlatform());
 		}
@@ -73,12 +80,16 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 			}
 		}
 
+		// 设置eclipselink.ddl-generation属性
+		// eclipselink.ddl-generation.output-mode
 		if (isGenerateDdl()) {
 			jpaProperties.put(PersistenceUnitProperties.DDL_GENERATION,
 					PersistenceUnitProperties.CREATE_ONLY);
 			jpaProperties.put(PersistenceUnitProperties.DDL_GENERATION_MODE,
 					PersistenceUnitProperties.DDL_DATABASE_GENERATION);
 		}
+		// 设置eclipselink.logging.parameters
+		// 设置eclipselink.logging.level
 		if (isShowSql()) {
 			jpaProperties.put(PersistenceUnitProperties.CATEGORY_LOGGING_LEVEL_ +
 					org.eclipse.persistence.logging.SessionLog.SQL, Level.FINE.toString());

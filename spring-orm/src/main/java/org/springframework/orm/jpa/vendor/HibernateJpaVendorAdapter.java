@@ -67,13 +67,24 @@ import org.springframework.lang.Nullable;
  * @see HibernateJpaDialect
  */
 public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
-
+	/**
+	 * JPA方言, 这里特定为hibernateJPA方言
+	 */
 	private final HibernateJpaDialect jpaDialect = new HibernateJpaDialect();
 
+	/**
+	 * 持久化提供者
+	 */
 	private final PersistenceProvider persistenceProvider;
 
+	/**
+	 * 实体管理器接口类
+	 */
 	private final Class<? extends EntityManagerFactory> entityManagerFactoryInterface;
 
+	/**
+	 * 实体管理器接口类
+	 */
 	private final Class<? extends EntityManager> entityManagerInterface;
 
 
@@ -134,9 +145,11 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		return buildJpaPropertyMap(this.jpaDialect.prepareConnection);
 	}
 
-	private Map<String, Object> buildJpaPropertyMap(boolean connectionReleaseOnClose) {
+		private Map<String, Object> buildJpaPropertyMap(boolean connectionReleaseOnClose) {
+		// 创建结果集合
 		Map<String, Object> jpaProperties = new HashMap<>();
 
+		// 放入hibernate.dialect属性值
 		if (getDatabasePlatform() != null) {
 			jpaProperties.put(AvailableSettings.DIALECT, getDatabasePlatform());
 		}
@@ -147,9 +160,11 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 			}
 		}
 
+		// 放入hibernate.hbm2ddl.auto属性值
 		if (isGenerateDdl()) {
 			jpaProperties.put(AvailableSettings.HBM2DDL_AUTO, "update");
 		}
+		// 放入hibernate.show_sql属性值
 		if (isShowSql()) {
 			jpaProperties.put(AvailableSettings.SHOW_SQL, "true");
 		}
@@ -184,18 +199,30 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	@Nullable
 	protected Class<?> determineDatabaseDialectClass(Database database) {
 		switch (database) {
-			case DB2: return DB2Dialect.class;
-			case DERBY: return DerbyTenSevenDialect.class;
-			case H2: return H2Dialect.class;
-			case HANA: return HANAColumnStoreDialect.class;
-			case HSQL: return HSQLDialect.class;
-			case INFORMIX: return InformixDialect.class;
-			case MYSQL: return MySQL5Dialect.class;
-			case ORACLE: return Oracle12cDialect.class;
-			case POSTGRESQL: return PostgreSQL95Dialect.class;
-			case SQL_SERVER: return SQLServer2012Dialect.class;
-			case SYBASE: return SybaseDialect.class;
-			default: return null;
+			case DB2:
+				return DB2Dialect.class;
+			case DERBY:
+				return DerbyTenSevenDialect.class;
+			case H2:
+				return H2Dialect.class;
+			case HANA:
+				return HANAColumnStoreDialect.class;
+			case HSQL:
+				return HSQLDialect.class;
+			case INFORMIX:
+				return InformixDialect.class;
+			case MYSQL:
+				return MySQL5Dialect.class;
+			case ORACLE:
+				return Oracle12cDialect.class;
+			case POSTGRESQL:
+				return PostgreSQL95Dialect.class;
+			case SQL_SERVER:
+				return SQLServer2012Dialect.class;
+			case SYBASE:
+				return SybaseDialect.class;
+			default:
+				return null;
 		}
 	}
 

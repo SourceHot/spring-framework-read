@@ -80,10 +80,13 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 		if (logger.isDebugEnabled()) {
 			logger.debug("Building JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
 		}
+		// 获取持久提供者接口
 		PersistenceProvider provider = getPersistenceProvider();
 		if (provider != null) {
 			// Create EntityManagerFactory directly through PersistenceProvider.
+			// 通过持久提供者接口进行创建
 			EntityManagerFactory emf = provider.createEntityManagerFactory(getPersistenceUnitName(), getJpaPropertyMap());
+			// 为空抛出异常
 			if (emf == null) {
 				throw new IllegalStateException(
 						"PersistenceProvider [" + provider + "] did not return an EntityManagerFactory for name '" +
@@ -93,6 +96,7 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 		}
 		else {
 			// Let JPA perform its standard PersistenceProvider autodetection.
+			// 根据持久单元名称和JPA属性表进行创建
 			return Persistence.createEntityManagerFactory(getPersistenceUnitName(), getJpaPropertyMap());
 		}
 	}

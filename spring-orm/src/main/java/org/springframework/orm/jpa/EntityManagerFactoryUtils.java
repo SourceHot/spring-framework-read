@@ -101,12 +101,17 @@ public abstract class EntityManagerFactoryUtils {
 			ListableBeanFactory beanFactory, @Nullable String unitName) throws NoSuchBeanDefinitionException {
 
 		Assert.notNull(beanFactory, "ListableBeanFactory must not be null");
+		// 单元名称不为空的情况下
 		if (StringUtils.hasLength(unitName)) {
 			// See whether we can find an EntityManagerFactory with matching persistence unit name.
+			// 在bean工厂中根据类型搜索对应的bean名称
 			String[] candidateNames =
 					BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, EntityManagerFactory.class);
+			// 循环候选的bean名称集合
 			for (String candidateName : candidateNames) {
+				// 从bean工厂中根据bean名称获取实例
 				EntityManagerFactory emf = (EntityManagerFactory) beanFactory.getBean(candidateName);
+				// 类型是EntityManagerFactoryInfo并且单元名称相同则返回
 				if (emf instanceof EntityManagerFactoryInfo &&
 						unitName.equals(((EntityManagerFactoryInfo) emf).getPersistenceUnitName())) {
 					return emf;
@@ -114,10 +119,12 @@ public abstract class EntityManagerFactoryUtils {
 			}
 			// No matching persistence unit found - simply take the EntityManagerFactory
 			// with the persistence unit name as bean name (by convention).
+			// 通过类型在bean工厂中搜索
 			return beanFactory.getBean(unitName, EntityManagerFactory.class);
 		}
 		else {
 			// Find unique EntityManagerFactory bean in the context, falling back to parent contexts.
+			// 通过类型在bean工厂中搜索
 			return beanFactory.getBean(EntityManagerFactory.class);
 		}
 	}
@@ -200,31 +207,41 @@ public abstract class EntityManagerFactoryUtils {
 
 		Assert.notNull(emf, "No EntityManagerFactory specified");
 
+		// 获取实体管理工厂对应的资源
 		EntityManagerHolder emHolder =
 				(EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
 		if (emHolder != null) {
+			// 使用同步事务
 			if (synchronizedWithTransaction) {
+				// 判断是否是一个同步和事务
 				if (!emHolder.isSynchronizedWithTransaction()) {
 					if (TransactionSynchronizationManager.isActualTransactionActive()) {
 						// Try to explicitly synchronize the EntityManager itself
 						// with an ongoing JTA transaction, if any.
 						try {
+							// 加入事务
 							emHolder.getEntityManager().joinTransaction();
 						}
 						catch (TransactionRequiredException ex) {
 							logger.debug("Could not join transaction because none was actually active", ex);
 						}
 					}
+					// 判断事务是否属于活动状态
 					if (TransactionSynchronizationManager.isSynchronizationActive()) {
+						// 解析事务对象
 						Object transactionData = prepareTransaction(emHolder.getEntityManager(), emf);
+						// 注册同步事务
 						TransactionSynchronizationManager.registerSynchronization(
 								new TransactionalEntityManagerSynchronization(emHolder, emf, transactionData, false));
+						// 设置同步事务标记为true
 						emHolder.setSynchronizedWithTransaction(true);
 					}
 				}
 				// Use holder's reference count to track synchronizedWithTransaction access.
 				// isOpen() check used below to find out about it.
+				// 进行累加1操作
 				emHolder.requested();
+				// 获取实体管理器
 				return emHolder.getEntityManager();
 			}
 			else {
@@ -236,12 +253,14 @@ public abstract class EntityManagerFactoryUtils {
 					// EntityManagerHolder with an active transaction coming from JpaTransactionManager,
 					// with no synchronized EntityManager having been requested by application code before.
 					// Unbind in order to register a new unsynchronized EntityManager instead.
+					// 资源解绑
 					TransactionSynchronizationManager.unbindResource(emf);
 				}
 				else {
 					// Either a previously bound unsynchronized EntityManager, or the application
 					// has requested a synchronized EntityManager before and therefore upgraded
 					// this transaction's EntityManager to synchronized before.
+					// 获取实体管理器
 					return emHolder.getEntityManager();
 				}
 			}
@@ -256,6 +275,7 @@ public abstract class EntityManagerFactoryUtils {
 		EntityManager em = null;
 		if (!synchronizedWithTransaction) {
 			try {
+				// 创建实体管理器
 				em = emf.createEntityManager(SynchronizationType.UNSYNCHRONIZED, properties);
 			}
 			catch (AbstractMethodError err) {
@@ -264,28 +284,38 @@ public abstract class EntityManagerFactoryUtils {
 			}
 		}
 		if (em == null) {
+			// 创建实体管理器,创建方式有2个
+			// 1. 携带属性表的创建
+			// 2. 不携带属性表的创建
 			em = (!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
 		}
 
 		try {
 			// Use same EntityManager for further JPA operations within the transaction.
 			// Thread-bound object will get removed by synchronization at transaction completion.
+			// 创建实体管理器持有对象
 			emHolder = new EntityManagerHolder(em);
 			if (synchronizedWithTransaction) {
+				// 解析事务对象
 				Object transactionData = prepareTransaction(em, emf);
+				// 注册同步事务
 				TransactionSynchronizationManager.registerSynchronization(
 						new TransactionalEntityManagerSynchronization(emHolder, emf, transactionData, true));
+				// 设置同步事务标记为true
 				emHolder.setSynchronizedWithTransaction(true);
 			}
 			else {
 				// Unsynchronized - just scope it for the transaction, as demanded by the JPA 2.1 spec...
+				// 注册同步事务
 				TransactionSynchronizationManager.registerSynchronization(
 						new TransactionScopedEntityManagerSynchronization(emHolder, emf));
 			}
+			// 资源绑定
 			TransactionSynchronizationManager.bindResource(emf, emHolder);
 		}
 		catch (RuntimeException ex) {
 			// Unexpected exception from external delegation call -> close EntityManager and rethrow.
+			// 关闭事务管理器
 			closeEntityManager(em);
 			throw ex;
 		}
@@ -447,12 +477,21 @@ public abstract class EntityManagerFactoryUtils {
 			extends ResourceHolderSynchronization<EntityManagerHolder, EntityManagerFactory>
 			implements Ordered {
 
+		/**
+		 * 事务数据
+		 */
 		@Nullable
 		private final Object transactionData;
 
+		/**
+		 * JPA方言
+		 */
 		@Nullable
 		private final JpaDialect jpaDialect;
 
+		/**
+		 * 是否是一个新的实体管理器
+		 */
 		private final boolean newEntityManager;
 
 		public TransactionalEntityManagerSynchronization(

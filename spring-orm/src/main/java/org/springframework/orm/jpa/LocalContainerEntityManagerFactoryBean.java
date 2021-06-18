@@ -89,12 +89,20 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("serial")
 public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean
 		implements ResourceLoaderAware, LoadTimeWeaverAware {
+	/**
+	 * 默认的持久单元管理器
+	 */
+	private final DefaultPersistenceUnitManager internalPersistenceUnitManager = new DefaultPersistenceUnitManager();
 
+	/**
+	 * 持久单元管理器
+	 */
 	@Nullable
 	private PersistenceUnitManager persistenceUnitManager;
 
-	private final DefaultPersistenceUnitManager internalPersistenceUnitManager = new DefaultPersistenceUnitManager();
-
+	/**
+	 * 持久单元信息
+	 */
 	@Nullable
 	private PersistenceUnitInfo persistenceUnitInfo;
 
@@ -131,20 +139,6 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 */
 	public void setPersistenceXmlLocation(String persistenceXmlLocation) {
 		this.internalPersistenceUnitManager.setPersistenceXmlLocation(persistenceXmlLocation);
-	}
-
-	/**
-	 * Uses the specified persistence unit name as the name of the default
-	 * persistence unit, if applicable.
-	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
-	 * @see DefaultPersistenceUnitManager#setDefaultPersistenceUnitName
-	 */
-	@Override
-	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
-		super.setPersistenceUnitName(persistenceUnitName);
-		if (persistenceUnitName != null) {
-			this.internalPersistenceUnitManager.setDefaultPersistenceUnitName(persistenceUnitName);
-		}
 	}
 
 	/**
@@ -244,25 +238,6 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * to use for accessing the database. This is an alternative to keeping the
 	 * JDBC configuration in {@code persistence.xml}, passing in a Spring-managed
 	 * DataSource instead.
-	 * <p>In JPA speak, a DataSource passed in here will be used as "nonJtaDataSource"
-	 * on the PersistenceUnitInfo passed to the PersistenceProvider, as well as
-	 * overriding data source configuration in {@code persistence.xml} (if any).
-	 * Note that this variant typically works for JTA transaction management as well;
-	 * if it does not, consider using the explicit {@link #setJtaDataSource} instead.
-	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
-	 * @see javax.persistence.spi.PersistenceUnitInfo#getNonJtaDataSource()
-	 * @see #setPersistenceUnitManager
-	 */
-	public void setDataSource(DataSource dataSource) {
-		this.internalPersistenceUnitManager.setDataSourceLookup(new SingleDataSourceLookup(dataSource));
-		this.internalPersistenceUnitManager.setDefaultDataSource(dataSource);
-	}
-
-	/**
-	 * Specify the JDBC DataSource that the JPA persistence provider is supposed
-	 * to use for accessing the database. This is an alternative to keeping the
-	 * JDBC configuration in {@code persistence.xml}, passing in a Spring-managed
-	 * DataSource instead.
 	 * <p>In JPA speak, a DataSource passed in here will be used as "jtaDataSource"
 	 * on the PersistenceUnitInfo passed to the PersistenceProvider, as well as
 	 * overriding data source configuration in {@code persistence.xml} (if any).
@@ -320,7 +295,6 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		this.internalPersistenceUnitManager.setResourceLoader(resourceLoader);
 	}
 
-
 	@Override
 	public void afterPropertiesSet() throws PersistenceException {
 		PersistenceUnitManager managerToUse = this.persistenceUnitManager;
@@ -345,15 +319,20 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
 		Assert.state(this.persistenceUnitInfo != null, "PersistenceUnitInfo not initialized");
 
+		// 获取持久提供者接口
 		PersistenceProvider provider = getPersistenceProvider();
 		if (provider == null) {
+			// 获取持久提供者的类名
 			String providerClassName = this.persistenceUnitInfo.getPersistenceProviderClassName();
+			// 为空抛出异常
 			if (providerClassName == null) {
 				throw new IllegalArgumentException(
 						"No PersistenceProvider specified in EntityManagerFactory configuration, " +
-						"and chosen PersistenceUnitInfo does not specify a provider class name either");
+								"and chosen PersistenceUnitInfo does not specify a provider class name either");
 			}
+			// 类加载器加载
 			Class<?> providerClass = ClassUtils.resolveClassName(providerClassName, getBeanClassLoader());
+			// bean 实例化
 			provider = (PersistenceProvider) BeanUtils.instantiateClass(providerClass);
 		}
 
@@ -361,13 +340,14 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 			logger.debug("Building JPA container EntityManagerFactory for persistence unit '" +
 					this.persistenceUnitInfo.getPersistenceUnitName() + "'");
 		}
+		// 通过持久提供者接口进行创建
 		EntityManagerFactory emf =
 				provider.createContainerEntityManagerFactory(this.persistenceUnitInfo, getJpaPropertyMap());
+		// 后置处理实体管理工厂
 		postProcessEntityManagerFactory(emf, this.persistenceUnitInfo);
 
 		return emf;
 	}
-
 
 	/**
 	 * Determine the PersistenceUnitInfo to use for the EntityManagerFactory
@@ -399,7 +379,6 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	protected void postProcessEntityManagerFactory(EntityManagerFactory emf, PersistenceUnitInfo pui) {
 	}
 
-
 	@Override
 	@Nullable
 	public PersistenceUnitInfo getPersistenceUnitInfo() {
@@ -415,6 +394,20 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		return super.getPersistenceUnitName();
 	}
 
+	/**
+	 * Uses the specified persistence unit name as the name of the default
+	 * persistence unit, if applicable.
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @see DefaultPersistenceUnitManager#setDefaultPersistenceUnitName
+	 */
+	@Override
+	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
+		super.setPersistenceUnitName(persistenceUnitName);
+		if (persistenceUnitName != null) {
+			this.internalPersistenceUnitManager.setDefaultPersistenceUnitName(persistenceUnitName);
+		}
+	}
+
 	@Override
 	public DataSource getDataSource() {
 		if (this.persistenceUnitInfo != null) {
@@ -425,6 +418,25 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		return (this.internalPersistenceUnitManager.getDefaultJtaDataSource() != null ?
 				this.internalPersistenceUnitManager.getDefaultJtaDataSource() :
 				this.internalPersistenceUnitManager.getDefaultDataSource());
+	}
+
+	/**
+	 * Specify the JDBC DataSource that the JPA persistence provider is supposed
+	 * to use for accessing the database. This is an alternative to keeping the
+	 * JDBC configuration in {@code persistence.xml}, passing in a Spring-managed
+	 * DataSource instead.
+	 * <p>In JPA speak, a DataSource passed in here will be used as "nonJtaDataSource"
+	 * on the PersistenceUnitInfo passed to the PersistenceProvider, as well as
+	 * overriding data source configuration in {@code persistence.xml} (if any).
+	 * Note that this variant typically works for JTA transaction management as well;
+	 * if it does not, consider using the explicit {@link #setJtaDataSource} instead.
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @see javax.persistence.spi.PersistenceUnitInfo#getNonJtaDataSource()
+	 * @see #setPersistenceUnitManager
+	 */
+	public void setDataSource(DataSource dataSource) {
+		this.internalPersistenceUnitManager.setDataSourceLookup(new SingleDataSourceLookup(dataSource));
+		this.internalPersistenceUnitManager.setDefaultDataSource(dataSource);
 	}
 
 }
