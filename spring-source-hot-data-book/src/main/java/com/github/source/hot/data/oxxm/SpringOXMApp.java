@@ -42,8 +42,8 @@ public class SpringOXMApp {
 		ApplicationContext appContext =
 				new ClassPathXmlApplicationContext("spring-oxm.xml");
 		SpringOXMApp application = appContext.getBean("application",SpringOXMApp.class);
-//		application.saveSettings();
-		application.loadSettings();
+		application.saveSettings();
+//		application.loadSettings();
 		System.out.println();
 	}
 }
