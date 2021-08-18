@@ -78,20 +78,33 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	private static final Log lostClientLogger = LogFactory.getLog(DISCONNECTED_CLIENT_LOG_CATEGORY);
 
-
+	/**
+	 * session管理器
+	 */
 	private WebSessionManager sessionManager = new DefaultWebSessionManager();
-
+	/**
+	 * 服务器编解码器配置
+	 */
 	private ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();
-
+	/**
+	 * 语言环境上下文解析器
+	 */
 	private LocaleContextResolver localeContextResolver = new AcceptHeaderLocaleContextResolver();
-
+	/**
+	 * 转发头处理器
+	 */
 	@Nullable
 	private ForwardedHeaderTransformer forwardedHeaderTransformer;
-
+	/**
+	 * 应用上下文
+	 */
 	@Nullable
 	private ApplicationContext applicationContext;
 
-	/** Whether to log potentially sensitive info (form data at DEBUG, headers at TRACE). */
+	/**
+	 *  Whether to log potentially sensitive info (form data at DEBUG, headers at TRACE).
+	 * 是否记录敏感数据
+	 * */
 	private boolean enableLoggingRequestDetails = false;
 
 
@@ -223,15 +236,19 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+		// 判断转发头处理器是否为空,不为空的情况下应用转发处理
 		if (this.forwardedHeaderTransformer != null) {
 			request = this.forwardedHeaderTransformer.apply(request);
 		}
+		// 创建ServerWebExchange
 		ServerWebExchange exchange = createExchange(request, response);
 
+		// 日志
 		LogFormatUtils.traceDebug(logger, traceOn ->
 				exchange.getLogPrefix() + formatRequest(exchange.getRequest()) +
 						(traceOn ? ", headers=" + formatHeaders(exchange.getRequest().getHeaders()) : ""));
 
+		// 实际处理
 		return getDelegate().handle(exchange)
 				.doOnSuccess(aVoid -> logResponse(exchange))
 				.onErrorResume(ex -> handleUnresolvedError(exchange, ex))

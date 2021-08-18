@@ -38,6 +38,9 @@ import org.springframework.util.Assert;
  */
 public class ContextPathCompositeHandler implements HttpHandler {
 
+	/**
+	 * handler映射集合
+	 */
 	private final Map<String, HttpHandler> handlerMap;
 
 
@@ -64,7 +67,9 @@ public class ContextPathCompositeHandler implements HttpHandler {
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 		// Remove underlying context path first (e.g. Servlet container)
+		// 从请求中获取请求地址
 		String path = request.getPath().pathWithinApplication().value();
+		// 从handlerMap变量中获取数据资源进行处理
 		return this.handlerMap.entrySet().stream()
 				.filter(entry -> path.startsWith(entry.getKey()))
 				.findFirst()

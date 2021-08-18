@@ -53,20 +53,23 @@ public class ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, 
 
 	@Override
 	public Mono<Void> apply(HttpServerRequest reactorRequest, HttpServerResponse reactorResponse) {
+		// 创建netty数据缓冲工厂
 		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(reactorResponse.alloc());
 		try {
+			// 创建ReactorServerHttpRequest
 			ReactorServerHttpRequest request = new ReactorServerHttpRequest(reactorRequest, bufferFactory);
+			// 创建ServerHttpResponse
 			ServerHttpResponse response = new ReactorServerHttpResponse(reactorResponse, bufferFactory);
 
 			if (request.getMethod() == HttpMethod.HEAD) {
 				response = new HttpHeadResponseDecorator(response);
 			}
 
+			// 处理请求
 			return this.httpHandler.handle(request, response)
 					.doOnError(ex -> logger.trace(request.getLogPrefix() + "Failed to complete: " + ex.getMessage()))
 					.doOnSuccess(aVoid -> logger.trace(request.getLogPrefix() + "Handling completed"));
-		}
-		catch (URISyntaxException ex) {
+		} catch (URISyntaxException ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Failed to get request URI: " + ex.getMessage());
 			}

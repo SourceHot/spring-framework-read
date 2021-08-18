@@ -46,9 +46,13 @@ import org.springframework.util.MultiValueMap;
  * @since 5.0
  */
 class ReactorServerHttpRequest extends AbstractServerHttpRequest {
-
+	/**
+	 * 请求对象
+	 */
 	private final HttpServerRequest request;
-
+	/**
+	 * netty数据缓冲工厂
+	 */
 	private final NettyDataBufferFactory bufferFactory;
 
 

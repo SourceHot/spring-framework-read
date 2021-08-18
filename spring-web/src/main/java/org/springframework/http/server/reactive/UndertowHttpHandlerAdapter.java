@@ -42,9 +42,13 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 	private static final Log logger = HttpLogging.forLogName(UndertowHttpHandlerAdapter.class);
 
-
+	/**
+	 * http处理器
+	 */
 	private final HttpHandler httpHandler;
-
+	/**
+	 * 数据缓冲工厂
+	 */
 	private DataBufferFactory bufferFactory = new DefaultDataBufferFactory(false);
 
 
@@ -66,24 +70,29 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 	@Override
 	public void handleRequest(HttpServerExchange exchange) {
+
+		// 创建UndertowServerHttpRequest对象
 		UndertowServerHttpRequest request = null;
 		try {
 			request = new UndertowServerHttpRequest(exchange, getDataBufferFactory());
-		}
-		catch (URISyntaxException ex) {
+		} catch (URISyntaxException ex) {
 			if (logger.isWarnEnabled()) {
 				logger.debug("Failed to get request URI: " + ex.getMessage());
 			}
 			exchange.setStatusCode(400);
 			return;
 		}
+		// 创建UndertowServerHttpResponse
 		ServerHttpResponse response = new UndertowServerHttpResponse(exchange, getDataBufferFactory(), request);
 
+		// 请求类型是HEAD的处理
 		if (request.getMethod() == HttpMethod.HEAD) {
 			response = new HttpHeadResponseDecorator(response);
 		}
 
+		// 创建结果订阅程序
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(exchange, request);
+		// 处理并且进行订阅
 		this.httpHandler.handle(request, response).subscribe(resultSubscriber);
 	}
 
