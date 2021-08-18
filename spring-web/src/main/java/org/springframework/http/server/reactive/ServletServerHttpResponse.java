@@ -48,21 +48,35 @@ import org.springframework.util.Assert;
  * @since 5.0
  */
 class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
-
+	/**
+	 * response
+	 */
 	private final HttpServletResponse response;
-
+	/**
+	 * 输出流
+	 */
 	private final ServletOutputStream outputStream;
-
+	/**
+	 * 缓冲区大小
+	 */
 	private final int bufferSize;
-
+	/**
+	 * 响应体推送程序
+	 */
 	@Nullable
 	private volatile ResponseBodyFlushProcessor bodyFlushProcessor;
-
+	/**
+	 * 响应体处理程序
+	 */
 	@Nullable
 	private volatile ResponseBodyProcessor bodyProcessor;
-
+	/**
+	 * 是否刷新下一个
+	 */
 	private volatile boolean flushOnNext;
-
+	/**
+	 * 请求
+	 */
 	private final ServletServerHttpRequest request;
 
 	public ServletServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,

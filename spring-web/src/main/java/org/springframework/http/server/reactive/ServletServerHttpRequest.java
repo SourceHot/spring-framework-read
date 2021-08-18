@@ -57,17 +57,30 @@ import org.springframework.util.StringUtils;
  */
 class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
+	/**
+	 * eof数据缓冲对象
+	 */
 	static final DataBuffer EOF_BUFFER = new DefaultDataBufferFactory().allocateBuffer(0);
 
-
+	/**
+	 * 请求对象
+	 */
 	private final HttpServletRequest request;
-
+	/**
+	 * 请求体推送工具
+	 */
 	private final RequestBodyPublisher bodyPublisher;
-
+	/**
+	 * cookie锁
+	 */
 	private final Object cookieLock = new Object();
-
+	/**
+	 * 数据缓冲工厂
+	 */
 	private final DataBufferFactory bufferFactory;
-
+	/**
+	 * 缓冲区
+	 */
 	private final byte[] buffer;
 
 	public ServletServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,

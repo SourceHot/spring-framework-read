@@ -58,19 +58,31 @@ import org.springframework.util.Assert;
 public class ServletHttpHandlerAdapter implements Servlet {
 
 	private static final Log logger = HttpLogging.forLogName(ServletHttpHandlerAdapter.class);
-
+	/**
+	 * 默认缓冲区大小
+	 */
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
-
+	/**
+	 * 写入错误属性名称
+	 */
 	private static final String WRITE_ERROR_ATTRIBUTE_NAME = ServletHttpHandlerAdapter.class.getName() + ".ERROR";
 
-
+	/**
+	 * 请求处理器
+	 */
 	private final HttpHandler httpHandler;
-
+	/**
+	 * 缓冲区大小
+	 */
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
-
+	/**
+	 * servlet路径
+	 */
 	@Nullable
 	private String servletPath;
-
+	/**
+	 * 数据缓冲区工厂
+	 */
 	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory(false);
 
 
@@ -125,19 +137,32 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		this.servletPath = getServletPath(config);
 	}
 
+	/**
+	 * 确定servlet  path
+	 * @param config
+	 * @return
+	 */
 	private String getServletPath(ServletConfig config) {
+		// 获取servlet名称
 		String name = config.getServletName();
+		// 获取Servlet注册对象
 		ServletRegistration registration = config.getServletContext().getServletRegistration(name);
+		// 如果servlet注册对象为空抛出异常
 		if (registration == null) {
 			throw new IllegalStateException("ServletRegistration not found for Servlet '" + name + "'");
 		}
 
+		// 从servlet注册对象中获取映射表
 		Collection<String> mappings = registration.getMappings();
+		// 印商标数量为1的处理情况，数量不唯一的情况下抛出异常
 		if (mappings.size() == 1) {
+			// 提取第一个元素
 			String mapping = mappings.iterator().next();
+			// 判断是否是"/"如果是将返回""
 			if (mapping.equals("/")) {
 				return "";
 			}
+			// 判断结尾是否是"/*"，如果是将"/*"切分后返回
 			if (mapping.endsWith("/*")) {
 				String path = mapping.substring(0, mapping.length() - 2);
 				if (!path.isEmpty() && logger.isDebugEnabled()) {
@@ -157,17 +182,20 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	@Override
 	public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
 		// Check for existing error attribute first
+		// 检查请求类型是否是async，如果是抛出异常
 		if (DispatcherType.ASYNC.equals(request.getDispatcherType())) {
 			Throwable ex = (Throwable) request.getAttribute(WRITE_ERROR_ATTRIBUTE_NAME);
 			throw new ServletException("Failed to create response content", ex);
 		}
 
 		// Start async before Read/WriteListener registration
+		// 开启异步，获取异步上下文
 		AsyncContext asyncContext = request.startAsync();
 		asyncContext.setTimeout(-1);
 
 		ServletServerHttpRequest httpRequest;
 		try {
+			// 创建请求
 			httpRequest = createRequest(((HttpServletRequest) request), asyncContext);
 		}
 		catch (URISyntaxException ex) {
@@ -179,16 +207,23 @@ public class ServletHttpHandlerAdapter implements Servlet {
 			return;
 		}
 
+		// 创建 response
 		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext, httpRequest);
+		// 如果请求方式是HEAD将response对象进行二次包装
 		if (httpRequest.getMethod() == HttpMethod.HEAD) {
 			httpResponse = new HttpHeadResponseDecorator(httpResponse);
 		}
 
+		// 创建处理成功表示符
 		AtomicBoolean isCompleted = new AtomicBoolean();
+		// 创建异步结果监听器
 		HandlerResultAsyncListener listener = new HandlerResultAsyncListener(isCompleted, httpRequest);
+		// 异步上下文加入监听器
 		asyncContext.addListener(listener);
 
+		// 处理结果订阅程序
 		HandlerResultSubscriber subscriber = new HandlerResultSubscriber(asyncContext, isCompleted, httpRequest);
+		// 进行处理，订阅程序进行订阅
 		this.httpHandler.handle(httpRequest, httpResponse).subscribe(subscriber);
 	}
 
