@@ -42,21 +42,35 @@ import org.springframework.util.StringUtils;
 public class DefaultTestContext implements TestContext {
 
 	private static final long serialVersionUID = -5827157174866681233L;
-
+	/**
+	 * 属性表
+	 */
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>(4);
-
+	/**
+	 * 上下文感知接口，负责加载和关闭应用程序上下文
+	 */
 	private final CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate;
-
+	/**
+	 * 合并的上下文配置类
+	 */
 	private final MergedContextConfiguration mergedContextConfiguration;
-
+	/**
+	 * 测试类
+	 */
 	private final Class<?> testClass;
-
+	/**
+	 *测试类实例对象
+	 */
 	@Nullable
 	private volatile Object testInstance;
-
+	/**
+	 *测试方法
+	 */
 	@Nullable
 	private volatile Method testMethod;
-
+	/**
+	 * 测试方法中抛出的异常
+	 */
 	@Nullable
 	private volatile Throwable testException;
 

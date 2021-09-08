@@ -45,9 +45,13 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 
 	/**
 	 * Default static cache of Spring application contexts.
+	 * 上下文缓存实例对象
 	 */
 	static final ContextCache defaultContextCache = new DefaultContextCache();
 
+	/**
+	 * 上下文缓存接口
+	 */
 	private final ContextCache contextCache;
 
 
@@ -88,20 +92,25 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	protected ApplicationContext loadContextInternal(MergedContextConfiguration mergedContextConfiguration)
 			throws Exception {
 
+		// 从合并的应用上下文配置对象中获取上下文加载器
 		ContextLoader contextLoader = mergedContextConfiguration.getContextLoader();
 		Assert.notNull(contextLoader, "Cannot load an ApplicationContext with a NULL 'contextLoader'. " +
 				"Consider annotating your test class with @ContextConfiguration or @ContextHierarchy.");
 
 		ApplicationContext applicationContext;
 
+		// 如果上下文加载器类型是SmartContextLoader，通过SmartContextLoader进行加载
 		if (contextLoader instanceof SmartContextLoader) {
 			SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
 			applicationContext = smartContextLoader.loadContext(mergedContextConfiguration);
 		}
+		// 其他情况的处理
 		else {
+			// 提取locations属性值
 			String[] locations = mergedContextConfiguration.getLocations();
 			Assert.notNull(locations, "Cannot load an ApplicationContext with a NULL 'locations' array. " +
 					"Consider annotating your test class with @ContextConfiguration or @ContextHierarchy.");
+			// 上下文加载器加载
 			applicationContext = contextLoader.loadContext(locations);
 		}
 
@@ -118,14 +127,18 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	@Override
 	public ApplicationContext loadContext(MergedContextConfiguration mergedContextConfiguration) {
 		synchronized (this.contextCache) {
+			// 从缓存上下文中根据合并的上下文配置获取应用上下文对象
 			ApplicationContext context = this.contextCache.get(mergedContextConfiguration);
+			// 若应用上下文对象为空则进行加载和设置应用上下文缓存
 			if (context == null) {
 				try {
+					// 加载上下文
 					context = loadContextInternal(mergedContextConfiguration);
 					if (logger.isDebugEnabled()) {
 						logger.debug(String.format("Storing ApplicationContext [%s] in cache under key [%s]",
 								System.identityHashCode(context), mergedContextConfiguration));
 					}
+					// 设置应用上下文缓存
 					this.contextCache.put(mergedContextConfiguration, context);
 				}
 				catch (Exception ex) {
@@ -139,8 +152,10 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 				}
 			}
 
+			// 缓存日志统计
 			this.contextCache.logStatistics();
 
+			// 返回上下文对象
 			return context;
 		}
 	}

@@ -59,6 +59,7 @@ public class DefaultContextCache implements ContextCache {
 
 	/**
 	 * Map of context keys to Spring {@code ApplicationContext} instances.
+	 * 上下文map容器
 	 */
 	private final Map<MergedContextConfiguration, ApplicationContext> contextMap =
 			Collections.synchronizedMap(new LruCache(32, 0.75f));
@@ -68,14 +69,19 @@ public class DefaultContextCache implements ContextCache {
 	 * of context hierarchies. This information is used for determining which subtrees
 	 * need to be recursively removed and closed when removing a context that is a parent
 	 * of other contexts.
+	 * 上下文层次结构
 	 */
 	private final Map<MergedContextConfiguration, Set<MergedContextConfiguration>> hierarchyMap =
 			new ConcurrentHashMap<>(32);
 
 	private final int maxSize;
-
+	/**
+	 * 命中数量
+	 */
 	private final AtomicInteger hitCount = new AtomicInteger();
-
+	/**
+	 * 未命中数量
+	 */
 	private final AtomicInteger missCount = new AtomicInteger();
 
 
@@ -139,9 +145,13 @@ public class DefaultContextCache implements ContextCache {
 		Assert.notNull(key, "Key must not be null");
 		Assert.notNull(context, "ApplicationContext must not be null");
 
+		// 设置到上下文容器中
 		this.contextMap.put(key, context);
+		// 获取子对象
 		MergedContextConfiguration child = key;
+		// 获取父对象
 		MergedContextConfiguration parent = child.getParent();
+		// 递归回去父对象为成员变量hierarchyMap进行数据设置
 		while (parent != null) {
 			Set<MergedContextConfiguration> list = this.hierarchyMap.computeIfAbsent(parent, k -> new HashSet<>());
 			list.add(child);
@@ -159,7 +169,10 @@ public class DefaultContextCache implements ContextCache {
 
 		// startKey is the level at which to begin clearing the cache,
 		// depending on the configured hierarchy mode.s
+
+		// 确认开始清除的key
 		MergedContextConfiguration startKey = key;
+		// 如果清除模式是EXHAUSTIVE,会搜索到最顶层的合并上下文配置
 		if (hierarchyMode == HierarchyMode.EXHAUSTIVE) {
 			MergedContextConfiguration parent = startKey.getParent();
 			while (parent != null) {
@@ -168,11 +181,14 @@ public class DefaultContextCache implements ContextCache {
 			}
 		}
 
+		// 需要移除的上下文配置集合
 		List<MergedContextConfiguration> removedContexts = new ArrayList<>();
+		// 移除
 		remove(removedContexts, startKey);
 
 		// Remove all remaining references to any removed contexts from the
 		// hierarchy map.
+		// 删除hierarchyMap变量中的引用
 		for (MergedContextConfiguration currentKey : removedContexts) {
 			for (Set<MergedContextConfiguration> children : this.hierarchyMap.values()) {
 				children.remove(currentKey);
@@ -180,6 +196,7 @@ public class DefaultContextCache implements ContextCache {
 		}
 
 		// Remove empty entries from the hierarchy map.
+		// 删除空数据
 		for (Map.Entry<MergedContextConfiguration, Set<MergedContextConfiguration>> entry : this.hierarchyMap.entrySet()) {
 			if (entry.getValue().isEmpty()) {
 				this.hierarchyMap.remove(entry.getKey());
@@ -190,7 +207,9 @@ public class DefaultContextCache implements ContextCache {
 	private void remove(List<MergedContextConfiguration> removedContexts, MergedContextConfiguration key) {
 		Assert.notNull(key, "Key must not be null");
 
+		// 从hierarchyMap成员变量中获取子集
 		Set<MergedContextConfiguration> children = this.hierarchyMap.get(key);
+		// 子集不为空的情况下处理
 		if (children != null) {
 			for (MergedContextConfiguration child : children) {
 				// Recurse through lower levels
@@ -202,10 +221,13 @@ public class DefaultContextCache implements ContextCache {
 
 		// Physically remove and close leaf nodes first (i.e., on the way back up the
 		// stack as opposed to prior to the recursive call).
+		// 从上下文
 		ApplicationContext context = this.contextMap.remove(key);
+		// 上下文类型是ConfigurableApplicationContext的情况下关闭上下文
 		if (context instanceof ConfigurableApplicationContext) {
 			((ConfigurableApplicationContext) context).close();
 		}
+		// 加入移除集合中
 		removedContexts.add(key);
 	}
 

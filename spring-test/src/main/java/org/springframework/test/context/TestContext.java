@@ -57,6 +57,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * to override this method with a more meaningful implementation. Note that
 	 * the standard {@code TestContext} implementation in Spring overrides this
 	 * method appropriately.
+	 * 确认是否存在应用上下文
 	 * @return {@code true} if the application context has already been loaded
 	 * @since 5.2
 	 * @see #getApplicationContext()
@@ -71,6 +72,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * <p>Implementations of this method are responsible for loading the
 	 * application context if the corresponding context has not already been
 	 * loaded, potentially caching the context as well.
+	 * 获取应用上下文
 	 * @return the application context (never {@code null})
 	 * @throws IllegalStateException if an error occurs while retrieving the
 	 * application context
@@ -84,6 +86,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * test context.
 	 * <p>The {@code ApplicationEvent} will only be published if the application
 	 * context for this test context {@linkplain #hasApplicationContext() is available}.
+	 * 推送事件
 	 * @param eventFactory factory for lazy creation of the {@code ApplicationEvent}
 	 * @since 5.2
 	 * @see #hasApplicationContext()
@@ -97,6 +100,8 @@ public interface TestContext extends AttributeAccessor, Serializable {
 
 	/**
 	 * Get the {@linkplain Class test class} for this test context.
+	 *
+	 * 获取此测试上下文的测试类。
 	 * @return the test class (never {@code null})
 	 */
 	Class<?> getTestClass();
@@ -104,6 +109,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	/**
 	 * Get the current {@linkplain Object test instance} for this test context.
 	 * <p>Note: this is a mutable property.
+	 * 获取此测试上下文的当前测试实例。
 	 * @return the current test instance (never {@code null})
 	 * @see #updateState(Object, Method, Throwable)
 	 */
@@ -112,6 +118,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	/**
 	 * Get the current {@linkplain Method test method} for this test context.
 	 * <p>Note: this is a mutable property.
+	 * 获取测试方法
 	 * @return the current test method (never {@code null})
 	 * @see #updateState(Object, Method, Throwable)
 	 */
@@ -121,6 +128,8 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * Get the {@linkplain Throwable exception} that was thrown during execution
 	 * of the {@linkplain #getTestMethod() test method}.
 	 * <p>Note: this is a mutable property.
+	 *
+	 * 获取在执行测试方法期间抛出的异常。
 	 * @return the exception that was thrown, or {@code null} if no exception was thrown
 	 * @see #updateState(Object, Method, Throwable)
 	 */
@@ -134,6 +143,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * <p>Do this if a test has modified the context &mdash; for example, by
 	 * modifying the state of a singleton bean, modifying the state of an embedded
 	 * database, etc.
+	 *
 	 * @param hierarchyMode the context cache clearing mode to be applied if the
 	 * context is part of a hierarchy (may be {@code null})
 	 */

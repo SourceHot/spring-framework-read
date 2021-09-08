@@ -49,6 +49,8 @@ public interface CacheAwareContextLoaderDelegate {
 	 * therefore highly encouraged to override this method with a more meaningful
 	 * implementation. Note that the standard {@code CacheAwareContextLoaderDelegate}
 	 * implementation in Spring overrides this method appropriately.
+	 *
+	 * 用于确认提供的合并上下文配置是否已经加载
 	 * @param mergedContextConfiguration the merged context configuration used
 	 * to load the application context; never {@code null}
 	 * @return {@code true} if the the application context has been loaded
@@ -68,6 +70,7 @@ public interface CacheAwareContextLoaderDelegate {
 	 * be returned; otherwise, it will be loaded, stored in the cache, and returned.
 	 * <p>The cache statistics should be logged by invoking
 	 * {@link org.springframework.test.context.cache.ContextCache#logStatistics()}.
+	 * 根据传入的合并上下文配置获取应用上下文
 	 * @param mergedContextConfiguration the merged context configuration to use
 	 * to load the application context; never {@code null}
 	 * @return the application context (never {@code null})
@@ -90,6 +93,7 @@ public interface CacheAwareContextLoaderDelegate {
 	 * a singleton bean has been changed (potentially affecting future interaction
 	 * with the context) or if the context needs to be prematurely removed from
 	 * the cache.
+	 * 根据传入的合并上下文配置关闭上下文
 	 * @param mergedContextConfiguration the merged context configuration for the
 	 * application context to close; never {@code null}
 	 * @param hierarchyMode the hierarchy mode; may be {@code null} if the context

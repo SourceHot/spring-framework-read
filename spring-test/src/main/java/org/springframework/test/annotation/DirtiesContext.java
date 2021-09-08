@@ -188,6 +188,8 @@ public @interface DirtiesContext {
 		 * <p>All {@code ApplicationContexts} that reside in a subhierarchy of
 		 * the common ancestor context will be removed from the context cache and
 		 * closed.
+		 *
+		 * 完全清除
 		 */
 		EXHAUSTIVE,
 
@@ -199,6 +201,8 @@ public @interface DirtiesContext {
 		 * <p>The <em>current level</em> refers to the {@code ApplicationContext}
 		 * at the lowest level in the context hierarchy that is visible from the
 		 * current test.
+		 *
+		 * 清理当前和当前子集
 		 */
 		CURRENT_LEVEL;
 	}

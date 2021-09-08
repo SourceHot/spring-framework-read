@@ -50,11 +50,14 @@ public interface ContextCache {
 	/**
 	 * The name of the logging category used for reporting {@code ContextCache}
 	 * statistics.
+	 *
+	 * 用于报告ContextCache统计信息的日志记录类别的名称
 	 */
 	String CONTEXT_CACHE_LOGGING_CATEGORY = "org.springframework.test.context.cache";
 
 	/**
 	 * The default maximum size of the context cache: {@value}.
+	 * 上下文缓存的默认最大大小
 	 * @since 4.3
 	 * @see #MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME
 	 */
@@ -67,6 +70,7 @@ public interface ContextCache {
 	 * <p>Note that implementations of {@code ContextCache} are not required to
 	 * actually support a maximum cache size. Consult the documentation of the
 	 * corresponding implementation for details.
+	 * 上下文缓存的最大大小键
 	 * @since 4.3
 	 * @see #DEFAULT_MAX_CONTEXT_CACHE_SIZE
 	 */
@@ -75,6 +79,7 @@ public interface ContextCache {
 
 	/**
 	 * Determine whether there is a cached context for the given key.
+	 * 判断是否存在上下文
 	 * @param key the context key (never {@code null})
 	 * @return {@code true} if the cache contains a context with the given key
 	 */
@@ -84,6 +89,7 @@ public interface ContextCache {
 	 * Obtain a cached {@code ApplicationContext} for the given key.
 	 * <p>The {@linkplain #getHitCount() hit} and {@linkplain #getMissCount() miss}
 	 * counts must be updated accordingly.
+	 * 获取上下文
 	 * @param key the context key (never {@code null})
 	 * @return the corresponding {@code ApplicationContext} instance, or {@code null}
 	 * if not found in the cache
@@ -95,6 +101,7 @@ public interface ContextCache {
 	/**
 	 * Explicitly add an {@code ApplicationContext} instance to the cache
 	 * under the given key, potentially honoring a custom eviction policy.
+	 * 添加上下文
 	 * @param key the context key (never {@code null})
 	 * @param context the {@code ApplicationContext} instance (never {@code null})
 	 */
@@ -110,6 +117,7 @@ public interface ContextCache {
 	 * future interaction with the context.
 	 * <p>In addition, the semantics of the supplied {@code HierarchyMode} must
 	 * be honored. See the Javadoc for {@link HierarchyMode} for details.
+	 * 移除上下文
 	 * @param key the context key; never {@code null}
 	 * @param hierarchyMode the hierarchy mode; may be {@code null} if the context
 	 * is not part of a hierarchy
@@ -120,11 +128,13 @@ public interface ContextCache {
 	 * Determine the number of contexts currently stored in the cache.
 	 * <p>If the cache contains more than {@code Integer.MAX_VALUE} elements,
 	 * this method must return {@code Integer.MAX_VALUE}.
+	 * 获取上下文数量
 	 */
 	int size();
 
 	/**
 	 * Determine the number of parent contexts currently tracked within the cache.
+	 * 确定当前在缓存中的父上下文的数量
 	 */
 	int getParentContextCount();
 
@@ -132,6 +142,7 @@ public interface ContextCache {
 	 * Get the overall hit count for this cache.
 	 * <p>A <em>hit</em> is any access to the cache that returns a non-null
 	 * context for the queried key.
+	 * 获取此缓存的总命中数。
 	 */
 	int getHitCount();
 
@@ -139,11 +150,13 @@ public interface ContextCache {
 	 * Get the overall miss count for this cache.
 	 * <p>A <em>miss</em> is any access to the cache that returns a {@code null}
 	 * context for the queried key.
+	 * 获取此缓存的总未命中数。
 	 */
 	int getMissCount();
 
 	/**
 	 * Reset all state maintained by this cache including statistics.
+	 * 重置此缓存维护的所有状态，包括统计信息
 	 * @see #clear()
 	 * @see #clearStatistics()
 	 */
@@ -151,17 +164,20 @@ public interface ContextCache {
 
 	/**
 	 * Clear all contexts from the cache, clearing context hierarchy information as well.
+	 * 从缓存中清除所有上下文，同时清除上下文层次结构信息。
 	 */
 	void clear();
 
 	/**
 	 * Clear hit and miss count statistics for the cache (i.e., reset counters to zero).
+	 * 清除缓存的命中和未命中计数统计信息
 	 */
 	void clearStatistics();
 
 	/**
 	 * Log the statistics for this {@code ContextCache} at {@code DEBUG} level
 	 * using the {@value #CONTEXT_CACHE_LOGGING_CATEGORY} logging category.
+	 * 日志统计
 	 * <p>The following information should be logged.
 	 * <ul>
 	 * <li>name of the concrete {@code ContextCache} implementation</li>
