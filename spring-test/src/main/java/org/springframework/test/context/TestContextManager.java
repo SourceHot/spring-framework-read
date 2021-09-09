@@ -202,12 +202,15 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 */
 	public void beforeTestClass() throws Exception {
+		// 从测试上下文对象中获取测试类对象
 		Class<?> testClass = getTestContext().getTestClass();
 		if (logger.isTraceEnabled()) {
 			logger.trace("beforeTestClass(): class [" + testClass.getName() + "]");
 		}
+		// 更新状态
 		getTestContext().updateState(null, null, null);
 
+		// 循环调度TestExecutionListener接口中的beforeTestClass方法
 		for (TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
 			try {
 				testExecutionListener.beforeTestClass(getTestContext());

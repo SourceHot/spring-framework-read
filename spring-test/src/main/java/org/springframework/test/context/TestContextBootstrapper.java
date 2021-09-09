@@ -59,17 +59,20 @@ public interface TestContextBootstrapper {
 
 	/**
 	 * Set the {@link BootstrapContext} to be used by this bootstrapper.
+	 * 设置引导上下文
 	 */
 	void setBootstrapContext(BootstrapContext bootstrapContext);
 
 	/**
 	 * Get the {@link BootstrapContext} associated with this bootstrapper.
+	 * 获取引导上下文
 	 */
 	BootstrapContext getBootstrapContext();
 
 	/**
 	 * Build the {@link TestContext} for the {@link BootstrapContext}
 	 * associated with this bootstrapper.
+	 * 构建测试上下文
 	 * @return a new {@link TestContext}, never {@code null}
 	 * @since 4.2
 	 * @see #buildMergedContextConfiguration()
@@ -102,6 +105,7 @@ public interface TestContextBootstrapper {
 	 * <li>Otherwise, concrete implementations are free to determine which
 	 * {@code ContextLoader} class to use as a default.</li>
 	 * </ol>
+	 * 构建合并上下文配置
 	 * @return the merged context configuration, never {@code null}
 	 * @see #buildTestContext()
 	 */
@@ -127,6 +131,8 @@ public interface TestContextBootstrapper {
 	 * taken into consideration. Specifically, if the {@code inheritListeners}
 	 * flag is set to {@code true}, listeners declared for a given test class must
 	 * be appended to the end of the list of listeners declared in superclasses.
+	 *
+	 * 获取TestExecutionListener集合
 	 * @return a list of {@code TestExecutionListener} instances
 	 */
 	List<TestExecutionListener> getTestExecutionListeners();

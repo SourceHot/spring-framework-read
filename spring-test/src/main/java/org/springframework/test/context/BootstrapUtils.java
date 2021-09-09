@@ -116,14 +116,17 @@ abstract class BootstrapUtils {
 	 * {@link org.springframework.test.context.web.WebTestContextBootstrapper
 	 * WebTestContextBootstrapper} will be used, depending on the presence of
 	 * {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}.
+	 *
 	 * @param bootstrapContext the bootstrap context to use
 	 * @return a fully configured {@code TestContextBootstrapper}
 	 */
 	static TestContextBootstrapper resolveTestContextBootstrapper(BootstrapContext bootstrapContext) {
+		// 提取测试类对象
 		Class<?> testClass = bootstrapContext.getTestClass();
 
 		Class<?> clazz = null;
 		try {
+			// 解析测试类对象
 			clazz = resolveExplicitTestContextBootstrapper(testClass);
 			if (clazz == null) {
 				clazz = resolveDefaultTestContextBootstrapper(testClass);
@@ -132,15 +135,14 @@ abstract class BootstrapUtils {
 				logger.debug(String.format("Instantiating TestContextBootstrapper for test class [%s] from class [%s]",
 						testClass.getName(), clazz.getName()));
 			}
+			// 实例化
 			TestContextBootstrapper testContextBootstrapper =
 					BeanUtils.instantiateClass(clazz, TestContextBootstrapper.class);
 			testContextBootstrapper.setBootstrapContext(bootstrapContext);
 			return testContextBootstrapper;
-		}
-		catch (IllegalStateException ex) {
+		} catch (IllegalStateException ex) {
 			throw ex;
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			throw new IllegalStateException("Could not load TestContextBootstrapper [" + clazz +
 					"]. Specify @BootstrapWith's 'value' attribute or make the default bootstrapper class available.",
 					ex);
