@@ -110,23 +110,32 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 				mergedConfig));
 		}
 
+		// 验证合并上下文配置
 		validateMergedContextConfiguration(mergedConfig);
-
+		// 创建上下文对象
 		GenericApplicationContext context = new GenericApplicationContext();
-
+		// 获取父上下文对象
 		ApplicationContext parent = mergedConfig.getParentApplicationContext();
 		if (parent != null) {
 			context.setParent(parent);
 		}
+		// 准备上下文
 		prepareContext(context);
 		prepareContext(context, mergedConfig);
+		// 自定义bean工厂
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
+		// 加载bean定义
 		loadBeanDefinitions(context, mergedConfig);
+		// 注册注解配置处理器
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+		// 自定义上下文
 		customizeContext(context);
 		customizeContext(context, mergedConfig);
+		// 刷新
 		context.refresh();
+		// 注册关闭hook
 		context.registerShutdownHook();
+		// 返回上下文
 		return context;
 	}
 
@@ -184,14 +193,23 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 			logger.debug(String.format("Loading ApplicationContext for locations [%s].",
 				StringUtils.arrayToCommaDelimitedString(locations)));
 		}
+		// 创建上下文
 		GenericApplicationContext context = new GenericApplicationContext();
+		// 准备上下文
 		prepareContext(context);
+		// 自定义bean工厂
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
+		// 加载bean定义
 		createBeanDefinitionReader(context).loadBeanDefinitions(locations);
+		// 注册注解配置处理器
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+		// 自定义上下文
 		customizeContext(context);
+		// 刷新
 		context.refresh();
+		// 注册关闭hook
 		context.registerShutdownHook();
+		// 返回上下文
 		return context;
 	}
 

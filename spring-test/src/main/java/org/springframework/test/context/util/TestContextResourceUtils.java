@@ -83,35 +83,43 @@ public abstract class TestContextResourceUtils {
 	 * <p>Each path will then be {@linkplain StringUtils#cleanPath cleaned},
 	 * unless the {@code preservePlaceholders} flag is {@code true} and the path
 	 * contains one or more placeholders in the form <code>${placeholder.name}</code>.
-	 * @param clazz the class with which the paths are associated
+	 *
+	 * @param clazz                the class with which the paths are associated
 	 * @param preservePlaceholders {@code true} if placeholders should be preserved
-	 * @param paths the paths to be converted
+	 * @param paths                the paths to be converted
 	 * @return a new array of converted resource paths
-	 * @since 5.2
 	 * @see #convertToResources
 	 * @see ResourceUtils#CLASSPATH_URL_PREFIX
 	 * @see ResourceUtils#FILE_URL_PREFIX
+	 * @since 5.2
 	 */
 	public static String[] convertToClasspathResourcePaths(Class<?> clazz, boolean preservePlaceholders, String... paths) {
+		// 创建需要转换的地址集合
 		String[] convertedPaths = new String[paths.length];
 		for (int i = 0; i < paths.length; i++) {
+			// 提取地址元素
 			String path = paths[i];
 
 			// Absolute path
+			// 是否以"/"开头
 			if (path.startsWith(SLASH)) {
+				// 前缀+地址作为元素数据
 				convertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;
 			}
 			// Relative path
+			// 非url的情况下将前缀+"/"+包路径+"/"+地址作为元素数据
 			else if (!ResourcePatternUtils.isUrl(path)) {
 				convertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH +
 						ClassUtils.classPackageAsResourcePath(clazz) + SLASH + path;
 			}
 			// URL
+			// url的情况下直接将path作为元素数据
 			else {
 				convertedPaths[i] = path;
 			}
-
+			// 同时不满足保留占位符和匹配
 			if (!(preservePlaceholders && PLACEHOLDER_PATTERN.matcher(convertedPaths[i]).matches())) {
+				// 解析一次字符串
 				convertedPaths[i] = StringUtils.cleanPath(convertedPaths[i]);
 			}
 		}

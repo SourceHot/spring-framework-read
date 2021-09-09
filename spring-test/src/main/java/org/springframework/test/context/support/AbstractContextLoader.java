@@ -66,7 +66,9 @@ import org.springframework.util.ResourceUtils;
  * @see #customizeContext
  */
 public abstract class AbstractContextLoader implements SmartContextLoader {
-
+	/**
+	 * 空字符串数组
+	 */
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	private static final Log logger = LogFactory.getLog(AbstractContextLoader.class);
@@ -86,13 +88,16 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * the supplied configuration attributes.
 	 * <p>Can be overridden in subclasses &mdash; for example, to process
 	 * annotated classes instead of resource locations.
-	 * @since 3.1
+	 *
 	 * @see #processLocations(Class, String...)
+	 * @since 3.1
 	 */
 	@Override
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
+		// 解析资源路径
 		String[] processedLocations =
 				processLocations(configAttributes.getDeclaringClass(), configAttributes.getLocations());
+		// 设置资源路径
 		configAttributes.setLocations(processedLocations);
 	}
 
@@ -132,9 +137,11 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * @see ConfigurableApplicationContext#setId
 	 */
 	protected void prepareContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
+		// 设置profiles
 		context.getEnvironment().setActiveProfiles(mergedConfig.getActiveProfiles());
 		TestPropertySourceUtils.addPropertiesFilesToEnvironment(context, mergedConfig.getPropertySourceLocations());
 		TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, mergedConfig.getPropertySourceProperties());
+		// 实例化上下文
 		invokeApplicationContextInitializers(context, mergedConfig);
 	}
 
@@ -142,30 +149,39 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	private void invokeApplicationContextInitializers(ConfigurableApplicationContext context,
 			MergedContextConfiguration mergedConfig) {
 
+		// 从合并的上下文属性集合中获取ApplicationContextInitializer接口实现类集合
 		Set<Class<? extends ApplicationContextInitializer<?>>> initializerClasses =
 				mergedConfig.getContextInitializerClasses();
+		// 如果ApplicationContextInitializer实现类集合为空将停止处理
 		if (initializerClasses.isEmpty()) {
 			// no ApplicationContextInitializers have been declared -> nothing to do
 			return;
 		}
 
+		// 创建ApplicationContextInitializer容器
 		List<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances = new ArrayList<>();
+		// 获取上下文类型
 		Class<?> contextClass = context.getClass();
 
+		// 循环ApplicationContextInitializer接口实现类集合
 		for (Class<? extends ApplicationContextInitializer<?>> initializerClass : initializerClasses) {
+			// 解析得到实际类
 			Class<?> initializerContextClass =
 					GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
+			// 若实际类不为空并且实际类不是上下文的实现将抛出异常，反之则加入到ApplicationContextInitializer容器
 			if (initializerContextClass != null && !initializerContextClass.isInstance(context)) {
 				throw new ApplicationContextException(String.format(
 						"Could not apply context initializer [%s] since its generic parameter [%s] " +
-						"is not assignable from the type of application context used by this " +
-						"context loader: [%s]", initializerClass.getName(), initializerContextClass.getName(),
+								"is not assignable from the type of application context used by this " +
+								"context loader: [%s]", initializerClass.getName(), initializerContextClass.getName(),
 						contextClass.getName()));
 			}
 			initializerInstances.add((ApplicationContextInitializer<ConfigurableApplicationContext>) BeanUtils.instantiateClass(initializerClass));
 		}
 
+		// 排序ApplicationContextInitializer容器
 		AnnotationAwareOrderComparator.sort(initializerInstances);
+		// 循环调用ApplicationContextInitializer接口提供的实例化方法
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : initializerInstances) {
 			initializer.initialize(context);
 		}
@@ -241,20 +257,26 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	protected String[] generateDefaultLocations(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 
+		// 获取后缀集合
 		String[] suffixes = getResourceSuffixes();
+		// 循环后缀集合
 		for (String suffix : suffixes) {
 			Assert.hasText(suffix, "Resource suffix must not be empty");
+			// 将类名转换为资源地址
 			String resourcePath = ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix;
+			// 将资源地址字符串转换为ClassPathResource对象
 			ClassPathResource classPathResource = new ClassPathResource(resourcePath);
+			// 对象ClassPathResource存在
 			if (classPathResource.exists()) {
+				// 前缀+资源地址组合
 				String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
 				if (logger.isInfoEnabled()) {
 					logger.info(String.format("Detected default resource location \"%s\" for test class [%s]",
 							prefixedResourcePath, clazz.getName()));
 				}
-				return new String[] {prefixedResourcePath};
-			}
-			else if (logger.isDebugEnabled()) {
+				// 返回对象
+				return new String[]{prefixedResourcePath};
+			} else if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Did not detect default resource location for test class [%s]: " +
 						"%s does not exist", clazz.getName(), classPathResource));
 			}
@@ -264,7 +286,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 			logger.info(String.format("Could not detect default resource locations for test class [%s]: " +
 					"no resource found for suffixes %s.", clazz.getName(), ObjectUtils.nullSafeToString(suffixes)));
 		}
-
+		// 返回空集合
 		return EMPTY_STRING_ARRAY;
 	}
 

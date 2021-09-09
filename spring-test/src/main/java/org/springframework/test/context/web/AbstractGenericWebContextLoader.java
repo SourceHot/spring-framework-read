@@ -95,39 +95,55 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * <li>{@link ConfigurableApplicationContext#refresh Refreshes} the
 	 * context and registers a JVM shutdown hook for it.</li>
 	 * </ul>
+	 *
 	 * @return a new web application context
 	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
 	 * @see GenericWebApplicationContext
 	 */
 	@Override
 	public final ConfigurableApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
+		// 类型不是WebMergedContextConfiguration抛出异常
 		Assert.isTrue(mergedConfig instanceof WebMergedContextConfiguration,
 				() -> String.format("Cannot load WebApplicationContext from non-web merged context configuration %s. " +
 						"Consider annotating your test class with @WebAppConfiguration.", mergedConfig));
 
+		// 类型转换
 		WebMergedContextConfiguration webMergedConfig = (WebMergedContextConfiguration) mergedConfig;
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Loading WebApplicationContext for merged context configuration %s.",
-				webMergedConfig));
+					webMergedConfig));
 		}
 
+		// 验证合并的上下文配置
 		validateMergedContextConfiguration(webMergedConfig);
 
+		// 创建上下文对象
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 
+		// 获取父上下文
 		ApplicationContext parent = mergedConfig.getParentApplicationContext();
+		// 为上下文对象设置父上下文
 		if (parent != null) {
 			context.setParent(parent);
 		}
+		// 配置web资源
 		configureWebResources(context, webMergedConfig);
+		// 准备上下文
 		prepareContext(context, webMergedConfig);
+		// 自定义bean工厂
 		customizeBeanFactory(context.getDefaultListableBeanFactory(), webMergedConfig);
+		// 加载bean定义
 		loadBeanDefinitions(context, webMergedConfig);
+		// 注册注解配置处理器
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+		// 自定义上下文
 		customizeContext(context, webMergedConfig);
+		// 刷新
 		context.refresh();
+		// 注册关闭hook
 		context.registerShutdownHook();
+		// 返回上下文
 		return context;
 	}
 
@@ -177,19 +193,28 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	protected void configureWebResources(GenericWebApplicationContext context,
 			WebMergedContextConfiguration webMergedConfig) {
 
+		// 获取父上下文
 		ApplicationContext parent = context.getParent();
 
 		// If the WebApplicationContext has no parent or the parent is not a WebApplicationContext,
 		// set the current context as the root WebApplicationContext:
+
+		// 父上下文为空或者父上下文类型不是WebApplicationContext
 		if (parent == null || (!(parent instanceof WebApplicationContext))) {
+			// 提取资源基本路径
 			String resourceBasePath = webMergedConfig.getResourceBasePath();
+			// 创建资源加载器
 			ResourceLoader resourceLoader = (resourceBasePath.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX) ?
 					new DefaultResourceLoader() : new FileSystemResourceLoader());
+			// 创建servlet上下文
 			ServletContext servletContext = new MockServletContext(resourceBasePath, resourceLoader);
+			// 设置属性
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, context);
+			// 设置servlet上下文
 			context.setServletContext(servletContext);
 		}
 		else {
+			// 确认servlet上下文对象
 			ServletContext servletContext = null;
 			// Find the root WebApplicationContext
 			while (parent != null) {
@@ -200,6 +225,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 				parent = parent.getParent();
 			}
 			Assert.state(servletContext != null, "Failed to find root WebApplicationContext in the context hierarchy");
+			// 设置servlet上下文
 			context.setServletContext(servletContext);
 		}
 	}
