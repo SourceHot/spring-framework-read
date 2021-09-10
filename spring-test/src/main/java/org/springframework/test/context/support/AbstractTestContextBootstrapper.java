@@ -111,64 +111,80 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 	@Override
 	public final List<TestExecutionListener> getTestExecutionListeners() {
+		// 获取引导上下文的类对象
 		Class<?> clazz = getBootstrapContext().getTestClass();
+		// 创建TestExecutionListeners类对象
 		Class<TestExecutionListeners> annotationType = TestExecutionListeners.class;
+		// 创建TestExecutionListener类集合
 		List<Class<? extends TestExecutionListener>> classesList = new ArrayList<>();
+		// 是否使用默认值
 		boolean usingDefaults = false;
 
+		// 寻找TestExecutionListener注解
 		AnnotationDescriptor<TestExecutionListeners> descriptor =
 				MetaAnnotationUtils.findAnnotationDescriptor(clazz, annotationType);
 
 		// Use defaults?
+		// 确认是否使用默认值,若注解TestExecutionListeners的描述信息为空则采用默认值
 		if (descriptor == null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("@TestExecutionListeners is not present for class [%s]: using defaults.",
 						clazz.getName()));
 			}
 			usingDefaults = true;
+			// 获取默认的TestExecutionListener集合
 			classesList.addAll(getDefaultTestExecutionListenerClasses());
-		}
-		else {
+		} else {
 			// Traverse the class hierarchy...
 			while (descriptor != null) {
+				// 获取实际类
 				Class<?> declaringClass = descriptor.getDeclaringClass();
+				// 获取TestExecutionListeners对象
 				TestExecutionListeners testExecutionListeners = descriptor.synthesizeAnnotation();
 				if (logger.isTraceEnabled()) {
 					logger.trace(String.format("Retrieved @TestExecutionListeners [%s] for declaring class [%s].",
 							testExecutionListeners, declaringClass.getName()));
 				}
 
+				// 确认是否继承监听器
 				boolean inheritListeners = testExecutionListeners.inheritListeners();
+				// 获取TestExecutionListeners属性
 				AnnotationDescriptor<TestExecutionListeners> superDescriptor =
 						MetaAnnotationUtils.findAnnotationDescriptor(
 								descriptor.getRootDeclaringClass().getSuperclass(), annotationType);
 
 				// If there are no listeners to inherit, we might need to merge the
 				// locally declared listeners with the defaults.
+				// 没有继承监听器并且需要进行合并
 				if ((!inheritListeners || superDescriptor == null) &&
 						testExecutionListeners.mergeMode() == MergeMode.MERGE_WITH_DEFAULTS) {
 					if (logger.isDebugEnabled()) {
 						logger.debug(String.format("Merging default listeners with listeners configured via " +
 								"@TestExecutionListeners for class [%s].", descriptor.getRootDeclaringClass().getName()));
 					}
+					// 标记使用默认值
 					usingDefaults = true;
+					// 获取默认的TestExecutionListener集合
 					classesList.addAll(getDefaultTestExecutionListenerClasses());
 				}
-
+				// 将testExecutionListeners中的TestExecutionListener类数据加入到结果集中
 				classesList.addAll(0, Arrays.asList(testExecutionListeners.listeners()));
-
+				// 描述对象的修正
 				descriptor = (inheritListeners ? superDescriptor : null);
 			}
 		}
 
+		// 做一次类型转换
 		Collection<Class<? extends TestExecutionListener>> classesToUse = classesList;
 		// Remove possible duplicates if we loaded default listeners.
 		if (usingDefaults) {
 			classesToUse = new LinkedHashSet<>(classesList);
 		}
 
+		// 实例化TestExecutionListener对象
 		List<TestExecutionListener> listeners = instantiateListeners(classesToUse);
 		// Sort by Ordered/@Order if we loaded default listeners.
+		// 使用默认的情况下需要排序
 		if (usingDefaults) {
 			AnnotationAwareOrderComparator.sort(listeners);
 		}
@@ -257,20 +273,26 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	@SuppressWarnings("unchecked")
 	@Override
 	public final MergedContextConfiguration buildMergedContextConfiguration() {
+		// 获取引导上下文的类对象
 		Class<?> testClass = getBootstrapContext().getTestClass();
+		// 获取CacheAwareContextLoaderDelegate对象
 		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = getCacheAwareContextLoaderDelegate();
 
+		// 若测试类对象上没有ContextConfiguration注解和ContextHierarchy注解将通过buildDefaultMergedContextConfiguration方法构建MergedContextConfiguration对象
 		if (MetaAnnotationUtils.findAnnotationDescriptorForTypes(
 				testClass, ContextConfiguration.class, ContextHierarchy.class) == null) {
 			return buildDefaultMergedContextConfiguration(testClass, cacheAwareContextLoaderDelegate);
 		}
 
+		// 若测试类对象上存在ContextHierarchy注解
 		if (AnnotationUtils.findAnnotation(testClass, ContextHierarchy.class) != null) {
+			// 构建数据集合
 			Map<String, List<ContextConfigurationAttributes>> hierarchyMap =
 					ContextLoaderUtils.buildContextHierarchyMap(testClass);
 			MergedContextConfiguration parentConfig = null;
 			MergedContextConfiguration mergedConfig = null;
 
+			// 循环处理ContextConfigurationAttributes集合
 			for (List<ContextConfigurationAttributes> list : hierarchyMap.values()) {
 				List<ContextConfigurationAttributes> reversedList = new ArrayList<>(list);
 				Collections.reverse(reversedList);
@@ -290,6 +312,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			Assert.state(mergedConfig != null, "No merged context configuration");
 			return mergedConfig;
 		}
+		// 其他情况
 		else {
 			return buildMergedContextConfiguration(testClass,
 					ContextLoaderUtils.resolveContextConfigurationAttributes(testClass),
@@ -345,16 +368,22 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 		Assert.notEmpty(configAttributesList, "ContextConfigurationAttributes list must not be null or empty");
 
+		// 获取上下文加载器
 		ContextLoader contextLoader = resolveContextLoader(testClass, configAttributesList);
+		// 创建locations存储集合
 		List<String> locations = new ArrayList<>();
+		// 创建类存储集合
 		List<Class<?>> classes = new ArrayList<>();
+		// 创建实例化类集合
 		List<Class<?>> initializers = new ArrayList<>();
 
+		// 循环方法参数configAttributesList
 		for (ContextConfigurationAttributes configAttributes : configAttributesList) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing locations and classes for context configuration attributes %s",
 						configAttributes));
 			}
+			// 若上下文加载器类型是SmartContextLoader
 			if (contextLoader instanceof SmartContextLoader) {
 				SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
 				smartContextLoader.processContextConfiguration(configAttributes);
@@ -373,6 +402,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 		}
 
+		// 获取ContextCustomizer实现集合
 		Set<ContextCustomizer> contextCustomizers = getContextCustomizers(testClass,
 				Collections.unmodifiableList(configAttributesList));
 
@@ -382,6 +412,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				"or ContextCustomizers were declared for context configuration attributes %s",
 				contextLoader.getClass().getSimpleName(), configAttributesList));
 
+		// 构建数据源
 		MergedTestPropertySources mergedTestPropertySources =
 				TestPropertySourceUtils.buildMergedTestPropertySources(testClass);
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(testClass,
