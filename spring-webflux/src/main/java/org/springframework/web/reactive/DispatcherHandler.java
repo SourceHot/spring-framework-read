@@ -136,9 +136,14 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange) {
+		// 如果成员变量handlerMappings为空返回未找到信息
 		if (this.handlerMappings == null) {
 			return createNotFoundError();
 		}
+		// 遍历成员变量handlerMappings
+		// 1. 找到handler，如果未找到返回未找到的信息
+		// 2. 处理请求对象
+		// 3. 处理结果对象
 		return Flux.fromIterable(this.handlerMappings)
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
@@ -155,13 +160,18 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	}
 
 	private Mono<HandlerResult> invokeHandler(ServerWebExchange exchange, Object handler) {
+		// 成员变量handlerAdapters不为空
 		if (this.handlerAdapters != null) {
+			// 遍历handlerAdapters
 			for (HandlerAdapter handlerAdapter : this.handlerAdapters) {
+				// 判断是否支持处理handler对象
 				if (handlerAdapter.supports(handler)) {
+					// 处理
 					return handlerAdapter.handle(exchange, handler);
 				}
 			}
 		}
+		// 返回异常结果
 		return Mono.error(new IllegalStateException("No HandlerAdapter: " + handler));
 	}
 

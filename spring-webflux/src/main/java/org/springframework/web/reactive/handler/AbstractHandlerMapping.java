@@ -178,19 +178,35 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	@Override
 	public Mono<Object> getHandler(ServerWebExchange exchange) {
-		return getHandlerInternal(exchange).map(handler -> {
-			if (logger.isDebugEnabled()) {
-				logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
-			}
-			ServerHttpRequest request = exchange.getRequest();
-			if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
-				CorsConfiguration config = (this.corsConfigurationSource != null ? this.corsConfigurationSource.getCorsConfiguration(exchange) : null);
-				CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
-				config = (config != null ? config.combine(handlerConfig) : handlerConfig);
-				if (!this.corsProcessor.process(config, exchange) || CorsUtils.isPreFlightRequest(request)) {
-					return REQUEST_HANDLED_HANDLER;
-				}
-			}
+		// 通过getHandlerInternal方法获取handler集合
+		return getHandlerInternal(exchange)
+				.map(handler -> {
+					if (logger.isDebugEnabled()) {
+						logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
+					}
+					// 获取请求对象
+					ServerHttpRequest request = exchange.getRequest();
+					// 判断handler是否带有cors配置
+					// 判断请求是否带有cors
+					if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(
+							request)) {
+						// 从corsConfigurationSource中提取cors配置
+						CorsConfiguration config = (this.corsConfigurationSource != null
+								? this.corsConfigurationSource.getCorsConfiguration(exchange)
+								: null);
+						// 从handler中获取cors配置
+						CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
+						// 确认cors配置
+						config = (config != null ? config.combine(handlerConfig) : handlerConfig);
+						// 1. 判断cors处理器是否可以处理
+						// 2. 判断请求是否带有cors
+						if (!this.corsProcessor.process(config, exchange)
+								|| CorsUtils.isPreFlightRequest(
+								request)) {
+							// 返回空的处理器
+							return REQUEST_HANDLED_HANDLER;
+						}
+					}
 			return handler;
 		});
 	}
