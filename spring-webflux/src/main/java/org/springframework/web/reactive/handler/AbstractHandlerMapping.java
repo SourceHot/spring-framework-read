@@ -178,7 +178,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	@Override
 	public Mono<Object> getHandler(ServerWebExchange exchange) {
-		// 通过getHandlerInternal方法获取handler集合
+		// 通过getHandlerInternal方法获取handler
 		return getHandlerInternal(exchange)
 				.map(handler -> {
 					if (logger.isDebugEnabled()) {
@@ -198,7 +198,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 						CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
 						// 确认cors配置
 						config = (config != null ? config.combine(handlerConfig) : handlerConfig);
-						// 1. 判断cors处理器是否可以处理
+						// 1. 判断cors处理器处理是否成功
 						// 2. 判断请求是否带有cors
 						if (!this.corsProcessor.process(config, exchange)
 								|| CorsUtils.isPreFlightRequest(
