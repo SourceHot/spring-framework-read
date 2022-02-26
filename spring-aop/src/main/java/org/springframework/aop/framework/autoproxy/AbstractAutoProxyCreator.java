@@ -254,7 +254,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
-	 * 后置方法
+	 * 后置方法,主要处理AOP增强相关
 	 *
 	 * @param beanClass the class of the bean to be instantiated
 	 * @param beanName  the name of the bean
